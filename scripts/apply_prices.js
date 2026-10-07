@@ -26,14 +26,19 @@ async function applyPrices() {
   }
 
   const reviewData = JSON.parse(fs.readFileSync(REVIEW_FILE, 'utf-8'));
-  const approvedCards = reviewData.cards.filter(c => c.status !== 'SKIP');
+  const approvedCards = reviewData.cards.filter(c => c.status === 'APPROVED');
+  const heldCards = reviewData.cards.filter(c => c.status !== 'APPROVED');
 
   if (approvedCards.length === 0) {
-    console.warn('⚠️ No approved cards to apply. All cards marked as SKIP.');
+    console.warn('⚠️ No approved cards to apply.');
     process.exit(0);
   }
 
-  console.log(`Processing ${approvedCards.length} approved GPU price updates...`);
+  console.log(`Processing ${approvedCards.length} approved GPU price updates (${heldCards.length} held for user review)...`);
+  if (heldCards.length > 0) {
+    console.log(`Holding ${heldCards.length} flagged GPUs for user review:`);
+    heldCards.forEach(c => console.log(`  ⏸️ ${c.name} (Status: ${c.status}, Proposed: $${c.proposedPrice})`));
+  }
 
   // 1. Read existing GPUS_DATA
   const gpusContent = fs.readFileSync(GPUS_FILE, 'utf-8');
@@ -139,16 +144,21 @@ async function applyPrices() {
   fs.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(auditLogs, null, 2), 'utf-8');
   console.log(`✓ Audit log saved to: ${AUDIT_LOG_FILE}`);
 
-  // 4. Clean up pending review file
-  reviewData.reviewStatus = 'APPLIED';
+  // 4. Update pending review file
+  reviewData.reviewStatus = heldCards.length > 0 ? 'PARTIALLY_APPLIED' : 'APPLIED';
   reviewData.appliedAt = new Date().toISOString();
+  reviewData.appliedCards = appliedSummary;
   fs.writeFileSync(REVIEW_FILE, JSON.stringify(reviewData, null, 2), 'utf-8');
 
-  // Also remove or archive the pending markdown review
+  // Also update markdown review file
   const mdReviewPath = path.join(ROOT_DIR, 'PENDING_PRICE_REVIEW.md');
   if (fs.existsSync(mdReviewPath)) {
     let md = fs.readFileSync(mdReviewPath, 'utf-8');
-    md = md.replace('> **MANUAL REVIEW STEP**', '> ✅ **STATUS: APPLIED TO PRODUCTION CODEBASE**');
+    if (heldCards.length > 0) {
+      md = md.replace('> **MANUAL REVIEW STEP**', `> ⚠️ **STATUS: PARTIALLY APPLIED** (${approvedCards.length} approved GPU prices applied to production codebase, ${heldCards.length} flagged GPUs held on hold for review)`);
+    } else {
+      md = md.replace('> **MANUAL REVIEW STEP**', '> ✅ **STATUS: APPLIED TO PRODUCTION CODEBASE**');
+    }
     fs.writeFileSync(mdReviewPath, md, 'utf-8');
   }
 

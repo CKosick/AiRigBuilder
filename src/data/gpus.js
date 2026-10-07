@@ -1,5 +1,5 @@
 // The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)
-// Last updated: 2026-10-07T02:03:23.637Z
+// Last updated: 2026-10-07T03:10:01.112Z
 export const GPUS_DATA = [
   {
     "id": "rtx-3090",
@@ -8,13 +8,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 936,
     "tdp": 350,
-    "usedStreetPrice": 694,
-    "usedPriceLow": 638,
-    "usedPriceHigh": 750,
+    "usedStreetPrice": 718,
+    "usedPriceLow": 576,
+    "usedPriceHigh": 863,
     "newPrice": null,
-    "trend7d": -0.1,
+    "trend7d": 3.3,
     "trend30d": -5.4,
-    "pricePerGb": 28.92,
+    "pricePerGb": 29.92,
     "multiGpuScore": 9.8,
     "aiRating": "👑 King of Local 70B",
     "summary": "The uncontested value king of local AI. Dual 3090s give 48GB VRAM with NVLink support for under $1,400 total GPU spend. Excellent memory bandwidth (936 GB/s).",
@@ -64,7 +64,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 694
+        "price": 718
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1"
@@ -76,13 +76,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 1008,
     "tdp": 450,
-    "usedStreetPrice": 1537,
-    "usedPriceLow": 1414,
-    "usedPriceHigh": 1660,
+    "usedStreetPrice": 1540,
+    "usedPriceLow": 1417,
+    "usedPriceHigh": 1663,
     "newPrice": 1849,
-    "trend7d": -0.2,
+    "trend7d": 0,
     "trend30d": -3.8,
-    "pricePerGb": 64.04,
+    "pricePerGb": 64.17,
     "multiGpuScore": 6.5,
     "aiRating": "🚀 Peak Consumer Compute",
     "summary": "The fastest consumer chip for inference and fine-tuning. 1008 GB/s bandwidth and 4th-gen Tensor Cores deliver blistering speeds, but at >$1,500 it is costly for raw VRAM.",
@@ -133,7 +133,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 1537
+        "price": 1540
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4090+24GB&LH_Sold=1&LH_Complete=1"
@@ -145,13 +145,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 960,
     "tdp": 355,
-    "usedStreetPrice": 793,
-    "usedPriceLow": 730,
-    "usedPriceHigh": 856,
+    "usedStreetPrice": 864,
+    "usedPriceLow": 834,
+    "usedPriceHigh": 975,
     "newPrice": 919,
-    "trend7d": 0.4,
+    "trend7d": 9.4,
     "trend30d": -1.8,
-    "pricePerGb": 33.04,
+    "pricePerGb": 36,
     "multiGpuScore": 7.2,
     "aiRating": "⚖️ High Bandwidth Alternative",
     "summary": "24GB VRAM with 960 GB/s bandwidth. With recent ROCm 6.2+ and vLLM/Ollama Linux support, it is a viable non-CUDA choice, though multi-card tensor parallel requires Linux.",
@@ -201,7 +201,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 793
+        "price": 864
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RX+7900+XTX+24GB&LH_Sold=1&LH_Complete=1"
@@ -213,13 +213,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 288,
     "tdp": 165,
-    "usedStreetPrice": 383,
-    "usedPriceLow": 352,
-    "usedPriceHigh": 414,
+    "usedStreetPrice": 385,
+    "usedPriceLow": 354,
+    "usedPriceHigh": 416,
     "newPrice": 449,
-    "trend7d": -0.5,
+    "trend7d": 0,
     "trend30d": -3.2,
-    "pricePerGb": 23.94,
+    "pricePerGb": 24.06,
     "multiGpuScore": 8.5,
     "aiRating": "⚡ Modern Low-Power 16GB",
     "summary": "The cheapest modern 16GB Ada card. Extremely power-efficient (165W) and easy to cool. Bandwidth is limited (288 GB/s), but perfect for 8B-14B models or budget 2x setup.",
@@ -268,7 +268,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 383
+        "price": 385
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4060+Ti+16GB&LH_Sold=1&LH_Complete=1"
@@ -481,13 +481,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 760,
     "tdp": 320,
-    "usedStreetPrice": 374,
-    "usedPriceLow": 344,
-    "usedPriceHigh": 404,
+    "usedStreetPrice": 383,
+    "usedPriceLow": 354,
+    "usedPriceHigh": 408,
     "newPrice": null,
-    "trend7d": 1.1,
+    "trend7d": 3.5,
     "trend30d": -6.1,
-    "pricePerGb": 37.4,
+    "pricePerGb": 38.3,
     "multiGpuScore": 7,
     "aiRating": "⚡ High Bandwidth 8B Speeder",
     "summary": "Fast 760 GB/s bandwidth at sub-$400, providing 100+ tok/s on 8B models. However, 10GB VRAM is tight for modern context windows.",
@@ -535,7 +535,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 374
+        "price": 383
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1"
@@ -547,13 +547,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6 with ECC",
     "bandwidth": 768,
     "tdp": 230,
-    "usedStreetPrice": 1176,
-    "usedPriceLow": 1082,
-    "usedPriceHigh": 1270,
+    "usedStreetPrice": 1180,
+    "usedPriceLow": 1086,
+    "usedPriceHigh": 1274,
     "newPrice": 2250,
-    "trend7d": -0.3,
+    "trend7d": 0,
     "trend30d": -2.1,
-    "pricePerGb": 49,
+    "pricePerGb": 49.17,
     "multiGpuScore": 9.9,
     "aiRating": "🏢 Workstation Dual-Slot Blower",
     "summary": "True 2-slot blower cooler with ECC memory and 230W TDP. The cleanest multi-GPU fit inside standard desktop cases without overheating adjacent cards.",
@@ -602,7 +602,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 1176
+        "price": 1180
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+RTX+A5000+24GB&LH_Sold=1&LH_Complete=1"

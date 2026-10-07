@@ -83,5 +83,58 @@
         "pricePerGb": 42.92
       }
     ]
+  },
+  {
+    "appliedAt": "2026-10-07T03:10:01.118Z",
+    "updates": [
+      {
+        "id": "rtx-3090",
+        "name": "NVIDIA GeForce RTX 3090",
+        "oldPrice": 694,
+        "newPrice": 718,
+        "diff": 24,
+        "pricePerGb": 29.92
+      },
+      {
+        "id": "rtx-4090",
+        "name": "NVIDIA GeForce RTX 4090",
+        "oldPrice": 1537,
+        "newPrice": 1540,
+        "diff": 3,
+        "pricePerGb": 64.17
+      },
+      {
+        "id": "rx-7900-xtx",
+        "name": "AMD Radeon RX 7900 XTX",
+        "oldPrice": 793,
+        "newPrice": 864,
+        "diff": 71,
+        "pricePerGb": 36
+      },
+      {
+        "id": "rtx-4060-ti-16gb",
+        "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
+        "oldPrice": 383,
+        "newPrice": 385,
+        "diff": 2,
+        "pricePerGb": 24.06
+      },
+      {
+        "id": "rtx-3080-10gb",
+        "name": "NVIDIA GeForce RTX 3080 10GB",
+        "oldPrice": 374,
+        "newPrice": 383,
+        "diff": 9,
+        "pricePerGb": 38.3
+      },
+      {
+        "id": "rtx-a5000",
+        "name": "NVIDIA RTX A5000 24GB",
+        "oldPrice": 1176,
+        "newPrice": 1180,
+        "diff": 4,
+        "pricePerGb": 49.17
+      }
+    ]
   }
 ]
