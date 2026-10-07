@@ -1,0 +1,340 @@
+// Model Picker & Build Sheet Component
+import { MODELS_DATA } from '../data/models.js';
+import { BUILDS_DATA } from '../data/builds.js';
+
+export function createModelPicker(container, onNavigateToCalc) {
+  let activeModelId = 'llama-3.3-70b';
+  let activeTierId = 'tier-budget-used';
+  let salesTaxRate = 7; // %
+  let dailyUsageHours = 4; // hrs/day
+  let kwhRate = 0.14; // $/kWh
+
+  function render() {
+    const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
+    const buildSheet = BUILDS_DATA[activeModelId] || BUILDS_DATA['llama-3.3-70b'];
+    const currentTier = buildSheet.tiers.find(t => t.id === activeTierId) || buildSheet.tiers[0];
+
+    // Compute parts subtotal
+    const partsSubtotal = currentTier.parts.reduce((sum, p) => sum + (p.price || 0), 0);
+    const taxAmount = Math.round(partsSubtotal * (salesTaxRate / 100));
+    
+    // Compute electricity cost: (Watts / 1000) * hours/day * 30.5 days * $/kWh
+    const systemWatts = currentTier.estimatedTdpWatts || 800;
+    const monthlyKwh = (systemWatts / 1000) * dailyUsageHours * 30.5;
+    const monthlyPowerCost = Math.round(monthlyKwh * kwhRate);
+    const firstYearPowerCost = Math.round(monthlyPowerCost * 12);
+    const firstYearTrueTotal = partsSubtotal + taxAmount + firstYearPowerCost;
+
+    container.innerHTML = `
+      <!-- Model Selector Bar -->
+      <div class="model-selector-bar">
+        <div class="selector-label">
+          <span>1. Select Target AI Model</span>
+          <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} flagship profiles loaded</span>
+        </div>
+        <div class="model-pills" id="model-pills-list">
+          ${MODELS_DATA.map(m => `
+            <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}">
+              <div class="pill-title">
+                <span>${m.name.split(' ')[0]} ${m.parameters}</span>
+                <span style="font-size: 0.72rem; color: var(--emerald);">${m.recommendedVram}GB VRAM</span>
+              </div>
+              <div class="pill-subtitle">${m.creator} • ${m.sweetSpotQuant.split(' ')[0]}</div>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Model Spec & VRAM Requirements Banner -->
+      <div class="model-spec-panel">
+        <div class="model-info-block">
+          <h3>${currentModel.name}</h3>
+          <p class="model-info-desc">${currentModel.description}</p>
+          <div style="margin-top: 8px; font-size: 0.78rem; color: var(--cyan); font-family: var(--font-mono);">
+            ⚡ Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
+          </div>
+        </div>
+
+        <div class="spec-badge-box">
+          <div class="spec-badge-label">Minimum VRAM</div>
+          <div class="spec-badge-value">${currentModel.minVram} GB</div>
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">Strict minimum for Q3/Q4</div>
+        </div>
+
+        <div class="spec-badge-box">
+          <div class="spec-badge-label">Sweet Spot Quant</div>
+          <div class="spec-badge-value" style="font-size: 1rem; color: #38bdf8;">${currentModel.sweetSpotQuant}</div>
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">99% FP16 accuracy</div>
+        </div>
+
+        <div class="spec-badge-box">
+          <div class="spec-badge-label">Cloud Alternative</div>
+          <div class="spec-badge-value" style="font-size: 0.92rem; color: var(--amber);">${currentModel.cloudEquivalent.split('(')[1]?.replace(')', '') || '$0.88/hr'}</div>
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">${currentModel.cloudEquivalent.split('(')[0]}</div>
+        </div>
+      </div>
+
+      <!-- 3 Tier Selector Cards -->
+      <div class="selector-label">
+        <span>2. Choose Hardware Architecture Tier</span>
+        <span style="color: var(--text-muted); font-size: 0.75rem;">All tiers verified for physical GPU clearance & power transients</span>
+      </div>
+      <div class="tier-tabs-container">
+        ${buildSheet.tiers.map((tier, idx) => {
+          const tierSubtotal = tier.parts.reduce((s, p) => s + (p.price || 0), 0);
+          const badgeClass = tier.type === 'used' ? 'tier-badge-budget' : (tier.type === 'balanced' ? 'tier-badge-balanced' : 'tier-badge-new');
+          return `
+            <div class="tier-tab-card ${tier.id === activeTierId ? 'active' : ''}" data-tier-id="${tier.id}">
+              <span class="tier-badge-label ${badgeClass}">${tier.badge}</span>
+              <div class="tier-title-row">
+                <span class="tier-name">${tier.name}</span>
+                <span class="tier-price-big">$${tierSubtotal.toLocaleString()}</span>
+              </div>
+              <div class="tier-subtitle">${tier.headline}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- Build Sheet Details & Parts List -->
+      <div class="build-sheet-card">
+        <div class="build-sheet-header">
+          <div class="build-sheet-title">
+            <h3>${currentTier.name} — Parts Manifest</h3>
+            <p>${currentTier.rigSummary}</p>
+          </div>
+          <div class="build-quick-actions">
+            <button class="btn-secondary" id="btn-copy-build-reddit">
+              📋 Copy for Reddit / Discord
+            </button>
+            <button class="btn-primary" id="btn-send-to-calc">
+              🚀 Calculate Break-Even ROI →
+            </button>
+          </div>
+        </div>
+
+        <div class="parts-table-wrap">
+          <table class="parts-table">
+            <thead>
+              <tr>
+                <th style="width: 14%;">Component</th>
+                <th style="width: 44%;">Part Details & Gotchas</th>
+                <th style="width: 14%;">Condition</th>
+                <th style="width: 12%;">Price</th>
+                <th style="width: 16%; text-align: right;">Merchant Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${currentTier.parts.map(part => {
+                const condClass = part.condition.includes('Used') ? 'condition-used' : (part.condition.includes('New') ? 'condition-new' : 'condition-included');
+                return `
+                  <tr>
+                    <td>
+                      <span class="part-category-tag">${part.category}</span>
+                    </td>
+                    <td class="part-name-cell">
+                      <strong>${part.name}</strong>
+                      <div class="part-spec-sub">${part.spec}</div>
+                      ${part.notes ? `<div class="part-notes">💡 ${part.notes}</div>` : ''}
+                    </td>
+                    <td>
+                      <span class="condition-badge ${condClass}">
+                        ${part.condition}
+                      </span>
+                    </td>
+                    <td class="part-price-cell">
+                      ${part.price > 0 ? `$${part.price.toLocaleString()}` : '<span style="color: var(--text-dim);">Included</span>'}
+                    </td>
+                    <td style="text-align: right;">
+                      ${part.url !== '#' ? `
+                        <a href="${part.url}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
+                          ${part.merchant.includes('eBay') ? '🔍 Search eBay' : (part.merchant.includes('Amazon') ? '🛒 Amazon' : '📦 B&H Photo')}
+                        </a>
+                      ` : '<span style="color: var(--text-dim); font-size: 0.78rem;">Built-in</span>'}
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- True Total Cost Calculation Panel -->
+        <div class="true-cost-panel">
+          <div class="cost-adjusters">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-highlight); margin-bottom: 2px;">
+              ⚡ True Total Ownership Cost Engine
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Estimated Sales Tax</span>
+                <strong>${salesTaxRate}% ($${taxAmount})</strong>
+              </div>
+              <input type="range" id="tax-slider" min="0" max="12" step="0.5" value="${salesTaxRate}">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Daily AI Generation Usage</span>
+                <strong>${dailyUsageHours} hrs / day</strong>
+              </div>
+              <input type="range" id="hours-slider" min="1" max="24" step="1" value="${dailyUsageHours}">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label-row">
+                <span>Electricity Cost</span>
+                <strong>$${kwhRate.toFixed(2)} / kWh</strong>
+              </div>
+              <input type="range" id="kwh-slider" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
+            </div>
+          </div>
+
+          <div class="cost-breakdown-col">
+            <div class="cost-breakdown-row">
+              <span>Hardware Parts:</span>
+              <strong>$${partsSubtotal.toLocaleString()}</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Sales Tax (${salesTaxRate}%):</span>
+              <strong>+$${taxAmount.toLocaleString()}</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Peak Power Draw:</span>
+              <strong style="color: var(--amber);">${systemWatts}W under load</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Monthly Electricity:</span>
+              <strong>+$${monthlyPowerCost}/mo</strong>
+            </div>
+            <div class="cost-breakdown-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle);">
+              <span>Year 1 Power Cost:</span>
+              <strong style="color: var(--cyan);">+$${firstYearPowerCost}/yr</strong>
+            </div>
+          </div>
+
+          <div class="total-equity-box">
+            <div class="total-equity-label">True 1st-Year Total Cost</div>
+            <div class="total-equity-number">$${firstYearTrueTotal.toLocaleString()}</div>
+            <div class="total-equity-sub">Parts ($${partsSubtotal}) + Tax ($${taxAmount}) + 1-Yr Power ($${firstYearPowerCost})</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    attachEvents(partsSubtotal, systemWatts);
+  }
+
+  function attachEvents(partsSubtotal, systemWatts) {
+    // Model pill click
+    container.querySelectorAll('.model-pill-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeModelId = btn.getAttribute('data-model-id');
+        activeTierId = 'tier-budget-used';
+        render();
+      });
+    });
+
+    // Tier tab click
+    container.querySelectorAll('.tier-tab-card').forEach(card => {
+      card.addEventListener('click', () => {
+        activeTierId = card.getAttribute('data-tier-id');
+        render();
+      });
+    });
+
+    // Tax slider
+    const taxSlider = container.querySelector('#tax-slider');
+    if (taxSlider) {
+      taxSlider.addEventListener('input', (e) => {
+        salesTaxRate = parseFloat(e.target.value);
+        render();
+      });
+    }
+
+    // Daily hours slider
+    const hoursSlider = container.querySelector('#hours-slider');
+    if (hoursSlider) {
+      hoursSlider.addEventListener('input', (e) => {
+        dailyUsageHours = parseInt(e.target.value, 10);
+        render();
+      });
+    }
+
+    // kWh rate slider
+    const kwhSlider = container.querySelector('#kwh-slider');
+    if (kwhSlider) {
+      kwhSlider.addEventListener('input', (e) => {
+        kwhRate = parseFloat(e.target.value);
+        render();
+      });
+    }
+
+    // Send to Break-Even Calculator
+    const btnSendToCalc = container.querySelector('#btn-send-to-calc');
+    if (btnSendToCalc && onNavigateToCalc) {
+      btnSendToCalc.addEventListener('click', () => {
+        onNavigateToCalc({
+          modelId: activeModelId,
+          upfrontCost: partsSubtotal,
+          systemWatts: systemWatts,
+          dailyHours: dailyUsageHours,
+          kwhRate: kwhRate
+        });
+      });
+    }
+
+    // Copy Reddit Markdown
+    const btnCopyReddit = container.querySelector('#btn-copy-build-reddit');
+    if (btnCopyReddit) {
+      btnCopyReddit.addEventListener('click', () => {
+        const buildSheet = BUILDS_DATA[activeModelId];
+        const currentTier = buildSheet.tiers.find(t => t.id === activeTierId);
+        
+        let md = `### [airigbuilder.com] ${buildSheet.title} - ${currentTier.name}\n\n`;
+        md += `**Target Model:** ${MODELS_DATA.find(m => m.id === activeModelId)?.name}\n`;
+        md += `**Upfront Parts Total:** $${partsSubtotal.toLocaleString()}\n`;
+        md += `**Estimated System Draw:** ${systemWatts}W\n\n`;
+        md += `| Component | Part | Condition | Price |\n`;
+        md += `| :--- | :--- | :--- | :--- |\n`;
+        currentTier.parts.forEach(p => {
+          md += `| ${p.category} | ${p.name} | ${p.condition} | $${p.price} |\n`;
+        });
+        md += `\n*Calculated via airigbuilder.com — The used-hardware price layer for local AI.*`;
+
+        navigator.clipboard.writeText(md).then(() => {
+          showToast('Copied build sheet to clipboard in Reddit Markdown format!');
+        });
+      });
+    }
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector('.toast-container');
+    if (existing) existing.remove();
+
+    const toastBox = document.createElement('div');
+    toastBox.className = 'toast-container';
+    toastBox.innerHTML = `
+      <div class="toast">
+        <span>✓</span>
+        <span>${msg}</span>
+      </div>
+    `;
+    document.body.appendChild(toastBox);
+    setTimeout(() => {
+      toastBox.remove();
+    }, 3200);
+  }
+
+  render();
+
+  return {
+    selectModel: (modelId) => {
+      activeModelId = modelId;
+      activeTierId = 'tier-budget-used';
+      render();
+    }
+  };
+}
