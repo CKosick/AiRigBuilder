@@ -564,7 +564,7 @@ export const GPUS_DATA = [
       "Workstation driver stability"
     ],
     "cons": [
-      "Higher cost than RTX 3090 ($1,180 vs $695)",
+      "Higher cost than RTX 3090 ($1,180 vs $718)",
       "Slightly lower bandwidth (768 vs 936 GB/s)"
     ],
     "history": [

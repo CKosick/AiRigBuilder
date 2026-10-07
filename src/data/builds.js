@@ -27,7 +27,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB Total GDDR6X, 936 GB/s, NVLink compatible',
             condition: 'Used (eBay Sold)',
-            price: 1436, // 2x $695
+            price: 1436, // 2x $718
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Look for Founder Edition or EVGA FTW3. Dual 24GB fits Q4_K_M with 16k context comfortably.'

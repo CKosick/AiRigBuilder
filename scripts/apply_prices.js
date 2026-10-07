@@ -103,7 +103,11 @@ async function applyPrices() {
   if (rtx3090) {
     // Dual 3090 price = 2x single price
     const dual3090Price = rtx3090.proposedPrice * 2;
-    // Replace dual 3090 prices in builds
+    // Replace dual 3090 prices and update comment in builds
+    buildsContent = buildsContent.replace(
+      /(name:\s*'2x NVIDIA GeForce RTX 3090 24GB'[\s\S]*?price:\s*)\d+(\s*,\s*\/\/\s*2x\s*\$)\d+/g,
+      `$1${dual3090Price}$2${rtx3090.proposedPrice}`
+    );
     buildsContent = buildsContent.replace(
       /(name:\s*'2x NVIDIA GeForce RTX 3090 24GB'[\s\S]*?price:\s*)\d+/g,
       `$1${dual3090Price}`
