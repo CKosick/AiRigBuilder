@@ -1,12 +1,18 @@
-// Main Application Entrypoint for airigbuilder.com
 import './style.css';
 import { createModelPicker } from './components/modelPicker.js';
 import { createBreakEvenCalc } from './components/breakEvenCalc.js';
 import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
+import { GPUS_DATA } from './data/gpus.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
+
+  const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090') || { usedStreetPrice: 718, trend7d: 3.3 };
+  const teslaP40 = GPUS_DATA.find(g => g.id === 'tesla-p40') || { usedStreetPrice: 273, pricePerGb: 11.38 };
+  const dual3090RigEst = (rtx3090.usedStreetPrice * 2) + 360;
+  const trendArrow = rtx3090.trend7d >= 0 ? `▲ ${rtx3090.trend7d}%` : `▼ ${Math.abs(rtx3090.trend7d)}%`;
+  const trendClass = rtx3090.trend7d >= 0 ? 'ticker-val' : 'ticker-drop';
 
   app.innerHTML = `
     <!-- Top Market Ticker -->
@@ -15,12 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="ticker-item">
           <span class="ticker-tag">Live Market</span>
           <span>RTX 3090 24GB Avg:</span>
-          <span class="ticker-val">$695</span>
-          <span class="ticker-drop">▼ 2.1% (7d)</span>
+          <span class="ticker-val">$${rtx3090.usedStreetPrice}</span>
+          <span class="${trendClass}" style="color: ${rtx3090.trend7d >= 0 ? '#34d399' : '#f87171'}">${trendArrow} (7d)</span>
         </div>
         <div class="ticker-item">
           <span>Dual-3090 70B Rig:</span>
-          <span class="ticker-val">~$1,780</span>
+          <span class="ticker-val">~$${dual3090RigEst.toLocaleString()}</span>
           <span style="color: var(--text-dim);">[Q4_K_M @ ~20 tok/s]</span>
         </div>
         <div class="ticker-item">
@@ -30,8 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="ticker-item">
           <span>Cheapest 24GB:</span>
-          <span class="ticker-val" style="color: #34d399;">Tesla P40 ($175)</span>
-          <span style="color: var(--text-dim);">[$7.29/GB]</span>
+          <span class="ticker-val" style="color: #34d399;">Tesla P40 ($${teslaP40.usedStreetPrice})</span>
+          <span style="color: var(--text-dim);">[$${teslaP40.pricePerGb}/GB]</span>
         </div>
       </div>
 
@@ -97,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="hero-stat-lbl">Dual 3090 VRAM</div>
           </div>
           <div class="hero-stat-pill">
-            <div class="hero-stat-val">~$1,780</div>
+            <div class="hero-stat-val">~$${dual3090RigEst.toLocaleString()}</div>
             <div class="hero-stat-lbl">Full 70B Rig Cost</div>
           </div>
           <div class="hero-stat-pill">

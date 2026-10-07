@@ -1,7 +1,9 @@
 // Used GPU Price Tracker Component (airigbuilder.com)
 // The SEO moat tracking street prices for the 10 GPUs that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
-import { Chart } from 'chart.js';
+import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
+
+Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler);
 
 export function createPriceTracker(container) {
   let sortBy = 'pricePerGb'; // 'pricePerGb', 'price', 'vram', 'bandwidth'
