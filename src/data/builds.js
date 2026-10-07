@@ -1,5 +1,6 @@
 // Build sheets per model for AI Rig Builder
 // Each model has 3 tiers: Budget Used, Balanced Mix, Best New
+import { MODELS_DATA } from './models.js';
 
 export const BUILDS_DATA = {
   // -------------------------------------------------------------
@@ -1307,3 +1308,31 @@ export const BUILDS_DATA = {
     ]
   }
 };
+
+// Automatically synthesize tailored build sheets for all 30+ model profiles in MODELS_DATA
+for (const model of MODELS_DATA) {
+  if (BUILDS_DATA[model.id]) continue;
+
+  let baseTemplateId = 'llama-3.1-8b';
+  if (model.recommendedVram >= 64) {
+    baseTemplateId = 'llama-3.3-70b';
+  } else if (model.recommendedVram >= 40) {
+    baseTemplateId = 'llama-3.3-70b';
+  } else if (model.recommendedVram >= 20) {
+    baseTemplateId = 'mistral-nemo-12b';
+  } else if (model.recommendedVram >= 14) {
+    baseTemplateId = 'mistral-nemo-12b';
+  } else {
+    baseTemplateId = 'llama-3.1-8b';
+  }
+
+  const base = BUILDS_DATA[baseTemplateId];
+  BUILDS_DATA[model.id] = {
+    modelId: model.id,
+    title: `${model.name} Inference Rigs`,
+    vramTarget: `${model.recommendedVram} GB VRAM (${model.minVram}GB Min)`,
+    quantTarget: model.sweetSpotQuant,
+    speedTarget: model.typicalSpeedDual3090,
+    tiers: JSON.parse(JSON.stringify(base.tiers))
+  };
+}

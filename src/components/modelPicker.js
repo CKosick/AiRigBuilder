@@ -5,14 +5,47 @@ import { BUILDS_DATA } from '../data/builds.js';
 export function createModelPicker(container, onNavigateToCalc) {
   let activeModelId = 'llama-3.3-70b';
   let activeTierId = 'tier-budget-used';
+  let activeCategory = 'all'; // 'all', '70b', 'medium', 'budget', 'coding'
+  let searchQuery = '';
   let salesTaxRate = 7; // %
   let dailyUsageHours = 4; // hrs/day
   let kwhRate = 0.14; // $/kWh
+
+  function getFilteredModels() {
+    return MODELS_DATA.filter(m => {
+      // Category filter
+      if (activeCategory === '70b') {
+        const isHeavy = m.recommendedVram >= 48 || m.architecture === 'moe' || m.parameters.includes('70B') || m.parameters.includes('72B') || m.parameters.includes('104B');
+        if (!isHeavy) return false;
+      } else if (activeCategory === 'medium') {
+        const isMed = (m.recommendedVram >= 24 && m.recommendedVram < 48) && !m.parameters.includes('70B');
+        if (!isMed) return false;
+      } else if (activeCategory === 'budget') {
+        const isBudget = m.recommendedVram <= 16;
+        if (!isBudget) return false;
+      } else if (activeCategory === 'coding') {
+        const isCoding = m.id.includes('coder') || m.id.includes('code') || m.id.includes('vision');
+        if (!isCoding) return false;
+      }
+
+      // Search query filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesName = m.name.toLowerCase().includes(q);
+        const matchesCreator = m.creator.toLowerCase().includes(q);
+        const matchesDesc = (m.description || '').toLowerCase().includes(q);
+        if (!matchesName && !matchesCreator && !matchesDesc) return false;
+      }
+
+      return true;
+    });
+  }
 
   function render() {
     const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
     const buildSheet = BUILDS_DATA[activeModelId] || BUILDS_DATA['llama-3.3-70b'];
     const currentTier = buildSheet.tiers.find(t => t.id === activeTierId) || buildSheet.tiers[0];
+    const filteredModels = getFilteredModels();
 
     // Compute parts subtotal
     const partsSubtotal = currentTier.parts.reduce((sum, p) => sum + (p.price || 0), 0);
@@ -30,10 +63,25 @@ export function createModelPicker(container, onNavigateToCalc) {
       <div class="model-selector-bar">
         <div class="selector-label">
           <span>1. Select Target AI Model</span>
-          <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} flagship profiles loaded</span>
+          <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} model profiles loaded (${filteredModels.length} shown)</span>
         </div>
+        
+        <!-- Filter and Search Row -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-cat="all">All (${MODELS_DATA.length})</button>
+            <button class="filter-btn ${activeCategory === '70b' ? 'active' : ''}" data-cat="70b">70B+ & MoE</button>
+            <button class="filter-btn ${activeCategory === 'medium' ? 'active' : ''}" data-cat="medium">20B-35B</button>
+            <button class="filter-btn ${activeCategory === 'budget' ? 'active' : ''}" data-cat="budget">≤14B Budget</button>
+            <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding">Coding & Vision</button>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <input type="text" id="model-search-input" value="${searchQuery}" placeholder="🔍 Search 32 models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 180px;">
+          </div>
+        </div>
+
         <div class="model-pills" id="model-pills-list">
-          ${MODELS_DATA.map(m => `
+          ${filteredModels.length > 0 ? filteredModels.map(m => `
             <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}">
               <div class="pill-title">
                 <span>${m.name.split(' ')[0]} ${m.parameters}</span>
@@ -41,7 +89,9 @@ export function createModelPicker(container, onNavigateToCalc) {
               </div>
               <div class="pill-subtitle">${m.creator} • ${m.sweetSpotQuant.split(' ')[0]}</div>
             </button>
-          `).join('')}
+          `).join('') : `
+            <div style="color: var(--text-dim); font-size: 0.85rem; padding: 12px;">No models match your search. <button class="btn-secondary" id="btn-reset-model-filter" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px;">Reset Filter</button></div>
+          `}
         </div>
       </div>
 
@@ -227,6 +277,38 @@ export function createModelPicker(container, onNavigateToCalc) {
   }
 
   function attachEvents(partsSubtotal, systemWatts) {
+    // Category filter buttons
+    container.querySelectorAll('.model-selector-bar .filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeCategory = btn.getAttribute('data-cat') || 'all';
+        render();
+      });
+    });
+
+    // Search input
+    const searchInput = container.querySelector('#model-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        render();
+        const updatedInput = container.querySelector('#model-search-input');
+        if (updatedInput) {
+          updatedInput.focus();
+          updatedInput.setSelectionRange(updatedInput.value.length, updatedInput.value.length);
+        }
+      });
+    }
+
+    // Reset filter button
+    const resetBtn = container.querySelector('#btn-reset-model-filter');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        searchQuery = '';
+        activeCategory = 'all';
+        render();
+      });
+    }
+
     // Model pill click
     container.querySelectorAll('.model-pill-btn').forEach(btn => {
       btn.addEventListener('click', () => {

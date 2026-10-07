@@ -56,7 +56,7 @@ describe('Data Integrity & Consistency Contracts', () => {
 
   describe('MODELS_DATA Contract', () => {
     it('contains flagship AI models with unique IDs', () => {
-      assert.ok(MODELS_DATA.length >= 4, 'Must have at least 4 flagship models');
+      assert.ok(MODELS_DATA.length >= 30, 'Must have at least 30 model profiles');
       const ids = MODELS_DATA.map(m => m.id);
       const uniqueIds = new Set(ids);
       assert.equal(uniqueIds.size, MODELS_DATA.length, 'All model IDs must be unique');

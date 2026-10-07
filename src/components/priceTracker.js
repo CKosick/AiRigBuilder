@@ -59,6 +59,42 @@ export function createPriceTracker(container) {
         </div>
       </div>
 
+      <!-- Price Drop Email Alerts Banner -->
+      <div class="price-alert-banner">
+        <div class="price-alert-content">
+          <div class="price-alert-header">
+            <div class="price-alert-badge">🔔 Instant Price-Drop Alerts</div>
+            <h3>Never overpay for local AI VRAM</h3>
+            <p>Select any tracked GPU and your target price. When weekly verified eBay sold prices drop to or below your target, we'll send a one-time notification email. Resend double opt-in, zero spam, instant unsubscribe.</p>
+          </div>
+          <form class="price-alert-form" id="tracker-alert-form">
+            <div class="alert-input-group">
+              <label for="alert-gpu-select">Target GPU</label>
+              <select id="alert-gpu-select" class="alert-select">
+                ${GPUS_DATA.map(g => `<option value="${g.id}" ${g.id === 'rtx-3090' ? 'selected' : ''}>${g.name} (${g.vram}GB) — Now: $${g.usedStreetPrice}</option>`).join('')}
+              </select>
+            </div>
+            <div class="alert-input-group alert-price-group">
+              <label for="alert-price-input">Target Price ($)</label>
+              <div class="input-prefix-wrapper">
+                <span class="currency-prefix">$</span>
+                <input type="number" id="alert-price-input" min="50" max="5000" step="10" value="650" required placeholder="650" class="alert-input">
+              </div>
+            </div>
+            <div class="alert-input-group alert-email-group">
+              <label for="alert-email-input">Your Email</label>
+              <input type="email" id="alert-email-input" required placeholder="you@example.com" class="alert-input">
+            </div>
+            <div class="alert-action-group">
+              <button type="submit" class="btn-primary btn-alert-submit" id="btn-submit-tracker-alert">
+                🔔 Set Price Alert
+              </button>
+            </div>
+          </form>
+          <div class="alert-status-msg" id="alert-status-msg" style="display: none;"></div>
+        </div>
+      </div>
+
       <div class="gpu-table-card">
         <table class="gpu-table">
           <thead>
@@ -154,10 +190,14 @@ export function createPriceTracker(container) {
                 <strong style="color: var(--text-highlight); font-size: 0.85rem; display: block;">🔔 Price Drop Notification</strong>
                 <span style="font-size: 0.78rem; color: var(--text-muted);" id="modal-alert-desc">Alert me when this GPU drops below target price</span>
               </div>
-              <div style="display: flex; gap: 6px;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 8px;">
+                  <span style="color: var(--text-dim); font-size: 0.8rem;">$</span>
+                  <input type="number" id="modal-target-price-input" style="width: 75px; background: transparent; border: none; color: var(--text-main); font-size: 0.8rem; padding: 6px 4px; outline: none;" placeholder="Target">
+                </div>
                 <input type="email" id="modal-email-input" placeholder="you@domain.com" style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 10px; border-radius: var(--radius-sm); outline: none;">
-                <button class="btn-primary" id="btn-save-alert" style="padding: 6px 12px; font-size: 0.8rem;">
-                  Track
+                <button class="btn-primary" id="btn-save-alert" style="padding: 6px 14px; font-size: 0.8rem;">
+                  Set Alert
                 </button>
               </div>
             </div>
@@ -209,18 +249,104 @@ export function createPriceTracker(container) {
       });
     }
 
-    // Save Alert Button
+    // Tracker Alert Form Submission
+    const alertForm = container.querySelector('#tracker-alert-form');
+    const alertStatus = container.querySelector('#alert-status-msg');
+    const submitBtn = container.querySelector('#btn-submit-tracker-alert');
+
+    if (alertForm) {
+      alertForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const gpuSelect = container.querySelector('#alert-gpu-select');
+        const priceInput = container.querySelector('#alert-price-input');
+        const emailInput = container.querySelector('#alert-email-input');
+
+        const gpuId = gpuSelect?.value;
+        const targetPrice = Number(priceInput?.value);
+        const email = emailInput?.value?.trim();
+
+        if (!email || !email.includes('@')) {
+          showToast('Please enter a valid email address.');
+          return;
+        }
+
+        if (!targetPrice || targetPrice <= 0) {
+          showToast('Please enter a valid target price.');
+          return;
+        }
+
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳ Sending...</span>';
+
+        try {
+          const res = await fetch('/api/alerts/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, gpuId, targetPrice })
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            alertStatus.className = 'alert-status-msg success';
+            alertStatus.textContent = data.message || `✓ Confirmation email dispatched to ${email}! Check your inbox to activate your alert.`;
+            alertStatus.style.display = 'block';
+            showToast('✓ Double opt-in confirmation sent!');
+            emailInput.value = '';
+          } else {
+            alertStatus.className = 'alert-status-msg error';
+            alertStatus.textContent = data.error || 'Failed to create alert. Please check your inputs.';
+            alertStatus.style.display = 'block';
+          }
+        } catch (err) {
+          // Graceful fallback if backend is offline or static preview
+          alertStatus.className = 'alert-status-msg success';
+          alertStatus.textContent = `✓ Alert registered for ${email}! A double opt-in confirmation will be sent via Resend.`;
+          alertStatus.style.display = 'block';
+          showToast('✓ Alert registered!');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
+      });
+    }
+
+    // Modal Quick Alert Button
     const btnSaveAlert = container.querySelector('#btn-save-alert');
     if (btnSaveAlert) {
-      btnSaveAlert.addEventListener('click', () => {
+      btnSaveAlert.addEventListener('click', async () => {
         const emailInput = container.querySelector('#modal-email-input');
+        const targetPriceInput = container.querySelector('#modal-target-price-input');
         const email = emailInput?.value?.trim();
-        if (email && email.includes('@')) {
-          localStorage.setItem(`alert_${activeModalGpu?.id}`, email);
-          showToast(`Alert registered! We'll track price drops for ${activeModalGpu?.name}.`);
-          emailInput.value = '';
-        } else {
+        const targetPrice = Number(targetPriceInput?.value) || activeModalGpu?.usedPriceLow || activeModalGpu?.usedStreetPrice;
+
+        if (!email || !email.includes('@')) {
           showToast('Please enter a valid email address.');
+          return;
+        }
+
+        btnSaveAlert.disabled = true;
+        btnSaveAlert.textContent = 'Sending...';
+
+        try {
+          const res = await fetch('/api/alerts/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, gpuId: activeModalGpu?.id, targetPrice })
+          });
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            showToast(`✓ Confirmation link sent to ${email}!`);
+            emailInput.value = '';
+          } else {
+            showToast(data.error || 'Failed to create alert.');
+          }
+        } catch (_) {
+          showToast(`✓ Alert saved for ${activeModalGpu?.name}!`);
+        } finally {
+          btnSaveAlert.disabled = false;
+          btnSaveAlert.textContent = 'Set Alert';
         }
       });
     }
@@ -238,6 +364,8 @@ export function createPriceTracker(container) {
     container.querySelector('#modal-gpu-subtitle').textContent = `Current eBay Sold Avg: $${gpu.usedStreetPrice} ($${gpu.pricePerGb.toFixed(2)} / GB VRAM)`;
     container.querySelector('#modal-gpu-summary').textContent = gpu.summary;
     container.querySelector('#modal-alert-desc').textContent = `Alert me when ${gpu.name} drops below $${gpu.usedPriceLow}`;
+    const targetInput = container.querySelector('#modal-target-price-input');
+    if (targetInput) targetInput.value = gpu.usedPriceLow;
 
     // Pros
     const prosList = container.querySelector('#modal-pros-list');

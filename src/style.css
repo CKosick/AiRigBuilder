@@ -1374,6 +1374,179 @@ input[type="range"] {
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* ==========================================================================
+   PRICE DROP EMAIL ALERTS BANNER & FORM
+   ========================================================================== */
+
+.price-alert-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(16, 185, 129, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.price-alert-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--emerald), var(--cyan));
+}
+
+.price-alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.price-alert-header {
+  max-width: 780px;
+}
+
+.price-alert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--emerald);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  margin-bottom: 0.5rem;
+}
+
+.price-alert-header h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-highlight);
+  margin: 0 0 0.4rem 0;
+}
+
+.price-alert-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.price-alert-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr auto;
+  gap: 1rem;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1.15rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.alert-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alert-input-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.alert-select,
+.alert-input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.alert-select:focus,
+.alert-input:focus {
+  border-color: var(--emerald);
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.input-prefix-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-prefix {
+  position: absolute;
+  left: 10px;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.input-prefix-wrapper .alert-input {
+  padding-left: 24px;
+  width: 100%;
+}
+
+.btn-alert-submit {
+  height: 38px;
+  padding: 0 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.alert-status-msg {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  animation: slideUp 0.2s ease;
+}
+
+.alert-status-msg.success {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.alert-status-msg.error {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #fb7185;
+}
+
+@media (max-width: 900px) {
+  .price-alert-form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .price-alert-form {
+    grid-template-columns: 1fr;
+  }
+  .btn-alert-submit {
+    width: 100%;
+  }
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
   .model-spec-panel {

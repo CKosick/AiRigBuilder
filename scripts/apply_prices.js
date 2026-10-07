@@ -166,7 +166,21 @@ async function applyPrices() {
     fs.writeFileSync(mdReviewPath, md, 'utf-8');
   }
 
-  // 5. Build validation
+  // 5. Evaluate and trigger Price-Drop Alerts
+  console.log('\nEvaluating user price-drop alert subscriptions...');
+  try {
+    const { evaluateAndTriggerAlerts } = await import('../src/services/alertService.js');
+    const alertResults = await evaluateAndTriggerAlerts(GPUS_DATA);
+    if (alertResults.firedCount > 0) {
+      console.log(`🔔 Fired ${alertResults.firedCount} price-drop alert email(s)!`);
+    } else {
+      console.log(`✓ Evaluated alerts (${alertResults.activeAlerts} active subscriptions monitored, no drop thresholds met).`);
+    }
+  } catch (alertErr) {
+    console.error('⚠️ Warning: Alert evaluation encountered an error:', alertErr.message);
+  }
+
+  // 6. Build validation
   console.log('\nValidating build with `npm run build`...');
   try {
     execSync('npm run build', { cwd: ROOT_DIR, stdio: 'inherit' });

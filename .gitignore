@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+.env
+.env.local
+.env.*.local
 
 # Local cache, browser downloads, Python artifacts, and eBay session cookies
 .cache/
