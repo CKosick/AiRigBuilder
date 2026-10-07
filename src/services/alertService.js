@@ -7,6 +7,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { GPUS_DATA } from '../data/gpus.js';
+import { formatAffiliateUrl } from '../config/affiliates.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -337,7 +338,7 @@ export async function sendPriceDropNotificationEmail(alert, currentGpu, appUrl =
           <a href="${trackerUrl}" style="display: inline-block; background-color: #10b981; color: #042f2e; text-decoration: none; font-weight: 700; font-size: 15px; padding: 12px 28px; border-radius: 8px; margin-right: 8px;">
             📊 View Tracker & Comps
           </a>
-          <a href="${currentGpu.ebaySoldUrl || 'https://www.ebay.com'}" target="_blank" style="display: inline-block; background-color: #1e293b; color: #f1f5f9; text-decoration: none; font-weight: 600; font-size: 14px; padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
+          <a href="${formatAffiliateUrl(currentGpu.ebaySoldUrl || 'https://www.ebay.com', 'eBay Sold')}" target="_blank" style="display: inline-block; background-color: #1e293b; color: #f1f5f9; text-decoration: none; font-weight: 600; font-size: 14px; padding: 12px 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
             🔍 eBay Sold Listings →
           </a>
         </div>

@@ -5,7 +5,9 @@ import {
   amazonTag,
   ebayCampaignId,
   ebayCustomId,
+  ebayParams,
   attachAmazonAffiliateTag,
+  attachEbayAffiliateParams,
   formatAffiliateUrl
 } from '../src/config/affiliates.js';
 
@@ -16,11 +18,19 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.equal(amazonTag, 'airigbuilder-20');
     });
 
-    it('leaves ebayCampaignId empty while approval is pending', () => {
-      assert.equal(AFFILIATE_CONFIG.ebayCampaignId, '');
-      assert.equal(ebayCampaignId, '');
+    it('sets default ebayCampaignId to 5339219563', () => {
+      assert.equal(AFFILIATE_CONFIG.ebayCampaignId, '5339219563');
+      assert.equal(ebayCampaignId, '5339219563');
       assert.equal(AFFILIATE_CONFIG.ebayCustomId, '');
       assert.equal(ebayCustomId, '');
+    });
+
+    it('defines standard EPN tracking parameters', () => {
+      assert.equal(ebayParams.mkcid, '1');
+      assert.equal(ebayParams.mkrid, '711-53200-19255-0');
+      assert.equal(ebayParams.siteid, '0');
+      assert.equal(ebayParams.toolid, '10001');
+      assert.equal(ebayParams.mkevt, '1');
     });
   });
 
@@ -61,6 +71,51 @@ describe('Affiliate Configuration & Attribution System', () => {
     });
   });
 
+  describe('attachEbayAffiliateParams', () => {
+    it('attaches EPN tracking parameters to search query URLs', () => {
+      const original = 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1';
+      const tagged = attachEbayAffiliateParams(original);
+      const parsed = new URL(tagged);
+
+      assert.equal(parsed.searchParams.get('_nkw'), 'RTX 3090 24GB');
+      assert.equal(parsed.searchParams.get('LH_Sold'), '1');
+      assert.equal(parsed.searchParams.get('LH_Complete'), '1');
+      assert.equal(parsed.searchParams.get('mkcid'), '1');
+      assert.equal(parsed.searchParams.get('mkrid'), '711-53200-19255-0');
+      assert.equal(parsed.searchParams.get('siteid'), '0');
+      assert.equal(parsed.searchParams.get('campid'), '5339219563');
+      assert.equal(parsed.searchParams.get('toolid'), '10001');
+      assert.equal(parsed.searchParams.get('mkevt'), '1');
+    });
+
+    it('attaches EPN tracking parameters to base domain or item URLs', () => {
+      const original = 'https://www.ebay.com/itm/123456789';
+      const tagged = attachEbayAffiliateParams(original);
+      assert.equal(
+        tagged,
+        'https://www.ebay.com/itm/123456789?mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=5339219563&toolid=10001&mkevt=1'
+      );
+    });
+
+    it('supports custom campaign ID override parameter', () => {
+      const original = 'https://www.ebay.com/sch/i.html?_nkw=RTX+4090';
+      const tagged = attachEbayAffiliateParams(original, '9999999999');
+      const parsed = new URL(tagged);
+      assert.equal(parsed.searchParams.get('campid'), '9999999999');
+    });
+
+    it('leaves non-eBay URLs unmodified', () => {
+      const amazonUrl = 'https://www.amazon.com/dp/B09VCHR1WH';
+      assert.equal(attachEbayAffiliateParams(amazonUrl), amazonUrl);
+
+      const bhUrl = 'https://www.bhphotovideo.com/c/search?Ntt=Corsair+1000W';
+      assert.equal(attachEbayAffiliateParams(bhUrl), bhUrl);
+
+      assert.equal(attachEbayAffiliateParams('#'), '#');
+      assert.equal(attachEbayAffiliateParams(''), '');
+    });
+  });
+
   describe('formatAffiliateUrl', () => {
     it('formats Amazon merchant URLs with Amazon Associates tracking tag', () => {
       const url = 'https://www.amazon.com/s?k=Corsair+RM1000e';
@@ -74,10 +129,16 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.equal(formatted, 'https://www.amazon.com/s?k=B550+motherboard&tag=airigbuilder-20');
     });
 
-    it('passes through eBay URLs unmodified while EPN is pending', () => {
+    it('formats eBay URLs with complete EPN parameters', () => {
       const url = 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1';
       const formatted = formatAffiliateUrl(url, 'eBay Sold');
-      assert.equal(formatted, url);
+      const parsed = new URL(formatted);
+      assert.equal(parsed.searchParams.get('mkcid'), '1');
+      assert.equal(parsed.searchParams.get('mkrid'), '711-53200-19255-0');
+      assert.equal(parsed.searchParams.get('siteid'), '0');
+      assert.equal(parsed.searchParams.get('campid'), '5339219563');
+      assert.equal(parsed.searchParams.get('toolid'), '10001');
+      assert.equal(parsed.searchParams.get('mkevt'), '1');
     });
 
     it('passes through B&H and non-affiliate URLs unmodified', () => {

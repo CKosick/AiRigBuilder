@@ -1,6 +1,7 @@
 // Used GPU Price Tracker Component (airigbuilder.com)
 // The SEO moat tracking street prices for the 10 GPUs that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
+import { formatAffiliateUrl } from '../config/affiliates.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler);
@@ -377,7 +378,7 @@ export function createPriceTracker(container) {
 
     // eBay Link
     const ebayLink = container.querySelector('#modal-ebay-link');
-    ebayLink.href = gpu.ebaySoldUrl;
+    ebayLink.href = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold');
 
     backdrop.classList.add('open');
 
