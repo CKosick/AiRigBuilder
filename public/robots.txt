@@ -1,0 +1,9 @@
+# robots.txt for https://airigbuilder.com
+User-agent: *
+Allow: /
+
+# Host
+Host: https://airigbuilder.com
+
+# Sitemaps
+Sitemap: https://airigbuilder.com/sitemap.xml

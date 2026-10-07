@@ -6,26 +6,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Rig Builder — The Used-Hardware Price Layer for Local AI | airigbuilder.com</title>
     <meta name="description" content="Calculate the cheapest way to run 70B local AI models with real used GPU prices, true total build costs (parts + tax + power), and cloud break-even ROI." />
-    <meta name="keywords" content="local AI hardware, used RTX 3090, 70B local LLM build, AI rig builder, dual GPU 48GB VRAM, RunPod break even, local LLM price calculator" />
-    
+    <meta name="keywords" content="local AI hardware, used RTX 3090, 70B local LLM build, AI rig builder, dual GPU 48GB VRAM, RunPod break even, local LLM price calculator, used GPU prices" />
+    <link rel="canonical" href="https://airigbuilder.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
     <!-- Open Graph / Social Sharing -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AI Rig Builder" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://airigbuilder.com/" />
-    <meta property="og:title" content="AI Rig Builder — Used-Hardware Price Layer for Local AI" />
+    <meta property="og:title" content="AI Rig Builder — The Used-Hardware Price Layer for Local AI" />
     <meta property="og:description" content="What's the cheapest way to run a 70B model at home? Real used eBay prices, true total build costs, and cloud break-even math." />
     <meta property="og:image" content="https://airigbuilder.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AI Rig Builder — Hardware Calculator and Used GPU Price Tracker" />
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content="AI Rig Builder — The Used-Hardware Price Layer for Local AI" />
-    <meta property="twitter:description" content="Cheapest way to run 70B models at home with real used prices and cloud break-even calculator." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AI Rig Builder — The Used-Hardware Price Layer for Local AI" />
+    <meta name="twitter:description" content="Cheapest way to run 70B models at home with real used prices and cloud break-even calculator." />
+    <meta name="twitter:image" content="https://airigbuilder.com/og-image.png" />
+    <meta name="twitter:image:alt" content="AI Rig Builder Preview" />
+
+    <!-- Schema.org JSON-LD Structured Data for Rich Google Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://airigbuilder.com/#app",
+          "name": "AI Rig Builder",
+          "url": "https://airigbuilder.com/",
+          "description": "Interactive calculator and used GPU pricing intelligence for building local AI rigs to run 70B models at home.",
+          "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "All",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://airigbuilder.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is the cheapest way to run a 70B model at home?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The community gold standard is dual used NVIDIA RTX 3090 24GB cards (~$718 each on eBay), delivering 48GB total VRAM on an AM4/AM5 platform for under $1,800 total. This runs Llama 3.3 70B at Q4_K_M quant at ~20 tokens/sec."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why is dual used RTX 3090 better than a single RTX 4090 for local LLMs?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "A single RTX 4090 only has 24GB VRAM and cannot fit a 70B model without CPU offloading (which slows inference to ~1.5 tokens/sec). Dual RTX 3090s provide 48GB VRAM, allowing the entire model to fit into high-speed GDDR6X for real-time 20 tok/sec generation."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How fast does a local 70B AI build break even against cloud GPU providers?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "At 4 hours of daily usage compared to RunPod or Vast.ai ($0.88/hr), an $1,800 Dual 3090 rig pays for itself in approximately 5.8 months after electricity costs."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 
     <!-- Fonts: Inter for UI, JetBrains Mono for specs/pricing -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e2b511c684444bdabc88fce51efd8bd4"}'></script><!-- End Cloudflare Web Analytics -->
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e2b511c684444bdabc88fce51efd8bd4"}'></script>
   </head>
   <body>
     <div id="app"></div>
