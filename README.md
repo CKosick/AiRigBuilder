@@ -46,15 +46,41 @@ npm run build
 
 ---
 
-## 📈 Updating Used GPU Prices (Weekly Workflow)
+## 📈 Weekly Used GPU Price Update Workflow (Phase 2)
 
-Used GPU street prices are maintained in [`src/data/gpus.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/gpus.js).
+We maintain street prices for the 10 GPUs that matter for local AI via a **semi-automated workflow with a human-in-the-loop review step**:
 
-To update prices weekly:
-1. Open the verified eBay sold listings link for each card (links are embedded in `gpus.js`).
-2. Update `usedStreetPrice`, `usedPriceLow`, `usedPriceHigh`, and `trend7d`.
-3. Add the latest month's price to the `history` array.
-4. Run `npm run build` and deploy.
+### Step 1: Fetch Scraped eBay Sold Listings
+```bash
+npm run prices:fetch
+```
+- Scrapes recent eBay completed & sold listings with rate limiting (2.5s delay).
+- Filters out non-working parts, boxes, coolers, waterblocks, and non-target variants.
+- Computes trimmed median, 25th percentile (Low), 75th percentile (High), and 7-day trend.
+- Outputs human-readable [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) and [`data/pending_price_review.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/pending_price_review.json).
+
+### Step 2: Eyeball & Review
+- Open [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) to eyeball proposed prices, changes, and sample listings.
+- Click the direct `[eBay Sold]` links in the markdown table if you want to inspect eBay in your browser.
+- If an outlier slipped through, simply edit `proposedPrice` or change `status: "SKIP"` in `data/pending_price_review.json`.
+
+### Step 3: Apply & Validate
+```bash
+npm run prices:apply
+```
+- Applies approved updates to [`src/data/gpus.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/gpus.js).
+- Recalculates `pricePerGb` ($/GB VRAM) and appends to the historical price-trajectory data.
+- Automatically syncs dependent GPU parts in [`src/data/builds.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/builds.js) (e.g. dual-3090 rig totals).
+- Records an audit log entry in [`data/price_history_log.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/price_history_log.json).
+- Runs `npm run build` to guarantee zero production syntax or bundler errors.
+
+### Step 4: Commit & Deploy
+```bash
+git add .
+git commit -m "chore: weekly used GPU price update"
+git push
+```
+Vercel automatically redeploys `airigbuilder.com` with the new prices.
 
 ---
 

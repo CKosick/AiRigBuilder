@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prices:fetch": "node scripts/scrape_ebay_prices.js",
+    "prices:apply": "node scripts/apply_prices.js"
   },
   "devDependencies": {
+    "cheerio": "^1.2.0",
     "vite": "^8.3.0"
   },
   "dependencies": {
