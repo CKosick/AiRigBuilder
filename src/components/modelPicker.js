@@ -1,6 +1,7 @@
 // Model Picker & Build Sheet Component
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
+import { formatAffiliateUrl } from '../config/affiliates.js';
 
 export function createModelPicker(container, onNavigateToCalc) {
   let activeModelId = 'llama-3.3-70b';
@@ -197,7 +198,7 @@ export function createModelPicker(container, onNavigateToCalc) {
                     </td>
                     <td style="text-align: right;">
                       ${part.url !== '#' ? `
-                        <a href="${part.url}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
+                        <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
                           ${part.merchant.includes('eBay') ? '🔍 Search eBay' : (part.merchant.includes('Amazon') ? '🛒 Amazon' : '📦 B&H Photo')}
                         </a>
                       ` : '<span style="color: var(--text-dim); font-size: 0.78rem;">Built-in</span>'}

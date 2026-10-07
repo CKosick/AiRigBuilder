@@ -73,4 +73,11 @@ describe('SEO & Structured Data Verification Tests', () => {
     assert.ok(sitemap.includes('<loc>https://airigbuilder.com/</loc>'));
     assert.ok(sitemap.includes('<changefreq>daily</changefreq>'));
   });
+
+  it('verifies eBay Partner Network (Impact) site verification meta tag exists in <head>', () => {
+    assert.ok(
+      indexHtml.includes("<meta name='impact-site-verification' value='890fb0c7-e571-423e-9f49-8a376e267bd0'>"),
+      "index.html must contain exact impact-site-verification meta tag with value attribute"
+    );
+  });
 });
