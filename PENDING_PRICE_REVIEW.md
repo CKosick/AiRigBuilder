@@ -1,49 +1,68 @@
 # Weekly Used GPU Price Review — Oct 06, 2026
 
 > [!IMPORTANT]
-> ⚠️ **STATUS: PARTIALLY APPLIED** (6 approved GPU prices applied to production codebase, 4 flagged GPUs held on hold for review)
-> The 6 approved cards below have been applied to `src/data/gpus.js` and `src/data/builds.js`.
-> The 4 flagged cards are held pending manual review. If you want to override their prices, edit `data/pending_price_review.json` and set their status to `APPROVED`, then re-run `npm run prices:apply`.
+> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.
+> If any price looks off due to an outlier, you can edit `data/pending_price_review.json`.
+> When satisfied, execute: `npm run prices:apply` to update the live site and price history.
 
-| GPU Model | VRAM | Previous | Applied/Proposed | Delta | 7d Trend | Price Range | Data Source | Review Status |
+| GPU Model | VRAM | Current | Proposed | Delta | 7d Trend | Proposed Range | Data Source | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **NVIDIA GeForce RTX 3090** | 24GB | $694 | **$718** | +$24 | +3.3% | $576 - $863 | 🟢 Live Comps | ✅ **APPLIED** |
-| **NVIDIA GeForce RTX 4090** | 24GB | $1537 | **$1540** | +$3 | +0.0% | $1417 - $1663 | 🟡 Baseline Guard | ✅ **APPLIED** |
-| **AMD Radeon RX 7900 XTX** | 24GB | $793 | **$864** | +$71 | +9.4% | $834 - $975 | 🟢 Live Comps | ✅ **APPLIED** |
-| **NVIDIA GeForce RTX 4060 Ti 16GB** | 16GB | $383 | **$385** | +$2 | +0.0% | $354 - $416 | 🟡 Baseline Guard | ✅ **APPLIED** |
-| **NVIDIA GeForce RTX 3080 10GB** | 10GB | $374 | **$383** | +$9 | +3.5% | $354 - $408 | 🟢 Live Comps | ✅ **APPLIED** |
-| **NVIDIA RTX A5000 24GB** | 24GB | $1176 | **$1180** | +$4 | +0.0% | $1086 - $1274 | 🟡 Baseline Guard | ✅ **APPLIED** |
-| **NVIDIA GeForce RTX 3060 12GB** | 12GB | $225 | **$307** | +$82 | +36.4% | $287 - $307 | 🟢 Live Comps | ⏸️ **HELD FOR REVIEW** |
-| **NVIDIA Tesla P40 24GB** | 24GB | $175 | **$273** | +$98 | +56.0% | $264 - $277 | 🟢 Live Comps | ⏸️ **HELD FOR REVIEW** |
-| **NVIDIA GeForce RTX 4080 Super 16GB** | 16GB | $880 | **$1103** | +$223 | +25.3% | $1070 - $1103 | 🟢 Live Comps | ⏸️ **HELD FOR REVIEW** |
-| **Apple Mac Studio M2 Ultra** | 64GB | $2750 | **$3311** | +$561 | +20.4% | $3167 - $3551 | 🟢 Live Comps | ⏸️ **HELD FOR REVIEW** |
+| **NVIDIA GeForce RTX 3090** | 24GB | $695 | **$718** | +$23 | +3.3% | $576 - $863 | 🟢 Live Comps | ✅ APPROVED |
+| **NVIDIA GeForce RTX 4090** | 24GB | $1540 | **$1540** | +$0 | +0.0% | $1417 - $1663 | 🟡 Baseline | ✅ APPROVED |
+| **AMD Radeon RX 7900 XTX** | 24GB | $790 | **$864** | +$74 | +9.4% | $834 - $975 | 🟢 Live Comps | ✅ APPROVED |
+| **NVIDIA GeForce RTX 4060 Ti 16GB** | 16GB | $385 | **$385** | +$0 | +0.0% | $354 - $416 | 🟡 Baseline | ✅ APPROVED |
+| **NVIDIA GeForce RTX 3060 12GB** | 12GB | $225 | **$307** | +$82 | +36.4% | $245 - $307 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
+| **NVIDIA Tesla P40 24GB** | 24GB | $175 | **$273** | +$98 | +56.0% | $264 - $277 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
+| **NVIDIA GeForce RTX 4080 Super 16GB** | 16GB | $880 | **$1103** | +$223 | +25.3% | $1070 - $1103 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
+| **NVIDIA GeForce RTX 3080 10GB** | 10GB | $370 | **$383** | +$13 | +3.5% | $354 - $408 | 🟢 Live Comps | ✅ APPROVED |
+| **NVIDIA RTX A5000 24GB** | 24GB | $1180 | **$1180** | +$0 | +0.0% | $1086 - $1274 | 🟡 Baseline | ✅ APPROVED |
+| **Apple Mac Studio (M2/M4 Ultra 64-192GB)** | 64GB | $2750 | **$3311** | +$561 | +20.4% | $3167 - $3551 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
 
-### Flagged GPUs Notes & Listing Evidence (On Hold)
+### Real Listings Sampled:
 
-1. **NVIDIA GeForce RTX 3060 12GB** (Current: $225 → Scraped: $307, +36.4%)
-   - *Reason for Hold:* Large swing (+36.4%). eBay Buy-It-Now listings for standalone 12GB models are currently elevated above typical sold averages ($299-$320).
-   - *Sample Listings:*
-     - $299.99 — Konalet NVIDIA GeForce RTX 3060 12GB Graphics Card
-     - $320.00 — MSI Ventus GeForce RTX 3060 12GB GDDR6 PCI Express 4.0
-     - $320.00 — ASUS ROG Strix GeForce RTX 3060 OC Edition 12GB GDDR6
+- **NVIDIA GeForce RTX 3090** (Proposed: $718):
+  - **$600.0** — *NVIDIA GeForce RTX 3090 Founders Edition 24GB GDDR6 Graphics Card -...Opens in a new window or tab*
+  - **$650.0** — *Gigabyte NVIDIA RTX 3090 24GB TURBO GDDR6X Graphics Card GV-N3090TURBO-24GDOpens in a new window or tab*
+  - **$748.0** — *VIDIA RTX 4060 Ti Founders Edition 8GB GDDR6 ITX SFF Small Form FactorOpens in a new window or tab*
 
-2. **NVIDIA Tesla P40 24GB** (Current: $175 → Scraped: $273, +56.0%)
-   - *Reason for Hold:* Large swing (+56.0%). Recent influx of buy-it-now server pulls priced at $275-$287, but standard Chinese import auctions often close lower ($170-$200).
-   - *Sample Listings:*
-     - $275.00 — Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2
-     - $287.00 — Open Box NVIDIA Tesla P40 24GB GDDR5 PCI-E 3.0 X16 GPU Accelerator
+- **NVIDIA GeForce RTX 4090** (Proposed: $1540):
+  - **$1540** — *NVIDIA GeForce RTX 4090 reference market comp*
 
-3. **NVIDIA GeForce RTX 4080 Super 16GB** (Current: $880 → Scraped: $1,103, +25.3%)
-   - *Reason for Hold:* Large swing (+25.3%). Live Buy-It-Now asking prices reflect high seller premiums ($1,119-$1,149) near or above retail MSRP ($999).
-   - *Sample Listings:*
-     - $1,119.99 — Dell GeForce RTX 4080 SUPER 16GB GDDR6X
-     - $1,149.99 — GIGABYTE GeForce RTX 4080 SUPER WINDFORCE V2 16GB
+- **AMD Radeon RX 7900 XTX** (Proposed: $864):
+  - **$780.99** — *Sapphire NITRO+ AMD Radeon RX 7900 XTX Vapor-X Gaming Graphics Card 24GB GDDR6Opens in a new window or tab*
+  - **$869.99** — *ASRock Phantom Gaming OC Radeon RX 7900 XTX 24GB - GPU - Heatsink Contact IssueOpens in a new window or tab*
+  - **$900.0** — *SAPPHIRE  Nitro+ AMD Radeon RX 7900 XTX 24GB GDDR6 Graphics Card PICK Up ONLYOpens in a new window or tab*
 
-4. **Apple Mac Studio M2 Ultra 64GB** (Current: $2,750 → Scraped: $3,311, +20.4%)
-   - *Reason for Hold:* Large swing (+20.4%). Available Buy-It-Now units are high-spec / mint condition ($3,299-$3,393) compared to bare refurbished base configs.
-   - *Sample Listings:*
-     - $3,299.67 — Apple Mac Studio M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSD
-     - $3,350.00 — Apple Mac Studio with M2 Ultra (24/60, 64GB RAM 1TB SSD) Excellent Condition
+- **NVIDIA GeForce RTX 4060 Ti 16GB** (Proposed: $385):
+  - **$385** — *NVIDIA GeForce RTX 4060 Ti 16GB reference market comp*
+
+- **NVIDIA GeForce RTX 3060 12GB** (Proposed: $307):
+  - **$255.0** — *NVIDIA GeForce RTX 3060 12GB PCIe x16 GPU Fan Heatsink HDMI DisplayPortOpens in a new window or tab*
+  - **$299.99** — ***READ**Konalet NVIDIA GeForce RTX 3060 12GB Graphics CardOpens in a new window or tab*
+  - **$320.0** — *MSI Ventus GeForce RTX 3060 12GB GDDR6 PCI Express 4.0 Graphics CardOpens in a new window or tab*
+
+- **NVIDIA Tesla P40 24GB** (Proposed: $273):
+  - **$287.0** — *Open Box NVIDIA Tesla P40 24GB GDDR5 PCI-E 3.0 X16 GPU Accelerator Graphics CardOpens in a new window or tab*
+  - **$275.0** — *Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2 Graphics Card -Opens in a new window or tab*
+  - **$275.0** — *Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2 Graphics Card -Opens in a new window or tab*
+
+- **NVIDIA GeForce RTX 4080 Super 16GB** (Proposed: $1103):
+  - **$1119.99** — *Dell GeForce RTX 4080 SUPER 16GB GDDR6X Graphics CardOpens in a new window or tab*
+  - **$1149.97** — *Zotac Nvidia RTX 4080 SUPER 16GB Graphics Card GPU PCOpens in a new window or tab*
+  - **$1149.99** — *GIGABYTE GeForce RTX 4080 SUPER WINDFORCE V2 16GB Graphic Card - USEDOpens in a new window or tab*
+
+- **NVIDIA GeForce RTX 3080 10GB** (Proposed: $383):
+  - **$300.0** — *GIGABYTE GeForce RTX NVIDIA 3080 10GB (not sure what’s wrong with it)Opens in a new window or tab*
+  - **$359.99** — *Dell RTX 3080 10GB OEM | Refurbished | Some Cosmetic WearOpens in a new window or tab*
+  - **$365.0** — *ZOTAC GAMING GeForce RTX 3080 Trinity OC 10GB GDDR6X Graphics CardOpens in a new window or tab*
+
+- **NVIDIA RTX A5000 24GB** (Proposed: $1180):
+  - **$1180** — *NVIDIA RTX A5000 24GB reference market comp*
+
+- **Apple Mac Studio (M2/M4 Ultra 64-192GB)** (Proposed: $3311):
+  - **$3299.67** — *Apple Mac Studio M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSD ExcellentOpens in a new window or tab*
+  - **$3350.0** — *Apple Mac Studio with M2 Ultra (24/60, 64GB RAM 1TB SSD) in Excellent Condition!Opens in a new window or tab*
+  - **$3393.0** — *Apple Mac Studio M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSD - SilverOpens in a new window or tab*
 
 ---
-*Generated by airigbuilder.com weekly scraper workflow.*
+*Generated by airigbuilder.com weekly scraper workflow (Headless UC Engine).*

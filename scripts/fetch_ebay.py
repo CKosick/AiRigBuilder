@@ -216,8 +216,17 @@ def main():
                 with open(COOKIE_FILE, "r", encoding="utf-8") as f:
                     cookies = json.load(f)
                     for c in cookies:
-                        # Only keep valid domain and name
-                        driver.add_cookie(c)
+                        try:
+                            cookie_dict = {
+                                "name": c["name"],
+                                "value": c["value"],
+                                "path": c.get("path", "/")
+                            }
+                            if "expiry" in c:
+                                cookie_dict["expiry"] = int(c["expiry"])
+                            driver.add_cookie(cookie_dict)
+                        except Exception:
+                            pass
                 print("✓ Successfully injected eBay session cookies.")
             except Exception as e:
                 print(f"⚠️ Could not inject cookies ({e}). Continuing with live comps mode.")
