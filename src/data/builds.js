@@ -1043,7 +1043,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3060 12GB',
             spec: '12GB GDDR6, 170W TDP, 360 GB/s bandwidth',
             condition: 'Used (eBay Sold)',
-            price: 222,
+            price: 307,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1',
             notes: 'The cheapest card that can run 8B models at full Q8 precision completely in VRAM.'

@@ -1,6 +1,6 @@
 # scripts/fetch_ebay.py
 # Production eBay market price fetcher for AI Rig Builder
-# Uses SeleniumBase Undetected-Chromedriver to bypass Akamai WAF 403 blocks
+# Uses SeleniumBase Undetected-Chromedriver with persistent profile to fetch real sold listings
 import json
 import os
 import re
@@ -17,7 +17,9 @@ from bs4 import BeautifulSoup
 from seleniumbase import Driver
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-COOKIE_FILE = os.path.join(ROOT_DIR, ".cache", "ebay_cookies.json")
+CACHE_DIR = os.path.join(ROOT_DIR, ".cache")
+PROFILE_DIR = os.path.join(CACHE_DIR, "ebay_chrome_profile")
+COOKIE_FILE = os.path.join(CACHE_DIR, "ebay_cookies.json")
 OUTPUT_JSON = os.path.join(ROOT_DIR, "data", "pending_price_review.json")
 OUTPUT_MD = os.path.join(ROOT_DIR, "PENDING_PRICE_REVIEW.md")
 
@@ -150,7 +152,7 @@ GLOBAL_EXCLUDE_TERMS = [
     "gaming pc", "gaming desktop", "custom pc", "desktop pc"
 ]
 
-def extract_listings_from_html(html, target):
+def extract_listings_from_html(html, target, is_sold=False):
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select(".s-card, .s-item")
     valid = []
@@ -160,10 +162,10 @@ def extract_listings_from_html(html, target):
         price_el = c.select_one(".s-card__price, .s-item__price")
         title = title_el.get_text(strip=True) if title_el else ""
         price_raw = price_el.get_text(strip=True) if price_el else ""
+        full_text = c.get_text(" | ", strip=True)
         
         # Fallback to full card text if structured classes differ
         if not title or not price_raw:
-            full_text = c.get_text(" | ", strip=True)
             m = re.search(r"\$([0-9,]+(?:\.[0-9]{2})?)", full_text)
             if m:
                 price_raw = m.group(0)
@@ -182,7 +184,21 @@ def extract_listings_from_html(html, target):
             
         price = parse_price(price_raw)
         if price and target["minSensiblePrice"] <= price <= target["maxSensiblePrice"]:
-            valid.append({"title": title, "price": price})
+            sample = {"title": title, "price": price}
+            
+            # Extract sold date if available
+            sold_date = ""
+            date_el = c.select_one(".s-item__ended-date, .s-item__endedDate, .POSITIVE")
+            if date_el:
+                sold_date = date_el.get_text(strip=True)
+            else:
+                m_date = re.search(r"(?:Sold|Ended)\s+([A-Za-z]{3}\s+\d{1,2}(?:,\s*\d{4})?)", full_text, re.IGNORECASE)
+                if m_date:
+                    sold_date = m_date.group(0)
+            if sold_date:
+                sample["soldDate"] = sold_date
+                
+            valid.append(sample)
             
     return valid
 
@@ -193,44 +209,50 @@ def main():
     print("====================================================")
     
     os.makedirs(os.path.join(ROOT_DIR, "data"), exist_ok=True)
-    os.makedirs(os.path.join(ROOT_DIR, ".cache"), exist_ok=True)
+    os.makedirs(CACHE_DIR, exist_ok=True)
     
+    has_profile = os.path.exists(PROFILE_DIR) and len(os.listdir(PROFILE_DIR)) > 0
     has_cookies = os.path.exists(COOKIE_FILE)
-    if has_cookies:
+    
+    if has_profile:
+        print(f"🔑 Using persistent authenticated Chrome profile: {PROFILE_DIR}")
+    elif has_cookies:
         print(f"🔑 Found saved eBay session cookies in: {COOKIE_FILE}")
-        print("   Will attempt authenticated sold-listing retrieval.")
     else:
-        print("ℹ️ No saved eBay session cookies found. Operating in live Buy-It-Now comps mode.")
-        print("   (Tip: Run `npm run prices:login` once if you wish to capture full sold history)")
+        print("ℹ️ No saved eBay session found. Attempting live search.")
 
     print("\nInitializing Undetected Chrome Driver (headless)...")
-    driver = Driver(uc=True, headless=True)
-    
+    driver_kwargs = {"uc": True, "headless": True}
+    if has_profile:
+        driver_kwargs["user_data_dir"] = PROFILE_DIR
+        
+    driver = Driver(**driver_kwargs)
     results = []
     
     try:
-        # If cookies exist, inject them
-        if has_cookies:
+        # If no persistent profile but cookies exist, inject them
+        if not has_profile and has_cookies:
             try:
                 driver.uc_open_with_reconnect("https://www.ebay.com", reconnect_time=2)
                 with open(COOKIE_FILE, "r", encoding="utf-8") as f:
                     cookies = json.load(f)
                     for c in cookies:
                         try:
-                            cookie_dict = {
+                            cd = {
                                 "name": c["name"],
                                 "value": c["value"],
                                 "path": c.get("path", "/")
                             }
+                            if "domain" in c:
+                                cd["domain"] = c["domain"]
                             if "expiry" in c:
-                                cookie_dict["expiry"] = int(c["expiry"])
-                            driver.add_cookie(cookie_dict)
+                                cd["expiry"] = int(c["expiry"])
+                            driver.add_cookie(cd)
                         except Exception:
                             pass
                 print("✓ Successfully injected eBay session cookies.")
             except Exception as e:
-                print(f"⚠️ Could not inject cookies ({e}). Continuing with live comps mode.")
-                has_cookies = False
+                print(f"⚠️ Could not inject cookies ({e}). Continuing with live search.")
 
         for idx, target in enumerate(TRACKED_GPUS, 1):
             print(f"\n[{idx}/10] Fetching: {target['name']}...")
@@ -239,27 +261,34 @@ def main():
             valid_listings = []
             source_type = "CALIBRATED_FALLBACK"
             
-            # Step A: If authenticated, try real sold listings
-            if has_cookies:
-                sold_url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={target['query']}&LH_Sold=1&LH_Complete=1&_sop=13"
-                try:
-                    driver.uc_open_with_reconnect(sold_url, reconnect_time=3)
-                    time.sleep(1)
-                    if "signin" not in driver.current_url.lower() and "security measure" not in driver.title.lower():
-                        valid_listings = extract_listings_from_html(driver.page_source, target)
-                        if len(valid_listings) >= 3:
-                            source_type = "REAL_EBAY_SOLD"
-                            print(f"  ✓ Found {len(valid_listings)} authenticated sold listings!")
-                except Exception as e:
-                    print(f"  ⚠️ Sold retrieval attempt error: {e}")
+            # Step A: Query real sold listings (LH_Sold=1&LH_Complete=1)
+            sold_url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={target['query']}&LH_Sold=1&LH_Complete=1&_sop=13"
+            try:
+                driver.uc_open_with_reconnect(sold_url, reconnect_time=3)
+                time.sleep(1)
+                cur_url = driver.current_url.lower()
+                title = driver.title.lower()
+                
+                # Check for redirect to signin
+                if "signin.ebay.com" not in cur_url and "sign in" not in title and "security measure" not in title:
+                    valid_listings = extract_listings_from_html(driver.page_source, target, is_sold=True)
+                    if len(valid_listings) >= 3:
+                        source_type = "REAL_EBAY_SOLD"
+                        print(f"  ✓ Found {len(valid_listings)} authenticated sold listings!")
+                    else:
+                        print(f"  ℹ️ Found {len(valid_listings)} sold listings (need >= 3).")
+                else:
+                    print("  ⚠️ eBay redirected sold query to signin. Authenticated session required.")
+            except Exception as e:
+                print(f"  ⚠️ Sold retrieval error: {e}")
 
-            # Step B: If no sold listings or unauthenticated, fetch live lowest Buy-It-Now comps
+            # Step B: If no sold listings (e.g. unauthenticated or rare card), fallback to lowest Buy-It-Now comps
             if len(valid_listings) < 3:
                 bin_url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={target['query']}&LH_BIN=1&_sop=15"
                 try:
                     driver.uc_open_with_reconnect(bin_url, reconnect_time=3)
                     time.sleep(1)
-                    valid_listings = extract_listings_from_html(driver.page_source, target)
+                    valid_listings = extract_listings_from_html(driver.page_source, target, is_sold=False)
                     if len(valid_listings) >= 3:
                         source_type = "REAL_EBAY_ACTIVE_COMPS"
                         print(f"  ✓ Found {len(valid_listings)} live eBay listings without blocks (HTTP 200).")
@@ -273,7 +302,6 @@ def main():
                 low = int(prices[int(len(prices) * 0.15)])
                 high = int(prices[int(len(prices) * 0.85)])
                 
-                # If active asking comps, apply standard 4% haircut (BIN asking -> sold realization spread)
                 if source_type == "REAL_EBAY_ACTIVE_COMPS":
                     proposed_price = int(round(median * 0.96))
                     price_low = int(round(low * 0.96))
@@ -289,9 +317,10 @@ def main():
                 pct_change = round(((diff / target["currentPrice"]) * 100), 1)
                 
                 print(f"    Current: ${target['currentPrice']} → Proposed: ${proposed_price} ({'+' if diff >= 0 else ''}{diff}, {pct_change}%)")
-                print(f"    Range: ${price_low} - ${price_high} | Samples: {len(valid_listings)}")
+                print(f"    Range: ${price_low} - ${price_high} | Samples: {len(valid_listings)} | Source: {source_type}")
                 for sample in valid_listings[:3]:
-                    print(f"      • ${sample['price']:.2f} — {sample['title'][:65]}")
+                    sold_info = f" ({sample.get('soldDate', '')})" if sample.get("soldDate") else ""
+                    print(f"      • ${sample['price']:.2f}{sold_info} — {sample['title'][:60]}")
                     
                 results.append({
                     "id": target["id"],
@@ -311,8 +340,7 @@ def main():
             else:
                 # Step D: Safe baseline guard if fewer than 3 listings found
                 print(f"  ⚠️ Found {len(valid_listings)} listings. Applying calibrated baseline.")
-                slight_var = 0
-                proposed = target["currentPrice"] + slight_var
+                proposed = target["currentPrice"]
                 results.append({
                     "id": target["id"],
                     "name": target["name"],
@@ -360,7 +388,13 @@ def main():
         diff_str = f"+${diff}" if diff >= 0 else f"-${abs(diff)}"
         trend_str = f"+{c['trend7d']}%" if c["trend7d"] >= 0 else f"{c['trend7d']}%"
         status_badge = "✅ APPROVED" if c["status"] == "APPROVED" else "⚠️ FLAGGED SWING"
-        source_badge = "🟢 Live Comps" if "ACTIVE" in c.get("source", "") else ("🟢 eBay Sold" if "SOLD" in c.get("source", "") else "🟡 Baseline")
+        if "SOLD" in c.get("source", ""):
+            source_badge = "🟢 Real Sold Comps"
+        elif "ACTIVE" in c.get("source", ""):
+            source_badge = "🟡 Active BIN Comps"
+        else:
+            source_badge = "⚪ Baseline"
+            
         md_lines.append(
             f"| **{c['name']}** | {c['vram']}GB | ${c['currentPrice']} | **${c['proposedPrice']}** | {diff_str} | {trend_str} | ${c['priceLow']} - ${c['priceHigh']} | {source_badge} | {status_badge} |"
         )
@@ -369,8 +403,9 @@ def main():
     for c in results:
         if c.get("recentSamples"):
             md_lines.append(f"\n- **{c['name']}** (Proposed: ${c['proposedPrice']}):")
-            for s in c["recentSamples"][:3]:
-                md_lines.append(f"  - **${s['price']}** — *{s['title']}*")
+            for s in c["recentSamples"][:5]:
+                sold_info = f" *({s['soldDate']})*" if s.get("soldDate") else ""
+                md_lines.append(f"  - **${s['price']}**{sold_info} — *{s['title']}*")
                 
     md_lines.append("\n---\n*Generated by airigbuilder.com weekly scraper workflow (Headless UC Engine).*\n")
 

@@ -1,9 +1,11 @@
 # scripts/ebay_login_helper.py
-# Interactive helper to capture authenticated eBay session cookies
+# Interactive helper to capture authenticated eBay session in persistent Chrome profile
 import json
 import os
 import sys
 import time
+import urllib.parse
+from bs4 import BeautifulSoup
 
 if sys.platform == "win32":
     try:
@@ -16,70 +18,121 @@ from seleniumbase import Driver
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CACHE_DIR = os.path.join(ROOT_DIR, ".cache")
+PROFILE_DIR = os.path.join(CACHE_DIR, "ebay_chrome_profile")
 COOKIE_FILE = os.path.join(CACHE_DIR, "ebay_cookies.json")
+
+def verify_sold_access(driver):
+    """Checks if sold listings can be loaded without redirecting to sign in."""
+    test_url = "https://www.ebay.com/sch/i.html?_nkw=RTX+3060&LH_Sold=1&LH_Complete=1&_sop=13"
+    print("\n[Verification] Testing sold-listing URL in browser...")
+    try:
+        driver.uc_open_with_reconnect(test_url, reconnect_time=2)
+        time.sleep(2)
+        cur_url = driver.current_url.lower()
+        title = driver.title.lower()
+        
+        if "signin.ebay.com" in cur_url or "sign in" in title or "security measure" in title:
+            return False, "Redirected to sign-in page. Session is not yet fully authenticated."
+            
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        items = soup.select(".s-card, .s-item")
+        sold_markers = soup.select(".s-item__ended-date, .s-item__endedDate, .POSITIVE")
+        
+        if len(items) > 0 and len(sold_markers) > 0:
+            return True, f"Found {len(items)} items and {len(sold_markers)} sold date markers!"
+        if len(items) > 5:
+            return True, f"Found {len(items)} listings on sold results page!"
+            
+        return False, f"Page loaded but only found {len(items)} listings."
+    except Exception as e:
+        return False, str(e)
+
+def check_user_greeting(driver):
+    """Passively checks if the current page header displays a signed-in username without reloading."""
+    try:
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        gh_ug = soup.select_one("#gh-ug")
+        if gh_ug:
+            text = gh_ug.get_text().strip().lower()
+            if "hi " in text and "sign in" not in text:
+                return True, gh_ug.get_text().strip()
+    except Exception:
+        pass
+    return False, ""
 
 def main():
     print("====================================================")
     print("🔑 AI RIG BUILDER — EBAY AUTHENTICATED SESSION HELPER")
     print("====================================================")
-    print("Opening a headful Chrome window to: https://signin.ebay.com/ ...")
-    print("👉 Please log into your eBay account in the opened Chrome browser.")
-    print("The helper will automatically detect when you finish signing in.")
+    print(f"Profile: {PROFILE_DIR}")
+    print("\nOpening headful Chrome window to: https://signin.ebay.com/ ...")
+    print("👉 Log into your eBay account in the Chrome browser.")
+    print("👉 When you are logged in, press [ENTER] in this terminal.")
     print("----------------------------------------------------")
     
     os.makedirs(CACHE_DIR, exist_ok=True)
-    driver = Driver(uc=True, headless=False)
+    os.makedirs(PROFILE_DIR, exist_ok=True)
+
+    driver = Driver(uc=True, user_data_dir=PROFILE_DIR, headless=False)
     
     try:
         driver.uc_open_with_reconnect("https://signin.ebay.com/", reconnect_time=3)
-        print("\n⏳ Browser opened. Waiting for eBay login completion...")
+        print("\n⏳ Browser opened. Waiting for your login...")
+        print("👉 Complete your sign-in, then press [ENTER] in this terminal when finished.")
         
-        logged_in = False
         start_time = time.time()
-        timeout_seconds = 300  # 5 minutes
+        timeout_seconds = 600  # 10 minutes
+        last_log_time = 0
         
         while time.time() - start_time < timeout_seconds:
-            time.sleep(2)
-            try:
-                current_url = driver.current_url.lower()
-                cookies = driver.get_cookies()
-                cookie_names = [c.get("name", "") for c in cookies]
-                
-                # Check for successful signin indicators
-                has_auth_cookies = any(k in cookie_names for k in ["nonsession", "dp1", "s", "userid", "user_auth"])
-                left_signin_page = "signin.ebay.com" not in current_url and "ebay.com" in current_url
-                
-                if (left_signin_page and len(cookies) >= 8) or (has_auth_cookies and len(cookies) >= 10):
-                    print("\n🎉 Detected successful eBay authentication!")
-                    logged_in = True
-                    break
-                    
-                # On Windows, also allow manual keypress via msvcrt
-                if sys.platform == "win32":
-                    import msvcrt
-                    if msvcrt.kbhit():
-                        msvcrt.getch()
-                        print("\n[Manual trigger received]")
-                        logged_in = True
-                        break
-            except Exception:
-                pass
-                
-        cookies = driver.get_cookies()
-        if not cookies or len(cookies) < 3:
-            print("⚠️ Warning: Few cookies detected. Ensure sign in was completed.")
+            time.sleep(1)
             
+            # Check for non-blocking manual Enter keypress on Windows
+            enter_pressed = False
+            if sys.platform == "win32":
+                import msvcrt
+                while msvcrt.kbhit():
+                    ch = msvcrt.getch()
+                    if ch in [b"\r", b"\n", b" "]:
+                        enter_pressed = True
+
+            # Check passively without navigating away
+            signed_in, greeting = check_user_greeting(driver)
+            
+            now = time.time()
+            if now - last_log_time > 20:
+                last_log_time = now
+                status_str = f"Greeting: '{greeting}'" if signed_in else "Not yet signed in"
+                print(f"   [Status: {status_str}] (Press [ENTER] in this terminal once logged in)")
+            
+            if enter_pressed or signed_in:
+                print(f"\n👉 Trigger received! (Greeting: '{greeting}')")
+                print("Running verification test to confirm sold listings access...")
+                ok, msg = verify_sold_access(driver)
+                if ok:
+                    print(f"\n🎉 SUCCESS: {msg}")
+                    print("eBay sold listings are unlocked and accessible!")
+                    break
+                else:
+                    print(f"⚠️ Verification check: {msg}")
+                    print("If you just finished 2FA or captcha, please ensure you're on eBay, then press [ENTER] again.")
+                    # Return driver to eBay homepage so user can continue if needed
+                    time.sleep(1)
+
+        # Save cookies to JSON as backup
+        cookies = driver.get_cookies()
         with open(COOKIE_FILE, "w", encoding="utf-8") as f:
             json.dump(cookies, f, indent=2)
             
-        print(f"\n✅ Successfully captured and saved {len(cookies)} session cookies to:")
-        print(f"   {COOKIE_FILE}")
-        print("\nSubsequent `npm run prices:fetch` calls will use your authenticated session")
-        print("to query real eBay sold listings directly!")
+        print(f"\n✅ Session profile and {len(cookies)} cookies saved successfully.")
+        print(f"   Profile: {PROFILE_DIR}")
+        print(f"   Cookies: {COOKIE_FILE}")
+        print("\nNext step: Run `npm run prices:fetch` to pull real sold listings!")
         
     finally:
         driver.quit()
         print("\nBrowser closed cleanly.")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 // The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)
-// Last updated: 2026-10-07T03:10:01.112Z
+// Last updated: 2026-10-07T03:56:24.849Z
 export const GPUS_DATA = [
   {
     "id": "rtx-3090",
@@ -280,13 +280,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 360,
     "tdp": 170,
-    "usedStreetPrice": 222,
-    "usedPriceLow": 204,
-    "usedPriceHigh": 240,
+    "usedStreetPrice": 307,
+    "usedPriceLow": 245,
+    "usedPriceHigh": 307,
     "newPrice": 279,
-    "trend7d": -1.3,
+    "trend7d": 36.4,
     "trend30d": -4,
-    "pricePerGb": 18.5,
+    "pricePerGb": 25.58,
     "multiGpuScore": 8,
     "aiRating": "💰 Sub-$250 Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for ~$225 allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
@@ -335,7 +335,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 222
+        "price": 307
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1"
@@ -347,13 +347,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR5",
     "bandwidth": 346,
     "tdp": 250,
-    "usedStreetPrice": 172,
-    "usedPriceLow": 158,
-    "usedPriceHigh": 186,
+    "usedStreetPrice": 273,
+    "usedPriceLow": 264,
+    "usedPriceHigh": 277,
     "newPrice": null,
-    "trend7d": -1.7,
+    "trend7d": 56,
     "trend30d": 3.5,
-    "pricePerGb": 7.17,
+    "pricePerGb": 11.38,
     "multiGpuScore": 6,
     "aiRating": "🛠️ Tinkerer Ultra-Budget 24GB",
     "summary": "24GB VRAM for under $180! A datacentre Pascal card requiring a custom cooling fan shroud and no video output. Slow on FP16, but runs GGUF quantized models surprisingly well.",
@@ -402,7 +402,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 172
+        "price": 273
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+Tesla+P40+24GB&LH_Sold=1&LH_Complete=1"
@@ -414,13 +414,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 736,
     "tdp": 320,
-    "usedStreetPrice": 881,
-    "usedPriceLow": 811,
-    "usedPriceHigh": 951,
+    "usedStreetPrice": 1103,
+    "usedPriceLow": 1070,
+    "usedPriceHigh": 1103,
     "newPrice": 999,
-    "trend7d": 0.1,
+    "trend7d": 25.3,
     "trend30d": -2.8,
-    "pricePerGb": 55.06,
+    "pricePerGb": 68.94,
     "multiGpuScore": 6.8,
     "aiRating": "🏎️ Fast Compute, VRAM Bottleneck",
     "summary": "Fast 736 GB/s bandwidth and great Ada Lovelace inference speed, but capped at 16GB VRAM. Expensive per GB compared to used 3090.",
@@ -469,7 +469,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 881
+        "price": 1103
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4080+Super+16GB&LH_Sold=1&LH_Complete=1"
@@ -614,13 +614,13 @@ export const GPUS_DATA = [
     "vramType": "Unified LPDDR5",
     "bandwidth": 800,
     "tdp": 140,
-    "usedStreetPrice": 2747,
-    "usedPriceLow": 2527,
-    "usedPriceHigh": 2967,
+    "usedStreetPrice": 3311,
+    "usedPriceLow": 3167,
+    "usedPriceHigh": 3551,
     "newPrice": 3999,
-    "trend7d": -0.1,
+    "trend7d": 20.4,
     "trend30d": -4.5,
-    "pricePerGb": 42.92,
+    "pricePerGb": 51.73,
     "multiGpuScore": 10,
     "aiRating": "🍎 Unified Memory Champion",
     "summary": "Up to 192GB unified memory in a silent, 140W desktop box. Runs 70B models unquantized or Q8, and can even fit 405B at Q3/Q4. Slower prompt processing than dual 3090, but zero setup friction.",
@@ -670,7 +670,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Current",
-        "price": 2747
+        "price": 3311
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M2+Ultra+unified+memory&LH_Sold=1&LH_Complete=1"

@@ -136,5 +136,90 @@
         "pricePerGb": 49.17
       }
     ]
+  },
+  {
+    "appliedAt": "2026-10-07T03:56:24.859Z",
+    "updates": [
+      {
+        "id": "rtx-3090",
+        "name": "NVIDIA GeForce RTX 3090",
+        "oldPrice": 718,
+        "newPrice": 718,
+        "diff": 0,
+        "pricePerGb": 29.92
+      },
+      {
+        "id": "rtx-4090",
+        "name": "NVIDIA GeForce RTX 4090",
+        "oldPrice": 1540,
+        "newPrice": 1540,
+        "diff": 0,
+        "pricePerGb": 64.17
+      },
+      {
+        "id": "rx-7900-xtx",
+        "name": "AMD Radeon RX 7900 XTX",
+        "oldPrice": 864,
+        "newPrice": 864,
+        "diff": 0,
+        "pricePerGb": 36
+      },
+      {
+        "id": "rtx-4060-ti-16gb",
+        "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
+        "oldPrice": 385,
+        "newPrice": 385,
+        "diff": 0,
+        "pricePerGb": 24.06
+      },
+      {
+        "id": "rtx-3060-12gb",
+        "name": "NVIDIA GeForce RTX 3060 12GB",
+        "oldPrice": 222,
+        "newPrice": 307,
+        "diff": 85,
+        "pricePerGb": 25.58
+      },
+      {
+        "id": "tesla-p40",
+        "name": "NVIDIA Tesla P40 24GB",
+        "oldPrice": 172,
+        "newPrice": 273,
+        "diff": 101,
+        "pricePerGb": 11.38
+      },
+      {
+        "id": "rtx-4080-super",
+        "name": "NVIDIA GeForce RTX 4080 Super 16GB",
+        "oldPrice": 881,
+        "newPrice": 1103,
+        "diff": 222,
+        "pricePerGb": 68.94
+      },
+      {
+        "id": "rtx-3080-10gb",
+        "name": "NVIDIA GeForce RTX 3080 10GB",
+        "oldPrice": 383,
+        "newPrice": 383,
+        "diff": 0,
+        "pricePerGb": 38.3
+      },
+      {
+        "id": "rtx-a5000",
+        "name": "NVIDIA RTX A5000 24GB",
+        "oldPrice": 1180,
+        "newPrice": 1180,
+        "diff": 0,
+        "pricePerGb": 49.17
+      },
+      {
+        "id": "mac-studio-m2-ultra",
+        "name": "Apple Mac Studio (M2/M4 Ultra 64-192GB)",
+        "oldPrice": 2747,
+        "newPrice": 3311,
+        "diff": 564,
+        "pricePerGb": 51.73
+      }
+    ]
   }
 ]

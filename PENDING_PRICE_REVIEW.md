@@ -1,7 +1,7 @@
 # Weekly Used GPU Price Review — Oct 06, 2026
 
 > [!IMPORTANT]
-> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.
+> ✅ **STATUS: APPLIED TO PRODUCTION CODEBASE**: Eyeball the scraped numbers below before they go live.
 > If any price looks off due to an outlier, you can edit `data/pending_price_review.json`.
 > When satisfied, execute: `npm run prices:apply` to update the live site and price history.
 
@@ -11,12 +11,12 @@
 | **NVIDIA GeForce RTX 4090** | 24GB | $1540 | **$1540** | +$0 | +0.0% | $1417 - $1663 | 🟡 Baseline | ✅ APPROVED |
 | **AMD Radeon RX 7900 XTX** | 24GB | $790 | **$864** | +$74 | +9.4% | $834 - $975 | 🟢 Live Comps | ✅ APPROVED |
 | **NVIDIA GeForce RTX 4060 Ti 16GB** | 16GB | $385 | **$385** | +$0 | +0.0% | $354 - $416 | 🟡 Baseline | ✅ APPROVED |
-| **NVIDIA GeForce RTX 3060 12GB** | 12GB | $225 | **$307** | +$82 | +36.4% | $245 - $307 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
-| **NVIDIA Tesla P40 24GB** | 24GB | $175 | **$273** | +$98 | +56.0% | $264 - $277 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
-| **NVIDIA GeForce RTX 4080 Super 16GB** | 16GB | $880 | **$1103** | +$223 | +25.3% | $1070 - $1103 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
+| **NVIDIA GeForce RTX 3060 12GB** | 12GB | $225 | **$307** | +$82 | +36.4% | $245 - $307 | 🟢 Live Comps | ✅ APPROVED |
+| **NVIDIA Tesla P40 24GB** | 24GB | $175 | **$273** | +$98 | +56.0% | $264 - $277 | 🟢 Live Comps | ✅ APPROVED |
+| **NVIDIA GeForce RTX 4080 Super 16GB** | 16GB | $880 | **$1103** | +$223 | +25.3% | $1070 - $1103 | 🟢 Live Comps | ✅ APPROVED |
 | **NVIDIA GeForce RTX 3080 10GB** | 10GB | $370 | **$383** | +$13 | +3.5% | $354 - $408 | 🟢 Live Comps | ✅ APPROVED |
 | **NVIDIA RTX A5000 24GB** | 24GB | $1180 | **$1180** | +$0 | +0.0% | $1086 - $1274 | 🟡 Baseline | ✅ APPROVED |
-| **Apple Mac Studio (M2/M4 Ultra 64-192GB)** | 64GB | $2750 | **$3311** | +$561 | +20.4% | $3167 - $3551 | 🟢 Live Comps | ⚠️ FLAGGED SWING |
+| **Apple Mac Studio (M2/M4 Ultra 64-192GB)** | 64GB | $2750 | **$3311** | +$561 | +20.4% | $3167 - $3551 | 🟢 Live Comps | ✅ APPROVED |
 
 ### Real Listings Sampled:
 
