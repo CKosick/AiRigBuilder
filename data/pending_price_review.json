@@ -1,6 +1,6 @@
 {
-  "scrapedAt": "2026-10-07T02:02:25.720Z",
-  "reviewStatus": "APPLIED",
+  "scrapedAt": "2026-10-07T02:53:19Z",
+  "reviewStatus": "PENDING_REVIEW",
   "note": "Eyeball this file before applying. Edit any proposedPrice if needed. When ready, run: npm run prices:apply",
   "cards": [
     {
@@ -8,17 +8,34 @@
       "name": "NVIDIA GeForce RTX 3090",
       "vram": 24,
       "currentPrice": 695,
-      "proposedPrice": 694,
-      "priceLow": 638,
-      "priceHigh": 750,
-      "trend7d": -0.1,
-      "sampleCount": 12,
+      "proposedPrice": 718,
+      "priceLow": 576,
+      "priceHigh": 863,
+      "trend7d": 3.3,
+      "sampleCount": 5,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "5 live eBay Buy-It-Now comps analyzed (Median asking: $748, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 3090 standard sold listing",
-          "price": 694
+          "title": "NVIDIA GeForce RTX 3090 Founders Edition 24GB GDDR6 Graphics Card -...Opens in a new window or tab",
+          "price": 600.0
+        },
+        {
+          "title": "Gigabyte NVIDIA RTX 3090 24GB TURBO GDDR6X Graphics Card GV-N3090TURBO-24GDOpens in a new window or tab",
+          "price": 650.0
+        },
+        {
+          "title": "VIDIA RTX 4060 Ti Founders Edition 8GB GDDR6 ITX SFF Small Form FactorOpens in a new window or tab",
+          "price": 748.0
+        },
+        {
+          "title": "ZOTAC GAMING GeForce RTX 3090 24GB | HAS CORE AND VRAM | NO POWEROpens in a new window or tab",
+          "price": 800.0
+        },
+        {
+          "title": "EVGA FTW3 Ultra V2 GeForce RTX 3090 24GB RAM - Graphics Card -Power Supply IssueOpens in a new window or tab",
+          "price": 899.99
         }
       ]
     },
@@ -27,17 +44,18 @@
       "name": "NVIDIA GeForce RTX 4090",
       "vram": 24,
       "currentPrice": 1540,
-      "proposedPrice": 1537,
-      "priceLow": 1414,
-      "priceHigh": 1660,
-      "trend7d": -0.2,
-      "sampleCount": 12,
+      "proposedPrice": 1540,
+      "priceLow": 1417,
+      "priceHigh": 1663,
+      "trend7d": 0.0,
+      "sampleCount": 2,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "CALIBRATED_FALLBACK",
+      "notes": "Fallback estimate (2 matches). Current baseline retained.",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 4090 standard sold listing",
-          "price": 1537
+          "title": "NVIDIA GeForce RTX 4090 reference market comp",
+          "price": 1540
         }
       ]
     },
@@ -46,17 +64,34 @@
       "name": "AMD Radeon RX 7900 XTX",
       "vram": 24,
       "currentPrice": 790,
-      "proposedPrice": 793,
-      "priceLow": 730,
-      "priceHigh": 856,
-      "trend7d": 0.4,
-      "sampleCount": 12,
+      "proposedPrice": 864,
+      "priceLow": 834,
+      "priceHigh": 975,
+      "trend7d": 9.4,
+      "sampleCount": 7,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "7 live eBay Buy-It-Now comps analyzed (Median asking: $900, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "AMD Radeon RX 7900 XTX standard sold listing",
-          "price": 793
+          "title": "Sapphire NITRO+ AMD Radeon RX 7900 XTX Vapor-X Gaming Graphics Card 24GB GDDR6Opens in a new window or tab",
+          "price": 780.99
+        },
+        {
+          "title": "ASRock Phantom Gaming OC Radeon RX 7900 XTX 24GB - GPU - Heatsink Contact IssueOpens in a new window or tab",
+          "price": 869.99
+        },
+        {
+          "title": "SAPPHIRE  Nitro+ AMD Radeon RX 7900 XTX 24GB GDDR6 Graphics Card PICK Up ONLYOpens in a new window or tab",
+          "price": 900.0
+        },
+        {
+          "title": "Used ASRock Rx 7900XTX Phantom Edition 24gb. GPU ONLY!Opens in a new window or tab",
+          "price": 900.0
+        },
+        {
+          "title": "ASRock AMD Radeon RX 7900 XTX Phantom Gaming OC 24GB GPUOpens in a new window or tab",
+          "price": 1010.0
         }
       ]
     },
@@ -65,17 +100,18 @@
       "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
       "vram": 16,
       "currentPrice": 385,
-      "proposedPrice": 383,
-      "priceLow": 352,
-      "priceHigh": 414,
-      "trend7d": -0.5,
-      "sampleCount": 12,
+      "proposedPrice": 385,
+      "priceLow": 354,
+      "priceHigh": 416,
+      "trend7d": 0.0,
+      "sampleCount": 2,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "CALIBRATED_FALLBACK",
+      "notes": "Fallback estimate (2 matches). Current baseline retained.",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 4060 Ti 16GB standard sold listing",
-          "price": 383
+          "title": "NVIDIA GeForce RTX 4060 Ti 16GB reference market comp",
+          "price": 385
         }
       ]
     },
@@ -84,17 +120,34 @@
       "name": "NVIDIA GeForce RTX 3060 12GB",
       "vram": 12,
       "currentPrice": 225,
-      "proposedPrice": 222,
-      "priceLow": 204,
-      "priceHigh": 240,
-      "trend7d": -1.3,
-      "sampleCount": 12,
-      "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "proposedPrice": 307,
+      "priceLow": 287,
+      "priceHigh": 307,
+      "trend7d": 36.4,
+      "sampleCount": 5,
+      "status": "FLAGGED_SWING",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "5 live eBay Buy-It-Now comps analyzed (Median asking: $320, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 3060 12GB standard sold listing",
-          "price": 222
+          "title": "**READ**Konalet NVIDIA GeForce RTX 3060 12GB Graphics CardOpens in a new window or tab",
+          "price": 299.99
+        },
+        {
+          "title": "MSI Ventus GeForce RTX 3060 12GB GDDR6 PCI Express 4.0 Graphics CardOpens in a new window or tab",
+          "price": 320.0
+        },
+        {
+          "title": "ASUS ROG Strix GeForce RTX 3060 OC Edition 12GB GDDR6 Graphics Card - Black...Opens in a new window or tab",
+          "price": 320.0
+        },
+        {
+          "title": "ASUS ROG Strix GeForce RTX 3060 OC V2 12GB GDDR6 Graphics CardOpens in a new window or tab",
+          "price": 320.0
+        },
+        {
+          "title": "GIGABYTE NVIDIA GeForce RTX 3060 12GB GDDR6 Graphics Card (GV-N3060GAMING...Opens in a new window or tab",
+          "price": 307.5
         }
       ]
     },
@@ -103,17 +156,34 @@
       "name": "NVIDIA Tesla P40 24GB",
       "vram": 24,
       "currentPrice": 175,
-      "proposedPrice": 172,
-      "priceLow": 158,
-      "priceHigh": 186,
-      "trend7d": -1.7,
-      "sampleCount": 12,
-      "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "proposedPrice": 273,
+      "priceLow": 264,
+      "priceHigh": 277,
+      "trend7d": 56.0,
+      "sampleCount": 35,
+      "status": "FLAGGED_SWING",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "35 live eBay Buy-It-Now comps analyzed (Median asking: $284, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "NVIDIA Tesla P40 24GB standard sold listing",
-          "price": 172
+          "title": "Open Box NVIDIA Tesla P40 24GB GDDR5 PCI-E 3.0 X16 GPU Accelerator Graphics CardOpens in a new window or tab",
+          "price": 287.0
+        },
+        {
+          "title": "Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2 Graphics Card -Opens in a new window or tab",
+          "price": 275.0
+        },
+        {
+          "title": "Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2 Graphics Card -Opens in a new window or tab",
+          "price": 275.0
+        },
+        {
+          "title": "Nvidia Tesla P40 24GB GPU GDDR5 PCI-E 3.0 x16 Accelerator Graphics CardOpens in a new window or tab",
+          "price": 275.0
+        },
+        {
+          "title": "Nvidia Tesla P40 24GB DDR5 GPU Accelerator Card Dual PCI-E 3.0 x16 For ServersOpens in a new window or tab",
+          "price": 275.0
         }
       ]
     },
@@ -122,17 +192,34 @@
       "name": "NVIDIA GeForce RTX 4080 Super 16GB",
       "vram": 16,
       "currentPrice": 880,
-      "proposedPrice": 881,
-      "priceLow": 811,
-      "priceHigh": 951,
-      "trend7d": 0.1,
-      "sampleCount": 12,
-      "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "proposedPrice": 1103,
+      "priceLow": 1070,
+      "priceHigh": 1103,
+      "trend7d": 25.3,
+      "sampleCount": 6,
+      "status": "FLAGGED_SWING",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "6 live eBay Buy-It-Now comps analyzed (Median asking: $1149, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 4080 Super 16GB standard sold listing",
-          "price": 881
+          "title": "Dell GeForce RTX 4080 SUPER 16GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 1119.99
+        },
+        {
+          "title": "Zotac Nvidia RTX 4080 SUPER 16GB Graphics Card GPU PCOpens in a new window or tab",
+          "price": 1149.97
+        },
+        {
+          "title": "GIGABYTE GeForce RTX 4080 SUPER WINDFORCE V2 16GB Graphic Card - USEDOpens in a new window or tab",
+          "price": 1149.99
+        },
+        {
+          "title": "Asus GeForce RTX 4080 Super TUF Gaming OC 16GB GDDR6X Graphics Card AD103-400-A1Opens in a new window or tab",
+          "price": 1149.99
+        },
+        {
+          "title": "(Factory Refurbished) Zotac RTX 4080 Super 16GB GDDR6X ZT-D40820M-10B Video CardOpens in a new window or tab",
+          "price": 1149.99
         }
       ]
     },
@@ -141,17 +228,34 @@
       "name": "NVIDIA GeForce RTX 3080 10GB",
       "vram": 10,
       "currentPrice": 370,
-      "proposedPrice": 374,
-      "priceLow": 344,
-      "priceHigh": 404,
-      "trend7d": 1.1,
-      "sampleCount": 12,
+      "proposedPrice": 383,
+      "priceLow": 354,
+      "priceHigh": 408,
+      "trend7d": 3.5,
+      "sampleCount": 44,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "44 live eBay Buy-It-Now comps analyzed (Median asking: $399, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "NVIDIA GeForce RTX 3080 10GB standard sold listing",
-          "price": 374
+          "title": "GIGABYTE GeForce RTX NVIDIA 3080 10GB (not sure what\u2019s wrong with it)Opens in a new window or tab",
+          "price": 300.0
+        },
+        {
+          "title": "Dell RTX 3080 10GB OEM | Refurbished | Some Cosmetic WearOpens in a new window or tab",
+          "price": 359.99
+        },
+        {
+          "title": "ZOTAC GAMING GeForce RTX 3080 Trinity OC 10GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 365.0
+        },
+        {
+          "title": "MSI GeForce RTX 3080 GAMING Z Trio LHR 10GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 350.0
+        },
+        {
+          "title": "GeForce RTX 3080 3X 10G OC 10GB GDDR6X Graphics Card...Opens in a new window or tab",
+          "price": 350.69
         }
       ]
     },
@@ -160,17 +264,18 @@
       "name": "NVIDIA RTX A5000 24GB",
       "vram": 24,
       "currentPrice": 1180,
-      "proposedPrice": 1176,
-      "priceLow": 1082,
-      "priceHigh": 1270,
-      "trend7d": -0.3,
-      "sampleCount": 12,
+      "proposedPrice": 1180,
+      "priceLow": 1086,
+      "priceHigh": 1274,
+      "trend7d": 0.0,
+      "sampleCount": 0,
       "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "source": "CALIBRATED_FALLBACK",
+      "notes": "Fallback estimate (0 matches). Current baseline retained.",
       "recentSamples": [
         {
-          "title": "NVIDIA RTX A5000 24GB standard sold listing",
-          "price": 1176
+          "title": "NVIDIA RTX A5000 24GB reference market comp",
+          "price": 1180
         }
       ]
     },
@@ -179,20 +284,36 @@
       "name": "Apple Mac Studio (M2/M4 Ultra 64-192GB)",
       "vram": 64,
       "currentPrice": 2750,
-      "proposedPrice": 2747,
-      "priceLow": 2527,
-      "priceHigh": 2967,
-      "trend7d": -0.1,
-      "sampleCount": 12,
-      "status": "APPROVED",
-      "notes": "Fallback estimate (HTTP 403). Current baseline adjusted.",
+      "proposedPrice": 3311,
+      "priceLow": 3167,
+      "priceHigh": 3551,
+      "trend7d": 20.4,
+      "sampleCount": 6,
+      "status": "FLAGGED_SWING",
+      "source": "REAL_EBAY_ACTIVE_COMPS",
+      "notes": "6 live eBay Buy-It-Now comps analyzed (Median asking: $3449, -4% sold spread applied).",
       "recentSamples": [
         {
-          "title": "Apple Mac Studio (M2/M4 Ultra 64-192GB) standard sold listing",
-          "price": 2747
+          "title": "Apple Mac Studio M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSD ExcellentOpens in a new window or tab",
+          "price": 3299.67
+        },
+        {
+          "title": "Apple Mac Studio with M2 Ultra (24/60, 64GB RAM 1TB SSD) in Excellent Condition!Opens in a new window or tab",
+          "price": 3350.0
+        },
+        {
+          "title": "Apple Mac Studio M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSD - SilverOpens in a new window or tab",
+          "price": 3393.0
+        },
+        {
+          "title": "Apple Mac Studio | M2 Ultra | 64GB | 1TB | 24 CPU | 60 GPU | Desktop ComputerOpens in a new window or tab",
+          "price": 3449.0
+        },
+        {
+          "title": "2023 Mac Studio M2 Ultra | 24C CPU 60C GPU | 64GB RAM 1TB SSD - Great ConditionOpens in a new window or tab",
+          "price": 3579.99
         }
       ]
     }
-  ],
-  "appliedAt": "2026-10-07T02:03:23.663Z"
+  ]
 }

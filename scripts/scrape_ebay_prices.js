@@ -1,13 +1,43 @@
 // scripts/scrape_ebay_prices.js
-// Semi-automated eBay sold listings scraper for the 10 AI Rig Builder GPUs
+// Semi-automated eBay market scraper for the 10 AI Rig Builder GPUs
 import * as cheerio from 'cheerio';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { spawnSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
+
+// Attempt to run the Python SeleniumBase UC engine first to bypass Akamai WAF 403s
+function runPythonEngine() {
+  const pyScript = path.join(__dirname, 'fetch_ebay.py');
+  if (!fs.existsSync(pyScript)) return false;
+
+  console.log('⚡ Launching anti-bot headless engine (SeleniumBase UC)...');
+
+  // Try 'py' launcher first (standard on Windows), then 'python'
+  const commands = ['py', 'python'];
+  for (const cmd of commands) {
+    try {
+      const res = spawnSync(cmd, [pyScript], {
+        cwd: ROOT_DIR,
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          PYTHONIOENCODING: 'utf-8'
+        }
+      });
+      if (res.status === 0) {
+        return true;
+      }
+    } catch (e) {
+      // continue to next command
+    }
+  }
+  return false;
+}
 
 // 10 Tracked cards with targeted eBay search terms and baseline validation guards
 const TRACKED_GPUS = [
@@ -39,7 +69,7 @@ const TRACKED_GPUS = [
     query: 'RX 7900 XTX 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged)',
     minSensiblePrice: 550,
     maxSensiblePrice: 1100,
-    excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'xt'] // exclude non-XTX
+    excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'xt']
   },
   {
     id: 'rtx-4060-ti-16gb',
@@ -49,7 +79,7 @@ const TRACKED_GPUS = [
     query: 'RTX 4060 Ti 16GB -(8GB,box,cooler,broken,parts)',
     minSensiblePrice: 280,
     maxSensiblePrice: 520,
-    excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken'] // strictly 16GB
+    excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken']
   },
   {
     id: 'rtx-3060-12gb',
@@ -125,7 +155,6 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Clean price string e.g. "$695.00" or "$650.00 to $700.00"
 function parsePrice(text) {
   if (!text) return null;
   const match = text.match(/\$([0-9,]+(?:\.[0-9]{2})?)/);
@@ -136,10 +165,9 @@ function parsePrice(text) {
 }
 
 async function scrapeGpuPrices(target) {
-  console.log(`\n🔍 Fetching eBay sold listings for: ${target.name}...`);
+  console.log(`\n🔍 Fetching eBay listings for: ${target.name}...`);
   const encodedQuery = encodeURIComponent(target.query);
-  // _sop=13: Ended recently, LH_Sold=1: Sold items, LH_Complete=1: Completed items
-  const url = `https://www.ebay.com/sch/i.html?_nkw=${encodedQuery}&LH_Sold=1&LH_Complete=1&_sop=13&_ipg=60`;
+  const url = `https://www.ebay.com/sch/27386/i.html?_nkw=${encodedQuery}&LH_BIN=1&_sop=15`;
 
   try {
     const res = await fetch(url, { headers: HEADERS });
@@ -150,10 +178,8 @@ async function scrapeGpuPrices(target) {
 
     const html = await res.text();
     const $ = cheerio.load(html);
-
     const validSales = [];
 
-    // eBay listing item selectors
     $('.s-item, .s-card').each((_, el) => {
       const title = $(el).find('.s-item__title, .s-card__title').text().trim();
       const priceText = $(el).find('.s-item__price, .s-card__price').text().trim();
@@ -162,7 +188,6 @@ async function scrapeGpuPrices(target) {
         return;
       }
 
-      // Check for exclude keywords
       const titleLower = title.toLowerCase();
       const hasExcludedKeyword = target.excludeKeywords.some(kw => titleLower.includes(kw.toLowerCase()));
       if (hasExcludedKeyword) return;
@@ -178,24 +203,19 @@ async function scrapeGpuPrices(target) {
       return fallbackResult(target, `Low listing count (${validSales.length})`);
     }
 
-    // Sort prices ascending
     validSales.sort((a, b) => a.price - b.price);
     const prices = validSales.map(s => s.price);
-
-    // Compute stats
     const median = Math.round(prices[Math.floor(prices.length / 2)]);
     const low = Math.round(prices[Math.floor(prices.length * 0.20)]);
     const high = Math.round(prices[Math.floor(prices.length * 0.80)]);
     const mean = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
 
-    // Filter outliers: use trimmed median
-    const finalProposedPrice = median;
+    const finalProposedPrice = Math.round(median * 0.96);
     const diff = finalProposedPrice - target.currentPrice;
     const pctChange = parseFloat(((diff / target.currentPrice) * 100).toFixed(1));
 
-    console.log(`  ✓ Found ${validSales.length} sold listings.`);
-    console.log(`    Current: $${target.currentPrice} → Scraped Median: $${finalProposedPrice} (${diff >= 0 ? '+' : ''}${diff}, ${pctChange}%)`);
-    console.log(`    Range: $${low} - $${high}`);
+    console.log(`  ✓ Found ${validSales.length} live listings.`);
+    console.log(`    Current: $${target.currentPrice} → Proposed: $${finalProposedPrice} (${diff >= 0 ? '+' : ''}${diff}, ${pctChange}%)`);
 
     return {
       id: target.id,
@@ -203,15 +223,15 @@ async function scrapeGpuPrices(target) {
       vram: target.vram,
       currentPrice: target.currentPrice,
       proposedPrice: finalProposedPrice,
-      priceLow: low,
-      priceHigh: high,
+      priceLow: Math.round(low * 0.96),
+      priceHigh: Math.round(high * 0.96),
       trend7d: pctChange,
       sampleCount: validSales.length,
       status: Math.abs(pctChange) > 15 ? 'FLAGGED_SWING' : 'APPROVED',
-      notes: `${validSales.length} sales analyzed. Median: $${median}, Mean: $${mean}.`,
+      source: 'REAL_EBAY_ACTIVE_COMPS',
+      notes: `${validSales.length} live listings analyzed. Median: $${median}, -4% spread applied.`,
       recentSamples: validSales.slice(0, 5)
     };
-
   } catch (err) {
     console.warn(`  ❌ Scraping error: ${err.message}. Using fallback.`);
     return fallbackResult(target, err.message);
@@ -219,11 +239,7 @@ async function scrapeGpuPrices(target) {
 }
 
 function fallbackResult(target, reason) {
-  // Graceful fallback with slight market fluctuation simulation if eBay rate limits
-  const slightVariation = Math.round((Math.random() * 10) - 5);
-  const proposed = target.currentPrice + slightVariation;
-  const pctChange = parseFloat((((proposed - target.currentPrice) / target.currentPrice) * 100).toFixed(1));
-
+  const proposed = target.currentPrice;
   return {
     id: target.id,
     name: target.name,
@@ -232,40 +248,29 @@ function fallbackResult(target, reason) {
     proposedPrice: proposed,
     priceLow: Math.round(proposed * 0.92),
     priceHigh: Math.round(proposed * 1.08),
-    trend7d: pctChange,
-    sampleCount: 12,
+    trend7d: 0.0,
+    sampleCount: 0,
     status: 'APPROVED',
-    notes: `Fallback estimate (${reason}). Current baseline adjusted.`,
+    source: 'CALIBRATED_FALLBACK',
+    notes: `Fallback estimate (${reason}). Baseline retained.`,
     recentSamples: [
-      { title: `${target.name} standard sold listing`, price: proposed }
+      { title: `${target.name} standard market baseline`, price: proposed }
     ]
   };
 }
 
-async function run() {
-  console.log('====================================================');
-  console.log('🤖 AI RIG BUILDER — WEEKLY USED GPU PRICE SCRAPER');
-  console.log('====================================================');
-  console.log(`Targeting 10 GPUs. Rate limiting: 2.5s delay between requests.`);
-
+async function runFallback() {
+  console.log('Running Node.js fallback scraper...');
   const results = [];
-
   for (let i = 0; i < TRACKED_GPUS.length; i++) {
     const gpu = TRACKED_GPUS[i];
     const result = await scrapeGpuPrices(gpu);
     results.push(result);
-
-    if (i < TRACKED_GPUS.length - 1) {
-      console.log('  ⏳ Waiting 2.5s (polite rate limit)...');
-      await sleep(2500);
-    }
+    if (i < TRACKED_GPUS.length - 1) await sleep(2500);
   }
 
-  // Ensure output directory exists
   const dataDir = path.join(ROOT_DIR, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
   const reviewPayload = {
     scrapedAt: new Date().toISOString(),
@@ -274,19 +279,13 @@ async function run() {
     cards: results
   };
 
-  // 1. Write structured JSON review file
   const jsonPath = path.join(dataDir, 'pending_price_review.json');
   fs.writeFileSync(jsonPath, JSON.stringify(reviewPayload, null, 2), 'utf-8');
 
-  // 2. Write Markdown review file for human eyeball
   const mdPath = path.join(ROOT_DIR, 'PENDING_PRICE_REVIEW.md');
   let md = `# Weekly Used GPU Price Review — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}\n\n`;
-  md += `> [!IMPORTANT]\n`;
-  md += `> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.\n`;
-  md += `> If any price looks off due to an outlier, you can edit \`data/pending_price_review.json\`.\n`;
-  md += `> When satisfied, execute: \`npm run prices:apply\` to update the live site and price history.\n\n`;
-
-  md += `| GPU Model | VRAM | Current | Proposed | Delta | 7d Trend | Proposed Range | Verify Link | Status |\n`;
+  md += `> [!IMPORTANT]\n> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.\n\n`;
+  md += `| GPU Model | VRAM | Current | Proposed | Delta | 7d Trend | Proposed Range | Data Source | Status |\n`;
   md += `| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n`;
 
   results.forEach(c => {
@@ -294,31 +293,19 @@ async function run() {
     const diffStr = diff >= 0 ? `+$${diff}` : `-$${Math.abs(diff)}`;
     const trendStr = c.trend7d >= 0 ? `+${c.trend7d}%` : `${c.trend7d}%`;
     const statusBadge = c.status === 'APPROVED' ? '✅ APPROVED' : '⚠️ FLAGGED SWING';
-    const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(c.name + ' ' + c.vram + 'GB')}&LH_Sold=1&LH_Complete=1&_sop=13`;
-    md += `| **${c.name}** | ${c.vram}GB | $${c.currentPrice} | **$${c.proposedPrice}** | ${diffStr} | ${trendStr} | $${c.priceLow} - $${c.priceHigh} | [eBay Sold](${ebayUrl}) | ${statusBadge} |\n`;
+    const sourceBadge = c.source === 'CALIBRATED_FALLBACK' ? '🟡 Baseline' : '🟢 Live Comps';
+    md += `| **${c.name}** | ${c.vram}GB | $${c.currentPrice} | **$${c.proposedPrice}** | ${diffStr} | ${trendStr} | $${c.priceLow} - $${c.priceHigh} | ${sourceBadge} | ${statusBadge} |\n`;
   });
-
-  md += `\n### Sample Listings Verified:\n`;
-  results.forEach(c => {
-    if (c.recentSamples && c.recentSamples.length > 0) {
-      md += `- **${c.name}** (Median: $${c.proposedPrice}):\n`;
-      c.recentSamples.slice(0, 3).forEach(s => {
-        md += `  - "$${s.price}" — *${s.title}*\n`;
-      });
-    }
-  });
-
-  md += `\n---\n*Generated by airigbuilder.com weekly scraper workflow.*\n`;
 
   fs.writeFileSync(mdPath, md, 'utf-8');
-
-  console.log('\n====================================================');
-  console.log('✅ SCRAPE COMPLETE! REVIEW FILES CREATED:');
-  console.log(`  1. Markdown for review: ${mdPath}`);
-  console.log(`  2. Data file for review: ${jsonPath}`);
-  console.log('====================================================');
-  console.log('👉 Next step: Eyeball PENDING_PRICE_REVIEW.md, then run:');
-  console.log('   npm run prices:apply\n');
 }
 
-run();
+async function main() {
+  const success = runPythonEngine();
+  if (!success) {
+    console.warn('⚠️ Python UC engine could not run or encountered an error. Running Node fallback...');
+    await runFallback();
+  }
+}
+
+main();

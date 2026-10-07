@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Local cache, browser downloads, Python artifacts, and eBay session cookies
+.cache/
+downloaded_files/
+*ebay_cookie*
+*.pyc
+__pycache__/
