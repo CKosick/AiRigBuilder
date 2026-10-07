@@ -8,6 +8,7 @@ export function createModelPicker(container, onNavigateToCalc) {
   let activeTierId = 'tier-budget-used';
   let activeCategory = 'all'; // 'all', '70b', 'medium', 'budget', 'coding'
   let searchQuery = '';
+  let isGridView = false;
   let salesTaxRate = 7; // %
   let dailyUsageHours = 4; // hrs/day
   let kwhRate = 0.14; // $/kWh
@@ -76,23 +77,34 @@ export function createModelPicker(container, onNavigateToCalc) {
             <button class="filter-btn ${activeCategory === 'budget' ? 'active' : ''}" data-cat="budget">≤14B Budget</button>
             <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding">Coding & Vision</button>
           </div>
-          <div style="display: flex; align-items: center;">
-            <input type="text" id="model-search-input" value="${searchQuery}" placeholder="🔍 Search 32 models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 180px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="text" id="model-search-input" value="${searchQuery}" placeholder="🔍 Search 32 models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 170px;">
+            <button class="btn-secondary" id="btn-toggle-model-layout" title="Toggle between Scrollable Row and Grid View" style="font-size: 0.78rem; padding: 6px 10px; display: inline-flex; align-items: center; gap: 4px;">
+              <span>${isGridView ? '↔ Row' : '⊞ Grid'}</span>
+            </button>
           </div>
         </div>
 
-        <div class="model-pills" id="model-pills-list">
-          ${filteredModels.length > 0 ? filteredModels.map(m => `
-            <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}">
-              <div class="pill-title">
-                <span>${m.name.split(' ')[0]} ${m.parameters}</span>
-                <span style="font-size: 0.72rem; color: var(--emerald);">${m.recommendedVram}GB VRAM</span>
-              </div>
-              <div class="pill-subtitle">${m.creator} • ${m.sweetSpotQuant.split(' ')[0]}</div>
-            </button>
-          `).join('') : `
-            <div style="color: var(--text-dim); font-size: 0.85rem; padding: 12px;">No models match your search. <button class="btn-secondary" id="btn-reset-model-filter" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px;">Reset Filter</button></div>
-          `}
+        <div class="model-pills-wrapper">
+          ${!isGridView && filteredModels.length > 4 ? `
+            <button class="pills-scroll-btn scroll-left" id="btn-pills-left" aria-label="Scroll left">‹</button>
+          ` : ''}
+          <div class="model-pills ${isGridView ? 'grid-view' : ''}" id="model-pills-list">
+            ${filteredModels.length > 0 ? filteredModels.map(m => `
+              <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}">
+                <div class="pill-title">
+                  <span>${m.name.split(' ')[0]} ${m.parameters}</span>
+                  <span style="font-size: 0.72rem; color: var(--emerald);">${m.recommendedVram}GB VRAM</span>
+                </div>
+                <div class="pill-subtitle">${m.creator} • ${m.sweetSpotQuant.split(' ')[0]}</div>
+              </button>
+            `).join('') : `
+              <div style="color: var(--text-dim); font-size: 0.85rem; padding: 12px;">No models match your search. <button class="btn-secondary" id="btn-reset-model-filter" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px;">Reset Filter</button></div>
+            `}
+          </div>
+          ${!isGridView && filteredModels.length > 4 ? `
+            <button class="pills-scroll-btn scroll-right" id="btn-pills-right" aria-label="Scroll right">›</button>
+          ` : ''}
         </div>
       </div>
 
@@ -310,12 +322,52 @@ export function createModelPicker(container, onNavigateToCalc) {
       });
     }
 
+    // Toggle between row and grid layout
+    const btnToggleLayout = container.querySelector('#btn-toggle-model-layout');
+    if (btnToggleLayout) {
+      btnToggleLayout.addEventListener('click', () => {
+        isGridView = !isGridView;
+        render();
+      });
+    }
+
+    // Horizontal scroll controls
+    const pillsList = container.querySelector('#model-pills-list');
+    const btnPillsLeft = container.querySelector('#btn-pills-left');
+    const btnPillsRight = container.querySelector('#btn-pills-right');
+
+    if (btnPillsLeft && pillsList) {
+      btnPillsLeft.addEventListener('click', () => {
+        pillsList.scrollBy({ left: -340, behavior: 'smooth' });
+      });
+    }
+
+    if (btnPillsRight && pillsList) {
+      btnPillsRight.addEventListener('click', () => {
+        pillsList.scrollBy({ left: 340, behavior: 'smooth' });
+      });
+    }
+
+    // Horizontal mousewheel support on row of pills
+    if (pillsList && !isGridView) {
+      pillsList.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0 && Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+          pillsList.scrollLeft += e.deltaY;
+        }
+      }, { passive: true });
+    }
+
     // Model pill click
     container.querySelectorAll('.model-pill-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         activeModelId = btn.getAttribute('data-model-id');
         activeTierId = 'tier-budget-used';
         render();
+        // Keep active button visible
+        const updatedBtn = container.querySelector(`.model-pill-btn[data-model-id="${activeModelId}"]`);
+        if (updatedBtn && !isGridView) {
+          updatedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
       });
     });
 
