@@ -209,11 +209,25 @@ export function createModelPicker(container, onNavigateToCalc) {
                       ${part.price > 0 ? `$${part.price.toLocaleString()}` : '<span style="color: var(--text-dim);">Included</span>'}
                     </td>
                     <td style="text-align: right;">
-                      ${part.url !== '#' ? `
-                        <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
-                          ${part.merchant.includes('eBay') ? '🔍 Search eBay' : (part.merchant.includes('Amazon') ? '🛒 Amazon' : '📦 B&H Photo')}
-                        </a>
-                      ` : '<span style="color: var(--text-dim); font-size: 0.78rem;">Built-in</span>'}
+                      ${part.url !== '#' ? (() => {
+                        const urlLower = (part.url || '').toLowerCase();
+                        const merchLower = (part.merchant || '').toLowerCase();
+                        let btnLabel = '🛒 Merchant Link';
+                        if (urlLower.includes('ebay.') || (!urlLower.includes('amazon.') && merchLower.includes('ebay'))) {
+                          btnLabel = '🔍 Search eBay';
+                        } else if (urlLower.includes('amazon.') || merchLower.includes('amazon')) {
+                          btnLabel = '🛒 Amazon';
+                        } else if (urlLower.includes('bhphoto') || merchLower.includes('b&h')) {
+                          btnLabel = '📦 B&H Photo';
+                        } else if (merchLower.includes('apple')) {
+                          btnLabel = '🍎 Apple';
+                        }
+                        return `
+                          <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
+                            ${btnLabel}
+                          </a>
+                        `;
+                      })() : '<span style="color: var(--text-dim); font-size: 0.78rem;">Built-in</span>'}
                     </td>
                   </tr>
                 `;

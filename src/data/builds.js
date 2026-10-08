@@ -47,10 +47,10 @@ export const BUILDS_DATA = {
             category: 'Motherboard',
             name: 'ASUS ROG Strix B550-F Gaming (WiFi)',
             spec: 'Supports dual full-length PCIe slots with 3-slot spacing',
-            condition: 'Used / Refurb',
+            condition: 'Used / Refurb (eBay)',
             price: 110,
-            merchant: 'eBay / Amazon',
-            url: 'https://www.amazon.com/s?k=B550+motherboard+dual+gpu+spacing',
+            merchant: 'eBay Sold',
+            url: 'https://www.ebay.com/sch/i.html?_nkw=ASUS+ROG+Strix+B550-F+Gaming',
             notes: 'Crucial: Slot 1 is x16 (PCIe 4.0), bottom slot is x4. For pure inference, x4 PCIe 3.0 has <3% token throughput loss.'
           },
           {
@@ -1053,9 +1053,9 @@ export const BUILDS_DATA = {
             category: 'CPU',
             name: 'AMD Ryzen 5 3600 / 5500 (6C / 12T)',
             spec: '6-core Zen 2/3, 65W TDP',
-            condition: 'Used / New (Amazon / eBay)',
+            condition: 'Used / New (Amazon)',
             price: 79,
-            merchant: 'Amazon / eBay',
+            merchant: 'Amazon',
             url: 'https://www.amazon.com/s?k=Ryzen+5+5500',
             notes: 'Plenty of power for lightweight agent tasks.'
           },

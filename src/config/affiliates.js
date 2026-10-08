@@ -139,14 +139,20 @@ export function attachEbayAffiliateParams(url, campaignId = AFFILIATE_CONFIG.eba
 export function formatAffiliateUrl(url, merchant = '') {
   if (!url || url === '#') return url;
 
-  // Format Amazon links
-  if ((merchant && merchant.toLowerCase().includes('amazon')) || url.includes('amazon.')) {
+  // Domain-based check takes precedence to prevent mixed merchant mismatches
+  if (url.includes('ebay.')) {
+    return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId);
+  }
+  if (url.includes('amazon.')) {
     return attachAmazonAffiliateTag(url, AFFILIATE_CONFIG.amazonTag);
   }
 
-  // Format eBay links
-  if ((merchant && merchant.toLowerCase().includes('ebay')) || url.includes('ebay.')) {
+  // Fallback to merchant string if URL does not specify a known domain
+  if (merchant && merchant.toLowerCase().includes('ebay')) {
     return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId);
+  }
+  if (merchant && merchant.toLowerCase().includes('amazon')) {
+    return attachAmazonAffiliateTag(url, AFFILIATE_CONFIG.amazonTag);
   }
 
   return url;

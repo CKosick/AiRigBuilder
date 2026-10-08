@@ -4,6 +4,7 @@ import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { CLOUD_PROVIDERS } from '../src/data/providers.js';
+import { formatAffiliateUrl } from '../src/config/affiliates.js';
 
 describe('Data Integrity & Consistency Contracts', () => {
   describe('GPUS_DATA Contract', () => {
@@ -106,6 +107,52 @@ describe('Data Integrity & Consistency Contracts', () => {
           assert.ok(subtotal > 300, `Total parts subtotal for ${tier.name} in ${modelId} must be realistic ($${subtotal})`);
         }
       }
+    });
+
+    it('verifies parts table URLs match merchant names without cross-merchant mismatches', () => {
+      for (const [modelId, build] of Object.entries(BUILDS_DATA)) {
+        for (const tier of build.tiers) {
+          for (const part of tier.parts) {
+            if (part.url === '#') continue;
+
+            const urlLower = part.url.toLowerCase();
+            const merchLower = (part.merchant || '').toLowerCase();
+
+            if (urlLower.includes('ebay.')) {
+              assert.ok(
+                merchLower.includes('ebay'),
+                `Part "${part.name}" in ${modelId}/${tier.name} links to eBay but merchant is "${part.merchant}"`
+              );
+            }
+
+            if (urlLower.includes('amazon.')) {
+              assert.ok(
+                merchLower.includes('amazon'),
+                `Part "${part.name}" in ${modelId}/${tier.name} links to Amazon but merchant is "${part.merchant}"`
+              );
+            }
+          }
+        }
+      }
+    });
+
+    it('verifies motherboard row in Budget Used Dual-3090 links to eBay with valid EPN tracking', () => {
+      const llamaBuild = BUILDS_DATA['llama-3.3-70b'];
+      assert.ok(llamaBuild, 'llama-3.3-70b build must exist');
+
+      const budgetTier = llamaBuild.tiers.find(t => t.name.includes('Dual-3090') || t.name.includes('Budget'));
+      assert.ok(budgetTier, 'Budget Dual-3090 tier must exist');
+
+      const mobo = budgetTier.parts.find(p => p.category === 'Motherboard');
+      assert.ok(mobo, 'Motherboard part must exist');
+      assert.ok(mobo.url.includes('ebay.com'), `Motherboard URL must be eBay, got: ${mobo.url}`);
+      assert.ok(mobo.merchant.toLowerCase().includes('ebay'), `Motherboard merchant must be eBay, got: ${mobo.merchant}`);
+
+      const formattedUrl = formatAffiliateUrl(mobo.url, mobo.merchant);
+      const parsed = new URL(formattedUrl);
+      assert.equal(parsed.searchParams.get('campid'), '5339219563', 'Motherboard link must include EPN campid');
+      assert.equal(parsed.searchParams.get('mkcid'), '1', 'Motherboard link must include mkcid=1');
+      assert.equal(parsed.searchParams.get('toolid'), '10001', 'Motherboard link must include toolid=10001');
     });
   });
 

@@ -129,6 +129,15 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.equal(formatted, 'https://www.amazon.com/s?k=B550+motherboard&tag=airigbuilder-20');
     });
 
+    it('formats mixed merchant eBay URLs with complete EPN parameters', () => {
+      const url = 'https://www.ebay.com/sch/i.html?_nkw=ASUS+ROG+Strix+B550-F+Gaming';
+      const formatted = formatAffiliateUrl(url, 'eBay / Amazon');
+      const parsed = new URL(formatted);
+      assert.equal(parsed.searchParams.get('campid'), '5339219563');
+      assert.equal(parsed.searchParams.get('mkcid'), '1');
+      assert.equal(parsed.searchParams.get('toolid'), '10001');
+    });
+
     it('formats eBay URLs with complete EPN parameters', () => {
       const url = 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1';
       const formatted = formatAffiliateUrl(url, 'eBay Sold');
