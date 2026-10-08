@@ -1,47 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-// Pure computation helper mirroring breakEvenCalc.js logic
-function computeBreakEven({
-  rigUpfrontCost,
-  dailyUsageHours,
-  hourlyCloudRate,
-  monthlyDiskFee = 7.00,
-  systemWatts,
-  kwhRate = 0.14,
-  resaleRetentionPct = 65
-}) {
-  const monthlyCloudRun = hourlyCloudRate * dailyUsageHours * 30.5;
-  const monthlyCloudTotal = monthlyCloudRun + monthlyDiskFee;
-  const monthlyLocalPower = (systemWatts / 1000) * dailyUsageHours * 30.5 * kwhRate;
-  const monthlyNetSavings = monthlyCloudTotal - monthlyLocalPower;
-
-  let breakEvenMonths = 0;
-  if (monthlyNetSavings > 0) {
-    breakEvenMonths = rigUpfrontCost / monthlyNetSavings;
-  } else {
-    breakEvenMonths = Infinity;
-  }
-
-  const cloud24Mo = monthlyCloudTotal * 24;
-  const local24Mo = rigUpfrontCost + (monthlyLocalPower * 24);
-  const netCashSavings24Mo = cloud24Mo - local24Mo;
-  const estimatedResaleValue = Math.round(rigUpfrontCost * (resaleRetentionPct / 100));
-  const netEquitySavings24Mo = netCashSavings24Mo + estimatedResaleValue;
-
-  return {
-    monthlyCloudTotal,
-    monthlyLocalPower,
-    monthlyNetSavings,
-    breakEvenMonths,
-    breakEvenDays: Math.round(breakEvenMonths * 30.5),
-    cloud24Mo,
-    local24Mo,
-    netCashSavings24Mo,
-    estimatedResaleValue,
-    netEquitySavings24Mo
-  };
-}
+import { computeBreakEven } from '../src/utils/breakEven.js';
 
 describe('Cloud Break-Even Calculator Logic', () => {
   it('correctly calculates break-even for Dual 3090 baseline at 4 hrs/day', () => {

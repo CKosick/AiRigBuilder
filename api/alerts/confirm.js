@@ -9,7 +9,13 @@ export default async function handler(req, res) {
     return sendHtmlResponse(res, 400, 'Invalid Token', 'Missing alert confirmation token.', false);
   }
 
-  const result = confirmAlert(token);
+  let result;
+  try {
+    result = await confirmAlert(token);
+  } catch (err) {
+    console.error('API Error in /api/alerts/confirm:', err);
+    return sendHtmlResponse(res, 500, 'Something Went Wrong', 'We could not confirm your alert right now. Please try the link again later.', false);
+  }
 
   if (!result.success) {
     return sendHtmlResponse(res, 400, 'Confirmation Failed', result.error, false);

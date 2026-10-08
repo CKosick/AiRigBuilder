@@ -95,4 +95,5 @@ gh repo create airigbuilder --public --source=. --push
 ```
 
 - Connect repo on [Vercel](https://vercel.com)
+- **Price alerts need Upstash Redis.** Vercel functions can't save files, so alert sign-ups are stored in Redis. In the Vercel project: Storage → Upstash Redis → connect. That sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Copy both into a local `.env` so `npm run alerts:check` and `npm run prices:apply` read the same alerts (the script prints which store it used). Without them, local runs use `data/alerts.json`, and on Vercel the alert API returns an error instead of losing sign-ups.
 - Custom domain: set up `airigbuilder.com` and point Porkbun DNS CNAME records to `cname.vercel-dns.com`.

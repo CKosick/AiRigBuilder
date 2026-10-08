@@ -10,8 +10,8 @@
     "test": "node --test tests/**/*.test.js",
     "prices:fetch": "node scripts/scrape_ebay_prices.js",
     "prices:login": "py scripts/ebay_login_helper.py",
-    "prices:apply": "node scripts/apply_prices.js",
-    "alerts:check": "node scripts/check_alerts.js"
+    "prices:apply": "node --env-file-if-exists=.env scripts/apply_prices.js",
+    "alerts:check": "node --env-file-if-exists=.env scripts/check_alerts.js"
   },
   "devDependencies": {
     "cheerio": "^1.2.0",

@@ -2,12 +2,12 @@
 // Handles Price-Drop Alert subscriptions, double opt-in confirmation,
 // unsubscribe tokens, Resend email dispatch, and price evaluation triggers.
 
-import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { GPUS_DATA } from '../data/gpus.js';
 import { formatAffiliateUrl } from '../config/affiliates.js';
+import { getAlertStore } from './alertStore.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +19,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 // Verified domain: harfordtreepros.com (configured in Resend)
 const DEFAULT_FROM = 'AiRigBuilder <alerts@harfordtreepros.com>';
 const RESEND_FROM = process.env.RESEND_FROM_EMAIL || DEFAULT_FROM;
-const APP_URL = process.env.APP_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://airigbuilder.com';
+const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://airigbuilder.com');
 
 /**
  * Standard email validation
@@ -32,31 +32,17 @@ export function isValidEmail(email) {
 }
 
 /**
- * Load alerts from file or return empty list
+ * Resolve the alert store (Redis in production, JSON file locally/tests)
  */
-export function loadAlerts(filePath = ALERTS_FILE) {
-  try {
-    if (!fs.existsSync(filePath)) {
-      return [];
-    }
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-    return Array.isArray(data.alerts) ? data.alerts : [];
-  } catch (err) {
-    console.error(`Error loading alerts from ${filePath}:`, err.message);
-    return [];
-  }
+function storeFor(filePath) {
+  return getAlertStore({ filePath, defaultFilePath: ALERTS_FILE });
 }
 
 /**
- * Save alerts back to file safely
+ * Load all alerts from the active store
  */
-export function saveAlerts(alerts, filePath = ALERTS_FILE) {
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  const payload = { alerts };
-  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf-8');
+export async function loadAlerts(filePath) {
+  return storeFor(filePath).all();
 }
 
 /**
@@ -126,21 +112,23 @@ export function validateAlertInput({ email, gpuId, targetPrice }) {
 /**
  * Register a new alert (Double Opt-in: PENDING_CONFIRMATION)
  */
-export async function registerAlert({ email, gpuId, targetPrice, filePath = ALERTS_FILE, appUrl = APP_URL }) {
+export async function registerAlert({ email, gpuId, targetPrice, filePath, appUrl = APP_URL }) {
   const validation = validateAlertInput({ email, gpuId, targetPrice });
   if (!validation.valid) {
     return { success: false, error: validation.error };
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  const alerts = loadAlerts(filePath);
+  const store = storeFor(filePath);
+  const alerts = await store.all();
 
   // Check if an identical active or pending alert already exists
   const existing = alerts.find(a => 
     a.email.toLowerCase() === normalizedEmail && 
     a.gpuId === gpuId && 
     a.targetPrice === validation.price &&
-    a.status !== 'UNSUBSCRIBED'
+    a.status !== 'UNSUBSCRIBED' &&
+    !a.fired
   );
 
   if (existing) {
@@ -181,8 +169,7 @@ export async function registerAlert({ email, gpuId, targetPrice, filePath = ALER
     lastNotifiedPrice: null
   };
 
-  alerts.push(newAlert);
-  saveAlerts(alerts, filePath);
+  await store.put(newAlert);
 
   // Send double opt-in confirmation email
   await sendConfirmationEmail(newAlert, appUrl);
@@ -252,10 +239,11 @@ export async function sendConfirmationEmail(alert, appUrl = APP_URL) {
 /**
  * Confirm alert by token (Sets status to ACTIVE)
  */
-export function confirmAlert(token, filePath = ALERTS_FILE) {
+export async function confirmAlert(token, filePath) {
   if (!token) return { success: false, error: 'Missing confirmation token.' };
 
-  const alerts = loadAlerts(filePath);
+  const store = storeFor(filePath);
+  const alerts = await store.all();
   const alert = alerts.find(a => a.confirmToken === token);
 
   if (!alert) {
@@ -268,7 +256,7 @@ export function confirmAlert(token, filePath = ALERTS_FILE) {
 
   alert.status = 'ACTIVE';
   alert.confirmedAt = new Date().toISOString();
-  saveAlerts(alerts, filePath);
+  await store.put(alert);
 
   return { success: true, alert };
 }
@@ -276,10 +264,11 @@ export function confirmAlert(token, filePath = ALERTS_FILE) {
 /**
  * Unsubscribe alert by token (Sets status to UNSUBSCRIBED)
  */
-export function unsubscribeAlert(token, filePath = ALERTS_FILE) {
+export async function unsubscribeAlert(token, filePath) {
   if (!token) return { success: false, error: 'Missing unsubscribe token.' };
 
-  const alerts = loadAlerts(filePath);
+  const store = storeFor(filePath);
+  const alerts = await store.all();
   const alert = alerts.find(a => a.unsubscribeToken === token || a.confirmToken === token);
 
   if (!alert) {
@@ -288,7 +277,7 @@ export function unsubscribeAlert(token, filePath = ALERTS_FILE) {
 
   alert.status = 'UNSUBSCRIBED';
   alert.unsubscribedAt = new Date().toISOString();
-  saveAlerts(alerts, filePath);
+  await store.put(alert);
 
   return { success: true, alert };
 }
@@ -368,9 +357,9 @@ export async function sendPriceDropNotificationEmail(alert, currentGpu, appUrl =
  * Ensures no repeat emails for the same drop (marks fired: true).
  */
 export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
-  const filePath = options.filePath || ALERTS_FILE;
   const appUrl = options.appUrl || APP_URL;
-  const alerts = loadAlerts(filePath);
+  const store = storeFor(options.filePath);
+  const alerts = await store.all();
 
   let firedCount = 0;
   const firedAlerts = [];
@@ -394,6 +383,7 @@ export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
       alert.firedAt = new Date().toISOString();
       alert.lastNotifiedPrice = gpu.usedStreetPrice;
       alert.notificationEmailId = emailResult?.id || null;
+      await store.put(alert);
 
       firedCount++;
       firedAlerts.push({
@@ -408,11 +398,11 @@ export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
   }
 
   if (firedCount > 0) {
-    saveAlerts(alerts, filePath);
     console.log(`✓ Triggered ${firedCount} price-drop alert email(s) and saved updated state.`);
   }
 
   return {
+    store: store.kind,
     totalAlerts: alerts.length,
     activeAlerts: alerts.filter(a => a.status === 'ACTIVE' && !a.fired).length,
     firedCount,

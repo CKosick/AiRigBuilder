@@ -16,6 +16,32 @@ import {
   loadAlerts
 } from '../src/services/alertService.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
+import { getAlertStore, FileAlertStore, RedisAlertStore } from '../src/services/alertStore.js';
+import subscribeHandler from '../api/alerts/subscribe.js';
+
+// In-memory stand-in for the Upstash Redis REST API (HGETALL / HSET only)
+function mockRedisFetch() {
+  const hash = new Map();
+  return async (_url, init) => {
+    const [cmd, , field, value] = JSON.parse(init.body);
+    let result;
+    if (cmd === 'HSET') { hash.set(field, value); result = 1; }
+    else if (cmd === 'HGETALL') { result = [...hash.entries()].flat(); }
+    else throw new Error(`unexpected command ${cmd}`);
+    return { ok: true, status: 200, json: async () => ({ result }) };
+  };
+}
+
+// Minimal Vercel-style response object
+function mockRes() {
+  return {
+    statusCode: 200, body: undefined, headers: {},
+    setHeader(k, v) { this.headers[k] = v; },
+    status(code) { this.statusCode = code; return this; },
+    json(b) { this.body = b; return this; },
+    end() { return this; }
+  };
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,7 +127,7 @@ describe('Price-Drop Alerts System', () => {
       assert.ok(result.alert.unsubscribeToken, 'Must generate unsubscribe token');
 
       // File should persist the alert
-      const stored = loadAlerts(TEST_ALERTS_FILE);
+      const stored = await loadAlerts(TEST_ALERTS_FILE);
       assert.equal(stored.length, 1);
       assert.equal(stored[0].id, result.alert.id);
     });
@@ -114,19 +140,19 @@ describe('Price-Drop Alerts System', () => {
         filePath: TEST_ALERTS_FILE
       });
 
-      const confirmRes = confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      const confirmRes = await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
       assert.equal(confirmRes.success, true);
       assert.equal(confirmRes.alert.status, 'ACTIVE');
       assert.ok(confirmRes.alert.confirmedAt, 'Must stamp confirmedAt timestamp');
 
       // Re-confirming should be idempotent
-      const idempotencyRes = confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      const idempotencyRes = await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
       assert.equal(idempotencyRes.success, true);
       assert.equal(idempotencyRes.alreadyConfirmed, true);
     });
 
-    it('rejects invalid confirmation tokens', () => {
-      const res = confirmAlert('non-existent-token-xyz', TEST_ALERTS_FILE);
+    it('rejects invalid confirmation tokens', async () => {
+      const res = await confirmAlert('non-existent-token-xyz', TEST_ALERTS_FILE);
       assert.equal(res.success, false);
       assert.match(res.error, /Invalid or expired/);
     });
@@ -152,7 +178,7 @@ describe('Price-Drop Alerts System', () => {
         targetPrice: 500, // Target is lower than current
         filePath: TEST_ALERTS_FILE
       });
-      confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
 
       const evalRes = await evaluateAndTriggerAlerts(GPUS_DATA, { filePath: TEST_ALERTS_FILE });
       assert.equal(evalRes.firedCount, 0, 'Must not fire when current price exceeds target');
@@ -166,7 +192,7 @@ describe('Price-Drop Alerts System', () => {
         targetPrice: 700,
         filePath: TEST_ALERTS_FILE
       });
-      confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
 
       // Mock GPU pricing where RTX 3090 has dropped to $680
       const mockGpus = GPUS_DATA.map(g => {
@@ -183,7 +209,7 @@ describe('Price-Drop Alerts System', () => {
       assert.equal(eval1.firedAlerts[0].droppedPrice, 680);
 
       // Verify stored state in file
-      const updatedAlerts = loadAlerts(TEST_ALERTS_FILE);
+      const updatedAlerts = await loadAlerts(TEST_ALERTS_FILE);
       assert.equal(updatedAlerts[0].fired, true);
       assert.ok(updatedAlerts[0].firedAt);
       assert.equal(updatedAlerts[0].lastNotifiedPrice, 680);
@@ -207,10 +233,10 @@ describe('Price-Drop Alerts System', () => {
         targetPrice: 350,
         filePath: TEST_ALERTS_FILE
       });
-      confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
 
       // Unsubscribe via unsubscribeToken
-      const unsubRes = unsubscribeAlert(reg.alert.unsubscribeToken, TEST_ALERTS_FILE);
+      const unsubRes = await unsubscribeAlert(reg.alert.unsubscribeToken, TEST_ALERTS_FILE);
       assert.equal(unsubRes.success, true);
       assert.equal(unsubRes.alert.status, 'UNSUBSCRIBED');
 
@@ -239,7 +265,7 @@ describe('Price-Drop Alerts System', () => {
       const { confirmToken } = subResult.alert;
 
       // Step 2: User clicks confirmation link in email
-      const confResult = confirmAlert(confirmToken, TEST_ALERTS_FILE);
+      const confResult = await confirmAlert(confirmToken, TEST_ALERTS_FILE);
       assert.equal(confResult.success, true);
       assert.equal(confResult.alert.status, 'ACTIVE');
 
@@ -256,7 +282,7 @@ describe('Price-Drop Alerts System', () => {
       assert.equal(check2.firedAlerts[0].droppedPrice, 695);
 
       // Step 5: Verification in database
-      const alerts = loadAlerts(TEST_ALERTS_FILE);
+      const alerts = await loadAlerts(TEST_ALERTS_FILE);
       const alert = alerts.find(a => a.email === 'alex@example.com');
       assert.equal(alert.fired, true);
       assert.equal(alert.lastNotifiedPrice, 695);
@@ -265,6 +291,61 @@ describe('Price-Drop Alerts System', () => {
       // Step 6: Next week runs at $690 -> no re-fire
       const check3 = await evaluateAndTriggerAlerts(dropGpus, { filePath: TEST_ALERTS_FILE });
       assert.equal(check3.firedCount, 0);
+    });
+  });
+
+  describe('Alert Storage Selection', () => {
+    it('uses the file store when a filePath is given', () => {
+      assert.ok(getAlertStore({ filePath: TEST_ALERTS_FILE, env: { KV_REST_API_URL: 'x', KV_REST_API_TOKEN: 'y' } }) instanceof FileAlertStore);
+    });
+
+    it('uses Redis when Upstash credentials are set', () => {
+      assert.ok(getAlertStore({ defaultFilePath: TEST_ALERTS_FILE, env: { KV_REST_API_URL: 'https://r.upstash.io', KV_REST_API_TOKEN: 't' } }) instanceof RedisAlertStore);
+      assert.ok(getAlertStore({ defaultFilePath: TEST_ALERTS_FILE, env: { UPSTASH_REDIS_REST_URL: 'https://r.upstash.io', UPSTASH_REDIS_REST_TOKEN: 't' } }) instanceof RedisAlertStore);
+    });
+
+    it('refuses to fall back to the read-only filesystem on Vercel', () => {
+      assert.throws(() => getAlertStore({ defaultFilePath: TEST_ALERTS_FILE, env: { VERCEL: '1' } }), /not configured/);
+    });
+
+    it('round-trips alerts through the Redis store without losing concurrent writes', async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = mockRedisFetch();
+      try {
+        const store = new RedisAlertStore('https://r.upstash.io', 't');
+        await Promise.all([
+          store.put({ id: 'a1', createdAt: '2026-01-01', email: 'a@x.com' }),
+          store.put({ id: 'a2', createdAt: '2026-01-02', email: 'b@x.com' })
+        ]);
+        await store.put({ id: 'a1', createdAt: '2026-01-01', email: 'a@x.com', status: 'ACTIVE' });
+        const all = await store.all();
+        assert.deepEqual(all.map(a => a.id), ['a1', 'a2']);
+        assert.equal(all[0].status, 'ACTIVE');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+  });
+
+  describe('Subscribe API Endpoint', () => {
+    it('never returns confirm or unsubscribe tokens to the browser', async () => {
+      const originalFetch = globalThis.fetch;
+      const saved = { url: process.env.KV_REST_API_URL, token: process.env.KV_REST_API_TOKEN };
+      globalThis.fetch = mockRedisFetch();
+      process.env.KV_REST_API_URL = 'https://r.upstash.io';
+      process.env.KV_REST_API_TOKEN = 't';
+      try {
+        const res = mockRes();
+        await subscribeHandler({ method: 'POST', headers: {}, body: { email: 'leak@test.com', gpuId: 'rtx-3090', targetPrice: 600 } }, res);
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.body.success, true);
+        assert.equal(res.body.alert, undefined);
+        assert.doesNotMatch(JSON.stringify(res.body), /[0-9a-f]{8}-[0-9a-f]{4}-/, 'response must not contain any token');
+      } finally {
+        globalThis.fetch = originalFetch;
+        if (saved.url === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = saved.url;
+        if (saved.token === undefined) delete process.env.KV_REST_API_TOKEN; else process.env.KV_REST_API_TOKEN = saved.token;
+      }
     });
   });
 });

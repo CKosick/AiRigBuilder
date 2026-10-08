@@ -4,6 +4,8 @@ import { createBreakEvenCalc } from './components/breakEvenCalc.js';
 import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { GPUS_DATA } from './data/gpus.js';
+import { CLOUD_PROVIDERS } from './data/providers.js';
+import { computeBreakEven } from './utils/breakEven.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
@@ -11,6 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090') || { usedStreetPrice: 718, trend7d: 3.3 };
   const teslaP40 = GPUS_DATA.find(g => g.id === 'tesla-p40') || { usedStreetPrice: 273, pricePerGb: 11.38 };
   const dual3090RigEst = (rtx3090.usedStreetPrice * 2) + 360;
+  // Headline payoff uses the same defaults as the Break-Even calculator (4 hrs/day, 820W, $0.14/kWh)
+  const runpodDual3090 = CLOUD_PROVIDERS.find(p => p.id === 'runpod-dual-3090');
+  const headlinePayoff = computeBreakEven({
+    rigUpfrontCost: dual3090RigEst,
+    dailyUsageHours: 4,
+    hourlyCloudRate: runpodDual3090.hourlyRate,
+    monthlyDiskFee: runpodDual3090.storageCostPerMonth,
+    systemWatts: 820,
+    kwhRate: 0.14
+  });
+  const payoffMonths = Math.round(headlinePayoff.breakEvenMonths);
   const trendArrow = rtx3090.trend7d >= 0 ? `▲ ${rtx3090.trend7d}%` : `▼ ${Math.abs(rtx3090.trend7d)}%`;
   const trendClass = rtx3090.trend7d >= 0 ? 'ticker-val' : 'ticker-drop';
 
@@ -31,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="ticker-item">
           <span>Cloud 70B Break-Even:</span>
-          <span class="ticker-val" style="color: var(--cyan);">5.8 Months</span>
-          <span style="color: var(--text-dim);">(vs RunPod $0.88/hr)</span>
+          <span class="ticker-val" style="color: var(--cyan);">~${payoffMonths} Months</span>
+          <span style="color: var(--text-dim);">(4 hrs/day vs RunPod $${runpodDual3090.hourlyRate.toFixed(2)}/hr)</span>
         </div>
         <div class="ticker-item">
           <span>Cheapest 24GB:</span>
@@ -107,8 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="hero-stat-lbl">Full 70B Rig Cost</div>
           </div>
           <div class="hero-stat-pill">
-            <div class="hero-stat-val">~5.8 Mo</div>
-            <div class="hero-stat-lbl">Cloud Payoff</div>
+            <div class="hero-stat-val">~${payoffMonths} Mo</div>
+            <div class="hero-stat-lbl">Cloud Payoff @ 4 hrs/day</div>
           </div>
         </div>
       </div>

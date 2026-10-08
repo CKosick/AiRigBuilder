@@ -1,6 +1,7 @@
 // Cloud Break-Even Calculator Component (airigbuilder.com)
 // The backlink and traffic engine comparing used local AI rigs vs RunPod/Vast.ai
 import { CLOUD_PROVIDERS } from '../data/providers.js';
+import { computeBreakEven } from '../utils/breakEven.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
 
 // Register Chart.js components
@@ -19,51 +20,15 @@ export function createBreakEvenCalc(container) {
   let chartInstance = null;
 
   function calculate() {
-    // Monthly cloud cost = (hourlyRate * dailyHours * 30.5) + monthlyDiskFee
-    const monthlyCloudRun = hourlyCloudRate * dailyUsageHours * 30.5;
-    const monthlyCloudTotal = monthlyCloudRun + monthlyDiskFee;
-
-    // Monthly local electricity = (Watts / 1000) * dailyHours * 30.5 * kwhRate
-    const monthlyLocalPower = (systemWatts / 1000) * dailyUsageHours * 30.5 * kwhRate;
-
-    // Monthly net savings = monthlyCloudTotal - monthlyLocalPower
-    const monthlyNetSavings = monthlyCloudTotal - monthlyLocalPower;
-
-    // Break-even month = rigUpfrontCost / monthlyNetSavings
-    let breakEvenMonths = 0;
-    if (monthlyNetSavings > 0) {
-      breakEvenMonths = rigUpfrontCost / monthlyNetSavings;
-    } else {
-      breakEvenMonths = Infinity;
-    }
-
-    // 24-month analysis
-    const cloud24Mo = monthlyCloudTotal * 24;
-    const local24Mo = rigUpfrontCost + (monthlyLocalPower * 24);
-    const netCashSavings24Mo = cloud24Mo - local24Mo;
-
-    // Resale value after 2 years
-    const estimatedResaleValue = Math.round(rigUpfrontCost * (resaleRetentionPct / 100));
-    const netEquitySavings24Mo = netCashSavings24Mo + estimatedResaleValue;
-
-    // Hourly comparison
-    const localHourlyPower = (systemWatts / 1000) * kwhRate;
-    const pctCheaper = Math.round(((hourlyCloudRate - localHourlyPower) / hourlyCloudRate) * 100);
-
-    return {
-      monthlyCloudTotal,
-      monthlyLocalPower,
-      monthlyNetSavings,
-      breakEvenMonths,
-      breakEvenDays: Math.round(breakEvenMonths * 30.5),
-      cloud24Mo,
-      local24Mo,
-      netCashSavings24Mo,
-      estimatedResaleValue,
-      netEquitySavings24Mo,
-      localHourlyPower,
-      pctCheaper
-    };
+    return computeBreakEven({
+      rigUpfrontCost,
+      dailyUsageHours,
+      hourlyCloudRate,
+      monthlyDiskFee,
+      systemWatts,
+      kwhRate,
+      resaleRetentionPct
+    });
   }
 
   function render() {

@@ -9,7 +9,13 @@ export default async function handler(req, res) {
     return sendHtmlResponse(res, 400, 'Invalid Token', 'Missing unsubscribe token.', false);
   }
 
-  const result = unsubscribeAlert(token);
+  let result;
+  try {
+    result = await unsubscribeAlert(token);
+  } catch (err) {
+    console.error('API Error in /api/alerts/unsubscribe:', err);
+    return sendHtmlResponse(res, 500, 'Something Went Wrong', 'We could not process your unsubscribe right now. Please try the link again later.', false);
+  }
 
   if (!result.success) {
     return sendHtmlResponse(res, 400, 'Unsubscribe Failed', result.error, false);

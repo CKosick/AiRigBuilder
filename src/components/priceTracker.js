@@ -300,11 +300,9 @@ export function createPriceTracker(container) {
             alertStatus.style.display = 'block';
           }
         } catch (err) {
-          // Graceful fallback if backend is offline or static preview
-          alertStatus.className = 'alert-status-msg success';
-          alertStatus.textContent = `✓ Alert registered for ${email}! A double opt-in confirmation will be sent via Resend.`;
+          alertStatus.className = 'alert-status-msg error';
+          alertStatus.textContent = 'Could not reach the alert service. Your alert was not saved. Please try again in a moment.';
           alertStatus.style.display = 'block';
-          showToast('✓ Alert registered!');
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnText;
@@ -344,7 +342,7 @@ export function createPriceTracker(container) {
             showToast(data.error || 'Failed to create alert.');
           }
         } catch (_) {
-          showToast(`✓ Alert saved for ${activeModalGpu?.name}!`);
+          showToast('Could not reach the alert service. Your alert was not saved.');
         } finally {
           btnSaveAlert.disabled = false;
           btnSaveAlert.textContent = 'Set Alert';

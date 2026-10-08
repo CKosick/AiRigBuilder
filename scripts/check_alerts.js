@@ -10,6 +10,7 @@ async function main() {
 
   const result = await evaluateAndTriggerAlerts(GPUS_DATA);
 
+  console.log(`Alert store: ${result.store}`);
   console.log(`Total alerts in database: ${result.totalAlerts}`);
   console.log(`Active pending-drop alerts: ${result.activeAlerts}`);
   console.log(`Alerts fired in this run: ${result.firedCount}`);

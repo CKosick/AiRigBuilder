@@ -31,22 +31,15 @@ export default async function handler(req, res) {
 
     const { email, gpuId, targetPrice } = body || {};
 
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const proto = req.headers['x-forwarded-proto'] || 'https';
-    const appUrl = host ? `${proto}://${host}` : undefined;
-
-    const result = await registerAlert({
-      email,
-      gpuId,
-      targetPrice,
-      appUrl
-    });
+    // Email links use APP_URL (see alertService), never the request's Host header
+    const result = await registerAlert({ email, gpuId, targetPrice });
 
     if (!result.success) {
-      return res.status(400).json(result);
+      return res.status(400).json({ success: false, error: result.error });
     }
 
-    return res.status(200).json(result);
+    // Never return the alert record: it holds the confirm/unsubscribe tokens
+    return res.status(200).json({ success: true, message: result.message });
   } catch (err) {
     console.error('API Error in /api/alerts/subscribe:', err);
     return res.status(500).json({ success: false, error: 'Internal server error processing alert subscription.' });
