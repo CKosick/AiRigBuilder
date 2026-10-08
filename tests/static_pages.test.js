@@ -173,6 +173,8 @@ describe('Generated page content without JavaScript', () => {
     for (const m of MODELS_DATA) {
       const text = visibleAppText(byPath[`/builds/${m.id}`]);
       assert.ok(text.includes(`${m.name}: Quantization Options`), `${m.id} quant heading`);
+      // contextCostPer8k in models.js doesn't match KV-cache math (e.g. DeepSeek V3 4.8 vs ~0.6 GB), so it isn't shown
+      assert.ok(!text.includes('per 8K tokens'), `${m.id} shows no unverified context-cost figure`);
       for (const q of m.quants) {
         assert.ok(text.includes(`${q.vram} GB`) && text.includes(q.speed) && text.includes(decode(q.quality)), `${m.id} ${q.name}`);
       }
