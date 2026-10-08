@@ -69,6 +69,12 @@ export const ebayCustomId = AFFILIATE_CONFIG.ebayCustomId;
 export const ebayParams = AFFILIATE_CONFIG.ebayParams;
 
 /**
+ * rel for every outbound merchant link: Google asks for rel="sponsored" on affiliate/paid links.
+ * Used on all merchant links (eBay, Amazon, B&H) since the footer discloses all three as referral partners.
+ */
+export const AFFILIATE_LINK_REL = 'sponsored noopener noreferrer';
+
+/**
  * Attaches the Amazon Associates tracking tag to an Amazon URL.
  * Preserves existing search params and updates or adds the 'tag' parameter.
  *

@@ -7,6 +7,9 @@ import { BUILDS_DATA } from './data/builds.js';
 export const SITE_URL = 'https://airigbuilder.com';
 export const SITE_NAME = 'AI Rig Builder';
 
+// The model the home page shows. Its /builds page would duplicate the home page, so it points there.
+export const DEFAULT_MODEL_ID = 'llama-3.3-70b';
+
 // The four tabbed sections. GPU detail pages live under the tracker tab.
 export const SECTIONS = [
   { view: 'builds', path: '/builds', label: 'Build Sheets' },
@@ -15,7 +18,8 @@ export const SECTIONS = [
   { view: 'guide', path: '/guide', label: 'Hardware Guide' }
 ];
 
-export const buildPath = (modelId) => `/builds/${modelId}`;
+/** Canonical URL path of a model's build sheet (the default model's is the home page). */
+export const buildPath = (modelId) => (modelId === DEFAULT_MODEL_ID ? '/' : `/builds/${modelId}`);
 export const gpuPath = (gpuId) => `/gpu/${gpuId}`;
 
 /** The tab a route belongs to ('gpu' pages sit under the tracker tab). */
@@ -36,6 +40,8 @@ export function parseRoute(pathname) {
 
   if (p === '/') return { view: 'builds', path: '/', home: true };
 
+  if (p === '/builds') return { view: 'builds', path: p, index: true };
+
   const section = SECTIONS.find(s => s.path === p);
   if (section) return { view: section.view, path: p };
 
@@ -54,13 +60,13 @@ export function legacyHashRoute(hash) {
   return section ? parseRoute(section.path) : null;
 }
 
-/** Every page the site serves, in sitemap order. */
+/** Every page the site serves (including /builds/llama-3.3-70b, which exists for old links but is not canonical). */
 export function allRoutes() {
   return [
     parseRoute('/'),
     ...SECTIONS.map(s => parseRoute(s.path)),
     ...GPUS_DATA.map(g => parseRoute(gpuPath(g.id))),
-    ...MODELS_DATA.filter(m => BUILDS_DATA[m.id]).map(m => parseRoute(buildPath(m.id)))
+    ...MODELS_DATA.filter(m => BUILDS_DATA[m.id]).map(m => parseRoute(`/builds/${m.id}`))
   ];
 }
 
@@ -99,8 +105,8 @@ export function pageMeta(route) {
     crumbs.push({ name: 'Build Sheets', path: '/builds' }, { name: model.name, path: route.path });
   } else if (route.view === 'builds') {
     meta = {
-      title: `Local AI Build Sheets for ${MODELS_DATA.length} Models: Parts & True Cost | ${SITE_NAME}`,
-      description: `Used, balanced and new hardware tiers for ${MODELS_DATA.length} local LLMs, from Llama 3.3 70B to Phi-4 Mini, with parts lists, power draw and first-year cost.`
+      title: `Local AI Build Sheets: Hardware for ${MODELS_DATA.length} LLMs Compared | ${SITE_NAME}`,
+      description: `Every local LLM build sheet in one table: VRAM needed, best quant, speed and the cheapest rig for ${MODELS_DATA.length} models from Llama 3.3 70B to Phi-4 Mini.`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' });
   } else if (route.view === 'calculator') {
@@ -134,7 +140,10 @@ export function pageMeta(route) {
   return {
     ...meta,
     description: clampDescription(meta.description),
-    canonical: `${SITE_URL}${route.path}`,
+    canonical: `${SITE_URL}${route.modelId ? buildPath(route.modelId) : route.path}`,
     breadcrumbs: crumbs
   };
 }
+
+/** False for pages that point their canonical elsewhere (kept out of the sitemap). */
+export const isCanonical = (route) => pageMeta(route).canonical === `${SITE_URL}${route.path}`;

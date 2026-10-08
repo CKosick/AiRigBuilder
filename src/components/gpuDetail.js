@@ -1,7 +1,7 @@
 // GPU detail page (/gpu/:id): price, range, $/GB, history and build notes for one tracked GPU.
 // Rendered at build time into a static page; in the browser the chart is drawn on top.
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../data/gpus.js';
-import { formatAffiliateUrl } from '../config/affiliates.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { fillMonthGaps } from '../utils/priceHistory.js';
 import { gpuPath, shortGpuName } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
@@ -43,7 +43,7 @@ export function renderGpuDetailHtml(gpu) {
           <h2 id="gpu-detail-title">${gpu.name} Used Price</h2>
           <p>${gpu.aiRating} · ${gpu.vram} GB ${gpu.vramType} · Prices last updated ${formatDate(GPUS_UPDATED_AT)}</p>
         </div>
-        <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold')}" target="_blank" rel="sponsored noopener noreferrer" class="btn-primary">
+        <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold')}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary">
           🔍 View Live eBay Sold Listings →
         </a>
       </div>

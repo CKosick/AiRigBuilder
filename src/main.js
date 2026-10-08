@@ -1,11 +1,12 @@
 import './style.css';
 import { renderShell } from './components/shell.js';
-import { createModelPicker, DEFAULT_MODEL_ID } from './components/modelPicker.js';
+import { createModelPicker } from './components/modelPicker.js';
 import { createBreakEvenCalc } from './components/breakEvenCalc.js';
 import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
-import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS } from './routes.js';
+import { createBuildsIndex } from './components/buildsIndex.js';
+import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
@@ -27,18 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const viewGuide = document.getElementById('view-guide');
   const trackerRoot = document.getElementById('tracker-root');
   const gpuDetailRoot = document.getElementById('gpu-detail-root');
+  const buildsIndexRoot = document.getElementById('builds-index-root');
+  const modelPickerRoot = document.getElementById('model-picker-root');
 
   // Initialize Subcomponents
   let breakEvenController = null;
 
-  const modelPickerController = createModelPicker(viewBuilds, (rigData) => {
+  const modelPickerController = createModelPicker(modelPickerRoot, (rigData) => {
     navigate(parseRoute('/calculator'));
     if (breakEvenController) {
       breakEvenController.preloadRig(rigData);
     }
   }, {
     initialModelId: route.modelId,
-    // Picking a model gives the page its shareable /builds/:model URL without adding history entries
+    // Picking a model gives the page its shareable /builds/:model URL (the home page for the default
+    // model) without adding history entries
     onModelChange: (modelId) => {
       if (route.view === 'builds') navigate(parseRoute(buildPath(modelId)), { replace: true, scroll: false });
     }
@@ -47,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   breakEvenController = createBreakEvenCalc(viewCalculator);
   createPriceTracker(trackerRoot);
   createHardwareGuide(viewGuide);
+  createBuildsIndex(buildsIndexRoot);
   const gpuDetailController = createGpuDetail(gpuDetailRoot);
 
   // Tab switching logic
@@ -87,7 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
     trackerRoot.hidden = isGpu;
     gpuDetailRoot.hidden = !isGpu;
     if (isGpu) gpuDetailController.show(next.gpuId);
-    if (next.view === 'builds' && next.modelId) modelPickerController.selectModel(next.modelId);
+    buildsIndexRoot.hidden = !next.index;
+    modelPickerRoot.hidden = Boolean(next.index);
+    // The home page always shows the default model's build sheet
+    if (next.view === 'builds' && !next.index) modelPickerController.selectModel(next.modelId || DEFAULT_MODEL_ID);
 
     const meta = pageMeta(next);
     document.title = meta.title;
@@ -108,13 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (scroll) window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   }
 
-  // The Build Sheets tab keeps the model you were looking at
+  // The Build Sheets tab opens the build sheet for the model you were looking at
+  // (the /builds index is reached through its links: footer, breadcrumbs, the picker)
   function routeForTab(viewId) {
     const section = SECTIONS.find(s => `view-${s.view}` === viewId);
-    if (section.view === 'builds') {
-      const modelId = modelPickerController.getModelId();
-      return parseRoute(modelId === DEFAULT_MODEL_ID ? '/builds' : buildPath(modelId));
-    }
+    if (section.view === 'builds') return parseRoute(buildPath(modelPickerController.getModelId()));
     return parseRoute(section.path);
   }
 

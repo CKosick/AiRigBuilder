@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { allRoutes, pageMeta, parseRoute, legacyHashRoute, SITE_URL } from '../src/routes.js';
+import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonical, DEFAULT_MODEL_ID, SITE_URL } from '../src/routes.js';
 import { renderAllPages, renderPage, renderNotFound, renderSitemap, outputFileFor } from '../scripts/prerender.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
@@ -25,6 +25,9 @@ function visibleAppText(html) {
 
 const pages = renderAllPages(template);
 const byPath = Object.fromEntries(pages.map(p => [p.route.path, p.html]));
+// The default model's /builds page duplicates the home page, so its canonical is /
+const canonicalFor = (route) => `${SITE_URL}${route.modelId ? buildPath(route.modelId) : route.path}`;
+const canonicalPages = pages.filter(p => isCanonical(p.route));
 
 describe('URL structure', () => {
   it('has a page for home, each section, each GPU and each model build sheet', () => {
@@ -38,6 +41,7 @@ describe('URL structure', () => {
 
   it('parses paths, trailing slashes and .html, and rejects unknown pages', () => {
     assert.deepEqual(parseRoute('/'), { view: 'builds', path: '/', home: true });
+    assert.deepEqual(parseRoute('/builds'), { view: 'builds', path: '/builds', index: true });
     assert.equal(parseRoute('/tracker/').path, '/tracker');
     assert.equal(parseRoute('/guide.html').path, '/guide');
     assert.equal(parseRoute('/gpu/rtx-3090').gpuId, 'rtx-3090');
@@ -79,7 +83,7 @@ describe('Generated page <head> SEO', () => {
       assert.ok(title.length >= 30 && title.length <= 80, `title length ${title.length}: ${title}`);
       const desc = attr(html, /<meta\s+name="description"\s+content="([^"]+)"/);
       assert.ok(desc.length >= 80 && desc.length <= 165, `description length ${desc.length}: ${desc}`);
-      const canonical = `${SITE_URL}${route.path}`;
+      const canonical = canonicalFor(route);
       assert.equal(attr(html, /<link\s+rel="canonical"\s+href="([^"]+)"/), canonical);
       assert.equal(attr(html, /<meta\s+property="og:url"\s+content="([^"]+)"/), canonical);
       assert.equal((html.match(/rel="canonical"/g) || []).length, 1, 'exactly one canonical');
@@ -98,14 +102,19 @@ describe('Generated page <head> SEO', () => {
         const crumbs = json['@graph'].find(n => n['@type'] === 'BreadcrumbList');
         assert.ok(crumbs, 'BreadcrumbList');
         assert.equal(crumbs.itemListElement.at(-1).item, `${SITE_URL}${route.path}`);
-        assert.equal(json['@graph'].find(n => n['@type'] === 'WebPage').url, `${SITE_URL}${route.path}`);
+        assert.equal(json['@graph'].find(n => n['@type'] === 'WebPage').url, canonicalFor(route));
       }
     });
   }
 
-  it('titles, descriptions and canonicals are unique across pages', () => {
+  it('only the default model build page points its canonical elsewhere (to the home page)', () => {
+    assert.deepEqual(pages.filter(p => !isCanonical(p.route)).map(p => p.route.path), [`/builds/${DEFAULT_MODEL_ID}`]);
+    assert.ok(byPath[`/builds/${DEFAULT_MODEL_ID}`].includes(`<link rel="canonical" href="${SITE_URL}/" />`));
+  });
+
+  it('titles, descriptions and canonicals are unique across canonical pages', () => {
     for (const pick of [titleOf, (h) => attr(h, /<meta\s+name="description"\s+content="([^"]+)"/), (h) => attr(h, /rel="canonical"\s+href="([^"]+)"/)]) {
-      const values = pages.map(p => pick(p.html));
+      const values = canonicalPages.map(p => pick(p.html));
       assert.equal(new Set(values).size, values.length);
     }
   });
@@ -148,6 +157,41 @@ describe('Generated page content without JavaScript', () => {
     }
   });
 
+  it('/builds is an index of every build sheet, not a copy of the home page', () => {
+    const html = byPath['/builds'];
+    const text = visibleAppText(html);
+    assert.ok(text.includes(`Local AI Build Sheets for ${MODELS_DATA.length} Models`));
+    for (const m of MODELS_DATA) {
+      assert.ok(html.includes(`href="${buildPath(m.id)}"><`) || html.includes(`<a href="${buildPath(m.id)}">${m.name}</a>`), `${m.id} linked`);
+      assert.ok(text.includes(BUILDS_DATA[m.id].vramTarget), `${m.id} VRAM target`);
+    }
+    assert.ok(!html.includes('model-pill-btn'), 'the interactive picker is not pre-rendered on the index');
+    assert.ok(byPath['/'].includes('model-pill-btn') && !byPath['/'].includes('builds-index-group'), 'home shows the picker, not the index');
+  });
+
+  it('build sheet pages that share a parts list still differ: each shows its own quant table', () => {
+    for (const m of MODELS_DATA) {
+      const text = visibleAppText(byPath[`/builds/${m.id}`]);
+      assert.ok(text.includes(`${m.name}: Quantization Options`), `${m.id} quant heading`);
+      for (const q of m.quants) {
+        assert.ok(text.includes(`${q.vram} GB`) && text.includes(q.speed) && text.includes(decode(q.quality)), `${m.id} ${q.name}`);
+      }
+    }
+  });
+
+  it('every outbound merchant link is marked rel=sponsored', () => {
+    let checked = 0;
+    for (const { route, html } of pages) {
+      for (const [tag] of html.matchAll(/<a\s[^>]*href="https?:\/\/(?!airigbuilder\.com)[^"]*"[^>]*>/g)) {
+        if (/fonts\.|cloudflare/.test(tag)) continue;
+        assert.match(tag, /rel="[^"]*\bsponsored\b/, `${route.path}: ${tag}`);
+        checked++;
+      }
+      assert.ok(!/id="modal-ebay-link"/.test(html) || /rel="sponsored[^"]*" id="modal-ebay-link"/.test(html), `${route.path}: tracker modal eBay link`);
+    }
+    assert.ok(checked > 100, `checked ${checked} merchant links`);
+  });
+
   it('each build sheet page shows its model, its tiers and the parts list', () => {
     for (const m of MODELS_DATA) {
       const text = visibleAppText(byPath[`/builds/${m.id}`]);
@@ -167,7 +211,7 @@ describe('Generated page content without JavaScript', () => {
 
   it('every page links to every build sheet and GPU page (crawlable internal links)', () => {
     const html = byPath['/guide'];
-    for (const m of MODELS_DATA) assert.ok(html.includes(`href="/builds/${m.id}"`), m.id);
+    for (const m of MODELS_DATA) assert.ok(html.includes(`href="${buildPath(m.id)}"`), m.id);
     for (const g of GPUS_DATA) assert.ok(html.includes(`href="/gpu/${g.id}"`), g.id);
     assert.ok(!/href="#(builds|calculator|tracker|guide)"/.test(html), 'no #hash navigation links left');
   });
@@ -189,10 +233,12 @@ describe('404, sitemap and hosting config', () => {
     assert.ok(html.includes('href="/tracker"'));
   });
 
-  it('sitemap lists every page and nothing else', () => {
+  it('sitemap lists every canonical page and nothing else', () => {
     const sitemap = renderSitemap();
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-    assert.deepEqual(locs, allRoutes().map(r => `${SITE_URL}${r.path}`));
+    assert.deepEqual(locs, allRoutes().filter(isCanonical).map(r => `${SITE_URL}${r.path}`));
+    assert.ok(!locs.includes(`${SITE_URL}/builds/${DEFAULT_MODEL_ID}`));
+    assert.equal(locs.length, 4 + GPUS_DATA.length + MODELS_DATA.length);
     assert.ok(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(sitemap));
   });
 
@@ -223,7 +269,7 @@ describe('npm run build output', () => {
       assert.ok(fs.existsSync(file), `missing ${outputFileFor(route)}`);
       const html = fs.readFileSync(file, 'utf-8');
       assert.ok(/<script type="module" crossorigin src="\/assets\/[^"]+\.js">/.test(html), `${route.path} loads the built bundle`);
-      assert.ok(html.includes(`<link rel="canonical" href="${SITE_URL}${route.path}" />`), `${route.path} canonical`);
+      assert.ok(html.includes(`<link rel="canonical" href="${canonicalFor(route)}" />`), `${route.path} canonical`);
       assert.ok(html.includes('class="view-section active"'), `${route.path} has rendered content`);
     }
     assert.ok(fs.existsSync(path.join(outDir, 'sitemap.xml')));

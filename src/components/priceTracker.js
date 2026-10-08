@@ -1,7 +1,7 @@
 // Used GPU Price Tracker Component (airigbuilder.com)
 // The SEO moat tracking street prices for the 10 GPUs that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
-import { formatAffiliateUrl } from '../config/affiliates.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
 import { gpuPath } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
@@ -202,7 +202,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             </div>
 
             <div style="margin-top: 1rem; text-align: right;">
-              <a href="#" target="_blank" rel="noopener noreferrer" id="modal-ebay-link" class="btn-secondary" style="font-size: 0.82rem;">
+              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary" style="font-size: 0.82rem;">
                 🔍 View Live eBay Sold Listings →
               </a>
             </div>

@@ -89,12 +89,13 @@ Vercel automatically redeploys `airigbuilder.com` with the new prices. The build
 | URL | Page |
 | --- | --- |
 | `/` | Home (Build Sheets view) |
-| `/builds`, `/builds/:model` | Build sheets, one page per model in `src/data/models.js` |
+| `/builds` | Index comparing every build sheet, grouped by VRAM class |
+| `/builds/:model` | One build sheet per model in `src/data/models.js` (`/builds/llama-3.3-70b` is the home page's content, so its canonical is `/`) |
 | `/calculator` | Break-even calculator |
 | `/tracker`, `/gpu/:id` | Price tracker, one page per GPU in `src/data/gpus.js` |
 | `/guide` | Hardware guide |
 
-Old `/#tracker`-style links redirect in the browser. Unknown paths get `404.html`.
+Old `/#tracker`-style links redirect in the browser. Unknown paths get `404.html`. Every merchant link uses `rel="sponsored"` (`AFFILIATE_LINK_REL` in `src/config/affiliates.js`).
 
 ---
 

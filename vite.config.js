@@ -17,7 +17,7 @@ function prerenderPages() {
       const template = String(index.source);
 
       // Imported at build time (not bundled into the config) so it reads the data files as they are now
-      const prerender = await import(pathToFileURL(path.resolve(__dirname, 'scripts/prerender.js')).href);
+      const prerender = await import(pathToFileURL(path.resolve(import.meta.dirname, 'scripts/prerender.js')).href);
 
       for (const page of prerender.renderAllPages(template)) {
         if (page.fileName === 'index.html') index.source = page.html;

@@ -32,7 +32,7 @@ function headlineStats() {
 
 /**
  * @param route  a route from parseRoute(); decides which tab and panel are active
- * @param panels optional pre-rendered panel HTML keyed by view ('builds', 'calculator', 'tracker', 'guide', 'gpu')
+ * @param panels optional pre-rendered panel HTML keyed by view ('buildsIndex', 'builds', 'calculator', 'tracker', 'guide', 'gpu')
  */
 export function renderShell(route, panels = {}) {
   const { rtx3090, teslaP40, dual3090RigEst, runpodDual3090, payoffMonths } = headlineStats();
@@ -40,6 +40,7 @@ export function renderShell(route, panels = {}) {
   const trendClass = rtx3090.trend7d >= 0 ? 'ticker-val' : 'ticker-drop';
   const activeTab = tabViewFor(route);
   const isGpu = route.view === 'gpu';
+  const isBuildsIndex = Boolean(route.index);
 
   const tabs = SECTIONS.map(s => {
     const active = s.view === activeTab;
@@ -146,7 +147,7 @@ export function renderShell(route, panels = {}) {
 
     <!-- Main Workspace Container -->
     <main class="main-wrapper" id="main-content" tabindex="-1">
-      ${panel('builds', panels.builds || '')}
+      ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div>`)}
       ${panel('calculator', panels.calculator || '')}
       ${panel('tracker', `<div id="tracker-root"${isGpu ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div>`)}
       ${panel('guide', panels.guide || '')}

@@ -1,10 +1,9 @@
 // Model Picker & Build Sheet Component
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
-import { formatAffiliateUrl } from '../config/affiliates.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
-
-export const DEFAULT_MODEL_ID = 'llama-3.3-70b';
+import { DEFAULT_MODEL_ID } from '../routes.js';
 
 export const MODEL_PICKER_DEFAULTS = {
   activeModelId: DEFAULT_MODEL_ID,
@@ -120,7 +119,7 @@ export function renderModelPickerHtml(state = {}) {
     <div class="model-selector-bar">
       <div class="selector-label">
         <span>1. Select Target AI Model</span>
-        <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} model profiles loaded (${filteredModels.length} shown)</span>
+        <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} model profiles loaded (${filteredModels.length} shown) · <a href="/builds" class="builds-index-link">Compare all build sheets →</a></span>
       </div>
       
       <!-- Filter and Search Row -->
@@ -191,6 +190,38 @@ export function renderModelPickerHtml(state = {}) {
         <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">${currentModel.cloudEquivalent.split('(')[0]}</div>
       </div>
     </div>
+
+    <!-- Model-specific quantization options -->
+    ${currentModel.quants && currentModel.quants.length ? `
+    <div class="quant-options">
+      <div class="selector-label">
+        <span>${currentModel.name}: Quantization Options</span>
+        ${currentModel.contextCostPer8k ? `<span style="color: var(--text-muted); font-size: 0.75rem;">Context adds ~${currentModel.contextCostPer8k} GB VRAM per 8K tokens</span>` : ''}
+      </div>
+      <div class="parts-table-wrap">
+        <table class="parts-table">
+          <thead>
+            <tr>
+              <th scope="col">Quant</th>
+              <th scope="col">VRAM for Weights</th>
+              <th scope="col">Typical Speed</th>
+              <th scope="col">Quality Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${currentModel.quants.map(q => `
+              <tr>
+                <td><strong>${q.name}</strong>${q.recommended ? ' <span class="condition-badge condition-new">Recommended</span>' : ''}</td>
+                <td class="part-price-cell">${q.vram} GB</td>
+                <td>${q.speed}</td>
+                <td>${q.quality}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    ` : ''}
 
     <!-- 3 Tier Selector Cards -->
     <div class="selector-label">
@@ -278,7 +309,7 @@ export function renderModelPickerHtml(state = {}) {
                         btnLabel = '🍎 Apple';
                       }
                       return `
-                        <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="noopener noreferrer" class="btn-merchant">
+                        <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-merchant">
                           ${btnLabel}
                         </a>
                       `;

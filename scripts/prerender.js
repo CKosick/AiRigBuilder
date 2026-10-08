@@ -2,9 +2,10 @@
 // each with its own <title>, description, canonical, Open Graph tags, JSON-LD and the page's
 // content already in #app (readable without JavaScript). The browser app then takes over the
 // same markup. Called from the Vite plugin in vite.config.js; the tests call it directly.
-import { allRoutes, pageMeta, parseRoute, SECTIONS, SITE_URL, SITE_NAME } from '../src/routes.js';
+import { allRoutes, pageMeta, parseRoute, isCanonical, SECTIONS, SITE_URL, SITE_NAME } from '../src/routes.js';
 import { renderShell } from '../src/components/shell.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
+import { renderBuildsIndexHtml } from '../src/components/buildsIndex.js';
 import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
@@ -22,7 +23,7 @@ export function outputFileFor(route) {
 
 function panelsFor(route) {
   switch (route.view) {
-    case 'builds': return { builds: renderModelPickerHtml({ activeModelId: route.modelId }) };
+    case 'builds': return route.index ? { buildsIndex: renderBuildsIndexHtml() } : { builds: renderModelPickerHtml({ activeModelId: route.modelId }) };
     case 'calculator': return { calculator: renderBreakEvenHtml() };
     case 'tracker': return { tracker: renderPriceTrackerHtml() };
     case 'guide': return { guide: renderHardwareGuideHtml() };
@@ -122,8 +123,8 @@ export function renderNotFound(template) {
 
 const SITEMAP_HINTS = { home: ['daily', '1.0'], tracker: ['daily', '0.9'], gpu: ['weekly', '0.8'], builds: ['weekly', '0.9'], calculator: ['weekly', '0.9'], guide: ['monthly', '0.8'], buildSheet: ['weekly', '0.7'] };
 
-/** sitemap.xml listing every real URL; lastmod is the last weekly price update. */
-export function renderSitemap(routes = allRoutes()) {
+/** sitemap.xml listing every canonical URL; lastmod is the last weekly price update. */
+export function renderSitemap(routes = allRoutes().filter(isCanonical)) {
   const lastmod = GPUS_UPDATED_AT.slice(0, 10);
   const urls = routes.map(route => {
     const key = route.home ? 'home' : (route.modelId ? 'buildSheet' : route.view);
