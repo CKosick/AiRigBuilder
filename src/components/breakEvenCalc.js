@@ -114,7 +114,7 @@ export function createBreakEvenCalc(container) {
               <span>Local AI Rig Total Build Cost</span>
               <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
             </div>
-            <input type="range" id="input-rig-cost" min="400" max="4500" step="10" value="${rigUpfrontCost}">
+            <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="4500" step="10" value="${rigUpfrontCost}">
             <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
               Includes used GPUs, motherboard, PSU, RAM, storage
             </div>
@@ -126,7 +126,7 @@ export function createBreakEvenCalc(container) {
               <span>Average Daily Usage</span>
               <span class="calc-badge-val" id="badge-daily-hours">${dailyUsageHours} hrs / day</span>
             </div>
-            <input type="range" id="input-daily-hours" min="1" max="24" step="0.5" value="${dailyUsageHours}">
+            <input type="range" id="input-daily-hours" aria-label="Average daily usage (hours per day)" min="1" max="24" step="0.5" value="${dailyUsageHours}">
             <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
               Active prompt eval + token streaming + batch agents
             </div>
@@ -137,7 +137,7 @@ export function createBreakEvenCalc(container) {
             <div class="calc-input-label">
               <span>Cloud Provider Comparison</span>
             </div>
-            <select class="calc-select" id="select-provider">
+            <select class="calc-select" id="select-provider" aria-label="Cloud provider comparison">
               ${CLOUD_PROVIDERS.map(p => `
                 <option value="${p.id}" ${p.id === selectedProviderId ? 'selected' : ''}>
                   ${p.name} ($${p.hourlyRate.toFixed(2)}/hr)
@@ -153,13 +153,13 @@ export function createBreakEvenCalc(container) {
               <div class="calc-input-label">
                 <span>Cloud $/hr</span>
               </div>
-              <input type="number" class="calc-text-input" id="input-hourly-rate" step="0.05" min="0.10" max="10.00" value="${hourlyCloudRate.toFixed(2)}">
+              <input type="number" class="calc-text-input" id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="10.00" value="${hourlyCloudRate.toFixed(2)}">
             </div>
             <div>
               <div class="calc-input-label">
                 <span>Storage $/mo</span>
               </div>
-              <input type="number" class="calc-text-input" id="input-disk-fee" step="1" min="0" max="50" value="${monthlyDiskFee.toFixed(2)}">
+              <input type="number" class="calc-text-input" id="input-disk-fee" aria-label="Cloud storage (dollars per month)" step="1" min="0" max="50" value="${monthlyDiskFee.toFixed(2)}">
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export function createBreakEvenCalc(container) {
               <span>Rig Load Power Draw</span>
               <span class="calc-badge-val" id="badge-watts">${systemWatts} Watts</span>
             </div>
-            <input type="range" id="input-system-watts" min="150" max="1400" step="25" value="${systemWatts}">
+            <input type="range" id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="1400" step="25" value="${systemWatts}">
           </div>
 
           <div class="calc-input-block">
@@ -177,7 +177,7 @@ export function createBreakEvenCalc(container) {
               <span>Electricity Cost</span>
               <span class="calc-badge-val" id="badge-kwh">$${kwhRate.toFixed(2)} / kWh</span>
             </div>
-            <input type="range" id="input-kwh" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
+            <input type="range" id="input-kwh" aria-label="Electricity cost (dollars per kWh)" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
           </div>
 
           <!-- Resale Equity Retention -->
@@ -186,7 +186,7 @@ export function createBreakEvenCalc(container) {
               <span>Used Hardware Resale Value (2 Yrs)</span>
               <span class="calc-badge-val" id="badge-resale">${resaleRetentionPct}%</span>
             </div>
-            <input type="range" id="input-resale" min="30" max="85" step="5" value="${resaleRetentionPct}">
+            <input type="range" id="input-resale" aria-label="Used hardware resale value after 2 years (percent)" min="30" max="85" step="5" value="${resaleRetentionPct}">
             <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
               Used RTX 3090 cards historically hold ~65-75% value over 24 months
             </div>
@@ -218,7 +218,7 @@ export function createBreakEvenCalc(container) {
           </div>
 
           <div class="chart-canvas-container">
-            <canvas id="break-even-chart"></canvas>
+            <canvas id="break-even-chart" role="img" aria-label="Cumulative spend over 24 months: cloud rental versus local rig"></canvas>
           </div>
 
           <!-- Bottom Narrative & Sharing -->
@@ -442,6 +442,7 @@ export function createBreakEvenCalc(container) {
 
     const toastBox = document.createElement('div');
     toastBox.className = 'toast-container';
+    toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
         <span>✓</span>

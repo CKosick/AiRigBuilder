@@ -34,7 +34,7 @@ describe('SEO & Structured Data Verification Tests', () => {
   });
 
   it('verifies OpenGraph and Twitter card social metadata', () => {
-    assert.ok(indexHtml.includes('property="og:image" content="https://airigbuilder.com/og-image.png"'), 'Missing og:image');
+    assert.ok(indexHtml.includes('property="og:image" content="https://airigbuilder.com/og-image.jpg"'), 'Missing og:image');
     assert.ok(indexHtml.includes('name="twitter:card" content="summary_large_image"'), 'Missing twitter:card');
     assert.ok(indexHtml.includes('property="og:site_name" content="AI Rig Builder"'), 'Missing og:site_name');
   });

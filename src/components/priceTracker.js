@@ -2,6 +2,7 @@
 // The SEO moat tracking street prices for the 10 GPUs that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
 import { formatAffiliateUrl } from '../config/affiliates.js';
+import { preserveFocus } from '../utils/focus.js';
 import { fillMonthGaps } from '../utils/priceHistory.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
 
@@ -12,6 +13,7 @@ export function createPriceTracker(container) {
   let sortAsc = true; // default ascending for pricePerGb ($/GB cheapest first)
   let activeModalGpu = null;
   let modalChartInstance = null;
+  let modalReturnFocus = null;
 
   function getSortedGpus() {
     return [...GPUS_DATA].sort((a, b) => {
@@ -38,6 +40,7 @@ export function createPriceTracker(container) {
   function render() {
     const gpus = getSortedGpus();
 
+    const restoreFocus = preserveFocus(container);
     container.innerHTML = `
       <div class="tracker-header-row">
         <div class="tracker-title">
@@ -46,16 +49,16 @@ export function createPriceTracker(container) {
         </div>
         <div class="tracker-filter-group">
           <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 4px; font-weight: 700;">SORT BY:</span>
-          <button class="filter-btn ${sortBy === 'pricePerGb' ? 'active' : ''}" data-sort="pricePerGb">
+          <button class="filter-btn ${sortBy === 'pricePerGb' ? 'active' : ''}" data-sort="pricePerGb" aria-pressed="${sortBy === 'pricePerGb'}">
             $/GB VRAM ${sortBy === 'pricePerGb' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
-          <button class="filter-btn ${sortBy === 'price' ? 'active' : ''}" data-sort="price">
+          <button class="filter-btn ${sortBy === 'price' ? 'active' : ''}" data-sort="price" aria-pressed="${sortBy === 'price'}">
             Street Price ${sortBy === 'price' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
-          <button class="filter-btn ${sortBy === 'vram' ? 'active' : ''}" data-sort="vram">
+          <button class="filter-btn ${sortBy === 'vram' ? 'active' : ''}" data-sort="vram" aria-pressed="${sortBy === 'vram'}">
             VRAM ${sortBy === 'vram' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
-          <button class="filter-btn ${sortBy === 'bandwidth' ? 'active' : ''}" data-sort="bandwidth">
+          <button class="filter-btn ${sortBy === 'bandwidth' ? 'active' : ''}" data-sort="bandwidth" aria-pressed="${sortBy === 'bandwidth'}">
             Bandwidth ${sortBy === 'bandwidth' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
         </div>
@@ -85,7 +88,7 @@ export function createPriceTracker(container) {
             </div>
             <div class="alert-input-group alert-email-group">
               <label for="alert-email-input">Your Email</label>
-              <input type="email" id="alert-email-input" required placeholder="you@example.com" class="alert-input">
+              <input type="email" id="alert-email-input" autocomplete="email" required placeholder="you@example.com" class="alert-input">
             </div>
             <div class="alert-action-group">
               <button type="submit" class="btn-primary btn-alert-submit" id="btn-submit-tracker-alert">
@@ -93,7 +96,7 @@ export function createPriceTracker(container) {
               </button>
             </div>
           </form>
-          <div class="alert-status-msg" id="alert-status-msg" style="display: none;"></div>
+          <div class="alert-status-msg" id="alert-status-msg" role="status" aria-live="polite" style="display: none;"></div>
         </div>
       </div>
 
@@ -146,7 +149,7 @@ export function createPriceTracker(container) {
                     </span>
                   </td>
                   <td style="text-align: right; white-space: nowrap;">
-                    <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" style="padding: 5px 10px; font-size: 0.75rem;">
+                    <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
                       📈 History
                     </button>
                   </td>
@@ -158,20 +161,20 @@ export function createPriceTracker(container) {
       </div>
 
       <!-- Price History Modal -->
-      <div class="modal-backdrop" id="gpu-modal-backdrop">
-        <div class="modal-dialog">
+      <div class="modal-backdrop" id="gpu-modal-backdrop" hidden>
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-gpu-title" aria-describedby="modal-gpu-subtitle">
           <div class="modal-header">
             <div>
               <h3 id="modal-gpu-title" style="color: var(--text-highlight); font-size: 1.15rem; font-weight: 800;"></h3>
               <p id="modal-gpu-subtitle" style="font-size: 0.8rem; color: var(--text-muted);"></p>
             </div>
-            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            <button class="modal-close-btn" id="modal-close-btn" aria-label="Close price history">&times;</button>
           </div>
           <div class="modal-body">
             <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="modal-gpu-summary"></div>
 
             <div style="height: 240px; margin-bottom: 1.5rem; position: relative;">
-              <canvas id="modal-history-chart"></canvas>
+              <canvas id="modal-history-chart" role="img" aria-label="Monthly average sold price chart"></canvas>
             </div>
 
             <!-- Pros & Cons -->
@@ -195,9 +198,9 @@ export function createPriceTracker(container) {
               <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 8px;">
                   <span style="color: var(--text-dim); font-size: 0.8rem;">$</span>
-                  <input type="number" id="modal-target-price-input" style="width: 75px; background: transparent; border: none; color: var(--text-main); font-size: 0.8rem; padding: 6px 4px; outline: none;" placeholder="Target">
+                  <input type="number" id="modal-target-price-input" aria-label="Target price in dollars" style="width: 75px; background: transparent; border: none; color: var(--text-main); font-size: 0.8rem; padding: 6px 4px;" placeholder="Target">
                 </div>
-                <input type="email" id="modal-email-input" placeholder="you@domain.com" style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 10px; border-radius: var(--radius-sm); outline: none;">
+                <input type="email" id="modal-email-input" aria-label="Your email" autocomplete="email" placeholder="you@domain.com" style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 10px; border-radius: var(--radius-sm);">
                 <button class="btn-primary" id="btn-save-alert" style="padding: 6px 14px; font-size: 0.8rem;">
                   Set Alert
                 </button>
@@ -215,6 +218,7 @@ export function createPriceTracker(container) {
     `;
 
     attachEvents();
+    restoreFocus();
   }
 
   function attachEvents() {
@@ -245,9 +249,17 @@ export function createPriceTracker(container) {
     const backdrop = container.querySelector('#gpu-modal-backdrop');
     const closeBtn = container.querySelector('#modal-close-btn');
     if (closeBtn && backdrop) {
-      closeBtn.addEventListener('click', () => backdrop.classList.remove('open'));
+      closeBtn.addEventListener('click', closeHistoryModal);
       backdrop.addEventListener('click', (e) => {
-        if (e.target === backdrop) backdrop.classList.remove('open');
+        if (e.target === backdrop) closeHistoryModal();
+      });
+      backdrop.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeHistoryModal();
+        } else if (e.key === 'Tab') {
+          trapFocus(e, backdrop);
+        }
       });
     }
 
@@ -352,6 +364,34 @@ export function createPriceTracker(container) {
     }
   }
 
+  function closeHistoryModal() {
+    const backdrop = container.querySelector('#gpu-modal-backdrop');
+    if (!backdrop || backdrop.hidden) return;
+    backdrop.classList.remove('open');
+    // Fully hide after the fade so the dialog's fields leave the tab order
+    setTimeout(() => {
+      if (!backdrop.classList.contains('open')) backdrop.hidden = true;
+    }, 200);
+    if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus();
+    modalReturnFocus = null;
+  }
+
+  // Keeps Tab / Shift+Tab cycling inside the open dialog
+  function trapFocus(e, root) {
+    const focusables = [...root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   function openHistoryModal(gpuId) {
     const gpu = GPUS_DATA.find(g => g.id === gpuId);
     if (!gpu) return;
@@ -379,7 +419,12 @@ export function createPriceTracker(container) {
     const ebayLink = container.querySelector('#modal-ebay-link');
     ebayLink.href = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold');
 
+    // Remember what opened the dialog so focus can return there on close
+    modalReturnFocus = document.activeElement;
+    backdrop.hidden = false;
+    void backdrop.offsetWidth; // let the fade-in transition start from the hidden state
     backdrop.classList.add('open');
+    container.querySelector('#modal-close-btn').focus();
 
     // Render chart
     setTimeout(() => {
@@ -463,6 +508,7 @@ export function createPriceTracker(container) {
 
     const toastBox = document.createElement('div');
     toastBox.className = 'toast-container';
+    toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
         <span>✓</span>

@@ -1697,3 +1697,57 @@ input[type="range"] {
     justify-content: space-between;
   }
 }
+
+/* =========================================================
+   Accessibility
+   ========================================================= */
+
+/* Visible keyboard focus for every interactive control */
+:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 2px;
+}
+
+.brand-wrapper {
+  color: inherit;
+  border-radius: var(--radius-sm);
+}
+
+/* Skip link: hidden until focused */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2000;
+  padding: 8px 14px;
+  background: var(--emerald);
+  color: #042f2e;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.main-wrapper:focus {
+  outline: none;
+}
+
+/* The closed dialog is removed from layout and the tab order */
+.modal-backdrop[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

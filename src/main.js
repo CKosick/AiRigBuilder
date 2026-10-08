@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const trendClass = rtx3090.trend7d >= 0 ? 'ticker-val' : 'ticker-drop';
 
   app.innerHTML = `
+    <a href="#main-content" class="skip-link" id="skip-link">Skip to main content</a>
+
     <!-- Top Market Ticker -->
     <header class="header-container">
       <div class="market-ticker">
@@ -56,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <!-- Main Navigation Bar -->
       <nav class="nav-bar">
-        <div class="brand-wrapper" id="brand-logo-btn">
+        <a href="#builds" class="brand-wrapper" id="brand-logo-btn" aria-label="AIRigBuilder.com home: Build Sheets">
           <div class="brand-icon-box">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="4" y="4" width="16" height="16" rx="2"/>
               <rect x="9" y="9" width="6" height="6"/>
               <line x1="9" y1="1" x2="9" y2="4"/>
@@ -75,27 +77,27 @@ document.addEventListener('DOMContentLoaded', () => {
             <h1>AIRigBuilder<span class="domain-suffix">.com</span></h1>
             <div class="brand-tagline">The Used-Hardware Price Layer for Local AI</div>
           </div>
-        </div>
+        </a>
 
         <!-- Navigation Tabs -->
-        <div class="nav-tabs">
-          <button class="nav-tab-btn active" data-view="view-builds">
-            <span>🖥️ Build Sheets</span>
+        <div class="nav-tabs" role="tablist" aria-label="Site sections">
+          <button class="nav-tab-btn active" id="tab-builds" role="tab" aria-selected="true" aria-controls="view-builds" data-view="view-builds">
+            <span><span aria-hidden="true">🖥️ </span>Build Sheets</span>
           </button>
-          <button class="nav-tab-btn" data-view="view-calculator">
-            <span>⚡ Break-Even ROI</span>
+          <button class="nav-tab-btn" id="tab-calculator" role="tab" aria-selected="false" aria-controls="view-calculator" tabindex="-1" data-view="view-calculator">
+            <span><span aria-hidden="true">⚡ </span>Break-Even ROI</span>
           </button>
-          <button class="nav-tab-btn" data-view="view-tracker">
-            <span>📊 GPU Price Tracker</span>
+          <button class="nav-tab-btn" id="tab-tracker" role="tab" aria-selected="false" aria-controls="view-tracker" tabindex="-1" data-view="view-tracker">
+            <span><span aria-hidden="true">📊 </span>GPU Price Tracker</span>
           </button>
-          <button class="nav-tab-btn" data-view="view-guide">
-            <span>🛠️ Hardware Guide</span>
+          <button class="nav-tab-btn" id="tab-guide" role="tab" aria-selected="false" aria-controls="view-guide" tabindex="-1" data-view="view-guide">
+            <span><span aria-hidden="true">🛠️ </span>Hardware Guide</span>
           </button>
         </div>
 
         <div class="header-actions">
           <button class="btn-secondary" id="btn-why-used">
-            💡 Why Used 3090?
+            <span aria-hidden="true">💡 </span>Why Used 3090?
           </button>
         </div>
       </nav>
@@ -128,11 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
 
     <!-- Main Workspace Container -->
-    <main class="main-wrapper">
-      <div id="view-builds" class="view-section active"></div>
-      <div id="view-calculator" class="view-section"></div>
-      <div id="view-tracker" class="view-section"></div>
-      <div id="view-guide" class="view-section"></div>
+    <main class="main-wrapper" id="main-content" tabindex="-1">
+      <div id="view-builds" class="view-section active" role="tabpanel" aria-labelledby="tab-builds"></div>
+      <div id="view-calculator" class="view-section" role="tabpanel" aria-labelledby="tab-calculator" hidden></div>
+      <div id="view-tracker" class="view-section" role="tabpanel" aria-labelledby="tab-tracker" hidden></div>
+      <div id="view-guide" class="view-section" role="tabpanel" aria-labelledby="tab-guide" hidden></div>
     </main>
 
     <!-- Footer -->
@@ -144,12 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
           </strong>
           Used GPU prices are aggregated from real eBay sold listings. When you buy components through our merchant links (Amazon Associates, B&H Photo, eBay Partner Network), we may earn a small referral commission at no additional cost to you. True electricity costs assume continuous model evaluation cycles.
         </div>
-        <div style="display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem;">
+        <nav aria-label="Footer" style="display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem;">
           <a href="#builds" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Build Sheets</a>
           <a href="#calculator" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Break-Even Calc</a>
           <a href="#tracker" class="footer-link" style="color: var(--text-muted); text-decoration: none;">GPU Tracker</a>
           <a href="#guide" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Hardware Gotchas</a>
-        </div>
+        </nav>
       </div>
     </footer>
   `;
@@ -183,31 +185,54 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'view-guide', hash: 'guide', el: viewGuide }
   ];
 
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   function switchView(targetViewId) {
     tabButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-view') === targetViewId);
+      const isActive = btn.getAttribute('data-view') === targetViewId;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', String(isActive));
+      btn.tabIndex = isActive ? 0 : -1;
     });
 
     views.forEach(v => {
-      v.el.classList.toggle('active', v.id === targetViewId);
+      const isActive = v.id === targetViewId;
+      v.el.classList.toggle('active', isActive);
+      v.el.hidden = !isActive;
     });
 
     const activeView = views.find(v => v.id === targetViewId);
     if (activeView) {
       history.replaceState(null, '', `#${activeView.hash}`);
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   }
 
-  tabButtons.forEach(btn => {
+  tabButtons.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-view');
       switchView(target);
     });
+
+    // Arrow keys / Home / End move between tabs (WAI-ARIA tabs pattern)
+    btn.addEventListener('keydown', (e) => {
+      const last = tabButtons.length - 1;
+      const next = { ArrowRight: idx === last ? 0 : idx + 1, ArrowLeft: idx === 0 ? last : idx - 1, Home: 0, End: last }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      tabButtons[next].focus();
+      switchView(tabButtons[next].getAttribute('data-view'));
+    });
   });
 
-  document.getElementById('brand-logo-btn').addEventListener('click', () => {
+  document.getElementById('brand-logo-btn').addEventListener('click', (e) => {
+    e.preventDefault();
     switchView('view-builds');
+  });
+
+  document.getElementById('skip-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('main-content').focus();
   });
 
   document.getElementById('btn-why-used').addEventListener('click', () => {

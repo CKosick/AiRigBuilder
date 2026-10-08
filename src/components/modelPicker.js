@@ -2,6 +2,7 @@
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
 import { formatAffiliateUrl } from '../config/affiliates.js';
+import { preserveFocus } from '../utils/focus.js';
 
 export function createModelPicker(container, onNavigateToCalc) {
   let activeModelId = 'llama-3.3-70b';
@@ -12,6 +13,7 @@ export function createModelPicker(container, onNavigateToCalc) {
   let salesTaxRate = 7; // %
   let dailyUsageHours = 4; // hrs/day
   let kwhRate = 0.14; // $/kWh
+  const scrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
   function getFilteredModels() {
     return MODELS_DATA.filter(m => {
@@ -114,6 +116,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     const costs = computeCosts(currentTier);
     const { partsSubtotal, taxAmount } = costs;
 
+    const restoreFocus = preserveFocus(container);
     container.innerHTML = `
       <!-- Model Selector Bar -->
       <div class="model-selector-bar">
@@ -125,14 +128,14 @@ export function createModelPicker(container, onNavigateToCalc) {
         <!-- Filter and Search Row -->
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
           <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-cat="all">All (${MODELS_DATA.length})</button>
-            <button class="filter-btn ${activeCategory === '70b' ? 'active' : ''}" data-cat="70b">70B+ & MoE</button>
-            <button class="filter-btn ${activeCategory === 'medium' ? 'active' : ''}" data-cat="medium">20B-35B</button>
-            <button class="filter-btn ${activeCategory === 'budget' ? 'active' : ''}" data-cat="budget">≤14B Budget</button>
-            <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding">Coding & Vision</button>
+            <button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-cat="all" aria-pressed="${activeCategory === 'all'}">All (${MODELS_DATA.length})</button>
+            <button class="filter-btn ${activeCategory === '70b' ? 'active' : ''}" data-cat="70b" aria-pressed="${activeCategory === '70b'}">70B+ & MoE</button>
+            <button class="filter-btn ${activeCategory === 'medium' ? 'active' : ''}" data-cat="medium" aria-pressed="${activeCategory === 'medium'}">20B-35B</button>
+            <button class="filter-btn ${activeCategory === 'budget' ? 'active' : ''}" data-cat="budget" aria-pressed="${activeCategory === 'budget'}">≤14B Budget</button>
+            <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding" aria-pressed="${activeCategory === 'coding'}">Coding & Vision</button>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="text" id="model-search-input" value="${escapeAttr(searchQuery)}" placeholder="🔍 Search ${MODELS_DATA.length} models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 170px;">
+            <input type="search" id="model-search-input" aria-label="Search models" value="${escapeAttr(searchQuery)}" placeholder="🔍 Search ${MODELS_DATA.length} models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); width: 170px;">
             <button class="btn-secondary" id="btn-toggle-model-layout" title="Toggle between Scrollable Row and Grid View" style="font-size: 0.78rem; padding: 6px 10px; display: inline-flex; align-items: center; gap: 4px;">
               <span>${isGridView ? '↔ Row' : '⊞ Grid'}</span>
             </button>
@@ -145,7 +148,7 @@ export function createModelPicker(container, onNavigateToCalc) {
           ` : ''}
           <div class="model-pills ${isGridView ? 'grid-view' : ''}" id="model-pills-list">
             ${filteredModels.length > 0 ? filteredModels.map(m => `
-              <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}">
+              <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}" aria-pressed="${m.id === activeModelId}">
                 <div class="pill-title">
                   <span>${m.name.split(' ')[0]} ${m.parameters}</span>
                   <span style="font-size: 0.72rem; color: var(--emerald);">${m.recommendedVram}GB VRAM</span>
@@ -201,7 +204,7 @@ export function createModelPicker(container, onNavigateToCalc) {
           const tierSubtotal = tier.parts.reduce((s, p) => s + (p.price || 0), 0);
           const badgeClass = tier.type === 'used' ? 'tier-badge-budget' : (tier.type === 'balanced' ? 'tier-badge-balanced' : 'tier-badge-new');
           return `
-            <div class="tier-tab-card ${tier.id === activeTierId ? 'active' : ''}" data-tier-id="${tier.id}">
+            <div class="tier-tab-card ${tier.id === activeTierId ? 'active' : ''}" data-tier-id="${tier.id}" role="button" tabindex="0" aria-pressed="${tier.id === activeTierId}">
               <span class="tier-badge-label ${badgeClass}">${tier.badge}</span>
               <div class="tier-title-row">
                 <span class="tier-name">${tier.name}</span>
@@ -302,7 +305,7 @@ export function createModelPicker(container, onNavigateToCalc) {
                 <span>Estimated Sales Tax</span>
                 <strong id="tax-label">${salesTaxRate}% ($${taxAmount})</strong>
               </div>
-              <input type="range" id="tax-slider" min="0" max="12" step="0.5" value="${salesTaxRate}">
+              <input type="range" id="tax-slider" aria-label="Estimated sales tax (%)" min="0" max="12" step="0.5" value="${salesTaxRate}">
             </div>
 
             <div class="slider-group">
@@ -310,7 +313,7 @@ export function createModelPicker(container, onNavigateToCalc) {
                 <span>Daily AI Generation Usage</span>
                 <strong id="hours-label">${dailyUsageHours} hrs / day</strong>
               </div>
-              <input type="range" id="hours-slider" min="1" max="24" step="1" value="${dailyUsageHours}">
+              <input type="range" id="hours-slider" aria-label="Daily AI usage (hours per day)" min="1" max="24" step="1" value="${dailyUsageHours}">
             </div>
 
             <div class="slider-group">
@@ -318,7 +321,7 @@ export function createModelPicker(container, onNavigateToCalc) {
                 <span>Electricity Cost</span>
                 <strong id="kwh-label">$${kwhRate.toFixed(2)} / kWh</strong>
               </div>
-              <input type="range" id="kwh-slider" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
+              <input type="range" id="kwh-slider" aria-label="Electricity cost (dollars per kWh)" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
             </div>
           </div>
 
@@ -330,6 +333,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     `;
 
     attachEvents();
+    restoreFocus();
   }
 
   function attachEvents() {
@@ -381,13 +385,13 @@ export function createModelPicker(container, onNavigateToCalc) {
 
     if (btnPillsLeft && pillsList) {
       btnPillsLeft.addEventListener('click', () => {
-        pillsList.scrollBy({ left: -340, behavior: 'smooth' });
+        pillsList.scrollBy({ left: -340, behavior: scrollBehavior });
       });
     }
 
     if (btnPillsRight && pillsList) {
       btnPillsRight.addEventListener('click', () => {
-        pillsList.scrollBy({ left: 340, behavior: 'smooth' });
+        pillsList.scrollBy({ left: 340, behavior: scrollBehavior });
       });
     }
 
@@ -409,16 +413,24 @@ export function createModelPicker(container, onNavigateToCalc) {
         // Keep active button visible
         const updatedBtn = container.querySelector(`.model-pill-btn[data-model-id="${activeModelId}"]`);
         if (updatedBtn && !isGridView) {
-          updatedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+          updatedBtn.scrollIntoView({ behavior: scrollBehavior, block: 'nearest', inline: 'nearest' });
         }
       });
     });
 
     // Tier tab click
     container.querySelectorAll('.tier-tab-card').forEach(card => {
-      card.addEventListener('click', () => {
+      const select = () => {
         activeTierId = card.getAttribute('data-tier-id');
         render();
+      };
+      card.addEventListener('click', select);
+      // Cards are role="button", so Enter and Space must activate them
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          select();
+        }
       });
     });
 
@@ -495,6 +507,7 @@ export function createModelPicker(container, onNavigateToCalc) {
 
     const toastBox = document.createElement('div');
     toastBox.className = 'toast-container';
+    toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
         <span>✓</span>
