@@ -5,22 +5,22 @@ import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { GPUS_DATA } from './data/gpus.js';
 import { CLOUD_PROVIDERS } from './data/providers.js';
-import { computeBreakEven } from './utils/breakEven.js';
+import { computeBreakEven, BASELINE_RIG } from './utils/breakEven.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
 
   const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090') || { usedStreetPrice: 718, trend7d: 3.3 };
   const teslaP40 = GPUS_DATA.find(g => g.id === 'tesla-p40') || { usedStreetPrice: 273, pricePerGb: 11.38 };
-  const dual3090RigEst = (rtx3090.usedStreetPrice * 2) + 360;
-  // Headline payoff uses the same defaults as the Break-Even calculator (4 hrs/day, 820W, $0.14/kWh)
+  const dual3090RigEst = BASELINE_RIG.cost;
+  // Headline payoff uses the same defaults as the Break-Even calculator (4 hrs/day, $0.14/kWh)
   const runpodDual3090 = CLOUD_PROVIDERS.find(p => p.id === 'runpod-dual-3090');
   const headlinePayoff = computeBreakEven({
     rigUpfrontCost: dual3090RigEst,
     dailyUsageHours: 4,
     hourlyCloudRate: runpodDual3090.hourlyRate,
     monthlyDiskFee: runpodDual3090.storageCostPerMonth,
-    systemWatts: 820,
+    systemWatts: BASELINE_RIG.watts,
     kwhRate: 0.14
   });
   const payoffMonths = Math.round(headlinePayoff.breakEvenMonths);
@@ -214,9 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
     switchView('view-guide');
   });
 
-  // Handle URL hash on load
-  const currentHash = window.location.hash.replace('#', '');
-  if (currentHash === 'calculator') switchView('view-calculator');
-  else if (currentHash === 'tracker') switchView('view-tracker');
-  else if (currentHash === 'guide') switchView('view-guide');
+  // Handle URL hash on load and on in-page links (footer, back/forward)
+  function showViewForHash() {
+    const view = views.find(v => v.hash === window.location.hash.replace('#', ''));
+    if (view) switchView(view.id);
+  }
+  window.addEventListener('hashchange', showViewForHash);
+  showViewForHash();
 });

@@ -45,7 +45,8 @@ export function createHardwareGuide(container) {
         </p>
         <ul>
           <li><strong>Model Loading:</strong> A model file transfers from SSD to VRAM in ~8s over x16, or ~14s over x4. This only happens once when the server boots.</li>
-          <li><strong>Inference Token Generation:</strong> In tensor-parallel (vLLM / exllamav2), GPUs only exchange tiny activation vectors between layers. A secondary card on PCIe 3.0 x4 sees <strong>less than 3% drop in tokens/second</strong> compared to x16.</li>
+          <li><strong>Layer split (llama.cpp, Ollama, LM Studio):</strong> Each GPU holds a block of layers and only passes a small activation vector to the next card once per token. A secondary card on PCIe x4 loses <strong>only a few percent of tokens/second</strong> compared to x16.</li>
+          <li><strong>Tensor parallel (vLLM, exllamav2 TP) is different:</strong> the GPUs sync inside every layer, so link speed matters a lot. If you plan to run tensor parallel, put both cards on x8/x8 slots or use NVLink on 3090s.</li>
           <li><strong>Takeaway:</strong> You do NOT need a $2,000 Threadripper or EPYC motherboard just to run 70B models! Standard consumer AM4/AM5 boards work wonders.</li>
         </ul>
       </div>
@@ -61,8 +62,8 @@ export function createHardwareGuide(container) {
         </div>
         <ul>
           <li><strong>Weights:</strong> Llama 70B at Q4_K_M (4.5 bpw) = (70 × 4.5 / 8) × 1.08 = <strong>42.5 GB</strong>.</li>
-          <li><strong>KV Cache (16K context):</strong> ~2.4 GB.</li>
-          <li><strong>Total Needed:</strong> 44.9 GB. Dual 24GB GPUs give <strong>48 GB</strong> — leaving 3.1 GB of safety buffer!</li>
+          <li><strong>KV Cache (16K context):</strong> Llama 70B stores ~0.33 MB per token at FP16 (80 layers × 8 KV heads × 128 dims × K+V × 2 bytes), so 16K tokens ≈ <strong>5.4 GB</strong>. An 8-bit KV cache halves that to ~2.7 GB.</li>
+          <li><strong>Total Needed:</strong> ~47.9 GB at FP16 KV, which is too tight for <strong>48 GB</strong> once CUDA overhead (~0.5–1 GB per card) is counted. With an 8-bit KV cache it's ~45.2 GB, which fits with ~2.8 GB to spare. Or drop to 8K context.</li>
         </ul>
       </div>
 

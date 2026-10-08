@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
+import { recordMonthlyPrice } from '../src/utils/priceHistory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -64,17 +65,8 @@ async function applyPrices() {
     gpu.trend7d = update.trend7d;
     gpu.pricePerGb = parseFloat((newPrice / gpu.vram).toFixed(2));
 
-    // Update history array:
-    // If the last entry is "Current", update its price.
-    // If the last entry has a date label, ensure we have the latest entry recorded.
-    if (gpu.history && gpu.history.length > 0) {
-      const last = gpu.history[gpu.history.length - 1];
-      if (last.date === 'Current') {
-        last.price = newPrice;
-      } else {
-        gpu.history.push({ date: 'Current', price: newPrice });
-      }
-    }
+    // One history point per month: update this month's point, or start a new one
+    gpu.history = recordMonthlyPrice(gpu.history || [], newPrice);
 
     appliedSummary.push({
       id: gpu.id,

@@ -2,7 +2,17 @@
 // Shared by the Break-Even calculator, the header/hero headline numbers, and tests,
 // so every figure on the site comes from the same formula.
 
+import { BUILDS_DATA } from '../data/builds.js';
+
 export const DAYS_PER_MONTH = 30.5;
+
+// The headline "Dual-3090 70B rig": the full Budget Used build sheet for Llama 3.3 70B,
+// so the header, hero, and calculator default always match the parts list.
+const baselineTier = BUILDS_DATA['llama-3.3-70b'].tiers.find(t => t.id === 'tier-budget-used');
+export const BASELINE_RIG = {
+  cost: baselineTier.parts.reduce((sum, p) => sum + (p.price || 0), 0),
+  watts: baselineTier.estimatedTdpWatts
+};
 
 export function computeBreakEven({
   rigUpfrontCost,

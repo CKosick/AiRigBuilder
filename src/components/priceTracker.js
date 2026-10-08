@@ -2,6 +2,7 @@
 // The SEO moat tracking street prices for the 10 GPUs that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
 import { formatAffiliateUrl } from '../config/affiliates.js';
+import { fillMonthGaps } from '../utils/priceHistory.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
 
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler);
@@ -394,8 +395,17 @@ export function createPriceTracker(container) {
       modalChartInstance.destroy();
     }
 
-    const labels = gpu.history.map(h => h.date);
-    const data = gpu.history.map(h => h.price);
+    // One point per month; months without recorded sales show as a gap in the line
+    const { points, missingMonths } = fillMonthGaps(gpu.history);
+    const labels = points.map(h => h.date);
+    const data = points.map(h => h.price);
+
+    const summaryEl = container.querySelector('#modal-gpu-summary');
+    if (summaryEl) {
+      summaryEl.textContent = missingMonths > 0
+        ? `${gpu.summary} Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).`
+        : gpu.summary;
+    }
 
     modalChartInstance = new Chart(canvas, {
       type: 'line',

@@ -63,7 +63,7 @@ export const GPUS_DATA = [
         "price": 698
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 718
       }
     ],
@@ -132,7 +132,7 @@ export const GPUS_DATA = [
         "price": 1550
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 1540
       }
     ],
@@ -200,7 +200,7 @@ export const GPUS_DATA = [
         "price": 792
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 864
       }
     ],
@@ -267,7 +267,7 @@ export const GPUS_DATA = [
         "price": 385
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 385
       }
     ],
@@ -334,7 +334,7 @@ export const GPUS_DATA = [
         "price": 225
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 307
       }
     ],
@@ -401,7 +401,7 @@ export const GPUS_DATA = [
         "price": 175
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 273
       }
     ],
@@ -468,7 +468,7 @@ export const GPUS_DATA = [
         "price": 880
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 1103
       }
     ],
@@ -534,7 +534,7 @@ export const GPUS_DATA = [
         "price": 370
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 383
       }
     ],
@@ -601,7 +601,7 @@ export const GPUS_DATA = [
         "price": 1180
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 1180
       }
     ],
@@ -669,7 +669,7 @@ export const GPUS_DATA = [
         "price": 2760
       },
       {
-        "date": "Current",
+        "date": "Oct 2026",
         "price": 3311
       }
     ],

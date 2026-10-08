@@ -1,19 +1,19 @@
 // Cloud Break-Even Calculator Component (airigbuilder.com)
 // The backlink and traffic engine comparing used local AI rigs vs RunPod/Vast.ai
 import { CLOUD_PROVIDERS } from '../data/providers.js';
-import { computeBreakEven } from '../utils/breakEven.js';
+import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
 
 // Register Chart.js components
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
 export function createBreakEvenCalc(container) {
-  let rigUpfrontCost = 1780; // $ (Dual used 3090 rig baseline)
+  let rigUpfrontCost = BASELINE_RIG.cost; // $ (Dual used 3090 rig build sheet)
   let dailyUsageHours = 4; // hrs/day
   let selectedProviderId = 'runpod-dual-3090';
   let hourlyCloudRate = 0.88; // $/hr
   let monthlyDiskFee = 7.00; // $/mo
-  let systemWatts = 820; // Watts
+  let systemWatts = BASELINE_RIG.watts; // Watts
   let kwhRate = 0.14; // $/kWh
   let resaleRetentionPct = 65; // % residual value after 2 years
 
@@ -29,6 +29,69 @@ export function createBreakEvenCalc(container) {
       kwhRate,
       resaleRetentionPct
     });
+  }
+
+  const money = (n) => `${n < 0 ? '-' : ''}$${Math.abs(Math.round(n)).toLocaleString()}`;
+  const signedMoney = (n) => `${n >= 0 ? '+' : ''}${money(n)}`;
+  const paysOff = (stats) => Number.isFinite(stats.breakEvenMonths) && stats.breakEvenMonths <= 60;
+
+  function kpiHtml(stats) {
+    return `
+      <div class="kpi-card hero-kpi">
+        <div class="kpi-label">Break-Even Point</div>
+        <div class="kpi-value">${paysOff(stats) ? `${stats.breakEvenMonths.toFixed(1)} mo` : (Number.isFinite(stats.breakEvenMonths) ? '> 5 yrs' : 'Never')}</div>
+        <div class="kpi-sub">${paysOff(stats) ? `~${stats.breakEvenDays} calendar days` : (Number.isFinite(stats.breakEvenMonths) ? 'Low usage' : 'Power costs more than cloud')}</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Monthly Cloud Bill</div>
+        <div class="kpi-value" style="color: var(--amber);">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
+        <div class="kpi-sub">Rent + persistent disk</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Monthly Local Power</div>
+        <div class="kpi-value" style="color: var(--cyan);">$${Math.round(stats.monthlyLocalPower)}/mo</div>
+        <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">2-Year Net Savings</div>
+        <div class="kpi-value" style="color: ${stats.netCashSavings24Mo >= 0 ? 'var(--emerald)' : '#f87171'};">${signedMoney(stats.netCashSavings24Mo)}</div>
+        <div class="kpi-sub">${signedMoney(stats.netEquitySavings24Mo)} with resale equity</div>
+      </div>
+    `;
+  }
+
+  function narrativeHtml(stats) {
+    const usage = `Running at <strong>${dailyUsageHours} hrs/day</strong>, your <strong>$${rigUpfrontCost.toLocaleString()}</strong> home rig`;
+    if (!Number.isFinite(stats.breakEvenMonths)) {
+      return `${usage} never pays for itself: its electricity costs more per month than renting in the cloud. At this usage, cloud is the cheaper option.`;
+    }
+    if (!paysOff(stats)) {
+      return `${usage} takes about <strong>${(stats.breakEvenMonths / 12).toFixed(0)} years</strong> to pay for itself at this usage. Over 2 years you'd be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
+    }
+    if (stats.netCashSavings24Mo < 0) {
+      return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years you'd still be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
+    }
+    return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years, you pocket <strong>${money(stats.netCashSavings24Mo)} in cash</strong> while maintaining 100% data privacy and offline autonomy.`;
+  }
+
+  // Updates numbers and chart in place, so sliders keep working mid-drag
+  function update() {
+    const stats = calculate();
+    const setText = (id, text) => {
+      const el = container.querySelector(`#${id}`);
+      if (el) el.textContent = text;
+    };
+    setText('badge-rig-cost', `$${rigUpfrontCost.toLocaleString()}`);
+    setText('badge-daily-hours', `${dailyUsageHours} hrs / day`);
+    setText('badge-watts', `${systemWatts} Watts`);
+    setText('badge-kwh', `$${kwhRate.toFixed(2)} / kWh`);
+    setText('badge-resale', `${resaleRetentionPct}%`);
+    container.querySelector('#calc-kpis').innerHTML = kpiHtml(stats);
+    container.querySelector('#calc-narrative').innerHTML = narrativeHtml(stats);
+    renderChart(stats);
   }
 
   function render() {
@@ -51,7 +114,7 @@ export function createBreakEvenCalc(container) {
               <span>Local AI Rig Total Build Cost</span>
               <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
             </div>
-            <input type="range" id="input-rig-cost" min="400" max="4500" step="50" value="${rigUpfrontCost}">
+            <input type="range" id="input-rig-cost" min="400" max="4500" step="10" value="${rigUpfrontCost}">
             <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
               Includes used GPUs, motherboard, PSU, RAM, storage
             </div>
@@ -133,31 +196,7 @@ export function createBreakEvenCalc(container) {
         <!-- Results & Chart Column -->
         <div class="calc-results-card">
           <!-- KPI Row -->
-          <div class="kpi-row">
-            <div class="kpi-card hero-kpi">
-              <div class="kpi-label">Break-Even Point</div>
-              <div class="kpi-value">${stats.breakEvenMonths < 100 ? `${stats.breakEvenMonths.toFixed(1)} mo` : '> 5 yrs'}</div>
-              <div class="kpi-sub">${stats.breakEvenMonths < 100 ? `~${stats.breakEvenDays} calendar days` : 'Low usage'}</div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-label">Monthly Cloud Bill</div>
-              <div class="kpi-value" style="color: var(--amber);">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
-              <div class="kpi-sub">Rent + persistent disk</div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-label">Monthly Local Power</div>
-              <div class="kpi-value" style="color: var(--cyan);">$${Math.round(stats.monthlyLocalPower)}/mo</div>
-              <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-label">2-Year Net Savings</div>
-              <div class="kpi-value" style="color: var(--emerald);">+$${Math.round(stats.netCashSavings24Mo).toLocaleString()}</div>
-              <div class="kpi-sub">+$${Math.round(stats.netEquitySavings24Mo).toLocaleString()} with resale equity</div>
-            </div>
-          </div>
+          <div class="kpi-row" id="calc-kpis">${kpiHtml(stats)}</div>
 
           <!-- Chart Area -->
           <div class="chart-header">
@@ -184,9 +223,7 @@ export function createBreakEvenCalc(container) {
 
           <!-- Bottom Narrative & Sharing -->
           <div class="calc-narrative-box">
-            <div class="calc-narrative-text">
-              Running at <strong>${dailyUsageHours} hrs/day</strong>, your <strong>$${rigUpfrontCost.toLocaleString()}</strong> home rig pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years, you pocket <strong>$${Math.round(stats.netCashSavings24Mo).toLocaleString()} in cash</strong> while maintaining 100% data privacy and offline autonomy.
-            </div>
+            <div class="calc-narrative-text" id="calc-narrative">${narrativeHtml(stats)}</div>
             <button class="btn-secondary" id="btn-copy-calc-reddit" style="white-space: nowrap;">
               📋 Copy Summary
             </button>
@@ -203,10 +240,6 @@ export function createBreakEvenCalc(container) {
     const canvas = container.querySelector('#break-even-chart');
     if (!canvas) return;
 
-    if (chartInstance) {
-      chartInstance.destroy();
-    }
-
     const months = Array.from({ length: 25 }, (_, i) => `M${i}`);
     
     // Cloud cumulative data: monthlyCloudTotal * month
@@ -221,6 +254,15 @@ export function createBreakEvenCalc(container) {
       const currentAssetValue = rigUpfrontCost * depreciationFactor;
       return Math.round(rigUpfrontCost + (stats.monthlyLocalPower * i) - currentAssetValue);
     });
+
+    if (chartInstance && chartInstance.canvas === canvas) {
+      chartInstance.data.datasets[0].data = cloudData;
+      chartInstance.data.datasets[1].data = localData;
+      chartInstance.data.datasets[2].data = equityData;
+      chartInstance.update('none');
+      return;
+    }
+    if (chartInstance) chartInstance.destroy();
 
     chartInstance = new Chart(canvas, {
       type: 'line',
@@ -301,7 +343,7 @@ export function createBreakEvenCalc(container) {
     if (inputRigCost) {
       inputRigCost.addEventListener('input', (e) => {
         rigUpfrontCost = parseInt(e.target.value, 10);
-        render();
+        update();
       });
     }
 
@@ -309,7 +351,7 @@ export function createBreakEvenCalc(container) {
     if (inputHours) {
       inputHours.addEventListener('input', (e) => {
         dailyUsageHours = parseFloat(e.target.value);
-        render();
+        update();
       });
     }
 
@@ -321,8 +363,10 @@ export function createBreakEvenCalc(container) {
         if (prov) {
           hourlyCloudRate = prov.hourlyRate;
           monthlyDiskFee = prov.storageCostPerMonth;
+          container.querySelector('#input-hourly-rate').value = hourlyCloudRate.toFixed(2);
+          container.querySelector('#input-disk-fee').value = monthlyDiskFee.toFixed(2);
         }
-        render();
+        update();
       });
     }
 
@@ -331,7 +375,8 @@ export function createBreakEvenCalc(container) {
       inputHourly.addEventListener('change', (e) => {
         hourlyCloudRate = parseFloat(e.target.value) || 0.88;
         selectedProviderId = 'custom';
-        render();
+        if (selectProvider) selectProvider.value = 'custom';
+        update();
       });
     }
 
@@ -339,7 +384,7 @@ export function createBreakEvenCalc(container) {
     if (inputDisk) {
       inputDisk.addEventListener('change', (e) => {
         monthlyDiskFee = parseFloat(e.target.value) || 0;
-        render();
+        update();
       });
     }
 
@@ -347,7 +392,7 @@ export function createBreakEvenCalc(container) {
     if (inputWatts) {
       inputWatts.addEventListener('input', (e) => {
         systemWatts = parseInt(e.target.value, 10);
-        render();
+        update();
       });
     }
 
@@ -355,7 +400,7 @@ export function createBreakEvenCalc(container) {
     if (inputKwh) {
       inputKwh.addEventListener('input', (e) => {
         kwhRate = parseFloat(e.target.value);
-        render();
+        update();
       });
     }
 
@@ -363,7 +408,7 @@ export function createBreakEvenCalc(container) {
     if (inputResale) {
       inputResale.addEventListener('input', (e) => {
         resaleRetentionPct = parseInt(e.target.value, 10);
-        render();
+        update();
       });
     }
 
@@ -378,8 +423,10 @@ export function createBreakEvenCalc(container) {
         md += `* **Cloud Provider Baseline:** $${hourlyCloudRate.toFixed(2)}/hr + $${monthlyDiskFee}/mo disk\n`;
         md += `* **Monthly Cloud Cost:** $${Math.round(stats.monthlyCloudTotal)}/mo\n`;
         md += `* **Monthly Local Electricity (${systemWatts}W @ $${kwhRate}/kWh):** $${Math.round(stats.monthlyLocalPower)}/mo\n`;
-        md += `* **Break-Even Payoff Point:** **${stats.breakEvenMonths.toFixed(1)} Months** (~${stats.breakEvenDays} days)\n`;
-        md += `* **2-Year Net Cash Savings:** **$${Math.round(stats.netCashSavings24Mo).toLocaleString()}**\n\n`;
+        md += Number.isFinite(stats.breakEvenMonths)
+          ? `* **Break-Even Payoff Point:** **${stats.breakEvenMonths.toFixed(1)} Months** (~${stats.breakEvenDays} days)\n`
+          : `* **Break-Even Payoff Point:** Never (electricity costs more than cloud rental)\n`;
+        md += `* **2-Year Net Cash Savings:** **${signedMoney(stats.netCashSavings24Mo)}**\n\n`;
         md += `*Generated via airigbuilder.com — The used-hardware price layer for local AI.*`;
 
         navigator.clipboard.writeText(md).then(() => {

@@ -39,7 +39,7 @@ describe('Data Integrity & Consistency Contracts', () => {
         // History array validation
         assert.ok(Array.isArray(gpu.history) && gpu.history.length >= 2, `GPU ${gpu.id} must have >= 2 history points`);
         const lastHistory = gpu.history[gpu.history.length - 1];
-        assert.equal(lastHistory.date, 'Current', `GPU ${gpu.id} last history point must be 'Current'`);
+        assert.match(lastHistory.date, /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$/, `GPU ${gpu.id} last history point must be a 'Mon YYYY' month label`);
         assert.equal(lastHistory.price, gpu.usedStreetPrice, `GPU ${gpu.id} last history price must match usedStreetPrice`);
       }
     });

@@ -43,22 +43,76 @@ export function createModelPicker(container, onNavigateToCalc) {
     });
   }
 
-  function render() {
-    const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
+  function currentBuild() {
     const buildSheet = BUILDS_DATA[activeModelId] || BUILDS_DATA['llama-3.3-70b'];
     const currentTier = buildSheet.tiers.find(t => t.id === activeTierId) || buildSheet.tiers[0];
-    const filteredModels = getFilteredModels();
+    return { buildSheet, currentTier };
+  }
 
-    // Compute parts subtotal
+  function computeCosts(currentTier) {
     const partsSubtotal = currentTier.parts.reduce((sum, p) => sum + (p.price || 0), 0);
     const taxAmount = Math.round(partsSubtotal * (salesTaxRate / 100));
-    
-    // Compute electricity cost: (Watts / 1000) * hours/day * 30.5 days * $/kWh
+
+    // Electricity: (Watts / 1000) * hours/day * 30.5 days * $/kWh
     const systemWatts = currentTier.estimatedTdpWatts || 800;
     const monthlyKwh = (systemWatts / 1000) * dailyUsageHours * 30.5;
     const monthlyPowerCost = Math.round(monthlyKwh * kwhRate);
     const firstYearPowerCost = Math.round(monthlyPowerCost * 12);
     const firstYearTrueTotal = partsSubtotal + taxAmount + firstYearPowerCost;
+    return { partsSubtotal, taxAmount, systemWatts, monthlyPowerCost, firstYearPowerCost, firstYearTrueTotal };
+  }
+
+  function costBreakdownHtml(c) {
+    return `
+            <div class="cost-breakdown-row">
+              <span>Hardware Parts:</span>
+              <strong>$${c.partsSubtotal.toLocaleString()}</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Sales Tax (${salesTaxRate}%):</span>
+              <strong>+$${c.taxAmount.toLocaleString()}</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Peak Power Draw:</span>
+              <strong style="color: var(--amber);">${c.systemWatts}W under load</strong>
+            </div>
+            <div class="cost-breakdown-row">
+              <span>Monthly Electricity:</span>
+              <strong>+$${c.monthlyPowerCost}/mo</strong>
+            </div>
+            <div class="cost-breakdown-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle);">
+              <span>Year 1 Power Cost:</span>
+              <strong style="color: var(--cyan);">+$${c.firstYearPowerCost}/yr</strong>
+            </div>
+    `;
+  }
+
+  function totalHtml(c) {
+    return `
+            <div class="total-equity-label">True 1st-Year Total Cost</div>
+            <div class="total-equity-number">$${c.firstYearTrueTotal.toLocaleString()}</div>
+            <div class="total-equity-sub">Parts ($${c.partsSubtotal}) + Tax ($${c.taxAmount}) + 1-Yr Power ($${c.firstYearPowerCost})</div>
+    `;
+  }
+
+  // Refreshes only the cost panel, so the sliders keep working mid-drag
+  function updateCosts() {
+    const c = computeCosts(currentBuild().currentTier);
+    container.querySelector('#tax-label').textContent = `${salesTaxRate}% ($${c.taxAmount})`;
+    container.querySelector('#hours-label').textContent = `${dailyUsageHours} hrs / day`;
+    container.querySelector('#kwh-label').textContent = `$${kwhRate.toFixed(2)} / kWh`;
+    container.querySelector('#cost-breakdown').innerHTML = costBreakdownHtml(c);
+    container.querySelector('#cost-total').innerHTML = totalHtml(c);
+  }
+
+  const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  function render() {
+    const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
+    const { buildSheet, currentTier } = currentBuild();
+    const filteredModels = getFilteredModels();
+    const costs = computeCosts(currentTier);
+    const { partsSubtotal, taxAmount } = costs;
 
     container.innerHTML = `
       <!-- Model Selector Bar -->
@@ -78,7 +132,7 @@ export function createModelPicker(container, onNavigateToCalc) {
             <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding">Coding & Vision</button>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="text" id="model-search-input" value="${searchQuery}" placeholder="🔍 Search 32 models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 170px;">
+            <input type="text" id="model-search-input" value="${escapeAttr(searchQuery)}" placeholder="🔍 Search ${MODELS_DATA.length} models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); outline: none; width: 170px;">
             <button class="btn-secondary" id="btn-toggle-model-layout" title="Toggle between Scrollable Row and Grid View" style="font-size: 0.78rem; padding: 6px 10px; display: inline-flex; align-items: center; gap: 4px;">
               <span>${isGridView ? '↔ Row' : '⊞ Grid'}</span>
             </button>
@@ -246,7 +300,7 @@ export function createModelPicker(container, onNavigateToCalc) {
             <div class="slider-group">
               <div class="slider-label-row">
                 <span>Estimated Sales Tax</span>
-                <strong>${salesTaxRate}% ($${taxAmount})</strong>
+                <strong id="tax-label">${salesTaxRate}% ($${taxAmount})</strong>
               </div>
               <input type="range" id="tax-slider" min="0" max="12" step="0.5" value="${salesTaxRate}">
             </div>
@@ -254,7 +308,7 @@ export function createModelPicker(container, onNavigateToCalc) {
             <div class="slider-group">
               <div class="slider-label-row">
                 <span>Daily AI Generation Usage</span>
-                <strong>${dailyUsageHours} hrs / day</strong>
+                <strong id="hours-label">${dailyUsageHours} hrs / day</strong>
               </div>
               <input type="range" id="hours-slider" min="1" max="24" step="1" value="${dailyUsageHours}">
             </div>
@@ -262,48 +316,23 @@ export function createModelPicker(container, onNavigateToCalc) {
             <div class="slider-group">
               <div class="slider-label-row">
                 <span>Electricity Cost</span>
-                <strong>$${kwhRate.toFixed(2)} / kWh</strong>
+                <strong id="kwh-label">$${kwhRate.toFixed(2)} / kWh</strong>
               </div>
               <input type="range" id="kwh-slider" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
             </div>
           </div>
 
-          <div class="cost-breakdown-col">
-            <div class="cost-breakdown-row">
-              <span>Hardware Parts:</span>
-              <strong>$${partsSubtotal.toLocaleString()}</strong>
-            </div>
-            <div class="cost-breakdown-row">
-              <span>Sales Tax (${salesTaxRate}%):</span>
-              <strong>+$${taxAmount.toLocaleString()}</strong>
-            </div>
-            <div class="cost-breakdown-row">
-              <span>Peak Power Draw:</span>
-              <strong style="color: var(--amber);">${systemWatts}W under load</strong>
-            </div>
-            <div class="cost-breakdown-row">
-              <span>Monthly Electricity:</span>
-              <strong>+$${monthlyPowerCost}/mo</strong>
-            </div>
-            <div class="cost-breakdown-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle);">
-              <span>Year 1 Power Cost:</span>
-              <strong style="color: var(--cyan);">+$${firstYearPowerCost}/yr</strong>
-            </div>
-          </div>
+          <div class="cost-breakdown-col" id="cost-breakdown">${costBreakdownHtml(costs)}</div>
 
-          <div class="total-equity-box">
-            <div class="total-equity-label">True 1st-Year Total Cost</div>
-            <div class="total-equity-number">$${firstYearTrueTotal.toLocaleString()}</div>
-            <div class="total-equity-sub">Parts ($${partsSubtotal}) + Tax ($${taxAmount}) + 1-Yr Power ($${firstYearPowerCost})</div>
-          </div>
+          <div class="total-equity-box" id="cost-total">${totalHtml(costs)}</div>
         </div>
       </div>
     `;
 
-    attachEvents(partsSubtotal, systemWatts);
+    attachEvents();
   }
 
-  function attachEvents(partsSubtotal, systemWatts) {
+  function attachEvents() {
     // Category filter buttons
     container.querySelectorAll('.model-selector-bar .filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -398,7 +427,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     if (taxSlider) {
       taxSlider.addEventListener('input', (e) => {
         salesTaxRate = parseFloat(e.target.value);
-        render();
+        updateCosts();
       });
     }
 
@@ -407,7 +436,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     if (hoursSlider) {
       hoursSlider.addEventListener('input', (e) => {
         dailyUsageHours = parseInt(e.target.value, 10);
-        render();
+        updateCosts();
       });
     }
 
@@ -416,7 +445,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     if (kwhSlider) {
       kwhSlider.addEventListener('input', (e) => {
         kwhRate = parseFloat(e.target.value);
-        render();
+        updateCosts();
       });
     }
 
@@ -424,6 +453,7 @@ export function createModelPicker(container, onNavigateToCalc) {
     const btnSendToCalc = container.querySelector('#btn-send-to-calc');
     if (btnSendToCalc && onNavigateToCalc) {
       btnSendToCalc.addEventListener('click', () => {
+        const { partsSubtotal, systemWatts } = computeCosts(currentBuild().currentTier);
         onNavigateToCalc({
           modelId: activeModelId,
           upfrontCost: partsSubtotal,
@@ -438,9 +468,9 @@ export function createModelPicker(container, onNavigateToCalc) {
     const btnCopyReddit = container.querySelector('#btn-copy-build-reddit');
     if (btnCopyReddit) {
       btnCopyReddit.addEventListener('click', () => {
-        const buildSheet = BUILDS_DATA[activeModelId];
-        const currentTier = buildSheet.tiers.find(t => t.id === activeTierId);
-        
+        const { buildSheet, currentTier } = currentBuild();
+        const { partsSubtotal, systemWatts } = computeCosts(currentTier);
+
         let md = `### [airigbuilder.com] ${buildSheet.title} - ${currentTier.name}\n\n`;
         md += `**Target Model:** ${MODELS_DATA.find(m => m.id === activeModelId)?.name}\n`;
         md += `**Upfront Parts Total:** $${partsSubtotal.toLocaleString()}\n`;

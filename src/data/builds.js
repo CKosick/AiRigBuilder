@@ -20,7 +20,7 @@ export const BUILDS_DATA = {
         type: 'used',
         accentColor: '#10b981', // emerald
         headline: 'Cheapest way to run full 70B locally at ~20 tokens/sec',
-        rigSummary: 'Dual used RTX 3090 24GB cards on an enterprise AM4/X570 platform. Delivers 48GB VRAM with NVLink support for under $1,800 total.',
+        rigSummary: 'Dual used RTX 3090 24GB cards on a budget AM4/B550 platform. Delivers 48GB VRAM with NVLink support for the lowest total cost of any 70B-capable build.',
         estimatedTdpWatts: 820,
         parts: [
           {
@@ -31,7 +31,7 @@ export const BUILDS_DATA = {
             price: 1436, // 2x $718
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
-            notes: 'Look for Founder Edition or EVGA FTW3. Dual 24GB fits Q4_K_M with 16k context comfortably.'
+            notes: 'Look for Founder Edition or EVGA FTW3. Dual 24GB fits Q4_K_M at 16k context with an 8-bit KV cache (or 8k context at FP16).'
           },
           {
             category: 'CPU',

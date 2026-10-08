@@ -25,7 +25,7 @@ npm run build
 1. **Model Picker → 3-Tier Build Sheets (`src/components/modelPicker.js`)**
    - 5 flagship models: Llama 3.3 70B, DeepSeek-R1-Distill-70B, Qwen 2.5 72B, Mistral NeMo 12B/24B, Llama 3.1 8B.
    - 3 verified tiers per model:
-     - **Budget Used** (Dual used RTX 3090 24GB @ ~$695 each, AM4 platform → ~$1,780 total)
+     - **Budget Used** (Dual used RTX 3090 24GB @ ~$695 each, AM4 platform → ~$2,270 total build)
      - **Balanced New/Used Mix** (AM5 Ryzen 7000, ASUS ProArt X670E, DDR5-6000 → ~$2,850 total)
      - **Best New / Turnkey** (Apple Mac Studio M2 Ultra Unified Memory or Blackwell single GPU)
    - Real-time **True 1st-Year Total Cost** engine factoring in user-customized sales tax and daily electricity draw ($/kWh).
