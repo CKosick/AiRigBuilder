@@ -19,6 +19,42 @@ import { GPUS_DATA } from '../src/data/gpus.js';
 import { getAlertStore, FileAlertStore, RedisAlertStore } from '../src/services/alertStore.js';
 import subscribeHandler from '../api/alerts/subscribe.js';
 
+// Lifecycle tests use the mock email sender; the "Resend Delivery" tests switch to production mode
+process.env.NODE_ENV = 'test';
+
+// Fake network for production-mode tests: Upstash REST plus the Resend API.
+// resend: { status, body } controls the Resend reply; calls records every Resend request.
+function mockNetwork({ resend = { status: 200, body: { id: 'email_123' } } } = {}) {
+  const redis = mockRedisFetch();
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    if (String(url).startsWith('https://api.resend.com/')) {
+      calls.push({ url, headers: init.headers, body: JSON.parse(init.body) });
+      return { ok: resend.status >= 200 && resend.status < 300, status: resend.status, json: async () => resend.body };
+    }
+    return redis(url, init);
+  };
+  return { fetchImpl, calls };
+}
+
+// Runs fn with production-like env vars and a mocked fetch, restoring everything afterwards
+async function withProductionEnv(env, fetchImpl, fn) {
+  const keys = ['NODE_ENV', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL', 'KV_REST_API_URL', 'KV_REST_API_TOKEN'];
+  const saved = Object.fromEntries(keys.map(k => [k, process.env[k]]));
+  const originalFetch = globalThis.fetch;
+  for (const k of keys) delete process.env[k];
+  Object.assign(process.env, { NODE_ENV: 'production', KV_REST_API_URL: 'https://r.upstash.io', KV_REST_API_TOKEN: 't' }, env);
+  globalThis.fetch = fetchImpl;
+  try {
+    return await fn();
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const k of keys) {
+      if (saved[k] === undefined) delete process.env[k]; else process.env[k] = saved[k];
+    }
+  }
+}
+
 // In-memory stand-in for the Upstash Redis REST API (HGETALL / HSET only)
 function mockRedisFetch() {
   const hash = new Map();
@@ -346,6 +382,80 @@ describe('Price-Drop Alerts System', () => {
         if (saved.url === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = saved.url;
         if (saved.token === undefined) delete process.env.KV_REST_API_TOKEN; else process.env.KV_REST_API_TOKEN = saved.token;
       }
+    });
+  });
+
+  describe('Resend Delivery (production mode)', () => {
+    const signup = { method: 'POST', headers: {}, body: { email: 'buyer@example.com', gpuId: 'rtx-3090', targetPrice: 600 } };
+
+    it('calls the Resend API from the airigbuilder.com sender and reports success', async () => {
+      const net = mockNetwork();
+      const res = mockRes();
+      await withProductionEnv({ RESEND_API_KEY: 're_test_key' }, net.fetchImpl, () => subscribeHandler(signup, res));
+
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.body.success, true);
+      assert.equal(net.calls.length, 1, 'exactly one Resend send');
+      const call = net.calls[0];
+      assert.equal(call.url, 'https://api.resend.com/emails');
+      assert.equal(call.headers.Authorization, 'Bearer re_test_key');
+      assert.equal(call.body.from, 'AiRigBuilder <alerts@airigbuilder.com>');
+      assert.deepEqual(call.body.to, ['buyer@example.com']);
+      assert.match(call.body.html, /\/api\/alerts\/confirm\?token=[0-9a-f-]{36}/);
+    });
+
+    it('returns an error instead of a false success when RESEND_API_KEY is missing', async () => {
+      const net = mockNetwork();
+      const res = mockRes();
+      await withProductionEnv({}, net.fetchImpl, () => subscribeHandler(signup, res));
+
+      assert.equal(res.statusCode, 502);
+      assert.equal(res.body.success, false);
+      assert.match(res.body.error, /couldn't send your confirmation email/);
+      assert.equal(net.calls.length, 0);
+    });
+
+    it('returns an error when Resend rejects the send, then re-sends on retry', async () => {
+      const failing = mockNetwork({ resend: { status: 403, body: { name: 'validation_error', message: 'The airigbuilder.com domain is not verified.' } } });
+      const first = mockRes();
+      const retry = mockRes();
+      await withProductionEnv({ RESEND_API_KEY: 're_test_key' }, failing.fetchImpl, async () => {
+        await subscribeHandler(signup, first);
+        await subscribeHandler(signup, retry);
+      });
+
+      assert.equal(first.statusCode, 502);
+      assert.equal(first.body.success, false);
+      assert.doesNotMatch(JSON.stringify(first.body), /validation_error|not verified/, 'Resend internals stay in the server log');
+      // The pending alert is kept, so the retry takes the re-send path (and fails again here)
+      assert.equal(retry.statusCode, 502);
+      assert.equal(failing.calls.length, 2);
+    });
+
+    it('honours RESEND_FROM_EMAIL when set', async () => {
+      const net = mockNetwork();
+      await withProductionEnv({ RESEND_API_KEY: 're_test_key', RESEND_FROM_EMAIL: 'Alerts <hello@airigbuilder.com>' }, net.fetchImpl,
+        () => subscribeHandler(signup, mockRes()));
+      assert.equal(net.calls[0].body.from, 'Alerts <hello@airigbuilder.com>');
+    });
+
+    it('does not mark a price-drop alert fired when its email fails, so the next run retries', async () => {
+      const reg = await registerAlert({ email: 'retry@domain.com', gpuId: 'rtx-3090', targetPrice: 700, filePath: TEST_ALERTS_FILE });
+      await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      const dropped = GPUS_DATA.map(g => g.id === 'rtx-3090' ? { ...g, usedStreetPrice: 650 } : g);
+
+      const failing = mockNetwork({ resend: { status: 500, body: { message: 'internal error' } } });
+      const run1 = await withProductionEnv({ RESEND_API_KEY: 're_test_key' }, failing.fetchImpl,
+        () => evaluateAndTriggerAlerts(dropped, { filePath: TEST_ALERTS_FILE }));
+      assert.equal(run1.firedCount, 0);
+      assert.equal(run1.failedAlerts.length, 1);
+      assert.equal((await loadAlerts(TEST_ALERTS_FILE))[0].fired, false);
+
+      const working = mockNetwork();
+      const run2 = await withProductionEnv({ RESEND_API_KEY: 're_test_key' }, working.fetchImpl,
+        () => evaluateAndTriggerAlerts(dropped, { filePath: TEST_ALERTS_FILE }));
+      assert.equal(run2.firedCount, 1);
+      assert.equal(working.calls.length, 1);
     });
   });
 });

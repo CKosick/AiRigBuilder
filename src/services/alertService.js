@@ -14,11 +14,8 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..', '..');
 const ALERTS_FILE = path.join(ROOT_DIR, 'data', 'alerts.json');
 
-// Configuration from environment variables
-const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
-// Verified domain: harfordtreepros.com (configured in Resend)
-const DEFAULT_FROM = 'AiRigBuilder <alerts@harfordtreepros.com>';
-const RESEND_FROM = process.env.RESEND_FROM_EMAIL || DEFAULT_FROM;
+// Sender on the verified airigbuilder.com domain in Resend (override with RESEND_FROM_EMAIL)
+const DEFAULT_FROM = 'AiRigBuilder <alerts@airigbuilder.com>';
 const APP_URL = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://airigbuilder.com');
 
 /**
@@ -46,47 +43,49 @@ export async function loadAlerts(filePath) {
 }
 
 /**
- * Send an email using Resend HTTP API (supports Node 18+ and edge/serverless)
+ * Send an email using Resend HTTP API (supports Node 18+ and edge/serverless).
+ * Only the test suite (NODE_ENV=test) gets a mock send; anywhere else a missing
+ * API key or a Resend error is returned as { success: false } and logged.
  */
 export async function sendEmail({ to, subject, html, text }) {
-  // If no API key is provided or test mode is detected, log and return mock response
-  if (!RESEND_API_KEY || process.env.NODE_ENV === 'test') {
-    return {
-      success: true,
-      mock: true,
-      id: `mock_email_${Date.now()}`,
-      to,
-      subject
-    };
+  if (process.env.NODE_ENV === 'test') {
+    return { success: true, mock: true, id: `mock_email_${Date.now()}`, to, subject };
+  }
+
+  // Read at call time so the deployed function always sees the current env
+  const apiKey = process.env.RESEND_API_KEY || '';
+  const from = process.env.RESEND_FROM_EMAIL || DEFAULT_FROM;
+
+  if (!apiKey) {
+    console.error('Email not sent: RESEND_API_KEY is not set in this environment.');
+    return { success: false, error: 'RESEND_API_KEY is not set' };
   }
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        from: RESEND_FROM,
-        to: [to],
-        subject,
-        html,
-        text
-      })
+      body: JSON.stringify({ from, to: [to], subject, html, text })
     });
 
-    const body = await res.json();
-    if (!res.ok) {
-      console.error('Resend API error response:', body);
-      return { success: false, error: body };
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.id) {
+      const error = body.message || body.error || `HTTP ${res.status}`;
+      console.error(`Resend send failed (${res.status}) from ${from}:`, error);
+      return { success: false, error };
     }
+    console.log(`Resend accepted email ${body.id}: "${subject}"`);
     return { success: true, id: body.id };
   } catch (err) {
-    console.error('Failed to send email via Resend:', err.message);
+    console.error('Failed to reach Resend:', err.message);
     return { success: false, error: err.message };
   }
 }
+
+const SEND_FAILED_MESSAGE = "We couldn't send your confirmation email right now. Please try again in a few minutes.";
 
 /**
  * Validate alert input parameters
@@ -140,8 +139,11 @@ export async function registerAlert({ email, gpuId, targetPrice, filePath, appUr
       };
     } else if (existing.status === 'PENDING_CONFIRMATION') {
       // Re-send confirmation email
-      await sendConfirmationEmail(existing, appUrl);
-      return { 
+      const resend = await sendConfirmationEmail(existing, appUrl);
+      if (!resend.success) {
+        return { success: false, emailFailed: true, error: SEND_FAILED_MESSAGE, emailError: resend.error };
+      }
+      return {
         success: true, 
         message: 'A confirmation link has been re-sent to your email. Please check your inbox.', 
         alert: existing 
@@ -171,8 +173,12 @@ export async function registerAlert({ email, gpuId, targetPrice, filePath, appUr
 
   await store.put(newAlert);
 
-  // Send double opt-in confirmation email
-  await sendConfirmationEmail(newAlert, appUrl);
+  // Send double opt-in confirmation email. The pending alert stays stored on failure,
+  // so submitting the form again takes the re-send path above.
+  const sent = await sendConfirmationEmail(newAlert, appUrl);
+  if (!sent.success) {
+    return { success: false, emailFailed: true, error: SEND_FAILED_MESSAGE, emailError: sent.error };
+  }
 
   return {
     success: true,
@@ -363,6 +369,7 @@ export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
 
   let firedCount = 0;
   const firedAlerts = [];
+  const failedAlerts = [];
 
   for (const alert of alerts) {
     // Only process ACTIVE alerts that have not already fired
@@ -378,7 +385,13 @@ export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
       console.log(`🎯 Alert fired for ${alert.email}: ${gpu.name} ($${gpu.usedStreetPrice} <= target $${alert.targetPrice})`);
       
       const emailResult = await sendPriceDropNotificationEmail(alert, gpu, appUrl);
-      
+      if (!emailResult.success) {
+        // Leave the alert un-fired so the next run retries it
+        console.error(`✗ Price-drop email to ${alert.email} failed: ${emailResult.error}`);
+        failedAlerts.push({ id: alert.id, email: alert.email, error: emailResult.error });
+        continue;
+      }
+
       alert.fired = true;
       alert.firedAt = new Date().toISOString();
       alert.lastNotifiedPrice = gpu.usedStreetPrice;
@@ -406,6 +419,7 @@ export async function evaluateAndTriggerAlerts(gpus = GPUS_DATA, options = {}) {
     totalAlerts: alerts.length,
     activeAlerts: alerts.filter(a => a.status === 'ACTIVE' && !a.fired).length,
     firedCount,
-    firedAlerts
+    firedAlerts,
+    failedAlerts
   };
 }

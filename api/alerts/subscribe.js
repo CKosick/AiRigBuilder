@@ -35,6 +35,11 @@ export default async function handler(req, res) {
     const result = await registerAlert({ email, gpuId, targetPrice });
 
     if (!result.success) {
+      if (result.emailFailed) {
+        // Upstream email failure, not bad input: log the real reason, show the user a retry message
+        console.error('Confirmation email failed for /api/alerts/subscribe:', result.emailError);
+        return res.status(502).json({ success: false, error: result.error });
+      }
       return res.status(400).json({ success: false, error: result.error });
     }
 
