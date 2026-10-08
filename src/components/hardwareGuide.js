@@ -1,8 +1,9 @@
 // Hardware Guide & Gotchas Component (airigbuilder.com)
 // Actionable enthusiast wisdom to avoid costly multi-GPU mistakes
 
-export function createHardwareGuide(container) {
-  container.innerHTML = `
+// Pure HTML, shared with the build-time prerender (scripts/prerender.js)
+export function renderHardwareGuideHtml() {
+  return `
     <div style="margin-bottom: 1.5rem;">
       <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-highlight);">
         Local AI Hardware Guide & Crucial Gotchas
@@ -93,4 +94,8 @@ export function createHardwareGuide(container) {
       </div>
     </div>
   `;
+}
+
+export function createHardwareGuide(container) {
+  container.innerHTML = renderHardwareGuideHtml();
 }

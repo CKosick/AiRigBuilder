@@ -80,7 +80,21 @@ git add .
 git commit -m "chore: weekly used GPU price update"
 git push
 ```
-Vercel automatically redeploys `airigbuilder.com` with the new prices.
+Vercel automatically redeploys `airigbuilder.com` with the new prices. The build regenerates every static page (`/tracker`, `/gpu/:id`, `/builds/:model`, …) and `sitemap.xml` from the updated data files, so the indexed pages carry the new prices too.
+
+### Pages & URLs
+
+`npm run build` writes one pre-rendered HTML file per page (see `scripts/prerender.js`, run by the plugin in `vite.config.js`); the browser app then takes over the same markup. Routes are defined once in `src/routes.js`:
+
+| URL | Page |
+| --- | --- |
+| `/` | Home (Build Sheets view) |
+| `/builds`, `/builds/:model` | Build sheets, one page per model in `src/data/models.js` |
+| `/calculator` | Break-even calculator |
+| `/tracker`, `/gpu/:id` | Price tracker, one page per GPU in `src/data/gpus.js` |
+| `/guide` | Hardware guide |
+
+Old `/#tracker`-style links redirect in the browser. Unknown paths get `404.html`.
 
 ---
 

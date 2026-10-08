@@ -1,5 +1,6 @@
 // The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)
 // Last updated: 2026-10-07T03:56:24.849Z
+export const GPUS_UPDATED_AT = '2026-10-07T03:56:24.849Z';
 export const GPUS_DATA = [
   {
     "id": "rtx-3090",

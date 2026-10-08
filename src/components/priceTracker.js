@@ -3,45 +3,39 @@
 import { GPUS_DATA } from '../data/gpus.js';
 import { formatAffiliateUrl } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
-import { fillMonthGaps } from '../utils/priceHistory.js';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
+import { gpuPath } from '../routes.js';
+import { drawPriceHistoryChart } from './priceHistoryChart.js';
 
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler);
+function sortGpus(sortBy, sortAsc) {
+  return [...GPUS_DATA].sort((a, b) => {
+    let valA, valB;
+    if (sortBy === 'pricePerGb') {
+      valA = a.pricePerGb;
+      valB = b.pricePerGb;
+    } else if (sortBy === 'price') {
+      valA = a.usedStreetPrice;
+      valB = b.usedStreetPrice;
+    } else if (sortBy === 'vram') {
+      valA = a.vram;
+      valB = b.vram;
+    } else if (sortBy === 'bandwidth') {
+      valA = a.bandwidth;
+      valB = b.bandwidth;
+    }
 
-export function createPriceTracker(container) {
-  let sortBy = 'pricePerGb'; // 'pricePerGb', 'price', 'vram', 'bandwidth'
-  let sortAsc = true; // default ascending for pricePerGb ($/GB cheapest first)
-  let activeModalGpu = null;
-  let modalChartInstance = null;
-  let modalReturnFocus = null;
+    if (sortAsc) return valA - valB;
+    return valB - valA;
+  });
+}
 
-  function getSortedGpus() {
-    return [...GPUS_DATA].sort((a, b) => {
-      let valA, valB;
-      if (sortBy === 'pricePerGb') {
-        valA = a.pricePerGb;
-        valB = b.pricePerGb;
-      } else if (sortBy === 'price') {
-        valA = a.usedStreetPrice;
-        valB = b.usedStreetPrice;
-      } else if (sortBy === 'vram') {
-        valA = a.vram;
-        valB = b.vram;
-      } else if (sortBy === 'bandwidth') {
-        valA = a.bandwidth;
-        valB = b.bandwidth;
-      }
+/**
+ * Pure HTML for the tracker. The component renders it in the browser and
+ * scripts/prerender.js renders it at build time, so both produce the same markup.
+ */
+export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true } = {}) {
+    const gpus = sortGpus(sortBy, sortAsc);
 
-      if (sortAsc) return valA - valB;
-      return valB - valA;
-    });
-  }
-
-  function render() {
-    const gpus = getSortedGpus();
-
-    const restoreFocus = preserveFocus(container);
-    container.innerHTML = `
+    return `
       <div class="tracker-header-row">
         <div class="tracker-title">
           <h2>Used GPU Price Tracker for Local AI</h2>
@@ -120,7 +114,7 @@ export function createPriceTracker(container) {
               return `
                 <tr>
                   <td class="gpu-name-cell">
-                    <strong>${gpu.name}</strong>
+                    <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
                       ${gpu.aiRating}
                     </div>
@@ -216,6 +210,18 @@ export function createPriceTracker(container) {
         </div>
       </div>
     `;
+}
+
+export function createPriceTracker(container) {
+  let sortBy = 'pricePerGb'; // 'pricePerGb', 'price', 'vram', 'bandwidth'
+  let sortAsc = true; // default ascending for pricePerGb ($/GB cheapest first)
+  let activeModalGpu = null;
+  let modalChartInstance = null;
+  let modalReturnFocus = null;
+
+  function render() {
+    const restoreFocus = preserveFocus(container);
+    container.innerHTML = renderPriceTrackerHtml({ sortBy, sortAsc });
 
     attachEvents();
     restoreFocus();
@@ -440,10 +446,8 @@ export function createPriceTracker(container) {
       modalChartInstance.destroy();
     }
 
-    // One point per month; months without recorded sales show as a gap in the line
-    const { points, missingMonths } = fillMonthGaps(gpu.history);
-    const labels = points.map(h => h.date);
-    const data = points.map(h => h.price);
+    const { chart, missingMonths } = drawPriceHistoryChart(canvas, gpu);
+    modalChartInstance = chart;
 
     const summaryEl = container.querySelector('#modal-gpu-summary');
     if (summaryEl) {
@@ -451,55 +455,6 @@ export function createPriceTracker(container) {
         ? `${gpu.summary} Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).`
         : gpu.summary;
     }
-
-    modalChartInstance = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: `${gpu.name} Avg Sold Price`,
-          data: data,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          fill: true,
-          tension: 0.3,
-          borderWidth: 2.5,
-          pointBackgroundColor: '#10b981',
-          pointRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#121824',
-            titleColor: '#f1f5f9',
-            bodyColor: '#10b981',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            callbacks: {
-              label: (context) => ` Average Sold: $${context.parsed.y}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-          },
-          y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: {
-              color: '#64748b',
-              font: { family: 'JetBrains Mono', size: 10 },
-              callback: (val) => `$${val}`
-            }
-          }
-        }
-      }
-    });
   }
 
   function showToast(msg) {

@@ -293,7 +293,8 @@ export async function unsubscribeAlert(token, filePath) {
  */
 export async function sendPriceDropNotificationEmail(alert, currentGpu, appUrl = APP_URL) {
   const unsubscribeUrl = `${appUrl}/api/alerts/unsubscribe?token=${alert.unsubscribeToken}`;
-  const trackerUrl = `${appUrl}/#tracker`;
+  // The GPU's own price page (/gpu/:id), or the tracker if the id is unknown
+  const trackerUrl = currentGpu.id ? `${appUrl}/gpu/${currentGpu.id}` : `${appUrl}/tracker`;
   const subject = `🔔 Price Drop Alert: ${alert.gpuName} hit $${currentGpu.usedStreetPrice}! (Target: $${alert.targetPrice})`;
 
   const html = `

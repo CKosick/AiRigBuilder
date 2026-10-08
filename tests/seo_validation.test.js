@@ -65,13 +65,15 @@ describe('SEO & Structured Data Verification Tests', () => {
     assert.ok(robots.includes('Sitemap: https://airigbuilder.com/sitemap.xml'));
   });
 
-  it('verifies public/sitemap.xml is valid XML and contains canonical domain routes', () => {
-    const sitemapPath = path.join(ROOT_DIR, 'public', 'sitemap.xml');
-    assert.ok(fs.existsSync(sitemapPath), 'public/sitemap.xml must exist');
-    const sitemap = fs.readFileSync(sitemapPath, 'utf-8');
+  it('verifies the generated sitemap.xml is valid XML and contains canonical domain routes', async () => {
+    // sitemap.xml is written at build time from the data files (scripts/prerender.js)
+    assert.ok(!fs.existsSync(path.join(ROOT_DIR, 'public', 'sitemap.xml')), 'a static public/sitemap.xml would go stale; the build generates it');
+    const { renderSitemap } = await import('../scripts/prerender.js');
+    const sitemap = renderSitemap();
     assert.ok(sitemap.startsWith('<?xml version="1.0"'));
     assert.ok(sitemap.includes('<loc>https://airigbuilder.com/</loc>'));
     assert.ok(sitemap.includes('<changefreq>daily</changefreq>'));
+    assert.ok(!sitemap.includes('#'), 'sitemap must not list #hash URLs (search engines treat them as one page)');
   });
 
   it('verifies eBay Partner Network (Impact) site verification meta tag exists in <head>', () => {

@@ -7,75 +7,238 @@ import { Chart, LineController, LineElement, PointElement, LinearScale, Category
 // Register Chart.js components
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
+export const BREAK_EVEN_DEFAULTS = {
+  rigUpfrontCost: BASELINE_RIG.cost, // $ (Dual used 3090 rig build sheet)
+  dailyUsageHours: 4, // hrs/day
+  selectedProviderId: 'runpod-dual-3090',
+  hourlyCloudRate: 0.88, // $/hr
+  monthlyDiskFee: 7.00, // $/mo
+  systemWatts: BASELINE_RIG.watts, // Watts
+  kwhRate: 0.14, // $/kWh
+  resaleRetentionPct: 65 // % residual value after 2 years
+};
+
+function calculateBreakEven(s) {
+  return computeBreakEven({
+    rigUpfrontCost: s.rigUpfrontCost,
+    dailyUsageHours: s.dailyUsageHours,
+    hourlyCloudRate: s.hourlyCloudRate,
+    monthlyDiskFee: s.monthlyDiskFee,
+    systemWatts: s.systemWatts,
+    kwhRate: s.kwhRate,
+    resaleRetentionPct: s.resaleRetentionPct
+  });
+}
+
+const money = (n) => `${n < 0 ? '-' : ''}$${Math.abs(Math.round(n)).toLocaleString()}`;
+const signedMoney = (n) => `${n >= 0 ? '+' : ''}${money(n)}`;
+const paysOff = (stats) => Number.isFinite(stats.breakEvenMonths) && stats.breakEvenMonths <= 60;
+
+function kpiHtml(stats) {
+  return `
+    <div class="kpi-card hero-kpi">
+      <div class="kpi-label">Break-Even Point</div>
+      <div class="kpi-value">${paysOff(stats) ? `${stats.breakEvenMonths.toFixed(1)} mo` : (Number.isFinite(stats.breakEvenMonths) ? '> 5 yrs' : 'Never')}</div>
+      <div class="kpi-sub">${paysOff(stats) ? `~${stats.breakEvenDays} calendar days` : (Number.isFinite(stats.breakEvenMonths) ? 'Low usage' : 'Power costs more than cloud')}</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Monthly Cloud Bill</div>
+      <div class="kpi-value" style="color: var(--amber);">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
+      <div class="kpi-sub">Rent + persistent disk</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Monthly Local Power</div>
+      <div class="kpi-value" style="color: var(--cyan);">$${Math.round(stats.monthlyLocalPower)}/mo</div>
+      <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">2-Year Net Savings</div>
+      <div class="kpi-value" style="color: ${stats.netCashSavings24Mo >= 0 ? 'var(--emerald)' : '#f87171'};">${signedMoney(stats.netCashSavings24Mo)}</div>
+      <div class="kpi-sub">${signedMoney(stats.netEquitySavings24Mo)} with resale equity</div>
+    </div>
+  `;
+}
+
+function narrativeHtml(stats, { dailyUsageHours, rigUpfrontCost }) {
+  const usage = `Running at <strong>${dailyUsageHours} hrs/day</strong>, your <strong>$${rigUpfrontCost.toLocaleString()}</strong> home rig`;
+  if (!Number.isFinite(stats.breakEvenMonths)) {
+    return `${usage} never pays for itself: its electricity costs more per month than renting in the cloud. At this usage, cloud is the cheaper option.`;
+  }
+  if (!paysOff(stats)) {
+    return `${usage} takes about <strong>${(stats.breakEvenMonths / 12).toFixed(0)} years</strong> to pay for itself at this usage. Over 2 years you'd be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
+  }
+  if (stats.netCashSavings24Mo < 0) {
+    return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years you'd still be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
+  }
+  return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years, you pocket <strong>${money(stats.netCashSavings24Mo)} in cash</strong> while maintaining 100% data privacy and offline autonomy.`;
+}
+
+/**
+ * Pure HTML for the calculator in a given state. The component renders it in the browser
+ * and scripts/prerender.js renders it at build time, so both produce the same markup.
+ */
+export function renderBreakEvenHtml(state = {}) {
+  const s = { ...BREAK_EVEN_DEFAULTS, ...state };
+  const {
+    rigUpfrontCost, dailyUsageHours, selectedProviderId, hourlyCloudRate, monthlyDiskFee, systemWatts, kwhRate, resaleRetentionPct
+  } = s;
+  const stats = calculateBreakEven(s);
+
+  return `
+    <div class="calc-grid">
+      <!-- Inputs Column -->
+      <div class="calc-inputs-card">
+        <div class="calc-section-title">
+          <span>⚙️ Hardware & Usage Parameters</span>
+        </div>
+        <div class="calc-section-desc">
+          Compare your local AI hardware investment against rented GPU cloud hours.
+        </div>
+
+        <!-- Rig Upfront Purchase Cost -->
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Local AI Rig Total Build Cost</span>
+            <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
+          </div>
+          <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="4500" step="10" value="${rigUpfrontCost}">
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+            Includes used GPUs, motherboard, PSU, RAM, storage
+          </div>
+        </div>
+
+        <!-- Daily Usage Hours -->
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Average Daily Usage</span>
+            <span class="calc-badge-val" id="badge-daily-hours">${dailyUsageHours} hrs / day</span>
+          </div>
+          <input type="range" id="input-daily-hours" aria-label="Average daily usage (hours per day)" min="1" max="24" step="0.5" value="${dailyUsageHours}">
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+            Active prompt eval + token streaming + batch agents
+          </div>
+        </div>
+
+        <!-- Cloud Provider Preset -->
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Cloud Provider Comparison</span>
+          </div>
+          <select class="calc-select" id="select-provider" aria-label="Cloud provider comparison">
+            ${CLOUD_PROVIDERS.map(p => `
+              <option value="${p.id}" ${p.id === selectedProviderId ? 'selected' : ''}>
+                ${p.name} ($${p.hourlyRate.toFixed(2)}/hr)
+              </option>
+            `).join('')}
+            <option value="custom">Custom Hourly Rate...</option>
+          </select>
+        </div>
+
+        <!-- Hourly Rate & Disk Fee -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+          <div>
+            <div class="calc-input-label">
+              <span>Cloud $/hr</span>
+            </div>
+            <input type="number" class="calc-text-input" id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="10.00" value="${hourlyCloudRate.toFixed(2)}">
+          </div>
+          <div>
+            <div class="calc-input-label">
+              <span>Storage $/mo</span>
+            </div>
+            <input type="number" class="calc-text-input" id="input-disk-fee" aria-label="Cloud storage (dollars per month)" step="1" min="0" max="50" value="${monthlyDiskFee.toFixed(2)}">
+          </div>
+        </div>
+
+        <!-- Rig Power Draw & Electricity Rate -->
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Rig Load Power Draw</span>
+            <span class="calc-badge-val" id="badge-watts">${systemWatts} Watts</span>
+          </div>
+          <input type="range" id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="1400" step="25" value="${systemWatts}">
+        </div>
+
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Electricity Cost</span>
+            <span class="calc-badge-val" id="badge-kwh">$${kwhRate.toFixed(2)} / kWh</span>
+          </div>
+          <input type="range" id="input-kwh" aria-label="Electricity cost (dollars per kWh)" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
+        </div>
+
+        <!-- Resale Equity Retention -->
+        <div class="calc-input-block">
+          <div class="calc-input-label">
+            <span>Used Hardware Resale Value (2 Yrs)</span>
+            <span class="calc-badge-val" id="badge-resale">${resaleRetentionPct}%</span>
+          </div>
+          <input type="range" id="input-resale" aria-label="Used hardware resale value after 2 years (percent)" min="30" max="85" step="5" value="${resaleRetentionPct}">
+          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+            Used RTX 3090 cards historically hold ~65-75% value over 24 months
+          </div>
+        </div>
+      </div>
+
+      <!-- Results & Chart Column -->
+      <div class="calc-results-card">
+        <!-- KPI Row -->
+        <div class="kpi-row" id="calc-kpis">${kpiHtml(stats)}</div>
+
+        <!-- Chart Area -->
+        <div class="chart-header">
+          <div class="chart-title">Cumulative Spend Timeline: Local Rig vs Cloud (24 Months)</div>
+          <div class="chart-legend-row">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #f59e0b;"></div>
+              <span>Cloud Rental</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #10b981;"></div>
+              <span>Local Rig Cash Outlay</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #06b6d4;"></div>
+              <span>Net After Resale Equity</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-canvas-container">
+          <canvas id="break-even-chart" role="img" aria-label="Cumulative spend over 24 months: cloud rental versus local rig"></canvas>
+        </div>
+
+        <!-- Bottom Narrative & Sharing -->
+        <div class="calc-narrative-box">
+          <div class="calc-narrative-text" id="calc-narrative">${narrativeHtml(stats, s)}</div>
+          <button class="btn-secondary" id="btn-copy-calc-reddit" style="white-space: nowrap;">
+            📋 Copy Summary
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 export function createBreakEvenCalc(container) {
-  let rigUpfrontCost = BASELINE_RIG.cost; // $ (Dual used 3090 rig build sheet)
-  let dailyUsageHours = 4; // hrs/day
-  let selectedProviderId = 'runpod-dual-3090';
-  let hourlyCloudRate = 0.88; // $/hr
-  let monthlyDiskFee = 7.00; // $/mo
-  let systemWatts = BASELINE_RIG.watts; // Watts
-  let kwhRate = 0.14; // $/kWh
-  let resaleRetentionPct = 65; // % residual value after 2 years
+  let rigUpfrontCost = BREAK_EVEN_DEFAULTS.rigUpfrontCost;
+  let dailyUsageHours = BREAK_EVEN_DEFAULTS.dailyUsageHours;
+  let selectedProviderId = BREAK_EVEN_DEFAULTS.selectedProviderId;
+  let hourlyCloudRate = BREAK_EVEN_DEFAULTS.hourlyCloudRate;
+  let monthlyDiskFee = BREAK_EVEN_DEFAULTS.monthlyDiskFee;
+  let systemWatts = BREAK_EVEN_DEFAULTS.systemWatts;
+  let kwhRate = BREAK_EVEN_DEFAULTS.kwhRate;
+  let resaleRetentionPct = BREAK_EVEN_DEFAULTS.resaleRetentionPct;
 
   let chartInstance = null;
 
-  function calculate() {
-    return computeBreakEven({
-      rigUpfrontCost,
-      dailyUsageHours,
-      hourlyCloudRate,
-      monthlyDiskFee,
-      systemWatts,
-      kwhRate,
-      resaleRetentionPct
-    });
-  }
-
-  const money = (n) => `${n < 0 ? '-' : ''}$${Math.abs(Math.round(n)).toLocaleString()}`;
-  const signedMoney = (n) => `${n >= 0 ? '+' : ''}${money(n)}`;
-  const paysOff = (stats) => Number.isFinite(stats.breakEvenMonths) && stats.breakEvenMonths <= 60;
-
-  function kpiHtml(stats) {
-    return `
-      <div class="kpi-card hero-kpi">
-        <div class="kpi-label">Break-Even Point</div>
-        <div class="kpi-value">${paysOff(stats) ? `${stats.breakEvenMonths.toFixed(1)} mo` : (Number.isFinite(stats.breakEvenMonths) ? '> 5 yrs' : 'Never')}</div>
-        <div class="kpi-sub">${paysOff(stats) ? `~${stats.breakEvenDays} calendar days` : (Number.isFinite(stats.breakEvenMonths) ? 'Low usage' : 'Power costs more than cloud')}</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">Monthly Cloud Bill</div>
-        <div class="kpi-value" style="color: var(--amber);">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
-        <div class="kpi-sub">Rent + persistent disk</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">Monthly Local Power</div>
-        <div class="kpi-value" style="color: var(--cyan);">$${Math.round(stats.monthlyLocalPower)}/mo</div>
-        <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-label">2-Year Net Savings</div>
-        <div class="kpi-value" style="color: ${stats.netCashSavings24Mo >= 0 ? 'var(--emerald)' : '#f87171'};">${signedMoney(stats.netCashSavings24Mo)}</div>
-        <div class="kpi-sub">${signedMoney(stats.netEquitySavings24Mo)} with resale equity</div>
-      </div>
-    `;
-  }
-
-  function narrativeHtml(stats) {
-    const usage = `Running at <strong>${dailyUsageHours} hrs/day</strong>, your <strong>$${rigUpfrontCost.toLocaleString()}</strong> home rig`;
-    if (!Number.isFinite(stats.breakEvenMonths)) {
-      return `${usage} never pays for itself: its electricity costs more per month than renting in the cloud. At this usage, cloud is the cheaper option.`;
-    }
-    if (!paysOff(stats)) {
-      return `${usage} takes about <strong>${(stats.breakEvenMonths / 12).toFixed(0)} years</strong> to pay for itself at this usage. Over 2 years you'd be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
-    }
-    if (stats.netCashSavings24Mo < 0) {
-      return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years you'd still be <strong>${money(-stats.netCashSavings24Mo)} behind</strong> renting in cash (${signedMoney(stats.netEquitySavings24Mo)} once you count resale value).`;
-    }
-    return `${usage} pays for itself in <strong>${stats.breakEvenMonths.toFixed(1)} months</strong>. Over 2 years, you pocket <strong>${money(stats.netCashSavings24Mo)} in cash</strong> while maintaining 100% data privacy and offline autonomy.`;
-  }
+  const currentState = () => ({
+    rigUpfrontCost, dailyUsageHours, selectedProviderId, hourlyCloudRate, monthlyDiskFee, systemWatts, kwhRate, resaleRetentionPct
+  });
+  const calculate = () => calculateBreakEven(currentState());
 
   // Updates numbers and chart in place, so sliders keep working mid-drag
   function update() {
@@ -90,150 +253,15 @@ export function createBreakEvenCalc(container) {
     setText('badge-kwh', `$${kwhRate.toFixed(2)} / kWh`);
     setText('badge-resale', `${resaleRetentionPct}%`);
     container.querySelector('#calc-kpis').innerHTML = kpiHtml(stats);
-    container.querySelector('#calc-narrative').innerHTML = narrativeHtml(stats);
+    container.querySelector('#calc-narrative').innerHTML = narrativeHtml(stats, { dailyUsageHours, rigUpfrontCost });
     renderChart(stats);
   }
 
   function render() {
-    const stats = calculate();
-
-    container.innerHTML = `
-      <div class="calc-grid">
-        <!-- Inputs Column -->
-        <div class="calc-inputs-card">
-          <div class="calc-section-title">
-            <span>⚙️ Hardware & Usage Parameters</span>
-          </div>
-          <div class="calc-section-desc">
-            Compare your local AI hardware investment against rented GPU cloud hours.
-          </div>
-
-          <!-- Rig Upfront Purchase Cost -->
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Local AI Rig Total Build Cost</span>
-              <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
-            </div>
-            <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="4500" step="10" value="${rigUpfrontCost}">
-            <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
-              Includes used GPUs, motherboard, PSU, RAM, storage
-            </div>
-          </div>
-
-          <!-- Daily Usage Hours -->
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Average Daily Usage</span>
-              <span class="calc-badge-val" id="badge-daily-hours">${dailyUsageHours} hrs / day</span>
-            </div>
-            <input type="range" id="input-daily-hours" aria-label="Average daily usage (hours per day)" min="1" max="24" step="0.5" value="${dailyUsageHours}">
-            <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
-              Active prompt eval + token streaming + batch agents
-            </div>
-          </div>
-
-          <!-- Cloud Provider Preset -->
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Cloud Provider Comparison</span>
-            </div>
-            <select class="calc-select" id="select-provider" aria-label="Cloud provider comparison">
-              ${CLOUD_PROVIDERS.map(p => `
-                <option value="${p.id}" ${p.id === selectedProviderId ? 'selected' : ''}>
-                  ${p.name} ($${p.hourlyRate.toFixed(2)}/hr)
-                </option>
-              `).join('')}
-              <option value="custom">Custom Hourly Rate...</option>
-            </select>
-          </div>
-
-          <!-- Hourly Rate & Disk Fee -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
-            <div>
-              <div class="calc-input-label">
-                <span>Cloud $/hr</span>
-              </div>
-              <input type="number" class="calc-text-input" id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="10.00" value="${hourlyCloudRate.toFixed(2)}">
-            </div>
-            <div>
-              <div class="calc-input-label">
-                <span>Storage $/mo</span>
-              </div>
-              <input type="number" class="calc-text-input" id="input-disk-fee" aria-label="Cloud storage (dollars per month)" step="1" min="0" max="50" value="${monthlyDiskFee.toFixed(2)}">
-            </div>
-          </div>
-
-          <!-- Rig Power Draw & Electricity Rate -->
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Rig Load Power Draw</span>
-              <span class="calc-badge-val" id="badge-watts">${systemWatts} Watts</span>
-            </div>
-            <input type="range" id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="1400" step="25" value="${systemWatts}">
-          </div>
-
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Electricity Cost</span>
-              <span class="calc-badge-val" id="badge-kwh">$${kwhRate.toFixed(2)} / kWh</span>
-            </div>
-            <input type="range" id="input-kwh" aria-label="Electricity cost (dollars per kWh)" min="0.06" max="0.38" step="0.01" value="${kwhRate}">
-          </div>
-
-          <!-- Resale Equity Retention -->
-          <div class="calc-input-block">
-            <div class="calc-input-label">
-              <span>Used Hardware Resale Value (2 Yrs)</span>
-              <span class="calc-badge-val" id="badge-resale">${resaleRetentionPct}%</span>
-            </div>
-            <input type="range" id="input-resale" aria-label="Used hardware resale value after 2 years (percent)" min="30" max="85" step="5" value="${resaleRetentionPct}">
-            <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
-              Used RTX 3090 cards historically hold ~65-75% value over 24 months
-            </div>
-          </div>
-        </div>
-
-        <!-- Results & Chart Column -->
-        <div class="calc-results-card">
-          <!-- KPI Row -->
-          <div class="kpi-row" id="calc-kpis">${kpiHtml(stats)}</div>
-
-          <!-- Chart Area -->
-          <div class="chart-header">
-            <div class="chart-title">Cumulative Spend Timeline: Local Rig vs Cloud (24 Months)</div>
-            <div class="chart-legend-row">
-              <div class="legend-item">
-                <div class="legend-dot" style="background: #f59e0b;"></div>
-                <span>Cloud Rental</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background: #10b981;"></div>
-                <span>Local Rig Cash Outlay</span>
-              </div>
-              <div class="legend-item">
-                <div class="legend-dot" style="background: #06b6d4;"></div>
-                <span>Net After Resale Equity</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="chart-canvas-container">
-            <canvas id="break-even-chart" role="img" aria-label="Cumulative spend over 24 months: cloud rental versus local rig"></canvas>
-          </div>
-
-          <!-- Bottom Narrative & Sharing -->
-          <div class="calc-narrative-box">
-            <div class="calc-narrative-text" id="calc-narrative">${narrativeHtml(stats)}</div>
-            <button class="btn-secondary" id="btn-copy-calc-reddit" style="white-space: nowrap;">
-              📋 Copy Summary
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
+    container.innerHTML = renderBreakEvenHtml(currentState());
 
     attachEvents();
-    renderChart(stats);
+    renderChart(calculate());
   }
 
   function renderChart(stats) {

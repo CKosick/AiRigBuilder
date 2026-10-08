@@ -2,10 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "source": "/builds/:model",
+      "destination": "/builds/:model.html"
+    },
+    {
+      "source": "/gpu/:gpu",
+      "destination": "/gpu/:gpu.html"
     }
   ],
   "headers": [
