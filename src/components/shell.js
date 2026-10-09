@@ -63,7 +63,7 @@ export function renderShell(route, panels = {}) {
         </div>
         <div class="ticker-item">
           <span>Cloud 70B Break-Even:</span>
-          <span class="ticker-val ticker-payoff">~${payoffMonths} Months</span>
+          <span class="ticker-val">~${payoffMonths} Months</span>
           <span class="ticker-note">(4 hrs/day vs RunPod $${runpodDual3090.hourlyRate.toFixed(2)}/hr)</span>
         </div>
         <div class="ticker-item">

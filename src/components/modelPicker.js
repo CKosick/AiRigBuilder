@@ -90,7 +90,7 @@ function costBreakdownHtml(c, salesTaxRate) {
           </div>
           <div class="cost-breakdown-row is-total">
             <span>Year 1 Power Cost:</span>
-            <strong class="is-info">+$${c.firstYearPowerCost}/yr</strong>
+            <strong>+$${c.firstYearPowerCost}/yr</strong>
           </div>
   `;
 }

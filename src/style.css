@@ -17,16 +17,19 @@
   --border-medium: rgba(255, 255, 255, 0.14);
   --border-glow: rgba(16, 185, 129, 0.35);
 
-  /* Brand Accents */
+  /* Two meaningful colours: green = good value / primary action, amber = warning / cost.
+     Everything else uses the neutrals below. */
   --emerald: #10b981;
   --emerald-glow: rgba(16, 185, 129, 0.25);
   --emerald-dim: rgba(16, 185, 129, 0.12);
-  --cyan: #06b6d4;
-  --cyan-glow: rgba(6, 182, 212, 0.25);
-  --violet: #8b5cf6;
-  --violet-glow: rgba(139, 92, 246, 0.25);
+  --accent-text: #34d399;
+  --accent-bg: rgba(16, 185, 129, 0.12);
   --amber: #f59e0b;
-  --rose: #f43f5e;
+  --warn-text: #fbbf24;
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --warn-border: rgba(245, 158, 11, 0.35);
+  --neutral-bg: rgba(148, 163, 184, 0.12);
+  --neutral-border: rgba(148, 163, 184, 0.28);
 
   /* Typography Colors */
   --text-main: #f1f5f9;
@@ -62,9 +65,7 @@ body {
   font-family: var(--font-sans);
   background-color: var(--bg-darkest);
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.12), transparent),
-    radial-gradient(ellipse 60% 40% at 90% 80%, rgba(6, 182, 212, 0.06), transparent),
-    radial-gradient(ellipse 60% 40% at 10% 90%, rgba(139, 92, 246, 0.05), transparent);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.12), transparent);
   background-attachment: fixed;
   color: var(--text-main);
   line-height: 1.5;
@@ -104,13 +105,8 @@ body {
 }
 
 .ticker-val {
-  color: var(--emerald);
+  color: var(--text-highlight);
   font-weight: 600;
-}
-
-.ticker-drop {
-  color: #34d399;
-  font-size: 0.75rem;
 }
 
 .ticker-tag {
@@ -145,7 +141,7 @@ body {
 .brand-icon-box {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.15));
+  background: var(--accent-bg);
   border: 1px solid var(--emerald);
   border-radius: var(--radius-md);
   display: flex;
@@ -264,7 +260,7 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+  background: linear-gradient(90deg, transparent, var(--emerald), transparent);
 }
 
 .hero-question {
@@ -285,9 +281,7 @@ body {
 }
 
 .hero-highlight {
-  background: linear-gradient(90deg, #10b981, #06b6d4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--accent-text);
 }
 
 .hero-facts {
@@ -302,7 +296,7 @@ body {
 }
 
 .hero-facts strong {
-  color: var(--emerald);
+  color: var(--text-highlight);
   font-family: var(--font-mono);
   font-weight: 700;
 }
@@ -444,7 +438,7 @@ body {
 }
 
 .model-option.active {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.1));
+  background: var(--accent-bg);
   border-color: var(--emerald);
 }
 
@@ -523,7 +517,7 @@ body {
   font-family: var(--font-mono);
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--emerald);
+  color: var(--text-highlight);
 }
 
 /* Tier Selector Tabs */
@@ -583,16 +577,11 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.tier-badge-balanced {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
+.tier-badge-balanced,
 .tier-badge-new {
-  background: rgba(139, 92, 246, 0.15);
-  color: #a78bfa;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: var(--neutral-bg);
+  color: var(--text-main);
+  border: 1px solid var(--neutral-border);
 }
 
 .tier-title-row {
@@ -735,7 +724,7 @@ body {
 
 .part-notes {
   font-size: 0.75rem;
-  color: #38bdf8;
+  color: var(--text-muted);
   margin-top: 4px;
   display: flex;
   align-items: center;
@@ -760,9 +749,9 @@ body {
 }
 
 .condition-new {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--neutral-bg);
+  color: var(--text-main);
+  border: 1px solid var(--neutral-border);
 }
 
 .condition-included {
@@ -865,7 +854,7 @@ input[type="range"] {
 }
 
 .total-equity-box {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05));
+  background: var(--accent-bg);
   border: 1px solid var(--emerald);
   border-radius: var(--radius-md);
   padding: 1.25rem;
@@ -885,7 +874,7 @@ input[type="range"] {
   font-family: var(--font-mono);
   font-size: 2rem;
   font-weight: 800;
-  color: var(--emerald);
+  color: var(--text-highlight);
   margin: 2px 0;
 }
 
@@ -944,7 +933,7 @@ input[type="range"] {
 
 .calc-badge-val {
   font-family: var(--font-mono);
-  color: var(--emerald);
+  color: var(--text-highlight);
   font-weight: 700;
 }
 
@@ -1210,8 +1199,8 @@ input[type="range"] {
   display: inline-block;
   font-size: 0.75rem;
   font-family: var(--font-mono);
-  background: rgba(6, 182, 212, 0.12);
-  color: var(--cyan);
+  background: var(--neutral-bg);
+  color: var(--text-main);
   padding: 2px 7px;
   border-radius: var(--radius-sm);
   margin-top: 3px;
@@ -1254,8 +1243,8 @@ input[type="range"] {
 }
 
 .trend-up {
-  background: rgba(244, 63, 94, 0.15);
-  color: #fb7185;
+  background: var(--warn-bg);
+  color: var(--warn-text);
 }
 
 .trend-na {
@@ -1361,7 +1350,7 @@ input[type="range"] {
 }
 
 .guide-card.info-card::before {
-  background: var(--cyan);
+  background: var(--text-dim);
 }
 
 .guide-card h3 {
@@ -1451,14 +1440,14 @@ input[type="range"] {
 
 .sparkline-line path {
   fill: none;
-  stroke: var(--cyan);
+  stroke: var(--text-muted);
   stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
 .sparkline-line circle {
-  fill: var(--cyan);
+  fill: var(--text-muted);
 }
 
 .sparkline-gap path {
@@ -1470,7 +1459,7 @@ input[type="range"] {
 }
 
 .sparkline-last {
-  fill: var(--emerald);
+  fill: var(--text-main);
 }
 
 .gpu-table tr.is-best-value {
@@ -1517,7 +1506,7 @@ input[type="range"] {
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(to bottom, var(--emerald), var(--cyan));
+  background: var(--emerald);
 }
 
 .price-alert-content {
@@ -1649,9 +1638,9 @@ input[type="range"] {
 }
 
 .alert-status-msg.error {
-  background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.4);
-  color: #fb7185;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
 }
 
 @media (max-width: 900px) {
@@ -1720,15 +1709,15 @@ input[type="range"] {
 .btn-text-sm { font-size: 0.82rem; }
 .is-good { color: var(--emerald); }
 .is-warn { color: var(--amber); }
-.is-bad { color: #f87171; }
-.is-info { color: var(--cyan); }
+.is-bad { color: var(--warn-text); }
 
 /* Ticker */
 .ticker-note { color: var(--text-dim); }
-.ticker-trend.is-up { color: #34d399; font-weight: 600; }
-.ticker-trend.is-down { color: #f87171; font-size: 0.75rem; }
-.ticker-payoff { color: var(--cyan); }
-.ticker-good { color: #34d399; }
+/* For a buyer a price rise is the warning and a drop is the good news */
+.ticker-trend { font-weight: 600; }
+.ticker-trend.is-up { color: var(--warn-text); }
+.ticker-trend.is-down { color: var(--accent-text); }
+.ticker-good { color: var(--accent-text); }
 
 /* Footer */
 .footer-title { color: var(--text-main); display: block; margin-bottom: 4px; }
@@ -1746,15 +1735,14 @@ input[type="range"] {
 .kpi-value.kpi-value-sm { font-size: 1.1rem; }
 .kpi-value.is-good { color: var(--emerald); }
 .kpi-value.is-warn { color: var(--amber); }
-.kpi-value.is-bad { color: #f87171; }
-.kpi-value.is-info { color: var(--cyan); }
+.kpi-value.is-bad { color: var(--warn-text); }
 .gpu-detail-back { margin-top: 1rem; }
 
 /* Calculator */
 .calc-pair-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
 .legend-cloud { background: #f59e0b; }
 .legend-local { background: #10b981; }
-.legend-equity { background: #06b6d4; }
+.legend-equity { background: var(--text-muted); }
 
 /* Tracker table */
 .filter-label { font-size: 0.75rem; color: var(--text-dim); margin-right: 4px; font-weight: 700; }
@@ -1774,10 +1762,10 @@ input[type="range"] {
 .proscons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.82rem; }
 .proscons-card { padding: 0.85rem; border-radius: var(--radius-md); }
 .proscons-card.proscons-pros { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); }
-.proscons-card.proscons-cons { background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); }
+.proscons-card.proscons-cons { background: var(--warn-bg); border: 1px solid var(--warn-border); }
 .proscons-title { display: block; margin-bottom: 4px; }
 .proscons-card.proscons-pros .proscons-title { color: var(--emerald); }
-.proscons-card.proscons-cons .proscons-title { color: #fb7185; }
+.proscons-card.proscons-cons .proscons-title { color: var(--warn-text); }
 .proscons-list { padding-left: 1rem; color: var(--text-muted); }
 .modal-alert-box { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .modal-alert-title { color: var(--text-highlight); font-size: 0.85rem; display: block; }
@@ -1792,9 +1780,8 @@ input[type="range"] {
 /* Build sheet */
 .cost-breakdown-row.is-total { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle); }
 .cost-breakdown-row strong.is-warn { color: var(--amber); }
-.cost-breakdown-row strong.is-info { color: var(--cyan); }
-.model-speed-line { margin-top: 8px; font-size: 0.78rem; color: var(--cyan); font-family: var(--font-mono); }
-.spec-badge-value.spec-badge-quant { font-size: 1rem; color: #38bdf8; }
+.model-speed-line { margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); }
+.spec-badge-value.spec-badge-quant { font-size: 1rem; color: var(--text-highlight); }
 .spec-badge-value.spec-badge-cost { font-size: 0.92rem; color: var(--amber); }
 .selector-note { color: var(--text-muted); font-size: 0.75rem; }
 .parts-table .col-component { width: 14%; }
@@ -1991,7 +1978,7 @@ input[type="range"] {
 }
 
 .gpu-detail-pros h3 { color: var(--emerald); }
-.gpu-detail-cons h3 { color: #fb7185; }
+.gpu-detail-cons h3 { color: var(--warn-text); }
 
 .gpu-detail-others {
   list-style: none;

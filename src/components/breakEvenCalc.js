@@ -50,7 +50,7 @@ function kpiHtml(stats) {
 
     <div class="kpi-card">
       <div class="kpi-label">Monthly Local Power</div>
-      <div class="kpi-value is-info">$${Math.round(stats.monthlyLocalPower)}/mo</div>
+      <div class="kpi-value">$${Math.round(stats.monthlyLocalPower)}/mo</div>
       <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
     </div>
 
@@ -318,7 +318,7 @@ export function createBreakEvenCalc(container) {
           {
             label: 'Net Outlay (After Hardware Equity)',
             data: equityData,
-            borderColor: '#06b6d4',
+            borderColor: '#94a3b8', // neutral: the third series is context, not a verdict
             borderDash: [5, 5],
             borderWidth: 2,
             pointRadius: 0,

@@ -8,6 +8,31 @@ const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const COMPONENTS_DIR = path.join(ROOT_DIR, 'src', 'components');
 const components = fs.readdirSync(COMPONENTS_DIR).filter(f => f.endsWith('.js'))
   .map(f => ({ file: f, src: fs.readFileSync(path.join(COMPONENTS_DIR, f), 'utf-8') }));
+const CSS = fs.readFileSync(path.join(ROOT_DIR, 'src', 'style.css'), 'utf-8');
+
+/** Every hex / rgb() / rgba() colour in a source text, as [text, r, g, b]. */
+function colours(text) {
+  const out = [];
+  for (const m of text.matchAll(/#([0-9a-f]{6}|[0-9a-f]{3})\b/gi)) {
+    let h = m[1];
+    if (h.length === 3) h = [...h].map(c => c + c).join('');
+    out.push([m[0], parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]);
+  }
+  for (const m of text.matchAll(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/gi)) out.push([m[0], +m[1], +m[2], +m[3]]);
+  return out;
+}
+
+/** Neutral grey, or the green (good value / primary) or amber (warning / cost) family. */
+function onPalette([, r, g, b]) {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  if ((max - min) / 255 < 0.18) return true;
+  let hue;
+  if (max === r) hue = 60 * (((g - b) / (max - min)) % 6);
+  else if (max === g) hue = 60 * ((b - r) / (max - min) + 2);
+  else hue = 60 * ((r - g) / (max - min) + 4);
+  if (hue < 0) hue += 360;
+  return (hue >= 140 && hue <= 180) || (hue >= 30 && hue <= 50);
+}
 
 describe('Visual system', () => {
   it('components style through classes in style.css, not inline style attributes', () => {
@@ -15,5 +40,20 @@ describe('Visual system', () => {
       const hits = src.match(/style="[^"]*"/g) || [];
       assert.deepEqual(hits, [], `${file} has inline styles`);
     }
+  });
+
+  it('uses two meaningful colours (green, amber) plus neutrals, in CSS and component code', () => {
+    assert.ok(!onPalette(['cyan', 6, 182, 212]) && !onPalette(['rose', 244, 63, 94]), 'the check rejects other hues');
+    const sources = [['style.css', CSS], ...components.map(c => [c.file, c.src])];
+    for (const [name, text] of sources) {
+      const off = colours(text).filter(c => !onPalette(c)).map(c => c[0]);
+      assert.deepEqual(off, [], `${name} uses colours outside green / amber / neutral`);
+    }
+  });
+
+  it('the ticker and tracker show a price rise as a warning and a drop as good news', () => {
+    assert.match(CSS, /\.ticker-trend\.is-up \{ color: var\(--warn-text\); \}/);
+    assert.match(CSS, /\.ticker-trend\.is-down \{ color: var\(--accent-text\); \}/);
+    assert.match(CSS, /\.trend-up \{[^}]*color: var\(--warn-text\)/);
   });
 });
