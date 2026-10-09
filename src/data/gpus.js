@@ -289,7 +289,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 25.58,
     "multiGpuScore": 8,
-    "aiRating": "💰 Sub-$250 Budget Gateway",
+    "aiRating": "💰 Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for about {price} allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
     "pros": [
       "Incredible $18.75/GB ratio",

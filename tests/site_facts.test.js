@@ -34,6 +34,13 @@ describe('Price-derived copy is generated from the data files', () => {
     }
   });
 
+  it('GPU tags (aiRating) make no price claims', () => {
+    // Tags are short labels shown on the tracker; a price in one goes stale with the next update
+    for (const gpu of GPUS_DATA) {
+      assert.ok(!/\$\d/.test(gpu.aiRating), `${gpu.id} aiRating hard-codes a price: ${gpu.aiRating}`);
+    }
+  });
+
   it('model descriptions use {price:<gpu-id>} placeholders, never hard-coded dollar amounts', () => {
     for (const model of MODELS_DATA) {
       assert.ok(!/\$\d/.test(model.description || ''), `${model.id} description hard-codes a price: ${model.description}`);
