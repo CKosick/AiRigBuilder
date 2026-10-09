@@ -49,7 +49,7 @@ export function renderBuildsIndexHtml() {
           <table class="parts-table stack-table">
             <thead>
               <tr>
-                <th scope="col" style="width: 30%;">Model</th>
+                <th scope="col" class="col-model">Model</th>
                 <th scope="col">VRAM Target</th>
                 <th scope="col">Sweet Spot Quant</th>
                 <th scope="col">Speed on Dual 3090</th>

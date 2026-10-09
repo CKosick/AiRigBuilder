@@ -49,7 +49,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
           <p>Updated weekly from verified eBay sold listings. Sorted by the metric that actually matters: <strong>Price per GB of VRAM</strong>.</p>
         </div>
         <div class="tracker-filter-group">
-          <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 4px; font-weight: 700;">SORT BY:</span>
+          <span class="filter-label">SORT BY:</span>
           <button class="filter-btn ${sortBy === 'pricePerGb' ? 'active' : ''}" data-sort="pricePerGb" aria-pressed="${sortBy === 'pricePerGb'}">
             $/GB VRAM ${sortBy === 'pricePerGb' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
@@ -76,7 +76,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
               <th scope="col">Price / GB</th>
               <th scope="col">Price History</th>
               ${showTrend ? '<th scope="col">7d Trend</th>' : ''}
-              <th scope="col" style="text-align: right;">Action</th>
+              <th scope="col" class="col-actions">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -85,17 +85,17 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
                   <td class="gpu-name-cell stack-head">
                     ${gpu.id === bestValueId ? '<span class="best-value-badge">Best value per GB</span>' : ''}
                     <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                    <div class="gpu-rating">
                       ${gpu.aiRating}
                     </div>
                   </td>
                   <td data-label="VRAM">
                     <span class="gpu-vram-pill">${gpu.vram} GB ${gpu.vramType}</span>
-                    <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">TDP: ${gpu.tdp}W</div>
+                    <div class="cell-sub">TDP: ${gpu.tdp}W</div>
                   </td>
                   <td data-label="Bandwidth">
-                    <strong style="font-family: var(--font-mono); color: var(--text-highlight);">${gpu.bandwidth} GB/s</strong>
-                    <div style="font-size: 0.72rem; color: var(--text-dim);">Memory Bus</div>
+                    <strong class="cell-figure">${gpu.bandwidth} GB/s</strong>
+                    <div class="cell-sub cell-sub-flush">Memory Bus</div>
                   </td>
                   <td data-label="Avg used price">
                     <div class="price-main">$${gpu.usedStreetPrice.toLocaleString()}</div>
@@ -104,15 +104,15 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
                   <td data-label="Price / GB">
                     <div class="price-per-gb-badge">
                       <span>$${gpu.pricePerGb.toFixed(2)}</span>
-                      <span style="font-size: 0.7rem; color: var(--text-dim);">/ GB</span>
+                      <span class="unit">/ GB</span>
                     </div>
                   </td>
                   <td data-label="Price history">
                     ${sparklineSvg(gpu.history)}
                   </td>
                   ${showTrend ? `<td data-label="7d trend">${trendBadgeHtml(gpu.trend7d)}</td>` : ''}
-                  <td class="stack-action" style="text-align: right; white-space: nowrap;">
-                    <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
+                  <td class="stack-action col-actions">
+                    <button class="btn-secondary btn-sm btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}">
                       📈 History
                     </button>
                   </td>
@@ -154,7 +154,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
               </button>
             </div>
           </form>
-          <div class="alert-status-msg" id="alert-status-msg" role="status" aria-live="polite" style="display: none;"></div>
+          <div class="alert-status-msg" id="alert-status-msg" role="status" aria-live="polite" hidden></div>
         </div>
       </div>
 
@@ -163,50 +163,50 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
         <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-gpu-title" aria-describedby="modal-gpu-subtitle">
           <div class="modal-header">
             <div>
-              <h3 id="modal-gpu-title" style="color: var(--text-highlight); font-size: 1.15rem; font-weight: 800;"></h3>
-              <p id="modal-gpu-subtitle" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+              <h3 id="modal-gpu-title" class="modal-title"></h3>
+              <p id="modal-gpu-subtitle" class="modal-subtitle"></p>
             </div>
             <button class="modal-close-btn" id="modal-close-btn" aria-label="Close price history">&times;</button>
           </div>
           <div class="modal-body">
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" id="modal-gpu-summary"></div>
+            <div class="modal-summary" id="modal-gpu-summary"></div>
 
-            <div style="height: 240px; margin-bottom: 1.5rem; position: relative;">
+            <div class="modal-chart">
               <canvas id="modal-history-chart" role="img" aria-label="Monthly average sold price chart"></canvas>
             </div>
 
             <!-- Pros & Cons -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.82rem;">
-              <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 0.85rem; border-radius: var(--radius-md);">
-                <strong style="color: var(--emerald); display: block; margin-bottom: 4px;">✓ AI Strengths</strong>
-                <ul id="modal-pros-list" style="padding-left: 1rem; color: var(--text-muted);"></ul>
+            <div class="proscons-grid">
+              <div class="proscons-card proscons-pros">
+                <strong class="proscons-title">✓ AI Strengths</strong>
+                <ul id="modal-pros-list" class="proscons-list"></ul>
               </div>
-              <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.2); padding: 0.85rem; border-radius: var(--radius-md);">
-                <strong style="color: #fb7185; display: block; margin-bottom: 4px;">⚠️ Build Gotchas</strong>
-                <ul id="modal-cons-list" style="padding-left: 1rem; color: var(--text-muted);"></ul>
+              <div class="proscons-card proscons-cons">
+                <strong class="proscons-title">⚠️ Build Gotchas</strong>
+                <ul id="modal-cons-list" class="proscons-list"></ul>
               </div>
             </div>
 
             <!-- Alert Capture Box -->
-            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div class="modal-alert-box">
               <div>
-                <strong style="color: var(--text-highlight); font-size: 0.85rem; display: block;">🔔 Price Drop Notification</strong>
-                <span style="font-size: 0.78rem; color: var(--text-muted);" id="modal-alert-desc">Alert me when this GPU drops below target price</span>
+                <strong class="modal-alert-title">🔔 Price Drop Notification</strong>
+                <span class="modal-alert-desc" id="modal-alert-desc">Alert me when this GPU drops below target price</span>
               </div>
-              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <div style="display: flex; align-items: center; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0 8px;">
-                  <span style="color: var(--text-dim); font-size: 0.8rem;">$</span>
-                  <input type="number" id="modal-target-price-input" aria-label="Target price in dollars" style="width: 75px; background: transparent; border: none; color: var(--text-main); font-size: 0.8rem; padding: 6px 4px;" placeholder="Target">
+              <div class="modal-alert-controls">
+                <div class="modal-price-field">
+                  <span class="modal-price-prefix">$</span>
+                  <input type="number" id="modal-target-price-input" aria-label="Target price in dollars" class="modal-price-input" placeholder="Target">
                 </div>
-                <input type="email" id="modal-email-input" aria-label="Your email" autocomplete="email" placeholder="you@domain.com" style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 10px; border-radius: var(--radius-sm);">
-                <button class="btn-primary" id="btn-save-alert" style="padding: 6px 14px; font-size: 0.8rem;">
+                <input type="email" id="modal-email-input" aria-label="Your email" autocomplete="email" placeholder="you@domain.com" class="modal-email-input">
+                <button class="btn-primary btn-sm-primary" id="btn-save-alert">
                   Set Alert
                 </button>
               </div>
             </div>
 
-            <div style="margin-top: 1rem; text-align: right;">
-              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary" style="font-size: 0.82rem;">
+            <div class="modal-footer-actions">
+              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm">
                 🔍 View Live eBay Sold Listings →
               </a>
             </div>
@@ -314,18 +314,18 @@ export function createPriceTracker(container) {
           if (res.ok && data.success) {
             alertStatus.className = 'alert-status-msg success';
             alertStatus.textContent = data.message || `✓ Confirmation email dispatched to ${email}! Check your inbox to activate your alert.`;
-            alertStatus.style.display = 'block';
+            alertStatus.hidden = false;
             showToast('✓ Double opt-in confirmation sent!');
             emailInput.value = '';
           } else {
             alertStatus.className = 'alert-status-msg error';
             alertStatus.textContent = data.error || 'Failed to create alert. Please check your inputs.';
-            alertStatus.style.display = 'block';
+            alertStatus.hidden = false;
           }
         } catch (err) {
           alertStatus.className = 'alert-status-msg error';
           alertStatus.textContent = 'Could not reach the alert service. Your alert was not saved. Please try again in a moment.';
-          alertStatus.style.display = 'block';
+          alertStatus.hidden = false;
         } finally {
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalBtnText;

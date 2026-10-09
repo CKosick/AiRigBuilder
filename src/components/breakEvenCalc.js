@@ -44,19 +44,19 @@ function kpiHtml(stats) {
 
     <div class="kpi-card">
       <div class="kpi-label">Monthly Cloud Bill</div>
-      <div class="kpi-value" style="color: var(--amber);">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
+      <div class="kpi-value is-warn">$${Math.round(stats.monthlyCloudTotal)}/mo</div>
       <div class="kpi-sub">Rent + persistent disk</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-label">Monthly Local Power</div>
-      <div class="kpi-value" style="color: var(--cyan);">$${Math.round(stats.monthlyLocalPower)}/mo</div>
+      <div class="kpi-value is-info">$${Math.round(stats.monthlyLocalPower)}/mo</div>
       <div class="kpi-sub">Just $${stats.localHourlyPower.toFixed(2)}/hr active</div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-label">2-Year Net Savings</div>
-      <div class="kpi-value" style="color: ${stats.netCashSavings24Mo >= 0 ? 'var(--emerald)' : '#f87171'};">${signedMoney(stats.netCashSavings24Mo)}</div>
+      <div class="kpi-value ${stats.netCashSavings24Mo >= 0 ? 'is-good' : 'is-bad'}">${signedMoney(stats.netCashSavings24Mo)}</div>
       <div class="kpi-sub">${signedMoney(stats.netEquitySavings24Mo)} with resale equity</div>
     </div>
   `;
@@ -105,7 +105,7 @@ export function renderBreakEvenHtml(state = {}) {
             <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
           </div>
           <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="4500" step="10" value="${rigUpfrontCost}">
-          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+          <div class="sub-note">
             Includes used GPUs, motherboard, PSU, RAM, storage
           </div>
         </div>
@@ -117,7 +117,7 @@ export function renderBreakEvenHtml(state = {}) {
             <span class="calc-badge-val" id="badge-daily-hours">${dailyUsageHours} hrs / day</span>
           </div>
           <input type="range" id="input-daily-hours" aria-label="Average daily usage (hours per day)" min="1" max="24" step="0.5" value="${dailyUsageHours}">
-          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+          <div class="sub-note">
             Active prompt eval + token streaming + batch agents
           </div>
         </div>
@@ -138,7 +138,7 @@ export function renderBreakEvenHtml(state = {}) {
         </div>
 
         <!-- Hourly Rate & Disk Fee -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <div class="calc-pair-grid">
           <div>
             <div class="calc-input-label">
               <span>Cloud $/hr</span>
@@ -177,7 +177,7 @@ export function renderBreakEvenHtml(state = {}) {
             <span class="calc-badge-val" id="badge-resale">${resaleRetentionPct}%</span>
           </div>
           <input type="range" id="input-resale" aria-label="Used hardware resale value after 2 years (percent)" min="30" max="85" step="5" value="${resaleRetentionPct}">
-          <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">
+          <div class="sub-note">
             Used RTX 3090 cards historically hold ~65-75% value over 24 months
           </div>
         </div>
@@ -193,15 +193,15 @@ export function renderBreakEvenHtml(state = {}) {
           <div class="chart-title">Cumulative Spend Timeline: Local Rig vs Cloud (24 Months)</div>
           <div class="chart-legend-row">
             <div class="legend-item">
-              <div class="legend-dot" style="background: #f59e0b;"></div>
+              <div class="legend-dot legend-cloud"></div>
               <span>Cloud Rental</span>
             </div>
             <div class="legend-item">
-              <div class="legend-dot" style="background: #10b981;"></div>
+              <div class="legend-dot legend-local"></div>
               <span>Local Rig Cash Outlay</span>
             </div>
             <div class="legend-item">
-              <div class="legend-dot" style="background: #06b6d4;"></div>
+              <div class="legend-dot legend-equity"></div>
               <span>Net After Resale Equity</span>
             </div>
           </div>
@@ -214,7 +214,7 @@ export function renderBreakEvenHtml(state = {}) {
         <!-- Bottom Narrative & Sharing -->
         <div class="calc-narrative-box">
           <div class="calc-narrative-text" id="calc-narrative">${narrativeHtml(stats, s)}</div>
-          <button class="btn-secondary" id="btn-copy-calc-reddit" style="white-space: nowrap;">
+          <button class="btn-secondary btn-nowrap" id="btn-copy-calc-reddit">
             📋 Copy Summary
           </button>
         </div>

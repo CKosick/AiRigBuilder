@@ -16,9 +16,9 @@ const TAB_LABELS = {
 
 // The 7d trend is null until the price log has a price from about a week earlier
 function tickerTrendHtml(pct) {
-  if (typeof pct !== 'number') return '<span style="color: var(--text-dim);">7d trend n/a</span>';
+  if (typeof pct !== 'number') return '<span class="ticker-note">7d trend n/a</span>';
   const up = pct >= 0;
-  return `<span class="${up ? 'ticker-val' : 'ticker-drop'}" style="color: ${up ? '#34d399' : '#f87171'}">${up ? '▲' : '▼'} ${Math.abs(pct)}% (7d)</span>`;
+  return `<span class="ticker-trend ${up ? 'is-up' : 'is-down'}">${up ? '▲' : '▼'} ${Math.abs(pct)}% (7d)</span>`;
 }
 
 /**
@@ -59,17 +59,17 @@ export function renderShell(route, panels = {}) {
         <div class="ticker-item">
           <span>Dual-3090 70B Rig:</span>
           <span class="ticker-val">~$${dual3090RigEst.toLocaleString('en-US')}</span>
-          <span style="color: var(--text-dim);">[Q4_K_M @ ~20 tok/s]</span>
+          <span class="ticker-note">[Q4_K_M @ ~20 tok/s]</span>
         </div>
         <div class="ticker-item">
           <span>Cloud 70B Break-Even:</span>
-          <span class="ticker-val" style="color: var(--cyan);">~${payoffMonths} Months</span>
-          <span style="color: var(--text-dim);">(4 hrs/day vs RunPod $${runpodDual3090.hourlyRate.toFixed(2)}/hr)</span>
+          <span class="ticker-val ticker-payoff">~${payoffMonths} Months</span>
+          <span class="ticker-note">(4 hrs/day vs RunPod $${runpodDual3090.hourlyRate.toFixed(2)}/hr)</span>
         </div>
         <div class="ticker-item">
           <span>Cheapest 24GB:</span>
-          <span class="ticker-val" style="color: #34d399;">Tesla P40 ($${teslaP40.usedStreetPrice})</span>
-          <span style="color: var(--text-dim);">[$${teslaP40.pricePerGb}/GB]</span>
+          <span class="ticker-val ticker-good">Tesla P40 ($${teslaP40.usedStreetPrice})</span>
+          <span class="ticker-note">[$${teslaP40.pricePerGb}/GB]</span>
         </div>
       </div>
 
@@ -121,16 +121,16 @@ export function renderShell(route, panels = {}) {
     <footer class="footer-container">
       <div class="footer-content">
         <div class="footer-disclaimer">
-          <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">
+          <strong class="footer-title">
             airigbuilder.com — Independent Local AI Hardware Intelligence
           </strong>
           Used GPU prices are aggregated from real eBay sold listings. When you buy components through our merchant links (Amazon Associates, B&H Photo, eBay Partner Network), we may earn a small referral commission at no additional cost to you. True electricity costs assume continuous model evaluation cycles.
         </div>
-        <nav aria-label="Footer" style="display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem;">
-          <a href="/builds" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Build Sheets</a>
-          <a href="/calculator" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Break-Even Calc</a>
-          <a href="/tracker" class="footer-link" style="color: var(--text-muted); text-decoration: none;">GPU Tracker</a>
-          <a href="/guide" class="footer-link" style="color: var(--text-muted); text-decoration: none;">Hardware Gotchas</a>
+        <nav aria-label="Footer" class="footer-nav">
+          <a href="/builds" class="footer-link">Build Sheets</a>
+          <a href="/calculator" class="footer-link">Break-Even Calc</a>
+          <a href="/tracker" class="footer-link">GPU Tracker</a>
+          <a href="/guide" class="footer-link">Hardware Gotchas</a>
         </nav>
       </div>
       <details class="footer-directory">

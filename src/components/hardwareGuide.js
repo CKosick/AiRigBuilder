@@ -8,11 +8,11 @@ import { siteFacts, usd } from '../utils/siteFacts.js';
 export function renderHardwareGuideHtml() {
   const { rtx4090, dual3090GpuCost } = siteFacts();
   return `
-    <div style="margin-bottom: 1.5rem;">
-      <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-highlight);">
+    <div class="section-intro">
+      <h2 class="section-title">
         Local AI Hardware Guide & Crucial Gotchas
       </h2>
-      <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+      <p class="section-lead">
         Building a multi-GPU local AI rig is not like building a gaming PC. Here are the 5 critical architectural traps to avoid.
       </p>
     </div>
@@ -62,7 +62,7 @@ export function renderHardwareGuideHtml() {
         <p>
           Never guess whether a model fits in your VRAM. Use this exact community equation:
         </p>
-        <div style="background: rgba(0, 0, 0, 0.4); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.82rem; color: var(--emerald); margin-bottom: 0.75rem;">
+        <div class="formula-box">
           Total VRAM (GB) = (Params × Bits_Per_Weight / 8) × 1.08 + KV_Cache_Overhead
         </div>
         <ul>

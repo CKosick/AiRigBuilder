@@ -20,7 +20,7 @@ export function renderGpuDetailHtml(gpu) {
               <tr>
                 <td>${h.date}</td>
                 <td class="part-price-cell">$${h.price.toLocaleString('en-US')}</td>
-                <td>${change === null ? '<span style="color: var(--text-dim);">—</span>' : `${change > 0 ? '+' : change < 0 ? '−' : '±'}$${Math.abs(change)}`}</td>
+                <td>${change === null ? '<span class="text-dim">—</span>' : `${change > 0 ? '+' : change < 0 ? '−' : '±'}$${Math.abs(change)}`}</td>
               </tr>`;
   }).join('');
   const others = [...GPUS_DATA].filter(g => g.id !== gpu.id).sort((a, b) => a.pricePerGb - b.pricePerGb);
@@ -53,17 +53,17 @@ export function renderGpuDetailHtml(gpu) {
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Typical Range</div>
-          <div class="kpi-value" style="font-size: 1.25rem;">$${gpu.usedPriceLow}–$${gpu.usedPriceHigh}</div>
+          <div class="kpi-value kpi-value-md">$${gpu.usedPriceLow}–$${gpu.usedPriceHigh}</div>
           <div class="kpi-sub">${gpu.newPrice ? `New: $${gpu.newPrice.toLocaleString('en-US')}` : 'No longer sold new'}</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Price / GB VRAM</div>
-          <div class="kpi-value" style="color: var(--emerald);">$${gpu.pricePerGb.toFixed(2)}</div>
+          <div class="kpi-value is-good">$${gpu.pricePerGb.toFixed(2)}</div>
           <div class="kpi-sub">${gpu.vram} GB ${gpu.vramType}</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Price Trend</div>
-          <div class="kpi-value" style="font-size: 1.1rem;">${trendBadgeHtml(gpu.trend7d)} <span class="kpi-sub">7d</span></div>
+          <div class="kpi-value kpi-value-sm">${trendBadgeHtml(gpu.trend7d)} <span class="kpi-sub">7d</span></div>
           <div class="kpi-sub">${trendBadgeHtml(gpu.trend30d)} 30d</div>
         </div>
       </div>
@@ -123,7 +123,7 @@ export function renderGpuDetailHtml(gpu) {
         <ul class="gpu-detail-others">
           ${others.map(g => `<li><a href="${gpuPath(g.id)}">${g.name}</a> <span>$${g.usedStreetPrice.toLocaleString('en-US')} · $${g.pricePerGb.toFixed(2)}/GB</span></li>`).join('')}
         </ul>
-        <p style="margin-top: 1rem;"><a href="/tracker" class="btn-secondary">← Compare all GPUs and set a price-drop alert</a></p>
+        <p class="gpu-detail-back"><a href="/tracker" class="btn-secondary">← Compare all GPUs and set a price-drop alert</a></p>
       </section>
     </article>
   `;

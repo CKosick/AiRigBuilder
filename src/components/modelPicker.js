@@ -82,15 +82,15 @@ function costBreakdownHtml(c, salesTaxRate) {
           </div>
           <div class="cost-breakdown-row">
             <span>Peak Power Draw:</span>
-            <strong style="color: var(--amber);">${c.systemWatts}W under load</strong>
+            <strong class="is-warn">${c.systemWatts}W under load</strong>
           </div>
           <div class="cost-breakdown-row">
             <span>Monthly Electricity:</span>
             <strong>+$${c.monthlyPowerCost}/mo</strong>
           </div>
-          <div class="cost-breakdown-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle);">
+          <div class="cost-breakdown-row is-total">
             <span>Year 1 Power Cost:</span>
-            <strong style="color: var(--cyan);">+$${c.firstYearPowerCost}/yr</strong>
+            <strong class="is-info">+$${c.firstYearPowerCost}/yr</strong>
           </div>
   `;
 }
@@ -164,7 +164,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="model-info-block">
         <h3>${currentModel.name}</h3>
         <p class="model-info-desc">${fillGpuPrices(currentModel.description)}</p>
-        <div style="margin-top: 8px; font-size: 0.78rem; color: var(--cyan); font-family: var(--font-mono);">
+        <div class="model-speed-line">
           ⚡ Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
         </div>
       </div>
@@ -172,19 +172,19 @@ export function renderModelPickerHtml(state = {}) {
       <div class="spec-badge-box">
         <div class="spec-badge-label">Minimum VRAM</div>
         <div class="spec-badge-value">${currentModel.minVram} GB</div>
-        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">Strict minimum for Q3/Q4</div>
+        <div class="sub-note">Strict minimum for Q3/Q4</div>
       </div>
 
       <div class="spec-badge-box">
         <div class="spec-badge-label">Sweet Spot Quant</div>
-        <div class="spec-badge-value" style="font-size: 1rem; color: #38bdf8;">${currentModel.sweetSpotQuant}</div>
-        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">99% FP16 accuracy</div>
+        <div class="spec-badge-value spec-badge-quant">${currentModel.sweetSpotQuant}</div>
+        <div class="sub-note">99% FP16 accuracy</div>
       </div>
 
       <div class="spec-badge-box">
         <div class="spec-badge-label">Cloud Alternative</div>
-        <div class="spec-badge-value" style="font-size: 0.92rem; color: var(--amber);">${currentModel.cloudEquivalent.split('(')[1]?.replace(')', '') || '$0.88/hr'}</div>
-        <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">${currentModel.cloudEquivalent.split('(')[0]}</div>
+        <div class="spec-badge-value spec-badge-cost">${currentModel.cloudEquivalent.split('(')[1]?.replace(')', '') || '$0.88/hr'}</div>
+        <div class="sub-note">${currentModel.cloudEquivalent.split('(')[0]}</div>
       </div>
     </div>
 
@@ -222,7 +222,7 @@ export function renderModelPickerHtml(state = {}) {
     <!-- 3 Tier Selector Cards -->
     <div class="selector-label">
       <span>2. Choose Hardware Architecture Tier</span>
-      <span style="color: var(--text-muted); font-size: 0.75rem;">All tiers verified for physical GPU clearance & power transients</span>
+      <span class="selector-note">All tiers verified for physical GPU clearance & power transients</span>
     </div>
     <div class="tier-tabs-container">
       ${buildSheet.tiers.map((tier, idx) => {
@@ -262,11 +262,11 @@ export function renderModelPickerHtml(state = {}) {
         <table class="parts-table stack-table">
           <thead>
             <tr>
-              <th style="width: 14%;">Component</th>
-              <th style="width: 44%;">Part Details & Gotchas</th>
-              <th style="width: 14%;">Condition</th>
-              <th style="width: 12%;">Price</th>
-              <th style="width: 16%; text-align: right;">Merchant Link</th>
+              <th class="col-component">Component</th>
+              <th class="col-part">Part Details & Gotchas</th>
+              <th class="col-condition">Condition</th>
+              <th class="col-price">Price</th>
+              <th class="col-merchant">Merchant Link</th>
             </tr>
           </thead>
           <tbody>
@@ -288,9 +288,9 @@ export function renderModelPickerHtml(state = {}) {
                     </span>
                   </td>
                   <td class="part-price-cell" data-label="Price">
-                    ${part.price > 0 ? `$${part.price.toLocaleString()}` : '<span style="color: var(--text-dim);">Included</span>'}
+                    ${part.price > 0 ? `$${part.price.toLocaleString()}` : '<span class="text-dim">Included</span>'}
                   </td>
-                  <td class="stack-action" style="text-align: right;">
+                  <td class="stack-action col-merchant">
                     ${part.url !== '#' ? (() => {
                       const urlLower = (part.url || '').toLowerCase();
                       const merchLower = (part.merchant || '').toLowerCase();
@@ -309,7 +309,7 @@ export function renderModelPickerHtml(state = {}) {
                           ${btnLabel}
                         </a>
                       `;
-                    })() : '<span style="color: var(--text-dim); font-size: 0.78rem;">Built-in</span>'}
+                    })() : '<span class="text-dim text-sm">Built-in</span>'}
                   </td>
                 </tr>
               `;
@@ -321,7 +321,7 @@ export function renderModelPickerHtml(state = {}) {
       <!-- True Total Cost Calculation Panel -->
       <div class="true-cost-panel">
         <div class="cost-adjusters">
-          <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-highlight); margin-bottom: 2px;">
+          <div class="cost-engine-title">
             ⚡ True Total Ownership Cost Engine
           </div>
           
