@@ -50,24 +50,26 @@ npm run build
 
 We maintain street prices for the 10 GPUs that matter for local AI via a **semi-automated workflow with a human-in-the-loop review step**:
 
-### Step 1: Fetch Scraped eBay Sold Listings
+### Step 1: Fetch eBay listings
 ```bash
 npm run prices:fetch
 ```
-- Scrapes recent eBay completed & sold listings with rate limiting (2.5s delay).
-- Filters out non-working parts, boxes, coolers, waterblocks, and non-target variants.
-- Computes trimmed median, 25th percentile (Low), 75th percentile (High), and the % change vs the current site price (not a trend).
+- Collects eBay listings per GPU (sold listings when a signed-in session is available, otherwise active Buy-It-Now listings) and filters out parts, boxes, coolers, waterblocks, whole PCs and other variants.
+- All pricing rules live in `scripts/price_review.js`: search terms and sanity ranges, the median (minus a 4% asking-to-sold spread for active listings), the 15th-85th percentile range, and the % change against the price the site shows now (read from `gpus.js`, never a copy in the scraper).
+- A GPU with fewer than 3 usable listings gets **NO_DATA**: no change is proposed and apply skips it. A move of more than 15% is **held** until someone sets it to APPROVED.
 - Outputs human-readable [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) and [`data/pending_price_review.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/pending_price_review.json).
 
 ### Step 2: Eyeball & Review
 - Open [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) to eyeball proposed prices, changes, and sample listings.
 - Click the direct `[eBay Sold]` links in the markdown table if you want to inspect eBay in your browser.
-- If an outlier slipped through, simply edit `proposedPrice` or change `status: "SKIP"` in `data/pending_price_review.json`.
+- If an outlier slipped through, edit `proposedPrice` in `data/pending_price_review.json`, or set a held card's `status` to `APPROVED` to apply it.
 
 ### Step 3: Apply & Validate
 ```bash
 npm run prices:apply
 ```
+- Applies only safe cards: APPROVED, with a sane price and range, and priced against the price the site shows now (a stale review file can't overwrite newer prices). Everything else keeps its price and is listed with the reason.
+- Does **not** send price-drop alert emails: prices aren't live until reviewed, merged and deployed. Run `npm run alerts:check` after deploying.
 - Applies approved updates to [`src/data/gpus.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/gpus.js).
 - Recalculates `pricePerGb` ($/GB VRAM) and appends to the historical price-trajectory data.
 - Automatically syncs dependent GPU parts in [`src/data/builds.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/builds.js) (e.g. dual-3090 rig totals).
@@ -111,5 +113,5 @@ gh repo create airigbuilder --public --source=. --push
 ```
 
 - Connect repo on [Vercel](https://vercel.com)
-- **Price alerts need Upstash Redis.** Vercel functions can't save files, so alert sign-ups are stored in Redis. In the Vercel project: Storage → Upstash Redis → connect. That sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Copy both into a local `.env` so `npm run alerts:check` and `npm run prices:apply` read the same alerts (the script prints which store it used). Without them, local runs use `data/alerts.json`, and on Vercel the alert API returns an error instead of losing sign-ups.
+- **Price alerts need Upstash Redis.** Vercel functions can't save files, so alert sign-ups are stored in Redis. In the Vercel project: Storage → Upstash Redis → connect. That sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Copy both into a local `.env` so `npm run alerts:check` reads the same alerts (the script prints which store it used). Without them, local runs use `data/alerts.json`, and on Vercel the alert API returns an error instead of losing sign-ups.
 - Custom domain: set up `airigbuilder.com` and point Porkbun DNS CNAME records to `cname.vercel-dns.com`.

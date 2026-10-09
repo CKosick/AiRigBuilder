@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "node --test tests/**/*.test.js",
     "prices:fetch": "node scripts/scrape_ebay_prices.js",
+    "prices:scrape": "node scripts/scrape_ebay_prices.js",
     "prices:login": "py scripts/ebay_login_helper.py",
     "prices:apply": "node --env-file-if-exists=.env scripts/apply_prices.js",
     "alerts:check": "node --env-file-if-exists=.env scripts/check_alerts.js"

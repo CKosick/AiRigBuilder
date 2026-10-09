@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { recordMonthlyPrice } from '../src/utils/priceHistory.js';
 import { computePriceTrends } from '../src/utils/priceTrends.js';
+import { selectApplicable } from './price_review.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,25 +29,21 @@ async function applyPrices() {
   }
 
   const reviewData = JSON.parse(fs.readFileSync(REVIEW_FILE, 'utf-8'));
-  const approvedCards = reviewData.cards.filter(c => c.status === 'APPROVED');
-  const heldCards = reviewData.cards.filter(c => c.status !== 'APPROVED');
 
+  // 1. Current data, then only the cards that are safe to apply (see selectApplicable)
+  const { GPUS_DATA } = await import(`file://${GPUS_FILE}?update=${Date.now()}`);
+  const { apply: approvedCards, held } = selectApplicable(reviewData.cards, GPUS_DATA);
+  const heldCards = held.map(h => h.card);
+
+  if (held.length > 0) {
+    console.log(`Holding ${held.length} card(s); they keep their current price:`);
+    held.forEach(h => console.log(`  ⏸️ ${h.card.name}: ${h.reason}`));
+  }
   if (approvedCards.length === 0) {
     console.warn('⚠️ No approved cards to apply.');
     process.exit(0);
   }
-
-  console.log(`Processing ${approvedCards.length} approved GPU price updates (${heldCards.length} held for user review)...`);
-  if (heldCards.length > 0) {
-    console.log(`Holding ${heldCards.length} flagged GPUs for user review:`);
-    heldCards.forEach(c => console.log(`  ⏸️ ${c.name} (Status: ${c.status}, Proposed: $${c.proposedPrice})`));
-  }
-
-  // 1. Read existing GPUS_DATA
-  const gpusContent = fs.readFileSync(GPUS_FILE, 'utf-8');
-
-  // We will dynamically import the current data
-  const { GPUS_DATA } = await import(`file://${GPUS_FILE}?update=${Date.now()}`);
+  console.log(`Applying ${approvedCards.length} approved GPU price update(s)...`);
 
   const currentDateLabel = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); // e.g. "Oct 2026"
   const appliedSummary = [];
@@ -155,28 +152,17 @@ async function applyPrices() {
   // Also update markdown review file
   const mdReviewPath = path.join(ROOT_DIR, 'PENDING_PRICE_REVIEW.md');
   if (fs.existsSync(mdReviewPath)) {
-    let md = fs.readFileSync(mdReviewPath, 'utf-8');
-    if (heldCards.length > 0) {
-      md = md.replace('> **MANUAL REVIEW STEP**', `> ⚠️ **STATUS: PARTIALLY APPLIED** (${approvedCards.length} approved GPU prices applied to production codebase, ${heldCards.length} flagged GPUs held on hold for review)`);
-    } else {
-      md = md.replace('> **MANUAL REVIEW STEP**', '> ✅ **STATUS: APPLIED TO PRODUCTION CODEBASE**');
-    }
-    fs.writeFileSync(mdReviewPath, md, 'utf-8');
+    const md = fs.readFileSync(mdReviewPath, 'utf-8');
+    const status = heldCards.length > 0
+      ? `> **Applied:** ${approvedCards.length} card(s). **Held:** ${held.map(h => `${h.card.name} (${h.reason})`).join('; ')}.`
+      : `> **Applied:** all ${approvedCards.length} cards.`;
+    // Insert the status under the title line
+    const [title, ...rest] = md.split('\n');
+    fs.writeFileSync(mdReviewPath, [title, '', status, ...rest].join('\n'), 'utf-8');
   }
 
-  // 5. Evaluate and trigger Price-Drop Alerts
-  console.log('\nEvaluating user price-drop alert subscriptions...');
-  try {
-    const { evaluateAndTriggerAlerts } = await import('../src/services/alertService.js');
-    const alertResults = await evaluateAndTriggerAlerts(GPUS_DATA);
-    if (alertResults.firedCount > 0) {
-      console.log(`🔔 Fired ${alertResults.firedCount} price-drop alert email(s)!`);
-    } else {
-      console.log(`✓ Evaluated alerts (${alertResults.activeAlerts} active subscriptions monitored, no drop thresholds met).`);
-    }
-  } catch (alertErr) {
-    console.error('⚠️ Warning: Alert evaluation encountered an error:', alertErr.message);
-  }
+  // 5. Price-drop alerts are not sent here: these prices are not live until they are reviewed,
+  // merged and deployed. Alerts go out after deploy (or run `npm run alerts:check` by hand).
 
   // 6. Build validation
   console.log('\nValidating build with `npm run build`...');
