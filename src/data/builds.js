@@ -2,6 +2,9 @@
 // Each model has 3 tiers: Budget Used, Balanced Mix, Best New
 import { MODELS_DATA } from './models.js';
 
+// Speed is stored once, on the model (models.js typicalSpeedDual3090); build sheets read it
+const speedOf = (modelId) => MODELS_DATA.find(m => m.id === modelId).typicalSpeedDual3090;
+
 export const BUILDS_DATA = {
   // -------------------------------------------------------------
   // 1. LLAMA 3.3 70B
@@ -11,7 +14,7 @@ export const BUILDS_DATA = {
     title: 'Llama 3.3 70B Inference Rigs',
     vramTarget: '48 GB VRAM (Dual GPU)',
     quantTarget: 'Q4_K_M (42 GB VRAM footprint)',
-    speedTarget: '17 - 22 tokens/second',
+    speedTarget: speedOf('llama-3.3-70b'),
     tiers: [
       {
         id: 'tier-budget-used',
@@ -260,7 +263,7 @@ export const BUILDS_DATA = {
     title: 'DeepSeek-R1-Distill-Llama-70B Inference Rigs',
     vramTarget: '48 GB VRAM (Dual GPU)',
     quantTarget: 'Q4_K_M or EXL2 4.25bpw',
-    speedTarget: '18 - 23 tokens/second',
+    speedTarget: speedOf('deepseek-r1-70b'),
     tiers: [
       {
         id: 'tier-budget-used',
@@ -499,7 +502,7 @@ export const BUILDS_DATA = {
     title: 'Qwen 2.5 72B Instruct Inference Rigs',
     vramTarget: '48 GB VRAM (Dual GPU)',
     quantTarget: 'Q4_K_M (44 GB VRAM footprint)',
-    speedTarget: '16 - 20 tokens/second',
+    speedTarget: speedOf('qwen-2.5-72b'),
     tiers: [
       {
         id: 'tier-budget-used',
@@ -738,7 +741,7 @@ export const BUILDS_DATA = {
     title: 'Mistral NeMo 12B / Small 24B Rigs',
     vramTarget: '16 - 24 GB VRAM (Single GPU)',
     quantTarget: 'Q8_0 or FP16 unquantized',
-    speedTarget: '45 - 85 tokens/second',
+    speedTarget: speedOf('mistral-nemo-12b'),
     tiers: [
       {
         id: 'tier-budget-used',
@@ -1027,7 +1030,7 @@ export const BUILDS_DATA = {
     title: 'Llama 3.1 8B Instruct Starter Rigs',
     vramTarget: '8 - 12 GB VRAM (Single Budget GPU)',
     quantTarget: 'Q8_0 or FP16 (Full Precision)',
-    speedTarget: '65 - 120 tokens/second',
+    speedTarget: speedOf('llama-3.1-8b'),
     tiers: [
       {
         id: 'tier-budget-used',
