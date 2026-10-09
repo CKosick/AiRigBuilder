@@ -2,7 +2,7 @@
 // the home FAQ structured data. Everything is computed from the data files, so a weekly price
 // update (npm run prices:apply, which rebuilds) changes the copy along with the tables.
 import { GPUS_DATA } from '../data/gpus.js';
-import { CLOUD_PROVIDERS } from '../data/providers.js';
+import { CLOUD_PROVIDERS, CLOUD_RATES } from '../data/providers.js';
 import { computeBreakEven, BASELINE_RIG } from './breakEven.js';
 
 export const usd = (n) => `$${Math.round(n).toLocaleString('en-US')}`;
@@ -43,6 +43,21 @@ export function gpuSummary(gpu) {
   return gpu.summary
     .replace(/\{price\}/g, usd(gpu.usedStreetPrice))
     .replace(/\{dualPrice\}/g, usd(gpu.usedStreetPrice * 2));
+}
+
+/** A model's cloud alternative from the rate table: { rate: '$0.88 - $1.60/hr', label: 'RunPod 2x RTX 3090 / RunPod 2x RTX A6000' }. */
+export function cloudAlternative(model) {
+  const offers = (model.cloudOffers || []).map(id => {
+    const offer = CLOUD_RATES[id];
+    if (!offer) throw new Error(`cloudAlternative: unknown cloud offer '${id}' on ${model.id}`);
+    return offer;
+  });
+  if (offers.length === 0) throw new Error(`cloudAlternative: ${model.id} has no cloud offers`);
+  const rates = offers.map(o => o.hourlyRate);
+  const lo = Math.min(...rates), hi = Math.max(...rates);
+  const rate = lo === hi ? `$${lo.toFixed(2)}/hr` : `$${lo.toFixed(2)} - $${hi.toFixed(2)}/hr`;
+  const label = offers.map(o => o.label).join(' / ') + (model.cloudNote ? `, ${model.cloudNote}` : '');
+  return { rate, label };
 }
 
 /** Text with each {price:<gpu-id>} placeholder replaced by that GPU's current used price. */

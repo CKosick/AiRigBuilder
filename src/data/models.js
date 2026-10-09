@@ -24,7 +24,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.2,
     typicalSpeedDual3090: '17 - 21 tokens/sec (exllamav2 / llama.cpp)',
-    cloudEquivalent: 'RunPod 2x RTX 3090 / 2x A6000 ($0.88 - $1.60/hr)'
+    cloudOffers: ['runpod-dual-3090', 'runpod-dual-a6000']
   },
   {
     id: 'deepseek-r1-70b',
@@ -46,7 +46,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.4,
     typicalSpeedDual3090: '18 - 23 tokens/sec (vLLM / exllamav2)',
-    cloudEquivalent: 'Vast.ai 2x RTX 3090 ($0.75 - $0.95/hr)'
+    cloudOffers: ['vast-dual-3090']
   },
   {
     id: 'qwen-2.5-72b',
@@ -68,7 +68,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.5,
     typicalSpeedDual3090: '16 - 20 tokens/sec (vLLM / llama.cpp)',
-    cloudEquivalent: 'RunPod 2x RTX 4090 ($1.48/hr)'
+    cloudOffers: ['runpod-dual-4090']
   },
   {
     id: 'llama-3.1-70b',
@@ -90,7 +90,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.2,
     typicalSpeedDual3090: '17 - 21 tokens/sec',
-    cloudEquivalent: 'RunPod 2x RTX 3090 ($0.88/hr)'
+    cloudOffers: ['runpod-dual-3090']
   },
   {
     id: 'qwen-2.5-coder-32b',
@@ -112,7 +112,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.8,
     typicalSpeedDual3090: '28 - 36 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 4090 ($0.45/hr)'
+    cloudOffers: ['vast-single-4090']
   },
 
   // ==========================================
@@ -138,7 +138,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.8,
     typicalSpeedDual3090: '30 - 38 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 4090 ($0.74/hr)'
+    cloudOffers: ['runpod-single-4090']
   },
   {
     id: 'deepseek-r1-distill-32b',
@@ -160,7 +160,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.8,
     typicalSpeedDual3090: '28 - 35 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 4090 ($0.45/hr)'
+    cloudOffers: ['vast-single-4090']
   },
   {
     id: 'gemma-2-27b',
@@ -182,7 +182,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.5,
     typicalSpeedDual3090: '32 - 42 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3090 ($0.44/hr)'
+    cloudOffers: ['runpod-single-3090']
   },
   {
     id: 'gemma-3-27b',
@@ -204,7 +204,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: '30 - 40 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3090 ($0.38/hr)'
+    cloudOffers: ['vast-single-3090']
   },
   {
     id: 'qwen-3-32b',
@@ -226,7 +226,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.8,
     typicalSpeedDual3090: '32 - 40 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 4090 ($0.74/hr)'
+    cloudOffers: ['runpod-single-4090']
   },
   {
     id: 'command-r-35b',
@@ -248,7 +248,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.1,
     typicalSpeedDual3090: '24 - 32 tokens/sec',
-    cloudEquivalent: 'RunPod 1x A6000 ($0.79/hr)'
+    cloudOffers: ['runpod-single-a6000']
   },
   {
     id: 'codestral-22b',
@@ -270,7 +270,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.4,
     typicalSpeedDual3090: '38 - 50 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3090 ($0.35/hr)'
+    cloudOffers: ['vast-single-3090']
   },
 
   // ==========================================
@@ -296,7 +296,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '50 - 85 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3090 ($0.35/hr)'
+    cloudOffers: ['vast-single-3090']
   },
   {
     id: 'qwen-2.5-14b',
@@ -318,7 +318,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.2,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3080 ($0.29/hr)'
+    cloudOffers: ['runpod-single-3080']
   },
   {
     id: 'deepseek-r1-distill-14b',
@@ -340,7 +340,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.2,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3080 ($0.25/hr)'
+    cloudOffers: ['vast-single-3080']
   },
   {
     id: 'gemma-3-12b',
@@ -362,7 +362,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '50 - 75 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3070 ($0.22/hr)'
+    cloudOffers: ['runpod-single-3070']
   },
   {
     id: 'phi-4-14b',
@@ -384,7 +384,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.2,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3080 ($0.25/hr)'
+    cloudOffers: ['vast-single-3080']
   },
   {
     id: 'llama-3.2-11b-vision',
@@ -406,7 +406,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '48 - 70 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3080 ($0.29/hr)'
+    cloudOffers: ['runpod-single-3080']
   },
   {
     id: 'starcoder2-15b',
@@ -428,7 +428,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.2,
     typicalSpeedDual3090: '42 - 60 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3080 ($0.25/hr)'
+    cloudOffers: ['vast-single-3080']
   },
 
   // ==========================================
@@ -454,7 +454,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.8,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3070 ($0.22/hr)'
+    cloudOffers: ['runpod-single-3070']
   },
   {
     id: 'qwen-2.5-7b',
@@ -476,7 +476,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.8,
     typicalSpeedDual3090: '95 - 135 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3070 ($0.18/hr)'
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'deepseek-r1-distill-8b',
@@ -498,7 +498,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.8,
     typicalSpeedDual3090: '85 - 125 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3070 ($0.22/hr)'
+    cloudOffers: ['runpod-single-3070']
   },
   {
     id: 'gemma-2-9b',
@@ -520,7 +520,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.9,
     typicalSpeedDual3090: '80 - 120 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3070 ($0.22/hr)'
+    cloudOffers: ['runpod-single-3070']
   },
   {
     id: 'mistral-7b-v03',
@@ -542,7 +542,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.8,
     typicalSpeedDual3090: '95 - 135 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3070 ($0.18/hr)'
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'qwen-3-8b',
@@ -564,7 +564,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.8,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3070 ($0.22/hr)'
+    cloudOffers: ['runpod-single-3070']
   },
   {
     id: 'phi-4-mini',
@@ -586,7 +586,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.5,
     typicalSpeedDual3090: '140 - 200 tokens/sec',
-    cloudEquivalent: 'Vast.ai 1x RTX 3060 ($0.12/hr)'
+    cloudOffers: ['vast-single-3060']
   },
   {
     id: 'llama-3.2-3b',
@@ -608,7 +608,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.4,
     typicalSpeedDual3090: '160 - 220 tokens/sec',
-    cloudEquivalent: 'RunPod 1x RTX 3060 ($0.15/hr)'
+    cloudOffers: ['runpod-single-3060']
   },
 
   // ==========================================
@@ -634,7 +634,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.8,
     typicalSpeedDual3090: '32 - 42 tokens/sec',
-    cloudEquivalent: 'RunPod 2x RTX 3090 ($0.88/hr)'
+    cloudOffers: ['runpod-dual-3090']
   },
   {
     id: 'mixtral-8x22b',
@@ -656,7 +656,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 3.5,
     typicalSpeedDual3090: 'Needs 4x GPU or Mac Studio 128GB',
-    cloudEquivalent: 'Lambda 4x A100 80GB ($6.00/hr)'
+    cloudOffers: ['lambda-quad-a100']
   },
   {
     id: 'command-r-plus',
@@ -678,7 +678,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 3.2,
     typicalSpeedDual3090: 'Needs 3x-4x 3090 or Mac Studio 96GB+',
-    cloudEquivalent: 'RunPod 4x RTX 4090 ($2.96/hr)'
+    cloudOffers: ['runpod-quad-4090']
   },
   {
     id: 'deepseek-v3-moe',
@@ -700,7 +700,8 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 4.8,
     typicalSpeedDual3090: 'Exceeds dual GPU memory (Mac 192GB required)',
-    cloudEquivalent: 'DeepSeek API / Vast.ai 8x H100 ($16.00/hr)'
+    cloudOffers: ['vast-8x-h100'],
+    cloudNote: 'or the DeepSeek API'
   },
   {
     id: 'deepseek-r1-full',
@@ -722,6 +723,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 4.8,
     typicalSpeedDual3090: 'Exceeds dual GPU memory (Mac 192GB required)',
-    cloudEquivalent: 'DeepSeek API / 8x H100 ($16.00/hr)'
+    cloudOffers: ['vast-8x-h100'],
+    cloudNote: 'or the DeepSeek API'
   }
 ];
