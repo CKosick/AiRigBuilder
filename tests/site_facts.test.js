@@ -73,6 +73,28 @@ describe('Price-derived copy is generated from the data files', () => {
     assert.ok(withRtx3090Price(650, faqText).includes('~$650 each'));
   });
 
+  it('the home page shows the FAQ readers see word for word as the FAQPage JSON-LD says it', async () => {
+    const { renderPage } = await import('../scripts/prerender.js');
+    const home = renderPage(TEMPLATE, parseRoute('/'));
+    const faq = JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph']
+      .find(n => n['@type'] === 'FAQPage');
+    const visible = [...home.matchAll(/<div class="home-faq-item">\s*<h3>([^<]*)<\/h3>\s*<p>([^<]*)<\/p>/g)]
+      .map(m => ({ question: m[1], answer: m[2] }));
+    assert.equal(visible.length, faq.mainEntity.length, 'one visible Q&A per FAQPage entry');
+    faq.mainEntity.forEach((q, i) => {
+      assert.equal(visible[i].question, q.name);
+      assert.equal(visible[i].answer, q.acceptedAnswer.text);
+    });
+    assert.ok(/<div id="home-faq-root">/.test(home), 'FAQ is not hidden on the home page');
+
+    // Only the home page carries the FAQ, in markup and in structured data
+    for (const p of ['/tracker', '/guide', '/builds/llama-3.3-70b']) {
+      const html = renderPage(TEMPLATE, parseRoute(p));
+      assert.ok(!html.includes('home-faq-item'), `${p} has no FAQ text`);
+      assert.ok(!html.includes('"FAQPage"'), `${p} has no FAQPage JSON-LD`);
+    }
+  });
+
   it('unavailable trends show as n/a on the tracker, GPU page and header ticker', () => {
     const gpu = { ...rtx3090, trend7d: null, trend30d: null };
     const detail = renderGpuDetailHtml(gpu);

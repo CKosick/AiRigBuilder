@@ -41,11 +41,39 @@ describe('7d / 30d price trends from the apply log', () => {
     assert.deepEqual(computePriceTrends(log, 'a', 700), { trend7d: null, trend30d: null });
   });
 
+  it('a later run on the same UTC day replaces an earlier one as the baseline', () => {
+    // 30.5 and 30.45 days back are both on Sep 19 (12:00 and 13:12 UTC); the earlier price was corrected
+    const log = [run(30.5, { a: 500 }), run(30.45, { a: 800 }), run(0, { a: 720 })];
+    assert.deepEqual(priceObservations(log, 'a').map(p => p.price), [800, 720]);
+    assert.equal(computePriceTrends(log, 'a', 720).trend30d, -10);
+  });
+
   it('only uses observations for the requested GPU', () => {
     const log = [run(7, { b: 100 }), run(0, { a: 700, b: 200 })];
     assert.equal(computePriceTrends(log, 'a', 700).trend7d, null);
     assert.equal(computePriceTrends(log, 'b', 200).trend7d, 100);
     assert.deepEqual(priceObservations(log, 'a').map(p => p.price), [700]);
+  });
+
+  it('n/a resolves as weekly apply runs accumulate: 7d on the next weekly run, 30d on the 4th', () => {
+    // Weekly runs starting from the committed log's state (three runs within one day)
+    const start = Date.parse('2026-10-07T03:56:24.859Z');
+    const log = AUDIT_LOG.map(r => ({ ...r }));
+    const seen = [];
+    for (let week = 1; week <= 6; week++) {
+      const price = 718 + week * 10;
+      log.push({ appliedAt: new Date(start + week * 7 * DAY).toISOString(), updates: [{ id: 'rtx-3090', newPrice: price }] });
+      seen.push(computePriceTrends(log, 'rtx-3090', price));
+    }
+    // week 1: 7 days after the Oct 7 runs; week 4: 28 days after (inside the 25-40 day window)
+    assert.deepEqual(seen.map(t => t.trend7d !== null), [true, true, true, true, true, true]);
+    assert.deepEqual(seen.map(t => t.trend30d !== null), [false, false, false, true, true, true]);
+    assert.equal(seen[0].trend7d, 1.4, '728 vs 718');
+    assert.equal(seen[3].trend30d, 5.6, '758 vs 718 four weeks earlier');
+
+    // A skipped week leaves 7d n/a (14 days is outside 5-10) until the next weekly run
+    const gap = [run(14, { a: 700 }), run(0, { a: 720 })];
+    assert.equal(computePriceTrends(gap, 'a', 720).trend7d, null);
   });
 
   it('gpus.js trends match what the committed apply log supports', () => {

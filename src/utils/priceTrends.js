@@ -10,8 +10,17 @@ export const TREND_WINDOWS = {
   trend30d: { days: 30, minDays: 25, maxDays: 40 }
 };
 
-/** Every price applied for one GPU, oldest first: [{ at: ms, price }] */
+/**
+ * Prices applied for one GPU, oldest first: [{ at: ms, price }]. A later run on the same UTC
+ * day replaces earlier ones (re-runs correct a bad scrape; the superseded price is not a baseline).
+ */
 export function priceObservations(auditLog, gpuId) {
+  const byDay = new Map();
+  for (const p of allObservations(auditLog, gpuId)) byDay.set(new Date(p.at).toISOString().slice(0, 10), p);
+  return [...byDay.values()];
+}
+
+function allObservations(auditLog, gpuId) {
   const points = [];
   for (const run of auditLog || []) {
     const at = Date.parse(run.appliedAt);

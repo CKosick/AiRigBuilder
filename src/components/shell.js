@@ -3,6 +3,7 @@
 import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
 import { siteFacts } from '../utils/siteFacts.js';
+import { renderHomeFaqHtml } from './homeFaq.js';
 import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
 
 const TAB_LABELS = {
@@ -134,7 +135,7 @@ export function renderShell(route, panels = {}) {
 
     <!-- Main Workspace Container -->
     <main class="main-wrapper" id="main-content" tabindex="-1">
-      ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div>`)}
+      ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div><div id="home-faq-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeFaqHtml() : ''}</div>`)}
       ${panel('calculator', panels.calculator || '')}
       ${panel('tracker', `<div id="tracker-root"${isGpu ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div>`)}
       ${panel('guide', panels.guide || '')}

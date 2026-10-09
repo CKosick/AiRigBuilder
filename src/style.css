@@ -1939,6 +1939,40 @@ input[type="range"] {
   line-height: 1.8;
 }
 
+.home-faq {
+  margin-top: 2.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.home-faq h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-highlight);
+  margin-bottom: 1rem;
+}
+
+.home-faq-item + .home-faq-item {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.home-faq h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.4rem;
+}
+
+.home-faq p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
 .not-found {
   padding-top: 4rem;
   color: var(--text-main);
