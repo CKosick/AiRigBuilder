@@ -38,7 +38,7 @@ export function renderGpuDetailHtml(gpu) {
 
       <div class="tracker-header-row">
         <div class="tracker-title">
-          <h2 id="gpu-detail-title">${gpu.name} Used Price</h2>
+          <h1 id="gpu-detail-title">${gpu.name} Used Price</h1>
           <p>${gpu.aiRating} · ${gpu.vram} GB ${gpu.vramType} · Prices last updated ${formatDate(GPUS_UPDATED_AT)}</p>
         </div>
         <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold')}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary">

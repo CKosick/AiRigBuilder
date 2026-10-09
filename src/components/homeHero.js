@@ -16,8 +16,7 @@ export function renderHomeHeroHtml() {
   return `
     <section class="hero-banner" aria-labelledby="hero-answer">
       <div class="hero-card">
-        <p class="hero-question">What's the cheapest way to run a 70B model at home?</p>
-        <h2 class="hero-answer" id="hero-answer">Two used RTX 3090s: <span class="hero-highlight">about ${usd(dual3090RigEst)}</span> for the whole PC.</h2>
+        <h1 class="hero-answer" id="hero-answer"><span class="hero-question">What's the cheapest way to run a 70B model at home?</span> Two used RTX 3090s: <span class="hero-highlight">about ${usd(dual3090RigEst)}</span> for the whole PC.</h1>
         <ul class="hero-facts">
           <li><strong>48 GB</strong> of VRAM across both cards</li>
           <li><strong>${speed}</strong> on ${model.name} at ${model.sweetSpotQuant}</li>

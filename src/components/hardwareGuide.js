@@ -9,9 +9,9 @@ export function renderHardwareGuideHtml() {
   const { rtx4090, dual3090GpuCost } = siteFacts();
   return `
     <div class="section-intro">
-      <h2 class="section-title">
+      <h1 class="section-title">
         Local AI Hardware Guide & Crucial Gotchas
-      </h2>
+      </h1>
       <p class="section-lead">
         Building a multi-GPU local AI rig is not like building a gaming PC. Here are the 5 critical architectural traps to avoid.
       </p>

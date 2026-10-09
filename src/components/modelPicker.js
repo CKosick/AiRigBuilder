@@ -14,6 +14,7 @@ export const MODEL_PICKER_DEFAULTS = {
   codingOnly: false,
   searchQuery: '',
   showAllModels: false,
+  isHome: false, // the home hero is the page's h1, so the model name drops to h2 there
   salesTaxRate: 7, // %
   dailyUsageHours: 4, // hrs/day
   kwhRate: 0.14 // $/kWh
@@ -112,8 +113,9 @@ const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;
  */
 export function renderModelPickerHtml(state = {}) {
   const {
-    activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, salesTaxRate, dailyUsageHours, kwhRate
+    activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
   } = { ...MODEL_PICKER_DEFAULTS, ...state };
+  const titleTag = isHome ? 'h2' : 'h1';
   const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
   const { buildSheet, currentTier } = findBuild(activeModelId, activeTierId);
   const filteredModels = filterModels({ vramBudget, codingOnly, searchQuery });
@@ -163,7 +165,7 @@ export function renderModelPickerHtml(state = {}) {
     <!-- Model Spec & VRAM Requirements Banner -->
     <div class="model-spec-panel">
       <div class="model-info-block">
-        <h3>${currentModel.name}</h3>
+        <${titleTag} class="model-info-title">${currentModel.name}</${titleTag}>
         <p class="model-info-desc">${fillGpuPrices(currentModel.description)}</p>
         <div class="model-speed-line">
           ${icon('zap')}Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
@@ -359,13 +361,14 @@ export function renderModelPickerHtml(state = {}) {
   `;
 }
 
-export function createModelPicker(container, onNavigateToCalc, { initialModelId, onModelChange } = {}) {
+export function createModelPicker(container, onNavigateToCalc, { initialModelId, isHome: initialIsHome = false, onModelChange } = {}) {
   let activeModelId = BUILDS_DATA[initialModelId] ? initialModelId : MODEL_PICKER_DEFAULTS.activeModelId;
   let activeTierId = MODEL_PICKER_DEFAULTS.activeTierId;
   let vramBudget = MODEL_PICKER_DEFAULTS.vramBudget;
   let codingOnly = MODEL_PICKER_DEFAULTS.codingOnly;
   let searchQuery = MODEL_PICKER_DEFAULTS.searchQuery;
   let showAllModels = MODEL_PICKER_DEFAULTS.showAllModels;
+  let isHome = initialIsHome;
   let salesTaxRate = MODEL_PICKER_DEFAULTS.salesTaxRate;
   let dailyUsageHours = MODEL_PICKER_DEFAULTS.dailyUsageHours;
   let kwhRate = MODEL_PICKER_DEFAULTS.kwhRate;
@@ -386,7 +389,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
   function render() {
     const restoreFocus = preserveFocus(container);
     container.innerHTML = renderModelPickerHtml({
-      activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, salesTaxRate, dailyUsageHours, kwhRate
+      activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
     });
 
     attachEvents();
@@ -559,10 +562,12 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
 
   return {
     getModelId: () => activeModelId,
-    selectModel: (modelId) => {
-      if (modelId === activeModelId) return;
+    // home: whether the page is / (the model name is then an h2 under the hero's h1)
+    selectModel: (modelId, { home = isHome } = {}) => {
+      if (modelId === activeModelId && home === isHome) return;
+      if (modelId !== activeModelId) activeTierId = 'tier-budget-used';
       activeModelId = modelId;
-      activeTierId = 'tier-budget-used';
+      isHome = home;
       render();
     }
   };

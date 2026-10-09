@@ -46,7 +46,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
     return `
       <div class="tracker-header-row">
         <div class="tracker-title">
-          <h2>Used GPU Price Tracker for Local AI</h2>
+          <h1>Used GPU Price Tracker for Local AI</h1>
           <p>Updated weekly from verified eBay sold listings. Sorted by the metric that actually matters: <strong>Price per GB of VRAM</strong>.</p>
         </div>
         <div class="tracker-filter-group">

@@ -74,7 +74,7 @@ export function renderBuildsIndexHtml() {
       </nav>
       <div class="tracker-header-row">
         <div class="tracker-title">
-          <h2>Local AI Build Sheets for ${models.length} Models</h2>
+          <h1>Local AI Build Sheets for ${models.length} Models</h1>
           <p>Each build sheet has three verified rigs: <strong>Budget Used</strong>, <strong>Balanced</strong> and <strong>Best New</strong>, with full parts lists, power draw and first-year cost. Pick the model you want to run.</p>
         </div>
         <a href="/calculator" class="btn-secondary">${icon('calculator')}Compare against cloud rental →</a>

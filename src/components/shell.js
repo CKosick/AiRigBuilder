@@ -92,7 +92,7 @@ export function renderShell(route, panels = {}) {
             </svg>
           </div>
           <div class="brand-title-group">
-            <h1>AIRigBuilder<span class="domain-suffix">.com</span></h1>
+            <span class="brand-name">AIRigBuilder<span class="domain-suffix">.com</span></span>
             <div class="brand-tagline">The Used-Hardware Price Layer for Local AI</div>
           </div>
         </a>

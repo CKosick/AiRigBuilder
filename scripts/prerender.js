@@ -24,7 +24,7 @@ export function outputFileFor(route) {
 
 function panelsFor(route) {
   switch (route.view) {
-    case 'builds': return route.index ? { buildsIndex: renderBuildsIndexHtml() } : { builds: renderModelPickerHtml({ activeModelId: route.modelId }) };
+    case 'builds': return route.index ? { buildsIndex: renderBuildsIndexHtml() } : { builds: renderModelPickerHtml({ activeModelId: route.modelId, isHome: Boolean(route.home) }) };
     case 'calculator': return { calculator: renderBreakEvenHtml() };
     case 'tracker': return { tracker: renderPriceTrackerHtml() };
     case 'guide': return { guide: renderHardwareGuideHtml() };

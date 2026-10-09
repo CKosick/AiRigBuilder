@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, {
     initialModelId: route.modelId,
+    isHome: Boolean(route.home),
     // Picking a model gives the page its shareable /builds/:model URL (the home page for the default
     // model) without adding history entries
     onModelChange: (modelId) => {
@@ -111,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     homeHeroRoot.hidden = !next.home;
     modelPickerRoot.hidden = Boolean(next.index);
     // The home page always shows the default model's build sheet
-    if (next.view === 'builds' && !next.index) modelPickerController.selectModel(next.modelId || DEFAULT_MODEL_ID);
+    if (next.view === 'builds' && !next.index) modelPickerController.selectModel(next.modelId || DEFAULT_MODEL_ID, { home: Boolean(next.home) });
 
     const meta = pageMeta(next);
     document.title = meta.title;

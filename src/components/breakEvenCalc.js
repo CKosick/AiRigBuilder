@@ -89,6 +89,12 @@ export function renderBreakEvenHtml(state = {}) {
   const stats = calculateBreakEven(s);
 
   return `
+    <div class="tracker-header-row">
+      <div class="tracker-title">
+        <h1>Local AI vs Cloud GPU Break-Even Calculator</h1>
+        <p>When does a home rig pay for itself compared with renting cloud GPUs? Set your build cost, hours per day and electricity price.</p>
+      </div>
+    </div>
     <div class="calc-grid">
       <!-- Inputs Column -->
       <div class="calc-inputs-card">
