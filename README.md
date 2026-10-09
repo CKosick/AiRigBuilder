@@ -50,11 +50,22 @@ npm run build
 
 We maintain street prices for the 10 GPUs that matter for local AI via a **semi-automated workflow with a human-in-the-loop review step**:
 
+### Automated weekly run
+`.github/workflows/weekly-prices.yml` runs Tuesdays at 23:00 UTC (and on demand from the Actions tab). It fetches listings from the eBay Browse API, applies the approved prices on a new `prices/<date>-run<N>` branch, runs the tests and opens a pull request with the review table. Nothing reaches `main` until someone checks the numbers and merges; Vercel deploys on merge. An older unmerged price PR is closed as superseded.
+
+Setup, once:
+- Repository secrets `EBAY_CLIENT_ID` and `EBAY_CLIENT_SECRET` (an eBay developer app's production keys; no eBay account login is involved).
+- Settings → Actions → General → Workflow permissions: allow GitHub Actions to create and approve pull requests.
+- Vercel: an environment variable `CRON_SECRET` (any long random string). The daily cron in `vercel.json` calls `/api/cron/check-alerts`, which emails price-drop alerts against the deployed prices. Email and alert-storage secrets stay in Vercel.
+
+The steps below are what the workflow does; they also work by hand.
+
 ### Step 1: Fetch eBay listings
 ```bash
-npm run prices:fetch
+npm run prices:fetch    # eBay Browse API (needs EBAY_CLIENT_ID / EBAY_CLIENT_SECRET in .env)
+npm run prices:scrape   # or: the local browser scraper (sold listings if signed in via prices:login)
 ```
-- Collects eBay listings per GPU (sold listings when a signed-in session is available, otherwise active Buy-It-Now listings) and filters out parts, boxes, coolers, waterblocks, whole PCs and other variants.
+- Collects eBay listings per GPU (active used Buy-It-Now listings from the API; the scraper gets sold listings when a signed-in session is available) and filters out parts, boxes, coolers, waterblocks, whole PCs and other variants.
 - All pricing rules live in `scripts/price_review.js`: search terms and sanity ranges, the median (minus a 4% asking-to-sold spread for active listings), the 15th-85th percentile range, and the % change against the price the site shows now (read from `gpus.js`, never a copy in the scraper).
 - A GPU with fewer than 3 usable listings gets **NO_DATA**: no change is proposed and apply skips it. A move of more than 15% is **held** until someone sets it to APPROVED.
 - Outputs human-readable [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) and [`data/pending_price_review.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/pending_price_review.json).
@@ -69,7 +80,7 @@ npm run prices:fetch
 npm run prices:apply
 ```
 - Applies only safe cards: APPROVED, with a sane price and range, and priced against the price the site shows now (a stale review file can't overwrite newer prices). Everything else keeps its price and is listed with the reason.
-- Does **not** send price-drop alert emails: prices aren't live until reviewed, merged and deployed. Run `npm run alerts:check` after deploying.
+- Does **not** send price-drop alert emails: prices aren't live until reviewed, merged and deployed. The daily Vercel Cron sends them after deploy (or run `npm run alerts:check` by hand).
 - Applies approved updates to [`src/data/gpus.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/gpus.js).
 - Recalculates `pricePerGb` ($/GB VRAM) and appends to the historical price-trajectory data.
 - Automatically syncs dependent GPU parts in [`src/data/builds.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/builds.js) (e.g. dual-3090 rig totals).

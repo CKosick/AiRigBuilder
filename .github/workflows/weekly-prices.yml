@@ -1,0 +1,84 @@
+# Weekly used-GPU price update.
+# Fetches listings from the eBay Browse API, applies the approved prices on a branch and opens a
+# pull request for a person to check. Nothing reaches main until that PR is merged; Vercel deploys
+# on merge, and price-drop alerts go out afterwards from the Vercel Cron (api/cron/check-alerts.js).
+#
+# Needs repository secrets EBAY_CLIENT_ID and EBAY_CLIENT_SECRET, and "Allow GitHub Actions to
+# create and approve pull requests" turned on (Settings > Actions > General > Workflow permissions).
+name: Weekly price update
+
+on:
+  schedule:
+    - cron: '0 23 * * 2' # Tuesdays 23:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-prices
+  cancel-in-progress: false
+
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch listings from the eBay Browse API
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+        run: npm run prices:fetch
+
+      # Applies only APPROVED cards priced against the live site; sends no alert emails
+      - name: Apply approved prices
+        run: node scripts/apply_prices.js
+
+      - name: Run tests
+        run: npm test
+
+      - name: Open the price review pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          day="$(date -u +%Y-%m-%d)"
+          # One branch per run: a re-run never overwrites a branch a reviewer may have edited
+          branch="prices/${day}-run${{ github.run_number }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git add PENDING_PRICE_REVIEW.md data/pending_price_review.json data/price_history_log.json src/data/gpus.js src/data/builds.js
+          if git diff --cached --quiet; then
+            echo "Nothing changed this week; no pull request."
+            exit 0
+          fi
+          git commit -m "chore(prices): weekly used GPU price update ${day}"
+          git push -u origin "$branch"
+
+          {
+            echo "Automated weekly price update from the eBay Browse API (run ${{ github.run_id }})."
+            echo
+            echo "**Before merging:** check the proposed prices and sample listings below. Approved cards are already applied in this branch. Held cards are not; to apply one, set its \`status\` to \`APPROVED\` in \`data/pending_price_review.json\` and run \`npm run prices:apply\` on this branch. Vercel deploys when this is merged, and price-drop alerts go out from the daily cron after that."
+            echo
+            cat PENDING_PRICE_REVIEW.md
+          } > "$RUNNER_TEMP/pr-body.md"
+
+          gh pr create --base main --head "$branch" --title "Weekly GPU prices: ${day}" --body-file "$RUNNER_TEMP/pr-body.md"
+
+          # An older price PR that was never merged is out of date now; close it so the two can't both land
+          new_pr="$(gh pr view "$branch" --json number --jq .number)"
+          gh pr list --state open --json number,headRefName --jq '.[] | select(.headRefName | startswith("prices/")) | select(.headRefName != "'"$branch"'") | .number' |
+            while read -r old; do
+              gh pr close "$old" --delete-branch --comment "Superseded by #${new_pr}, which is priced against the current site."
+            done
