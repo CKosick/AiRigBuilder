@@ -70,6 +70,21 @@ describe('Visual system', () => {
     }
   });
 
+  it('keeps the monospace font for numbers, not for labels and links', () => {
+    const rule = (selector) => {
+      const start = CSS.replace(/\r\n/g, '\n').indexOf('\n' + selector + ' {');
+      assert.ok(start >= 0, `${selector} rule exists`);
+      const css = CSS.replace(/\r\n/g, '\n');
+      return css.slice(start, css.indexOf('}', start));
+    };
+    for (const text of ['.market-ticker', '.domain-suffix', '.chart-legend-row', '.footer-nav', '.breadcrumbs ol', '.footer-directory summary', '.model-speed-line']) {
+      assert.ok(!rule(text).includes('font-mono'), `${text} is text, not a number`);
+    }
+    for (const figure of ['.ticker-val', '.price-main', '.kpi-value', '.part-price-cell', '.price-per-gb-badge']) {
+      assert.ok(rule(figure).includes('font-family: var(--font-mono)'), `${figure} is a number`);
+    }
+  });
+
   it('the ticker and tracker show a price rise as a warning and a drop as good news', () => {
     assert.match(CSS, /\.ticker-trend\.is-up \{ color: var\(--warn-text\); \}/);
     assert.match(CSS, /\.ticker-trend\.is-down \{ color: var\(--accent-text\); \}/);

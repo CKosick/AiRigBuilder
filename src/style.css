@@ -87,7 +87,6 @@ body {
   background: rgba(7, 9, 14, 0.95);
   border-bottom: 1px solid var(--border-subtle);
   font-size: 0.78rem;
-  font-family: var(--font-mono);
   color: var(--text-muted);
   padding: 6px 1.5rem;
   display: flex;
@@ -105,6 +104,7 @@ body {
 }
 
 .ticker-val {
+  font-family: var(--font-mono);
   color: var(--text-highlight);
   font-weight: 600;
 }
@@ -162,7 +162,6 @@ body {
 
 .domain-suffix {
   color: var(--emerald);
-  font-family: var(--font-mono);
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -1047,7 +1046,6 @@ input[type="range"] {
   display: flex;
   gap: 1rem;
   font-size: 0.78rem;
-  font-family: var(--font-mono);
 }
 
 .legend-item {
@@ -1742,14 +1740,14 @@ input[type="range"] {
 /* Ticker */
 .ticker-note { color: var(--text-dim); }
 /* For a buyer a price rise is the warning and a drop is the good news */
-.ticker-trend { font-weight: 600; }
+.ticker-trend { font-weight: 600; font-family: var(--font-mono); }
 .ticker-trend.is-up { color: var(--warn-text); }
 .ticker-trend.is-down { color: var(--accent-text); }
 .ticker-good { color: var(--accent-text); }
 
 /* Footer */
 .footer-title { color: var(--text-main); display: block; margin-bottom: 4px; }
-.footer-nav { display: flex; gap: 1.5rem; font-family: var(--font-mono); font-size: 0.78rem; }
+.footer-nav { display: flex; gap: 1.5rem; font-size: 0.82rem; }
 .footer-link { color: var(--text-muted); text-decoration: none; }
 
 /* Section headings (hardware guide) */
@@ -1808,7 +1806,8 @@ input[type="range"] {
 /* Build sheet */
 .cost-breakdown-row.is-total { margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border-subtle); }
 .cost-breakdown-row strong.is-warn { color: var(--amber); }
-.model-speed-line { margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-mono); }
+.model-speed-line { margin-top: 8px; font-size: 0.8rem; color: var(--text-muted); }
+.model-speed-line strong { color: var(--text-main); }
 .spec-badge-value.spec-badge-quant { font-size: 1rem; color: var(--text-highlight); }
 .spec-badge-value.spec-badge-cost { font-size: 0.92rem; color: var(--amber); }
 .selector-note { color: var(--text-muted); font-size: 0.75rem; }
@@ -1897,7 +1896,6 @@ input[type="range"] {
   padding: 0;
   margin: 0 0 1rem 0;
   font-size: 0.78rem;
-  font-family: var(--font-mono);
   color: var(--text-dim);
 }
 
@@ -2030,7 +2028,6 @@ input[type="range"] {
 
 .footer-directory summary {
   cursor: pointer;
-  font-family: var(--font-mono);
   font-size: 0.78rem;
   color: var(--text-muted);
 }
