@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
+import { BUILDS_DATA } from '../src/data/builds.js';
 import { siteFacts, gpuSummary, homeFaq, usd, fillGpuPrices } from '../src/utils/siteFacts.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
@@ -34,10 +35,30 @@ describe('Price-derived copy is generated from the data files', () => {
     }
   });
 
-  it('GPU tags (aiRating) make no price claims', () => {
-    // Tags are short labels shown on the tracker; a price in one goes stale with the next update
+  it('GPU tags (aiRating) and pros/cons make no price claims', () => {
+    // Short labels shown on the tracker and GPU pages; a price in one goes stale with the next update
     for (const gpu of GPUS_DATA) {
       assert.ok(!/\$\d/.test(gpu.aiRating), `${gpu.id} aiRating hard-codes a price: ${gpu.aiRating}`);
+      for (const text of [...gpu.pros, ...gpu.cons]) {
+        assert.ok(!/\$\d/.test(text), `${gpu.id} pros/cons hard-code a price: ${text}`);
+      }
+    }
+  });
+
+  it('build sheet tiers and parts make no price claims in their text', () => {
+    // Prices belong in the parts' price fields, which the tier totals add up; prose next to the
+    // total that quotes its own number drifts and contradicts it
+    for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+      for (const tier of sheet.tiers) {
+        for (const key of ['name', 'badge', 'headline', 'rigSummary']) {
+          assert.ok(!/\$\d/.test(tier[key] || ''), `${modelId} ${tier.id} ${key} hard-codes a price: ${tier[key]}`);
+        }
+        for (const part of tier.parts) {
+          for (const key of ['name', 'spec', 'notes']) {
+            assert.ok(!/\$\d/.test(part[key] || ''), `${modelId} ${tier.id} part ${key} hard-codes a price: ${part[key]}`);
+          }
+        }
+      }
     }
   });
 

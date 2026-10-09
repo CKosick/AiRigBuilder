@@ -245,7 +245,7 @@ export const BUILDS_DATA = {
             price: 0,
             merchant: 'Included',
             url: '#',
-            notes: 'Draws only 135W under full generation. Electricity cost is less than $5/month even running 8 hrs/day.'
+            notes: 'Draws only 135W under full generation. Electricity costs only a few dollars a month even running 8 hrs/day.'
           }
         ]
       }
@@ -268,7 +268,7 @@ export const BUILDS_DATA = {
         badge: 'Best Value for DeepSeek R1',
         type: 'used',
         accentColor: '#10b981',
-        headline: 'Uncompromising chain-of-thought speed for under $1,800',
+        headline: 'Uncompromising chain-of-thought speed on used hardware',
         rigSummary: 'Dual used RTX 3090s running exllamav2 or vLLM. Retains near 100% of o1-level reasoning performance with 48GB VRAM headroom for extended scratchpads.',
         estimatedTdpWatts: 820,
         parts: [
@@ -507,7 +507,7 @@ export const BUILDS_DATA = {
         badge: 'Best for 128K Code Ingestion',
         type: 'used',
         accentColor: '#10b981',
-        headline: 'Full 72B coding monster at home for ~$1,800',
+        headline: 'Full 72B coding monster at home on used hardware',
         rigSummary: 'Dual used RTX 3090s providing 48GB VRAM. Handles full repositories and long coding generation in Cursor/Aider with local privacy.',
         estimatedTdpWatts: 820,
         parts: [
@@ -746,7 +746,7 @@ export const BUILDS_DATA = {
         badge: 'Unquantized FP16 on Budget',
         type: 'used',
         accentColor: '#10b981',
-        headline: 'Full unquantized FP16 weights for under $1,150 total build',
+        headline: 'Full unquantized FP16 weights on a budget build',
         rigSummary: 'Single used RTX 3090 24GB card with a budget AM4 platform. Delivers 24GB VRAM to run 12B-24B models with zero quantization loss at 50+ tokens/sec.',
         estimatedTdpWatts: 480,
         parts: [
@@ -838,7 +838,7 @@ export const BUILDS_DATA = {
         badge: 'Sub-250W Whisper Quiet',
         type: 'balanced',
         accentColor: '#3b82f6',
-        headline: 'Modern Ada Lovelace 16GB rig with sub-250W power draw for under $980',
+        headline: 'Modern Ada Lovelace 16GB rig with sub-250W power draw',
         rigSummary: 'Brand new RTX 4060 Ti 16GB with 165W TDP. Silent, brand-new components with 3-year warranties throughout.',
         estimatedTdpWatts: 240,
         parts: [
@@ -1032,10 +1032,10 @@ export const BUILDS_DATA = {
       {
         id: 'tier-budget-used',
         name: 'Ultra-Budget Used RTX 3060 12GB',
-        badge: 'Sub-$600 Complete PC',
+        badge: 'Budget Complete PC',
         type: 'used',
         accentColor: '#10b981',
-        headline: 'Run full Q8 8B models in VRAM for under $580 total build',
+        headline: 'Run full Q8 8B models entirely in VRAM on a budget build',
         rigSummary: 'Pair a used RTX 3060 12GB with a refurbished office PC or budget AM4 kit. 12GB VRAM lets you fit Llama 3.1 8B at Q8_0 plus 16K context with zero offload.',
         estimatedTdpWatts: 280,
         parts: [
@@ -1127,7 +1127,7 @@ export const BUILDS_DATA = {
         badge: '100+ Tokens/sec Speed',
         type: 'balanced',
         accentColor: '#3b82f6',
-        headline: '760 GB/s memory bandwidth for ultra-fast response for under $820',
+        headline: '760 GB/s memory bandwidth for ultra-fast responses',
         rigSummary: 'Used RTX 3080 10GB card delivering 760 GB/s bandwidth. Token generation speeds exceed 100 tok/s on 8B models.',
         estimatedTdpWatts: 420,
         parts: [
@@ -1139,7 +1139,7 @@ export const BUILDS_DATA = {
             price: 370,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1',
-            notes: 'Incredible memory bandwidth for under $400. 10GB fits 8B at Q8 or FP16.'
+            notes: 'Incredible memory bandwidth for the price. 10GB fits 8B at Q8 or FP16.'
           },
           {
             category: 'CPU',

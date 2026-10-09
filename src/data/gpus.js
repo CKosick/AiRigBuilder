@@ -95,7 +95,7 @@ export const GPUS_DATA = [
     ],
     "cons": [
       "Huge physically (3.5+ slots)",
-      "Expensive $/GB ($64/GB)",
+      "High price per GB of VRAM",
       "No NVLink",
       "Requires 12VHPWR caution"
     ],
@@ -157,7 +157,7 @@ export const GPUS_DATA = [
     "aiRating": "⚖️ High Bandwidth Alternative",
     "summary": "24GB VRAM with 960 GB/s bandwidth. With recent ROCm 6.2+ and vLLM/Ollama Linux support, it is a viable non-CUDA choice, though multi-card tensor parallel requires Linux.",
     "pros": [
-      "24GB VRAM at $790",
+      "24GB VRAM for much less than an RTX 4090",
       "960 GB/s bandwidth",
       "Standard 8-pin power connectors",
       "Great Linux ROCm support now"
@@ -228,7 +228,7 @@ export const GPUS_DATA = [
       "Low 165W TDP",
       "Ada Lovelace fp8 / bf16 support",
       "Runs on 550W PSU",
-      "16GB VRAM at sub-$400"
+      "Affordable 16GB VRAM"
     ],
     "cons": [
       "Narrow 128-bit bus (288 GB/s)",
@@ -292,7 +292,7 @@ export const GPUS_DATA = [
     "aiRating": "💰 Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for about {price} allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
     "pros": [
-      "Incredible $18.75/GB ratio",
+      "Low price per GB of VRAM",
       "Low power 170W",
       "Runs 8B models completely in VRAM",
       "Accessible price"
@@ -359,8 +359,8 @@ export const GPUS_DATA = [
     "aiRating": "🛠️ Tinkerer Ultra-Budget 24GB",
     "summary": "24GB VRAM for about {price}. A datacentre Pascal card requiring a custom cooling fan shroud and no video output. Slow on FP16, but runs GGUF quantized models surprisingly well.",
     "pros": [
-      "Unbeatable $7.29 per GB VRAM",
-      "24GB per card ($350 for 48GB!)",
+      "Very low price per GB of VRAM",
+      "24GB per card; two cards give 48GB on a budget",
       "Single slot-friendly form factor"
     ],
     "cons": [
@@ -432,7 +432,7 @@ export const GPUS_DATA = [
     ],
     "cons": [
       "Only 16GB VRAM",
-      "$55/GB price ratio",
+      "High price per GB of VRAM",
       "3-slot thickness limits dual card builds"
     ],
     "history": [
@@ -495,7 +495,7 @@ export const GPUS_DATA = [
     "pros": [
       "High 760 GB/s bandwidth",
       "Blazing fast on small models",
-      "Sub-$400 used price"
+      "Low used price for its bandwidth"
     ],
     "cons": [
       "10GB VRAM headroom is tight",
@@ -565,7 +565,7 @@ export const GPUS_DATA = [
       "Workstation driver stability"
     ],
     "cons": [
-      "Higher cost than RTX 3090 ($1,180 vs $718)",
+      "Costs more than an RTX 3090 for the same 24GB",
       "Slightly lower bandwidth (768 vs 936 GB/s)"
     ],
     "history": [
@@ -632,7 +632,7 @@ export const GPUS_DATA = [
       "No PCIe lanes or power cabling nightmares"
     ],
     "cons": [
-      "High upfront cost ($2,500 - $4,000)",
+      "High upfront cost",
       "Slower prompt ingestion / TTFT than CUDA",
       "Non-upgradable"
     ],
