@@ -9,32 +9,30 @@ import { DEFAULT_MODEL_ID } from '../routes.js';
 export const MODEL_PICKER_DEFAULTS = {
   activeModelId: DEFAULT_MODEL_ID,
   activeTierId: 'tier-budget-used',
-  activeCategory: 'all', // 'all', '70b', 'medium', 'budget', 'coding'
+  vramBudget: null, // GB; null = any. Shows models whose recommended VRAM fits
+  codingOnly: false,
   searchQuery: '',
-  isGridView: false,
+  showAllModels: false,
   salesTaxRate: 7, // %
   dailyUsageHours: 4, // hrs/day
   kwhRate: 0.14 // $/kWh
 };
 
-function filterModels(activeCategory, searchQuery) {
-  return MODELS_DATA.filter(m => {
-    // Category filter
-    if (activeCategory === '70b') {
-      const isHeavy = m.recommendedVram >= 48 || m.architecture === 'moe' || m.parameters.includes('70B') || m.parameters.includes('72B') || m.parameters.includes('104B');
-      if (!isHeavy) return false;
-    } else if (activeCategory === 'medium') {
-      const isMed = (m.recommendedVram >= 24 && m.recommendedVram < 48) && !m.parameters.includes('70B');
-      if (!isMed) return false;
-    } else if (activeCategory === 'budget') {
-      const isBudget = m.recommendedVram <= 16;
-      if (!isBudget) return false;
-    } else if (activeCategory === 'coding') {
-      const isCoding = m.id.includes('coder') || m.id.includes('code') || m.id.includes('vision');
-      if (!isCoding) return false;
-    }
+// "Runs well in" choices, compared with each model's recommendedVram (its sweet-spot quant)
+export const VRAM_BUDGETS = [12, 16, 24, 48, 96];
+// The chooser lists this many models until "Show all" is pressed
+export const VISIBLE_MODELS = 10;
 
-    // Search query filter
+const isCodingOrVision = (m) => m.id.includes('coder') || m.id.includes('code') || m.id.includes('vision');
+
+/** '70 Billion' -> '70B', '46.7B MoE (12.9B active)' -> '46.7B MoE' */
+export const paramsShort = (m) => /Billion/.test(m.parameters) ? `${parseFloat(m.parameters)}B` : m.parameters.split(' (')[0];
+
+export function filterModels({ vramBudget = null, codingOnly = false, searchQuery = '' } = {}) {
+  return MODELS_DATA.filter(m => {
+    if (vramBudget && m.recommendedVram > vramBudget) return false;
+    if (codingOnly && !isCodingOrVision(m)) return false;
+
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const matchesName = m.name.toLowerCase().includes(q);
@@ -45,6 +43,12 @@ function filterModels(activeCategory, searchQuery) {
 
     return true;
   });
+}
+
+/** The first VISIBLE_MODELS of the filtered list, plus the selected model if it is further down. */
+function visibleModels(filtered, activeModelId, showAll) {
+  if (showAll) return filtered;
+  return filtered.filter((m, i) => i < VISIBLE_MODELS || m.id === activeModelId);
 }
 
 export function findBuild(modelId, tierId) {
@@ -107,60 +111,52 @@ const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;
  */
 export function renderModelPickerHtml(state = {}) {
   const {
-    activeModelId, activeTierId, activeCategory, searchQuery, isGridView, salesTaxRate, dailyUsageHours, kwhRate
+    activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, salesTaxRate, dailyUsageHours, kwhRate
   } = { ...MODEL_PICKER_DEFAULTS, ...state };
   const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
   const { buildSheet, currentTier } = findBuild(activeModelId, activeTierId);
-  const filteredModels = filterModels(activeCategory, searchQuery);
+  const filteredModels = filterModels({ vramBudget, codingOnly, searchQuery });
+  const shownModels = visibleModels(filteredModels, activeModelId, showAllModels);
   const costs = computeTierCosts(currentTier, { salesTaxRate, dailyUsageHours, kwhRate });
   const { partsSubtotal, taxAmount } = costs;
 
   return `
-    <!-- Model Selector Bar -->
+    <!-- Model chooser: VRAM and use filters, search, then the matching models by full name -->
     <div class="model-selector-bar">
       <div class="selector-label">
-        <span>1. Select Target AI Model</span>
-        <span style="color: var(--emerald); font-family: var(--font-mono);">${MODELS_DATA.length} model profiles loaded (${filteredModels.length} shown) · <a href="/builds" class="builds-index-link">Compare all build sheets →</a></span>
+        <span>1. Pick the model you want to run</span>
+        <a href="/builds" class="builds-index-link">Compare all ${MODELS_DATA.length} build sheets →</a>
       </div>
-      
-      <!-- Filter and Search Row -->
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.85rem; flex-wrap: wrap;">
-        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-          <button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-cat="all" aria-pressed="${activeCategory === 'all'}">All (${MODELS_DATA.length})</button>
-          <button class="filter-btn ${activeCategory === '70b' ? 'active' : ''}" data-cat="70b" aria-pressed="${activeCategory === '70b'}">70B+ & MoE</button>
-          <button class="filter-btn ${activeCategory === 'medium' ? 'active' : ''}" data-cat="medium" aria-pressed="${activeCategory === 'medium'}">20B-35B</button>
-          <button class="filter-btn ${activeCategory === 'budget' ? 'active' : ''}" data-cat="budget" aria-pressed="${activeCategory === 'budget'}">≤14B Budget</button>
-          <button class="filter-btn ${activeCategory === 'coding' ? 'active' : ''}" data-cat="coding" aria-pressed="${activeCategory === 'coding'}">Coding & Vision</button>
+
+      <div class="model-filters">
+        <div class="vram-filter" role="group" aria-label="Show models that run well in this much VRAM">
+          <span class="model-filter-label">Runs well in</span>
+          <button class="filter-btn ${!vramBudget ? 'active' : ''}" data-vram="" aria-pressed="${!vramBudget}">Any VRAM</button>
+          ${VRAM_BUDGETS.map(v => `<button class="filter-btn ${vramBudget === v ? 'active' : ''}" data-vram="${v}" aria-pressed="${vramBudget === v}">${v} GB</button>`).join('')}
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="search" id="model-search-input" aria-label="Search models" value="${escapeAttr(searchQuery)}" placeholder="🔍 Search ${MODELS_DATA.length} models..." style="background: var(--bg-input); border: 1px solid var(--border-subtle); color: var(--text-main); font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius-sm); width: 170px;">
-          <button class="btn-secondary" id="btn-toggle-model-layout" title="Toggle between Scrollable Row and Grid View" style="font-size: 0.78rem; padding: 6px 10px; display: inline-flex; align-items: center; gap: 4px;">
-            <span>${isGridView ? '↔ Row' : '⊞ Grid'}</span>
-          </button>
+        <div class="model-filters-side">
+          <button class="filter-btn ${codingOnly ? 'active' : ''}" id="btn-coding-only" aria-pressed="${codingOnly}">Coding & vision</button>
+          <input type="search" id="model-search-input" class="model-search" aria-label="Search models" value="${escapeAttr(searchQuery)}" placeholder="Search models">
         </div>
       </div>
 
-      <div class="model-pills-wrapper">
-        ${!isGridView && filteredModels.length > 4 ? `
-          <button class="pills-scroll-btn scroll-left" id="btn-pills-left" aria-label="Scroll left">‹</button>
-        ` : ''}
-        <div class="model-pills ${isGridView ? 'grid-view' : ''}" id="model-pills-list">
-          ${filteredModels.length > 0 ? filteredModels.map(m => `
-            <button class="model-pill-btn ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}" aria-pressed="${m.id === activeModelId}">
-              <div class="pill-title">
-                <span>${m.name.split(' ')[0]} ${m.parameters}</span>
-                <span style="font-size: 0.72rem; color: var(--emerald);">${m.recommendedVram}GB VRAM</span>
-              </div>
-              <div class="pill-subtitle">${m.creator} • ${m.sweetSpotQuant.split(' ')[0]}</div>
-            </button>
-          `).join('') : `
-            <div style="color: var(--text-dim); font-size: 0.85rem; padding: 12px;">No models match your search. <button class="btn-secondary" id="btn-reset-model-filter" style="font-size: 0.75rem; padding: 3px 8px; margin-left: 8px;">Reset Filter</button></div>
-          `}
-        </div>
-        ${!isGridView && filteredModels.length > 4 ? `
-          <button class="pills-scroll-btn scroll-right" id="btn-pills-right" aria-label="Scroll right">›</button>
-        ` : ''}
+      <p class="model-results-count">${filteredModels.length === MODELS_DATA.length ? `All ${MODELS_DATA.length} models` : `${filteredModels.length} of ${MODELS_DATA.length} models`}${vramBudget ? ` run well in ${vramBudget} GB of VRAM` : ''}</p>
+
+      ${filteredModels.length > 0 ? `
+      <div class="model-options${showAllModels ? '' : ' is-collapsed'}" id="model-options-list">
+        ${shownModels.map(m => `
+          <button class="model-option ${m.id === activeModelId ? 'active' : ''}" data-model-id="${m.id}" aria-pressed="${m.id === activeModelId}">
+            <span class="model-option-name">${m.name}</span>
+            <span class="model-option-meta">${paramsShort(m)} · ${m.recommendedVram} GB · ${m.sweetSpotQuant.split(' ')[0]}</span>
+          </button>`).join('')}
       </div>
+      ${filteredModels.length > VISIBLE_MODELS ? `
+        <button class="btn-secondary model-options-toggle" id="btn-show-all-models" aria-expanded="${showAllModels}" aria-controls="model-options-list">
+          ${showAllModels ? 'Show fewer models' : `Show all ${filteredModels.length} models`}
+        </button>` : ''}
+      ` : `
+      <div class="model-options-empty">No models match these filters. <button class="btn-secondary" id="btn-reset-model-filter">Reset filters</button></div>
+      `}
     </div>
 
     <!-- Model Spec & VRAM Requirements Banner -->
@@ -365,13 +361,13 @@ export function renderModelPickerHtml(state = {}) {
 export function createModelPicker(container, onNavigateToCalc, { initialModelId, onModelChange } = {}) {
   let activeModelId = BUILDS_DATA[initialModelId] ? initialModelId : MODEL_PICKER_DEFAULTS.activeModelId;
   let activeTierId = MODEL_PICKER_DEFAULTS.activeTierId;
-  let activeCategory = MODEL_PICKER_DEFAULTS.activeCategory;
+  let vramBudget = MODEL_PICKER_DEFAULTS.vramBudget;
+  let codingOnly = MODEL_PICKER_DEFAULTS.codingOnly;
   let searchQuery = MODEL_PICKER_DEFAULTS.searchQuery;
-  let isGridView = MODEL_PICKER_DEFAULTS.isGridView;
+  let showAllModels = MODEL_PICKER_DEFAULTS.showAllModels;
   let salesTaxRate = MODEL_PICKER_DEFAULTS.salesTaxRate;
   let dailyUsageHours = MODEL_PICKER_DEFAULTS.dailyUsageHours;
   let kwhRate = MODEL_PICKER_DEFAULTS.kwhRate;
-  const scrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
   const currentBuild = () => findBuild(activeModelId, activeTierId);
   const computeCosts = (tier) => computeTierCosts(tier, { salesTaxRate, dailyUsageHours, kwhRate });
@@ -389,7 +385,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
   function render() {
     const restoreFocus = preserveFocus(container);
     container.innerHTML = renderModelPickerHtml({
-      activeModelId, activeTierId, activeCategory, searchQuery, isGridView, salesTaxRate, dailyUsageHours, kwhRate
+      activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, salesTaxRate, dailyUsageHours, kwhRate
     });
 
     attachEvents();
@@ -397,13 +393,22 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
   }
 
   function attachEvents() {
-    // Category filter buttons
-    container.querySelectorAll('.model-selector-bar .filter-btn').forEach(btn => {
+    // "Runs well in" VRAM buttons
+    container.querySelectorAll('.vram-filter .filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        activeCategory = btn.getAttribute('data-cat') || 'all';
+        const v = btn.getAttribute('data-vram');
+        vramBudget = v ? Number(v) : null;
         render();
       });
     });
+
+    const codingBtn = container.querySelector('#btn-coding-only');
+    if (codingBtn) {
+      codingBtn.addEventListener('click', () => {
+        codingOnly = !codingOnly;
+        render();
+      });
+    }
 
     // Search input
     const searchInput = container.querySelector('#model-search-input');
@@ -419,63 +424,31 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
       });
     }
 
-    // Reset filter button
     const resetBtn = container.querySelector('#btn-reset-model-filter');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
         searchQuery = '';
-        activeCategory = 'all';
+        vramBudget = null;
+        codingOnly = false;
         render();
       });
     }
 
-    // Toggle between row and grid layout
-    const btnToggleLayout = container.querySelector('#btn-toggle-model-layout');
-    if (btnToggleLayout) {
-      btnToggleLayout.addEventListener('click', () => {
-        isGridView = !isGridView;
+    const showAllBtn = container.querySelector('#btn-show-all-models');
+    if (showAllBtn) {
+      showAllBtn.addEventListener('click', () => {
+        showAllModels = !showAllModels;
         render();
       });
     }
 
-    // Horizontal scroll controls
-    const pillsList = container.querySelector('#model-pills-list');
-    const btnPillsLeft = container.querySelector('#btn-pills-left');
-    const btnPillsRight = container.querySelector('#btn-pills-right');
-
-    if (btnPillsLeft && pillsList) {
-      btnPillsLeft.addEventListener('click', () => {
-        pillsList.scrollBy({ left: -340, behavior: scrollBehavior });
-      });
-    }
-
-    if (btnPillsRight && pillsList) {
-      btnPillsRight.addEventListener('click', () => {
-        pillsList.scrollBy({ left: 340, behavior: scrollBehavior });
-      });
-    }
-
-    // Horizontal mousewheel support on row of pills
-    if (pillsList && !isGridView) {
-      pillsList.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0 && Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
-          pillsList.scrollLeft += e.deltaY;
-        }
-      }, { passive: true });
-    }
-
-    // Model pill click
-    container.querySelectorAll('.model-pill-btn').forEach(btn => {
+    // Picking a model
+    container.querySelectorAll('.model-option').forEach(btn => {
       btn.addEventListener('click', () => {
         activeModelId = btn.getAttribute('data-model-id');
         activeTierId = 'tier-budget-used';
         render();
         if (onModelChange) onModelChange(activeModelId);
-        // Keep active button visible
-        const updatedBtn = container.querySelector(`.model-pill-btn[data-model-id="${activeModelId}"]`);
-        if (updatedBtn && !isGridView) {
-          updatedBtn.scrollIntoView({ behavior: scrollBehavior, block: 'nearest', inline: 'nearest' });
-        }
       });
     });
 

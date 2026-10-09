@@ -76,6 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Shows the view for a route; does not touch the URL
   function showRoute(next) {
+    // Switching models between / and /builds/:model adds or removes the home hero above the
+    // picker; keep the picker where it is on screen so the list doesn't jump under the pointer
+    const pickerSwitch = route.view === 'builds' && !route.index && next.view === 'builds' && !next.index
+      && Boolean(route.home) !== Boolean(next.home);
+    const pickerTop = pickerSwitch ? modelPickerRoot.getBoundingClientRect().top : 0;
+    // The browser's own scroll anchoring would correct for the hero too; turn it off for this switch
+    if (pickerSwitch) document.documentElement.style.overflowAnchor = 'none';
     route = next;
     const targetViewId = `view-${tabViewFor(next)}`;
 
@@ -110,6 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.title = meta.title;
     setMeta('meta[name="description"]', 'content', meta.description);
     setMeta('link[rel="canonical"]', 'href', meta.canonical);
+
+    if (pickerSwitch) {
+      window.scrollBy(0, modelPickerRoot.getBoundingClientRect().top - pickerTop);
+      requestAnimationFrame(() => { document.documentElement.style.overflowAnchor = ''; });
+    }
   }
 
   /**

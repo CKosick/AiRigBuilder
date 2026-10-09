@@ -166,8 +166,8 @@ describe('Generated page content without JavaScript', () => {
       assert.ok(html.includes(`href="${buildPath(m.id)}"><`) || html.includes(`<a href="${buildPath(m.id)}">${m.name}</a>`), `${m.id} linked`);
       assert.ok(text.includes(BUILDS_DATA[m.id].vramTarget), `${m.id} VRAM target`);
     }
-    assert.ok(!html.includes('model-pill-btn'), 'the interactive picker is not pre-rendered on the index');
-    assert.ok(byPath['/'].includes('model-pill-btn') && !byPath['/'].includes('builds-index-group'), 'home shows the picker, not the index');
+    assert.ok(!html.includes('class="model-option'), 'the interactive picker is not pre-rendered on the index');
+    assert.ok(byPath['/'].includes('class="model-option') && !byPath['/'].includes('builds-index-group'), 'home shows the picker, not the index');
   });
 
   it('build sheet pages that share a parts list still differ: each shows its own quant table', () => {

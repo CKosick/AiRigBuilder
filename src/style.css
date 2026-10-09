@@ -375,156 +375,107 @@ body {
   justify-content: space-between;
 }
 
-.model-pills-wrapper {
-  position: relative;
+/* Model chooser: filters, then a wrapping grid of models by full name */
+.model-filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.vram-filter,
+.model-filters-side {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.model-pills {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 4px 4px 10px 4px;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(16, 185, 129, 0.4) rgba(255, 255, 255, 0.04);
-  width: 100%;
+.model-filter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 4px;
 }
 
-.model-pills::-webkit-scrollbar {
-  height: 6px;
+.model-search {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  width: 190px;
 }
 
-.model-pills::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: var(--radius-full);
+.model-results-count {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
 }
 
-.model-pills::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.35);
-  border-radius: var(--radius-full);
-}
-
-.model-pills::-webkit-scrollbar-thumb:hover {
-  background: var(--emerald);
-}
-
-/* Grid layout mode */
-.model-pills.grid-view {
+.model-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 0.75rem;
-  max-height: 330px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 4px 6px 6px 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(16, 185, 129, 0.4) rgba(255, 255, 255, 0.04);
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 0.6rem;
 }
 
-.model-pills.grid-view::-webkit-scrollbar {
-  width: 6px;
-}
-
-.model-pills.grid-view .model-pill-btn {
-  flex: none;
-  min-width: 0;
-  width: 100%;
-  max-width: none;
-}
-
-.model-pill-btn {
+.model-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 0.75rem 1.1rem;
+  padding: 0.7rem 0.9rem;
   color: var(--text-main);
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-  flex: 0 0 auto;
-  min-width: 205px;
-  max-width: 260px;
-  overflow: hidden;
-  user-select: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.model-pill-btn:hover {
+.model-option:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--border-medium);
-  transform: translateY(-1px);
 }
 
-.model-pill-btn.active {
+.model-option.active {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.1));
   border-color: var(--emerald);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
 }
 
-.pill-title {
+.model-option-name {
   font-weight: 700;
-  font-size: 0.92rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.3;
 }
 
-.pill-title span:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pill-subtitle {
-  font-size: 0.75rem;
+.model-option-meta {
+  font-size: 0.74rem;
   color: var(--text-muted);
-  margin-top: 3px;
   font-family: var(--font-mono);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.pills-scroll-btn {
-  background: rgba(18, 24, 36, 0.9);
-  border: 1px solid var(--border-medium);
-  color: var(--text-main);
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
+.model-option.active .model-option-meta {
+  color: var(--emerald);
+}
+
+.model-options-toggle {
+  margin-top: 0.75rem;
+}
+
+.model-options-empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  font-size: 1.1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.pills-scroll-btn:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--emerald);
-  color: var(--emerald);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-}
-
-.pills-scroll-btn.scroll-left {
-  left: -14px;
-}
-
-.pills-scroll-btn.scroll-right {
-  right: -14px;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 /* Model Spec Banner */
@@ -2221,6 +2172,28 @@ input[type="range"] {
   .calc-results-card,
   .price-alert-banner {
     padding: 1.15rem 1rem;
+  }
+
+  /* Model chooser: full-width search, two columns of models */
+  .model-filters-side,
+  .model-search {
+    width: 100%;
+  }
+  .model-search {
+    flex: 1;
+  }
+  .model-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .model-option {
+    padding: 0.6rem 0.7rem;
+  }
+  /* Three rows until "Show all"; the selected model always stays */
+  .model-options.is-collapsed .model-option:nth-child(n + 7):not(.active) {
+    display: none;
+  }
+  .model-option-name {
+    font-size: 0.84rem;
   }
 
   /* Rows of controls and legends wrap instead of running off the edge */
