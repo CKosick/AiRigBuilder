@@ -7,6 +7,7 @@ import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
 import { createBuildsIndex } from './components/buildsIndex.js';
 import { renderHomeFaqHtml } from './components/homeFaq.js';
+import { renderHomeHeroHtml } from './components/homeHero.js';
 import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const buildsIndexRoot = document.getElementById('builds-index-root');
   const modelPickerRoot = document.getElementById('model-picker-root');
   const homeFaqRoot = document.getElementById('home-faq-root');
+  const homeHeroRoot = document.getElementById('home-hero-root');
 
   // Initialize Subcomponents
   let breakEvenController = null;
@@ -98,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // The FAQ belongs to the home page only; pages entered elsewhere fill it on first visit home
     if (next.home && !homeFaqRoot.firstElementChild) homeFaqRoot.innerHTML = renderHomeFaqHtml();
     homeFaqRoot.hidden = !next.home;
+    if (next.home && !homeHeroRoot.firstElementChild) homeHeroRoot.innerHTML = renderHomeHeroHtml();
+    homeHeroRoot.hidden = !next.home;
     modelPickerRoot.hidden = Boolean(next.index);
     // The home page always shows the default model's build sheet
     if (next.view === 'builds' && !next.index) modelPickerController.selectModel(next.modelId || DEFAULT_MODEL_ID);

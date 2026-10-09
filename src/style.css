@@ -242,21 +242,16 @@ body {
   border-color: var(--border-medium);
 }
 
-/* Hero Section */
+/* Home first screen: the question, its answer, three facts, two actions */
 .hero-banner {
-  max-width: 1320px;
-  margin: 1.5rem auto 1.5rem auto;
-  padding: 0 1.5rem;
+  margin: 1.5rem 0;
 }
 
 .hero-card {
   background: linear-gradient(135deg, rgba(18, 24, 36, 0.8), rgba(12, 16, 23, 0.95));
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 1.75rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 2rem 2.25rem;
   position: relative;
   overflow: hidden;
   box-shadow: var(--shadow-md);
@@ -272,12 +267,21 @@ body {
   background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
 }
 
-.hero-text h2 {
-  font-size: 1.75rem;
+.hero-question {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.hero-answer {
+  font-size: 2.1rem;
   font-weight: 800;
+  line-height: 1.2;
   letter-spacing: -0.5px;
   color: var(--text-highlight);
-  margin-bottom: 0.4rem;
+  max-width: 900px;
+  margin-bottom: 1.1rem;
 }
 
 .hero-highlight {
@@ -286,37 +290,42 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.hero-text p {
+.hero-facts {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
   color: var(--text-muted);
   font-size: 0.95rem;
-  max-width: 720px;
+  margin-bottom: 1.4rem;
 }
 
-.hero-stats {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.hero-stat-pill {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 1.25rem;
-  text-align: center;
-}
-
-.hero-stat-val {
-  font-size: 1.35rem;
-  font-weight: 700;
-  font-family: var(--font-mono);
+.hero-facts strong {
   color: var(--emerald);
+  font-family: var(--font-mono);
+  font-weight: 700;
 }
 
-.hero-stat-lbl {
-  font-size: 0.75rem;
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.hero-actions a {
+  text-decoration: none;
+}
+
+.hero-note {
+  font-size: 0.78rem;
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+}
+
+/* "See the parts list" lands below the sticky header, not under it */
+#parts-list {
+  scroll-margin-top: 140px;
 }
 
 /* Main Container */
@@ -1694,15 +1703,6 @@ input[type="range"] {
   .kpi-row {
     grid-template-columns: 1fr 1fr;
   }
-  .hero-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .hero-stats {
-    width: 100%;
-    justify-content: space-between;
-  }
 }
 
 /* =========================================================
@@ -2125,34 +2125,26 @@ input[type="range"] {
     white-space: nowrap;
   }
 
-  /* Hero: smaller type, the three stats in one row that fits */
+  /* First screen: smaller answer, facts stacked, full-width actions */
   .hero-banner {
-    margin: 1rem auto;
-    padding: 0 1rem;
+    margin: 1rem 0;
   }
   .hero-card {
     padding: 1.25rem 1rem;
   }
-  .hero-text h2 {
-    font-size: 1.35rem;
+  .hero-answer {
+    font-size: 1.45rem;
   }
-  .hero-text p {
+  .hero-facts {
+    flex-direction: column;
     font-size: 0.88rem;
   }
-  .hero-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
+  .hero-actions a {
+    flex: 1 1 100%;
+    justify-content: center;
   }
-  .hero-stat-pill {
-    padding: 0.6rem 0.35rem;
-  }
-  .hero-stat-val {
-    font-size: 1rem;
-  }
-  .hero-stat-lbl {
-    font-size: 0.62rem;
-    letter-spacing: 0.3px;
+  #parts-list {
+    scroll-margin-top: 1rem; /* the header is not pinned on phones */
   }
 
   .main-wrapper {

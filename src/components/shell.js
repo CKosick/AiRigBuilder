@@ -1,9 +1,10 @@
-// Page shell: ticker, header with section tabs, hero, tab panels and footer.
+// Page shell: ticker, header with section tabs, home hero, tab panels and footer.
 // Pure HTML shared by the browser (src/main.js) and the build-time prerender (scripts/prerender.js).
 import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
 import { siteFacts } from '../utils/siteFacts.js';
 import { renderHomeFaqHtml } from './homeFaq.js';
+import { renderHomeHeroHtml } from './homeHero.js';
 import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
 
 const TAB_LABELS = {
@@ -107,34 +108,9 @@ export function renderShell(route, panels = {}) {
       </nav>
     </header>
 
-    <!-- Hero Banner -->
-    <section class="hero-banner">
-      <div class="hero-card">
-        <div class="hero-text">
-          <h2>The Smartest Way to Run <span class="hero-highlight">70B Local AI Models</span></h2>
-          <p>
-            Nobody answers <em>"what is the cheapest way to run 70B models at home"</em> with real used-market street prices, true total-build electricity costs, and the exact cloud break-even point. We track verified eBay sold prices so you never overpay.
-          </p>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat-pill">
-            <div class="hero-stat-val">48 GB</div>
-            <div class="hero-stat-lbl">Dual 3090 VRAM</div>
-          </div>
-          <div class="hero-stat-pill">
-            <div class="hero-stat-val">~$${dual3090RigEst.toLocaleString('en-US')}</div>
-            <div class="hero-stat-lbl">Full 70B Rig Cost</div>
-          </div>
-          <div class="hero-stat-pill">
-            <div class="hero-stat-val">~${payoffMonths} Mo</div>
-            <div class="hero-stat-lbl">Cloud Payoff @ 4 hrs/day</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Main Workspace Container -->
     <main class="main-wrapper" id="main-content" tabindex="-1">
+      <div id="home-hero-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeHeroHtml() : ''}</div>
       ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div><div id="home-faq-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeFaqHtml() : ''}</div>`)}
       ${panel('calculator', panels.calculator || '')}
       ${panel('tracker', `<div id="tracker-root"${isGpu ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div>`)}

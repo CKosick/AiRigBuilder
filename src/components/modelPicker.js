@@ -246,7 +246,7 @@ export function renderModelPickerHtml(state = {}) {
     </div>
 
     <!-- Build Sheet Details & Parts List -->
-    <div class="build-sheet-card">
+    <div class="build-sheet-card" id="parts-list">
       <div class="build-sheet-header">
         <div class="build-sheet-title">
           <h3>${currentTier.name} — Parts Manifest</h3>
