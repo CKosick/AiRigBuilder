@@ -6,12 +6,13 @@ import { siteFacts } from '../utils/siteFacts.js';
 import { renderHomeFaqHtml } from './homeFaq.js';
 import { renderHomeHeroHtml } from './homeHero.js';
 import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
+import { icon } from './icons.js';
 
 const TAB_LABELS = {
-  builds: { icon: '🖥️', text: 'Build Sheets' },
-  calculator: { icon: '⚡', text: 'Break-Even ROI' },
-  tracker: { icon: '📊', text: 'GPU Price Tracker' },
-  guide: { icon: '🛠️', text: 'Hardware Guide' }
+  builds: { icon: 'monitor', text: 'Build Sheets' },
+  calculator: { icon: 'calculator', text: 'Break-Even ROI' },
+  tracker: { icon: 'chart', text: 'GPU Price Tracker' },
+  guide: { icon: 'book', text: 'Hardware Guide' }
 };
 
 // The 7d trend is null until the price log has a price from about a week earlier
@@ -35,7 +36,7 @@ export function renderShell(route, panels = {}) {
     const active = s.view === activeTab;
     return `
           <button class="nav-tab-btn${active ? ' active' : ''}" id="tab-${s.view}" role="tab" aria-selected="${active}" aria-controls="view-${s.view}"${active ? '' : ' tabindex="-1"'} data-view="view-${s.view}">
-            <span><span aria-hidden="true">${TAB_LABELS[s.view].icon} </span>${TAB_LABELS[s.view].text}</span>
+            <span>${icon(TAB_LABELS[s.view].icon)}${TAB_LABELS[s.view].text}</span>
           </button>`;
   }).join('');
 
@@ -102,7 +103,7 @@ export function renderShell(route, panels = {}) {
 
         <div class="header-actions">
           <button class="btn-secondary" id="btn-why-used">
-            <span aria-hidden="true">💡 </span>Why Used 3090?
+            ${icon('bulb')}Why Used 3090?
           </button>
         </div>
       </nav>

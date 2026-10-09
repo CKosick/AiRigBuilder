@@ -17,7 +17,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 29.92,
     "multiGpuScore": 9.8,
-    "aiRating": "👑 King of Local 70B",
+    "aiRating": "King of Local 70B",
     "summary": "The uncontested value king of local AI. Dual 3090s give 48GB VRAM with NVLink support for about {dualPrice} total GPU spend. Excellent memory bandwidth (936 GB/s).",
     "pros": [
       "24GB VRAM per card",
@@ -85,7 +85,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 64.17,
     "multiGpuScore": 6.5,
-    "aiRating": "🚀 Peak Consumer Compute",
+    "aiRating": "Peak Consumer Compute",
     "summary": "The fastest consumer chip for inference and fine-tuning. 1008 GB/s bandwidth and 4th-gen Tensor Cores deliver blistering speeds, but at about {price} used it is costly for raw VRAM.",
     "pros": [
       "Top single-card tok/s speed",
@@ -154,7 +154,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 36,
     "multiGpuScore": 7.2,
-    "aiRating": "⚖️ High Bandwidth Alternative",
+    "aiRating": "High Bandwidth Alternative",
     "summary": "24GB VRAM with 960 GB/s bandwidth. With recent ROCm 6.2+ and vLLM/Ollama Linux support, it is a viable non-CUDA choice, though multi-card tensor parallel requires Linux.",
     "pros": [
       "24GB VRAM for much less than an RTX 4090",
@@ -222,7 +222,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 24.06,
     "multiGpuScore": 8.5,
-    "aiRating": "⚡ Modern Low-Power 16GB",
+    "aiRating": "Modern Low-Power 16GB",
     "summary": "The cheapest modern 16GB Ada card. Extremely power-efficient (165W) and easy to cool. Bandwidth is limited (288 GB/s), but perfect for 8B-14B models or budget 2x setup.",
     "pros": [
       "Low 165W TDP",
@@ -289,7 +289,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 25.58,
     "multiGpuScore": 8,
-    "aiRating": "💰 Budget Gateway",
+    "aiRating": "Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for about {price} allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
     "pros": [
       "Low price per GB of VRAM",
@@ -356,7 +356,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 11.38,
     "multiGpuScore": 6,
-    "aiRating": "🛠️ Tinkerer Ultra-Budget 24GB",
+    "aiRating": "Tinkerer Ultra-Budget 24GB",
     "summary": "24GB VRAM for about {price}. A datacentre Pascal card requiring a custom cooling fan shroud and no video output. Slow on FP16, but runs GGUF quantized models surprisingly well.",
     "pros": [
       "Very low price per GB of VRAM",
@@ -423,7 +423,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 68.94,
     "multiGpuScore": 6.8,
-    "aiRating": "🏎️ Fast Compute, VRAM Bottleneck",
+    "aiRating": "Fast Compute, VRAM Bottleneck",
     "summary": "Fast 736 GB/s bandwidth and great Ada Lovelace inference speed, but capped at 16GB VRAM. Expensive per GB compared to used 3090.",
     "pros": [
       "736 GB/s memory bandwidth",
@@ -490,7 +490,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 38.3,
     "multiGpuScore": 7,
-    "aiRating": "⚡ High Bandwidth 8B Speeder",
+    "aiRating": "High Bandwidth 8B Speeder",
     "summary": "Fast 760 GB/s bandwidth at about {price} used, providing 100+ tok/s on 8B models. However, 10GB VRAM is tight for modern context windows.",
     "pros": [
       "High 760 GB/s bandwidth",
@@ -556,7 +556,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 49.17,
     "multiGpuScore": 9.9,
-    "aiRating": "🏢 Workstation Dual-Slot Blower",
+    "aiRating": "Workstation Dual-Slot Blower",
     "summary": "True 2-slot blower cooler with ECC memory and 230W TDP. The cleanest multi-GPU fit inside standard desktop cases without overheating adjacent cards.",
     "pros": [
       "Strict 2-slot blower design (easy dual/quad fit)",
@@ -623,7 +623,7 @@ export const GPUS_DATA = [
     "trend30d": null,
     "pricePerGb": 51.73,
     "multiGpuScore": 10,
-    "aiRating": "🍎 Unified Memory Champion",
+    "aiRating": "Unified Memory Champion",
     "summary": "Up to 192GB unified memory in a silent, 140W desktop box. Runs 70B models unquantized or Q8, and can even fit 405B at Q3/Q4. Slower prompt processing than dual 3090, but zero setup friction.",
     "pros": [
       "Up to 192GB unified memory on one SOC",

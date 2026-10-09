@@ -1,6 +1,7 @@
 // Cloud Break-Even Calculator Component (airigbuilder.com)
 // The backlink and traffic engine comparing used local AI rigs vs RunPod/Vast.ai
 import { CLOUD_PROVIDERS } from '../data/providers.js';
+import { icon } from './icons.js';
 import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
 
@@ -92,7 +93,7 @@ export function renderBreakEvenHtml(state = {}) {
       <!-- Inputs Column -->
       <div class="calc-inputs-card">
         <div class="calc-section-title">
-          <span>⚙️ Hardware & Usage Parameters</span>
+          <span>${icon('sliders')}Hardware & Usage Parameters</span>
         </div>
         <div class="calc-section-desc">
           Compare your local AI hardware investment against rented GPU cloud hours.
@@ -215,7 +216,7 @@ export function renderBreakEvenHtml(state = {}) {
         <div class="calc-narrative-box">
           <div class="calc-narrative-text" id="calc-narrative">${narrativeHtml(stats, s)}</div>
           <button class="btn-secondary btn-nowrap" id="btn-copy-calc-reddit">
-            📋 Copy Summary
+            ${icon('copy')}Copy Summary
           </button>
         </div>
       </div>
@@ -473,7 +474,7 @@ export function createBreakEvenCalc(container) {
     toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
-        <span>✓</span>
+        ${icon('check')}
         <span>${msg}</span>
       </div>
     `;

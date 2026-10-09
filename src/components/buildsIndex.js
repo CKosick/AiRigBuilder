@@ -3,6 +3,7 @@
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
 import { buildPath } from '../routes.js';
+import { icon } from './icons.js';
 
 const VRAM_GROUPS = [
   { min: 48, title: '48 GB+ VRAM: 70B, MoE and Larger', blurb: 'Dual-GPU and bigger rigs. A pair of used RTX 3090s is the cheapest way into this class.' },
@@ -76,7 +77,7 @@ export function renderBuildsIndexHtml() {
           <h2>Local AI Build Sheets for ${models.length} Models</h2>
           <p>Each build sheet has three verified rigs: <strong>Budget Used</strong>, <strong>Balanced</strong> and <strong>Best New</strong>, with full parts lists, power draw and first-year cost. Pick the model you want to run.</p>
         </div>
-        <a href="/calculator" class="btn-secondary">⚡ Compare against cloud rental →</a>
+        <a href="/calculator" class="btn-secondary">${icon('calculator')}Compare against cloud rental →</a>
       </div>
       ${groupHtml}
     </div>

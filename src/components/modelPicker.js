@@ -5,6 +5,7 @@ import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js'
 import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID } from '../routes.js';
+import { icon } from './icons.js';
 
 export const MODEL_PICKER_DEFAULTS = {
   activeModelId: DEFAULT_MODEL_ID,
@@ -165,7 +166,7 @@ export function renderModelPickerHtml(state = {}) {
         <h3>${currentModel.name}</h3>
         <p class="model-info-desc">${fillGpuPrices(currentModel.description)}</p>
         <div class="model-speed-line">
-          ⚡ Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
+          ${icon('zap')}Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
         </div>
       </div>
 
@@ -250,10 +251,10 @@ export function renderModelPickerHtml(state = {}) {
         </div>
         <div class="build-quick-actions">
           <button class="btn-secondary" id="btn-copy-build-reddit">
-            📋 Copy for Reddit / Discord
+            ${icon('copy')}Copy for Reddit / Discord
           </button>
           <button class="btn-primary" id="btn-send-to-calc">
-            🚀 Calculate Break-Even ROI →
+            ${icon('calculator')}Calculate Break-Even ROI →
           </button>
         </div>
       </div>
@@ -280,7 +281,7 @@ export function renderModelPickerHtml(state = {}) {
                   <td class="part-name-cell stack-head">
                     <strong>${part.name}</strong>
                     <div class="part-spec-sub">${part.spec}</div>
-                    ${part.notes ? `<div class="part-notes">💡 ${part.notes}</div>` : ''}
+                    ${part.notes ? `<div class="part-notes">${icon('bulb')}<span>${part.notes}</span></div>` : ''}
                   </td>
                   <td data-label="Condition">
                     <span class="condition-badge ${condClass}">
@@ -294,15 +295,15 @@ export function renderModelPickerHtml(state = {}) {
                     ${part.url !== '#' ? (() => {
                       const urlLower = (part.url || '').toLowerCase();
                       const merchLower = (part.merchant || '').toLowerCase();
-                      let btnLabel = '🛒 Merchant Link';
+                      let btnLabel = `${icon('cart')}Merchant Link`;
                       if (urlLower.includes('ebay.') || (!urlLower.includes('amazon.') && merchLower.includes('ebay'))) {
-                        btnLabel = '🔍 Search eBay';
+                        btnLabel = `${icon('search')}Search eBay`;
                       } else if (urlLower.includes('amazon.') || merchLower.includes('amazon')) {
-                        btnLabel = '🛒 Amazon';
+                        btnLabel = `${icon('cart')}Amazon`;
                       } else if (urlLower.includes('bhphoto') || merchLower.includes('b&h')) {
-                        btnLabel = '📦 B&H Photo';
+                        btnLabel = `${icon('package')}B&H Photo`;
                       } else if (merchLower.includes('apple')) {
-                        btnLabel = '🍎 Apple';
+                        btnLabel = `${icon('cart')}Apple`;
                       }
                       return `
                         <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-merchant">
@@ -322,7 +323,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="true-cost-panel">
         <div class="cost-adjusters">
           <div class="cost-engine-title">
-            ⚡ True Total Ownership Cost Engine
+            ${icon('calculator')}True Total Ownership Cost Engine
           </div>
           
           <div class="slider-group">
@@ -544,7 +545,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
     toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
-        <span>✓</span>
+        ${icon('check')}
         <span>${msg}</span>
       </div>
     `;

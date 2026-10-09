@@ -8,6 +8,7 @@ import { drawPriceHistoryChart } from './priceHistoryChart.js';
 import { trendBadgeHtml } from '../utils/priceTrends.js';
 import { sparklineSvg } from '../utils/sparkline.js';
 import { gpuSummary } from '../utils/siteFacts.js';
+import { icon } from './icons.js';
 
 function sortGpus(sortBy, sortAsc) {
   return [...GPUS_DATA].sort((a, b) => {
@@ -113,7 +114,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
                   ${showTrend ? `<td data-label="7d trend">${trendBadgeHtml(gpu.trend7d)}</td>` : ''}
                   <td class="stack-action col-actions">
                     <button class="btn-secondary btn-sm btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}">
-                      📈 History
+                      ${icon('history')}History
                     </button>
                   </td>
                 </tr>
@@ -126,7 +127,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
       <div class="price-alert-banner">
         <div class="price-alert-content">
           <div class="price-alert-header">
-            <div class="price-alert-badge">🔔 Instant Price-Drop Alerts</div>
+            <div class="price-alert-badge">${icon('bell')}Instant Price-Drop Alerts</div>
             <h3>Never overpay for local AI VRAM</h3>
             <p>Select any tracked GPU and your target price. When weekly verified eBay sold prices drop to or below your target, we'll send a one-time notification email. Resend double opt-in, zero spam, instant unsubscribe.</p>
           </div>
@@ -150,7 +151,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             </div>
             <div class="alert-action-group">
               <button type="submit" class="btn-primary btn-alert-submit" id="btn-submit-tracker-alert">
-                🔔 Set Price Alert
+                ${icon('bell')}Set Price Alert
               </button>
             </div>
           </form>
@@ -178,11 +179,11 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             <!-- Pros & Cons -->
             <div class="proscons-grid">
               <div class="proscons-card proscons-pros">
-                <strong class="proscons-title">✓ AI Strengths</strong>
+                <strong class="proscons-title">${icon('check')}AI Strengths</strong>
                 <ul id="modal-pros-list" class="proscons-list"></ul>
               </div>
               <div class="proscons-card proscons-cons">
-                <strong class="proscons-title">⚠️ Build Gotchas</strong>
+                <strong class="proscons-title">${icon('alert')}Build Gotchas</strong>
                 <ul id="modal-cons-list" class="proscons-list"></ul>
               </div>
             </div>
@@ -190,7 +191,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             <!-- Alert Capture Box -->
             <div class="modal-alert-box">
               <div>
-                <strong class="modal-alert-title">🔔 Price Drop Notification</strong>
+                <strong class="modal-alert-title">${icon('bell')}Price Drop Notification</strong>
                 <span class="modal-alert-desc" id="modal-alert-desc">Alert me when this GPU drops below target price</span>
               </div>
               <div class="modal-alert-controls">
@@ -207,7 +208,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
 
             <div class="modal-footer-actions">
               <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm">
-                🔍 View Live eBay Sold Listings →
+                ${icon('search')}View Live eBay Sold Listings →
               </a>
             </div>
           </div>
@@ -313,9 +314,9 @@ export function createPriceTracker(container) {
 
           if (res.ok && data.success) {
             alertStatus.className = 'alert-status-msg success';
-            alertStatus.textContent = data.message || `✓ Confirmation email dispatched to ${email}! Check your inbox to activate your alert.`;
+            alertStatus.textContent = data.message || `Confirmation email dispatched to ${email}! Check your inbox to activate your alert.`;
             alertStatus.hidden = false;
-            showToast('✓ Double opt-in confirmation sent!');
+            showToast('Double opt-in confirmation sent!');
             emailInput.value = '';
           } else {
             alertStatus.className = 'alert-status-msg error';
@@ -359,7 +360,7 @@ export function createPriceTracker(container) {
           const data = await res.json();
 
           if (res.ok && data.success) {
-            showToast(`✓ Confirmation link sent to ${email}!`);
+            showToast(`Confirmation link sent to ${email}!`);
             emailInput.value = '';
           } else {
             showToast(data.error || 'Failed to create alert.');
@@ -470,7 +471,7 @@ export function createPriceTracker(container) {
     toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
       <div class="toast">
-        <span>✓</span>
+        ${icon('check')}
         <span>${msg}</span>
       </div>
     `;

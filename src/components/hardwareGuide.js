@@ -20,7 +20,7 @@ export function renderHardwareGuideHtml() {
     <div class="guide-grid">
       <!-- Gotcha 1 -->
       <div class="guide-card warning-card">
-        <h3>⚡ 1. The 3090 Transient Spike & PSU Trap</h3>
+        <h3>1. The 3090 Transient Spike & PSU Trap</h3>
         <p>
           RTX 3090 cards suffer from notorious 1ms to 10ms transient power spikes up to <strong>550W per card</strong>. Dual 3090s can momentarily demand <strong>1,200W+</strong> from your power supply rail.
         </p>
@@ -32,7 +32,7 @@ export function renderHardwareGuideHtml() {
 
       <!-- Gotcha 2 -->
       <div class="guide-card">
-        <h3>📏 2. Physical Motherboard Slot Spacing</h3>
+        <h3>2. Physical Motherboard Slot Spacing</h3>
         <p>
           Most RTX 3090 cards are <strong>2.7 to 3 slots thick</strong> (55mm to 62mm). If your motherboard places the two PCIe x16 slots only 2 slots apart, the top card will be completely smothered and overheat to 95°C.
         </p>
@@ -44,7 +44,7 @@ export function renderHardwareGuideHtml() {
 
       <!-- Gotcha 3 -->
       <div class="guide-card info-card">
-        <h3>🧠 3. PCIe Bandwidth: Does x16 vs x8 vs x4 Matter?</h3>
+        <h3>3. PCIe Bandwidth: Does x16 vs x8 vs x4 Matter?</h3>
         <p>
           In gaming, running at PCIe x4 hurts frame rates. <strong>In LLM inference, it barely matters.</strong>
         </p>
@@ -58,7 +58,7 @@ export function renderHardwareGuideHtml() {
 
       <!-- Gotcha 4 -->
       <div class="guide-card">
-        <h3>🧮 4. The Exact VRAM Math Formula</h3>
+        <h3>4. The Exact VRAM Math Formula</h3>
         <p>
           Never guess whether a model fits in your VRAM. Use this exact community equation:
         </p>
@@ -74,7 +74,7 @@ export function renderHardwareGuideHtml() {
 
       <!-- Gotcha 5 -->
       <div class="guide-card">
-        <h3>🥊 5. Why Dual Used 3090 Beats Single RTX 4090 for LLMs</h3>
+        <h3>5. Why Dual Used 3090 Beats Single RTX 4090 for LLMs</h3>
         <p>
           Buyers often ask: "Should I just buy one new RTX 4090 (${usd(rtx4090.newPrice)}) instead of two used 3090s (~${usd(dual3090GpuCost)})?"
         </p>
@@ -87,7 +87,7 @@ export function renderHardwareGuideHtml() {
 
       <!-- Gotcha 6 -->
       <div class="guide-card info-card">
-        <h3>🌡️ 6. Memory Junction Thermals on Used Ampere Cards</h3>
+        <h3>6. Memory Junction Thermals on Used Ampere Cards</h3>
         <p>
           The RTX 3090 has 12GB of VRAM on the front of the PCB and 12GB on the back. The rear memory chips are cooled only by the backplate.
         </p>

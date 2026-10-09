@@ -1698,6 +1698,34 @@ input[type="range"] {
 }
 
 /* =========================================================
+   Icons (src/components/icons.js): line icons in the text colour
+   ========================================================= */
+.icon {
+  width: 1.05em;
+  height: 1.05em;
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+  margin-right: 0.4em;
+}
+
+/* Flex containers already space their children */
+:is(.btn-primary, .btn-secondary, .part-notes, .price-alert-badge, .toast) > .icon {
+  margin-right: 0;
+}
+
+.part-notes {
+  align-items: flex-start;
+}
+
+.part-notes > .icon {
+  margin-top: 0.15em;
+}
+
+.toast > .icon {
+  color: var(--emerald);
+}
+
+/* =========================================================
    Component classes (formerly inline styles)
    ========================================================= */
 .text-dim { color: var(--text-dim); }

@@ -7,6 +7,7 @@ import { trendBadgeHtml } from '../utils/priceTrends.js';
 import { gpuSummary } from '../utils/siteFacts.js';
 import { gpuPath, shortGpuName } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
+import { icon } from './icons.js';
 
 const formatDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
@@ -41,7 +42,7 @@ export function renderGpuDetailHtml(gpu) {
           <p>${gpu.aiRating} · ${gpu.vram} GB ${gpu.vramType} · Prices last updated ${formatDate(GPUS_UPDATED_AT)}</p>
         </div>
         <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold')}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary">
-          🔍 View Live eBay Sold Listings →
+          ${icon('search')}View Live eBay Sold Listings →
         </a>
       </div>
 
@@ -92,11 +93,11 @@ export function renderGpuDetailHtml(gpu) {
           </table>
         </section>
         <section class="gpu-detail-card gpu-detail-pros" aria-labelledby="gpu-pros-title">
-          <h3 id="gpu-pros-title">✓ AI Strengths</h3>
+          <h3 id="gpu-pros-title">${icon('check')}AI Strengths</h3>
           <ul>${gpu.pros.map(p => `<li>${p}</li>`).join('')}</ul>
         </section>
         <section class="gpu-detail-card gpu-detail-cons" aria-labelledby="gpu-cons-title">
-          <h3 id="gpu-cons-title">⚠️ Build Gotchas</h3>
+          <h3 id="gpu-cons-title">${icon('alert')}Build Gotchas</h3>
           <ul>${gpu.cons.map(c => `<li>${c}</li>`).join('')}</ul>
         </section>
       </div>

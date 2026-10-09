@@ -51,6 +51,25 @@ describe('Visual system', () => {
     }
   });
 
+  it('uses the SVG icon set instead of emoji in components and GPU tags', async () => {
+    const emoji = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}]/u;
+    for (const { file, src } of components) {
+      const lines = src.split('\n').filter(l => emoji.test(l)).map(l => l.trim());
+      assert.deepEqual(lines, [], `${file} still uses emoji`);
+    }
+    const { GPUS_DATA } = await import('../src/data/gpus.js');
+    for (const gpu of GPUS_DATA) assert.ok(!emoji.test(gpu.aiRating), `${gpu.id} tag: ${gpu.aiRating}`);
+
+    const { icon, ICON_NAMES } = await import('../src/components/icons.js');
+    for (const name of ICON_NAMES) {
+      assert.match(icon(name), /^<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"[^>]*stroke="currentColor"/);
+    }
+    assert.throws(() => icon('no-such-icon'), /unknown icon/);
+    for (const { file, src } of components) {
+      for (const m of src.matchAll(/icon\('([a-z-]+)'\)/g)) assert.ok(ICON_NAMES.includes(m[1]), `${file} uses unknown icon '${m[1]}'`);
+    }
+  });
+
   it('the ticker and tracker show a price rise as a warning and a drop as good news', () => {
     assert.match(CSS, /\.ticker-trend\.is-up \{ color: var\(--warn-text\); \}/);
     assert.match(CSS, /\.ticker-trend\.is-down \{ color: var\(--accent-text\); \}/);
