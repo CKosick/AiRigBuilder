@@ -1297,6 +1297,11 @@ input[type="range"] {
   color: #fb7185;
 }
 
+.trend-na {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text-dim);
+}
+
 /* Modal for GPU Price History */
 .modal-backdrop {
   position: fixed;

@@ -2,8 +2,7 @@
 // Pure HTML shared by the browser (src/main.js) and the build-time prerender (scripts/prerender.js).
 import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
-import { CLOUD_PROVIDERS } from '../data/providers.js';
-import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
+import { siteFacts } from '../utils/siteFacts.js';
 import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
 
 const TAB_LABELS = {
@@ -13,21 +12,11 @@ const TAB_LABELS = {
   guide: { icon: '🛠️', text: 'Hardware Guide' }
 };
 
-function headlineStats() {
-  const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090') || { usedStreetPrice: 718, trend7d: 3.3 };
-  const teslaP40 = GPUS_DATA.find(g => g.id === 'tesla-p40') || { usedStreetPrice: 273, pricePerGb: 11.38 };
-  const dual3090RigEst = BASELINE_RIG.cost;
-  // Headline payoff uses the same defaults as the Break-Even calculator (4 hrs/day, $0.14/kWh)
-  const runpodDual3090 = CLOUD_PROVIDERS.find(p => p.id === 'runpod-dual-3090');
-  const headlinePayoff = computeBreakEven({
-    rigUpfrontCost: dual3090RigEst,
-    dailyUsageHours: 4,
-    hourlyCloudRate: runpodDual3090.hourlyRate,
-    monthlyDiskFee: runpodDual3090.storageCostPerMonth,
-    systemWatts: BASELINE_RIG.watts,
-    kwhRate: 0.14
-  });
-  return { rtx3090, teslaP40, dual3090RigEst, runpodDual3090, payoffMonths: Math.round(headlinePayoff.breakEvenMonths) };
+// The 7d trend is null until the price log has a price from about a week earlier
+function tickerTrendHtml(pct) {
+  if (typeof pct !== 'number') return '<span style="color: var(--text-dim);">7d trend n/a</span>';
+  const up = pct >= 0;
+  return `<span class="${up ? 'ticker-val' : 'ticker-drop'}" style="color: ${up ? '#34d399' : '#f87171'}">${up ? '▲' : '▼'} ${Math.abs(pct)}% (7d)</span>`;
 }
 
 /**
@@ -35,9 +24,7 @@ function headlineStats() {
  * @param panels optional pre-rendered panel HTML keyed by view ('buildsIndex', 'builds', 'calculator', 'tracker', 'guide', 'gpu')
  */
 export function renderShell(route, panels = {}) {
-  const { rtx3090, teslaP40, dual3090RigEst, runpodDual3090, payoffMonths } = headlineStats();
-  const trendArrow = rtx3090.trend7d >= 0 ? `▲ ${rtx3090.trend7d}%` : `▼ ${Math.abs(rtx3090.trend7d)}%`;
-  const trendClass = rtx3090.trend7d >= 0 ? 'ticker-val' : 'ticker-drop';
+  const { rtx3090, teslaP40, dual3090RigEst, runpodDual3090, payoffMonths4h: payoffMonths } = siteFacts();
   const activeTab = tabViewFor(route);
   const isGpu = route.view === 'gpu';
   const isBuildsIndex = Boolean(route.index);
@@ -65,7 +52,7 @@ export function renderShell(route, panels = {}) {
           <span class="ticker-tag">Live Market</span>
           <span>RTX 3090 24GB Avg:</span>
           <span class="ticker-val">$${rtx3090.usedStreetPrice}</span>
-          <span class="${trendClass}" style="color: ${rtx3090.trend7d >= 0 ? '#34d399' : '#f87171'}">${trendArrow} (7d)</span>
+          ${tickerTrendHtml(rtx3090.trend7d)}
         </div>
         <div class="ticker-item">
           <span>Dual-3090 70B Rig:</span>

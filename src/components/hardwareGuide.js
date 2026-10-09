@@ -1,8 +1,12 @@
 // Hardware Guide & Gotchas Component (airigbuilder.com)
 // Actionable enthusiast wisdom to avoid costly multi-GPU mistakes
 
-// Pure HTML, shared with the build-time prerender (scripts/prerender.js)
+import { siteFacts, usd } from '../utils/siteFacts.js';
+
+// Pure HTML, shared with the build-time prerender (scripts/prerender.js);
+// prices come from the data files so they match the tracker
 export function renderHardwareGuideHtml() {
+  const { rtx4090, dual3090GpuCost } = siteFacts();
   return `
     <div style="margin-bottom: 1.5rem;">
       <h2 style="font-size: 1.4rem; font-weight: 800; color: var(--text-highlight);">
@@ -72,7 +76,7 @@ export function renderHardwareGuideHtml() {
       <div class="guide-card">
         <h3>🥊 5. Why Dual Used 3090 Beats Single RTX 4090 for LLMs</h3>
         <p>
-          Buyers often ask: "Should I just buy one new RTX 4090 ($1,750) instead of two used 3090s (~$1,436)?"
+          Buyers often ask: "Should I just buy one new RTX 4090 (${usd(rtx4090.newPrice)}) instead of two used 3090s (~${usd(dual3090GpuCost)})?"
         </p>
         <ul>
           <li><strong>The VRAM Wall:</strong> A 4090 only has 24GB. It cannot load a 70B model into VRAM. Offloading half the layers to system RAM drops generation speed from <strong>20 tokens/sec down to 1.5 tokens/sec</strong>.</li>

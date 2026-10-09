@@ -56,7 +56,7 @@ npm run prices:fetch
 ```
 - Scrapes recent eBay completed & sold listings with rate limiting (2.5s delay).
 - Filters out non-working parts, boxes, coolers, waterblocks, and non-target variants.
-- Computes trimmed median, 25th percentile (Low), 75th percentile (High), and 7-day trend.
+- Computes trimmed median, 25th percentile (Low), 75th percentile (High), and the % change vs the current site price (not a trend).
 - Outputs human-readable [`PENDING_PRICE_REVIEW.md`](file:///c:/Users/Cliff/Documents/AiRigBuilder/PENDING_PRICE_REVIEW.md) and [`data/pending_price_review.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/pending_price_review.json).
 
 ### Step 2: Eyeball & Review
@@ -71,7 +71,8 @@ npm run prices:apply
 - Applies approved updates to [`src/data/gpus.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/gpus.js).
 - Recalculates `pricePerGb` ($/GB VRAM) and appends to the historical price-trajectory data.
 - Automatically syncs dependent GPU parts in [`src/data/builds.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/builds.js) (e.g. dual-3090 rig totals).
-- Records an audit log entry in [`data/price_history_log.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/price_history_log.json).
+- Records an audit log entry in [`data/price_history_log.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/price_history_log.json) and recomputes each GPU's 7d/30d trend from it: the % change since the price applied about 7 (5-10) or 30 (25-40) days before the latest run, or `null` (shown as "n/a") when the log has no price that old.
+- Price-dependent copy (GPU summaries via `{price}`/`{dualPrice}`, hardware guide, home FAQ JSON-LD) is generated at build time by `src/utils/siteFacts.js`, so the rebuild updates it too.
 - Runs `npm run build` to guarantee zero production syntax or bundler errors.
 
 ### Step 4: Commit & Deploy

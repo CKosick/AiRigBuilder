@@ -225,7 +225,7 @@ async function scrapeGpuPrices(target) {
       proposedPrice: finalProposedPrice,
       priceLow: Math.round(low * 0.96),
       priceHigh: Math.round(high * 0.96),
-      trend7d: pctChange,
+      changePct: pctChange, // vs the current site price, not a 7-day trend
       sampleCount: validSales.length,
       status: Math.abs(pctChange) > 15 ? 'FLAGGED_SWING' : 'APPROVED',
       source: 'REAL_EBAY_ACTIVE_COMPS',
@@ -248,7 +248,7 @@ function fallbackResult(target, reason) {
     proposedPrice: proposed,
     priceLow: Math.round(proposed * 0.92),
     priceHigh: Math.round(proposed * 1.08),
-    trend7d: 0.0,
+    changePct: 0.0,
     sampleCount: 0,
     status: 'APPROVED',
     source: 'CALIBRATED_FALLBACK',
@@ -285,13 +285,13 @@ async function runFallback() {
   const mdPath = path.join(ROOT_DIR, 'PENDING_PRICE_REVIEW.md');
   let md = `# Weekly Used GPU Price Review — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}\n\n`;
   md += `> [!IMPORTANT]\n> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.\n\n`;
-  md += `| GPU Model | VRAM | Current | Proposed | Delta | 7d Trend | Proposed Range | Data Source | Status |\n`;
+  md += `| GPU Model | VRAM | Current | Proposed | Delta | Change | Proposed Range | Data Source | Status |\n`;
   md += `| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n`;
 
   results.forEach(c => {
     const diff = c.proposedPrice - c.currentPrice;
     const diffStr = diff >= 0 ? `+$${diff}` : `-$${Math.abs(diff)}`;
-    const trendStr = c.trend7d >= 0 ? `+${c.trend7d}%` : `${c.trend7d}%`;
+    const trendStr = c.changePct >= 0 ? `+${c.changePct}%` : `${c.changePct}%`;
     const statusBadge = c.status === 'APPROVED' ? '✅ APPROVED' : '⚠️ FLAGGED SWING';
     const sourceBadge = c.source === 'CALIBRATED_FALLBACK' ? '🟡 Baseline' : '🟢 Live Comps';
     md += `| **${c.name}** | ${c.vram}GB | $${c.currentPrice} | **$${c.proposedPrice}** | ${diffStr} | ${trendStr} | $${c.priceLow} - $${c.priceHigh} | ${sourceBadge} | ${statusBadge} |\n`;

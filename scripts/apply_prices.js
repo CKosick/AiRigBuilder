@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import { recordMonthlyPrice } from '../src/utils/priceHistory.js';
+import { computePriceTrends } from '../src/utils/priceTrends.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,7 +63,6 @@ async function applyPrices() {
     gpu.usedStreetPrice = newPrice;
     gpu.usedPriceLow = update.priceLow;
     gpu.usedPriceHigh = update.priceHigh;
-    gpu.trend7d = update.trend7d;
     gpu.pricePerGb = parseFloat((newPrice / gpu.vram).toFixed(2));
 
     // One history point per month: update this month's point, or start a new one
@@ -78,8 +78,24 @@ async function applyPrices() {
     });
   });
 
-  // Write updated gpus.js
+  // Add this run to the audit log, then recompute every GPU's 7d/30d trend from it
+  // (null when the log has no price from about that long ago)
   const updatedAt = new Date().toISOString();
+  let auditLogs = [];
+  if (fs.existsSync(AUDIT_LOG_FILE)) {
+    try {
+      auditLogs = JSON.parse(fs.readFileSync(AUDIT_LOG_FILE, 'utf-8'));
+    } catch (_) {}
+  }
+  auditLogs.push({
+    appliedAt: updatedAt,
+    updates: appliedSummary
+  });
+  GPUS_DATA.forEach(gpu => {
+    Object.assign(gpu, computePriceTrends(auditLogs, gpu.id, gpu.usedStreetPrice));
+  });
+
+  // Write updated gpus.js
   const updatedGpusCode = `// The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)\n// Last updated: ${updatedAt}\nexport const GPUS_UPDATED_AT = '${updatedAt}';\nexport const GPUS_DATA = ${JSON.stringify(GPUS_DATA, null, 2)};\n`;
   fs.writeFileSync(GPUS_FILE, updatedGpusCode, 'utf-8');
   console.log(`✓ Updated: ${GPUS_FILE}`);
@@ -126,18 +142,7 @@ async function applyPrices() {
     console.log(`✓ Synced dependent GPU prices in: ${BUILDS_FILE}`);
   }
 
-  // 3. Append to audit log
-  let auditLogs = [];
-  if (fs.existsSync(AUDIT_LOG_FILE)) {
-    try {
-      auditLogs = JSON.parse(fs.readFileSync(AUDIT_LOG_FILE, 'utf-8'));
-    } catch (_) {}
-  }
-
-  auditLogs.push({
-    appliedAt: new Date().toISOString(),
-    updates: appliedSummary
-  });
+  // 3. Save the audit log (this run was added above)
   fs.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(auditLogs, null, 2), 'utf-8');
   console.log(`✓ Audit log saved to: ${AUDIT_LOG_FILE}`);
 

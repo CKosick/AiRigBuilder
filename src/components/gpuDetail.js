@@ -3,13 +3,10 @@
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../data/gpus.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { fillMonthGaps } from '../utils/priceHistory.js';
+import { trendBadgeHtml } from '../utils/priceTrends.js';
+import { gpuSummary } from '../utils/siteFacts.js';
 import { gpuPath, shortGpuName } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
-
-const trendHtml = (pct) => {
-  const cls = pct <= 0 ? 'trend-down' : 'trend-up';
-  return `<span class="trend-badge ${cls}">${pct <= 0 ? '▼' : '▲'} ${Math.abs(pct)}%</span>`;
-};
 
 const formatDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
@@ -66,12 +63,12 @@ export function renderGpuDetailHtml(gpu) {
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Price Trend</div>
-          <div class="kpi-value" style="font-size: 1.1rem;">${trendHtml(gpu.trend7d)} <span class="kpi-sub">7d</span></div>
-          <div class="kpi-sub">${typeof gpu.trend30d === 'number' ? `${trendHtml(gpu.trend30d)} 30d` : ''}</div>
+          <div class="kpi-value" style="font-size: 1.1rem;">${trendBadgeHtml(gpu.trend7d)} <span class="kpi-sub">7d</span></div>
+          <div class="kpi-sub">${trendBadgeHtml(gpu.trend30d)} 30d</div>
         </div>
       </div>
 
-      <p class="gpu-detail-summary">${gpu.summary}</p>
+      <p class="gpu-detail-summary">${gpuSummary(gpu)}</p>
 
       <section class="gpu-detail-card" aria-labelledby="gpu-chart-title">
         <h3 id="gpu-chart-title">Monthly Average Sold Price</h3>

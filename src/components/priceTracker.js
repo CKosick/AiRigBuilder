@@ -5,6 +5,8 @@ import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js'
 import { preserveFocus } from '../utils/focus.js';
 import { gpuPath } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
+import { trendBadgeHtml } from '../utils/priceTrends.js';
+import { gpuSummary } from '../utils/siteFacts.js';
 
 function sortGpus(sortBy, sortAsc) {
   return [...GPUS_DATA].sort((a, b) => {
@@ -108,10 +110,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             </tr>
           </thead>
           <tbody>
-            ${gpus.map(gpu => {
-              const trendClass = gpu.trend7d <= 0 ? 'trend-down' : 'trend-up';
-              const trendIcon = gpu.trend7d <= 0 ? '▼' : '▲';
-              return `
+            ${gpus.map(gpu => `
                 <tr>
                   <td class="gpu-name-cell">
                     <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
@@ -138,9 +137,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
                     </div>
                   </td>
                   <td>
-                    <span class="trend-badge ${trendClass}">
-                      ${trendIcon} ${Math.abs(gpu.trend7d)}%
-                    </span>
+                    ${trendBadgeHtml(gpu.trend7d)}
                   </td>
                   <td style="text-align: right; white-space: nowrap;">
                     <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
@@ -148,8 +145,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
                     </button>
                   </td>
                 </tr>
-              `;
-            }).join('')}
+              `).join('')}
           </tbody>
         </table>
       </div>
@@ -408,7 +404,7 @@ export function createPriceTracker(container) {
 
     container.querySelector('#modal-gpu-title').textContent = `${gpu.name} (${gpu.vram}GB)`;
     container.querySelector('#modal-gpu-subtitle').textContent = `Current eBay Sold Avg: $${gpu.usedStreetPrice} ($${gpu.pricePerGb.toFixed(2)} / GB VRAM)`;
-    container.querySelector('#modal-gpu-summary').textContent = gpu.summary;
+    container.querySelector('#modal-gpu-summary').textContent = gpuSummary(gpu);
     container.querySelector('#modal-alert-desc').textContent = `Alert me when ${gpu.name} drops below $${gpu.usedPriceLow}`;
     const targetInput = container.querySelector('#modal-target-price-input');
     if (targetInput) targetInput.value = gpu.usedPriceLow;
@@ -452,8 +448,8 @@ export function createPriceTracker(container) {
     const summaryEl = container.querySelector('#modal-gpu-summary');
     if (summaryEl) {
       summaryEl.textContent = missingMonths > 0
-        ? `${gpu.summary} Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).`
-        : gpu.summary;
+        ? `${gpuSummary(gpu)} Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).`
+        : gpuSummary(gpu);
     }
   }
 

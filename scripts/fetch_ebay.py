@@ -330,7 +330,7 @@ def main():
                     "proposedPrice": proposed_price,
                     "priceLow": price_low,
                     "priceHigh": price_high,
-                    "trend7d": pct_change,
+                    "changePct": pct_change,  # vs the current site price, not a 7-day trend
                     "sampleCount": len(valid_listings),
                     "status": "FLAGGED_SWING" if abs(pct_change) > 15 else "APPROVED",
                     "source": source_type,
@@ -349,7 +349,7 @@ def main():
                     "proposedPrice": proposed,
                     "priceLow": int(round(proposed * 0.92)),
                     "priceHigh": int(round(proposed * 1.08)),
-                    "trend7d": 0.0,
+                    "changePct": 0.0,
                     "sampleCount": len(valid_listings),
                     "status": "APPROVED",
                     "source": "CALIBRATED_FALLBACK",
@@ -379,14 +379,14 @@ def main():
         "> **MANUAL REVIEW STEP**: Eyeball the scraped numbers below before they go live.",
         "> If any price looks off due to an outlier, you can edit `data/pending_price_review.json`.",
         "> When satisfied, execute: `npm run prices:apply` to update the live site and price history.\n",
-        "| GPU Model | VRAM | Current | Proposed | Delta | 7d Trend | Proposed Range | Data Source | Status |",
+        "| GPU Model | VRAM | Current | Proposed | Delta | Change | Proposed Range | Data Source | Status |",
         "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
     
     for c in results:
         diff = c["proposedPrice"] - c["currentPrice"]
         diff_str = f"+${diff}" if diff >= 0 else f"-${abs(diff)}"
-        trend_str = f"+{c['trend7d']}%" if c["trend7d"] >= 0 else f"{c['trend7d']}%"
+        trend_str = f"+{c['changePct']}%" if c["changePct"] >= 0 else f"{c['changePct']}%"
         status_badge = "✅ APPROVED" if c["status"] == "APPROVED" else "⚠️ FLAGGED SWING"
         if "SOLD" in c.get("source", ""):
             source_badge = "🟢 Real Sold Comps"

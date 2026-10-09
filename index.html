@@ -33,7 +33,9 @@
     <meta name="twitter:image" content="https://airigbuilder.com/og-image.jpg" />
     <meta name="twitter:image:alt" content="AI Rig Builder Preview" />
 
-    <!-- Schema.org JSON-LD Structured Data for Rich Google Snippets -->
+    <!-- Schema.org JSON-LD Structured Data for Rich Google Snippets. The build adds the home
+         FAQPage with prices from the data files (src/utils/siteFacts.js) and gives every other
+         page its own WebPage/BreadcrumbList graph (scripts/prerender.js). -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -51,36 +53,6 @@
             "price": "0",
             "priceCurrency": "USD"
           }
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "https://airigbuilder.com/#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "What is the cheapest way to run a 70B model at home?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "The community gold standard is dual used NVIDIA RTX 3090 24GB cards (~$718 each on eBay), delivering 48GB total VRAM on an AM4 platform for about $2,300 for the complete build (GPUs, CPU, board, RAM, 1000W PSU, SSD and case). This runs Llama 3.3 70B at Q4_K_M quant at ~20 tokens/sec."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "Why is dual used RTX 3090 better than a single RTX 4090 for local LLMs?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "A single RTX 4090 only has 24GB VRAM and cannot fit a 70B model without CPU offloading (which slows inference to ~1.5 tokens/sec). Dual RTX 3090s provide 48GB VRAM, allowing the entire model to fit into high-speed GDDR6X for real-time 20 tok/sec generation."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How fast does a local 70B AI build break even against cloud GPU providers?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "At 4 hours of daily usage compared to renting 2x RTX 3090 on RunPod ($0.88/hr plus storage), a ~$2,300 Dual 3090 rig pays for itself in roughly 23 months after electricity costs. At 12 hours a day the payoff drops to about 8 months."
-              }
-            }
-          ]
         }
       ]
     }

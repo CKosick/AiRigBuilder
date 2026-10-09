@@ -11,6 +11,7 @@ import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../src/data/gpus.js';
+import { homeFaq } from '../src/utils/siteFacts.js';
 
 const escapeHtml = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // JSON inside <script> must not be able to close the tag
@@ -64,6 +65,28 @@ function structuredData(route, meta) {
   };
 }
 
+/** The template's own JSON-LD graph (WebApplication) plus a FAQPage built from the current data. */
+export function homeStructuredData(template) {
+  const match = template.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  if (!match) throw new Error('prerender: index.html template is missing JSON-LD block');
+  const base = JSON.parse(match[1]);
+  return {
+    ...base,
+    '@graph': [
+      ...base['@graph'].filter(node => node['@type'] !== 'FAQPage'),
+      {
+        '@type': 'FAQPage',
+        '@id': `${SITE_URL}/#faq`,
+        mainEntity: homeFaq().map(({ question, answer }) => ({
+          '@type': 'Question',
+          name: question,
+          acceptedAnswer: { '@type': 'Answer', text: answer }
+        }))
+      }
+    ]
+  };
+}
+
 /** Full HTML for one route, built from the (Vite-built or source) index.html. */
 export function renderPage(template, route) {
   const meta = pageMeta(route);
@@ -76,8 +99,16 @@ export function renderPage(template, route) {
   html = replaceRequired(html, /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${meta.canonical}" />`, 'canonical link');
   html = replaceRequired(html, /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/, `<meta property="og:url" content="${meta.canonical}" />`, 'og:url');
 
-  // The home page keeps its hand-written social copy, WebApplication and FAQ markup
-  if (!route.home) {
+  // The home page keeps its hand-written social copy and WebApplication node; its FAQ is generated
+  // from the current prices. Other pages get WebPage + BreadcrumbList.
+  if (route.home) {
+    html = replaceRequired(
+      html,
+      /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
+      `<script type="application/ld+json">\n${jsonForScript(homeStructuredData(html))}\n    </script>`,
+      'JSON-LD block'
+    );
+  } else {
     html = replaceRequired(html, /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/, `<meta property="og:title" content="${title}" />`, 'og:title');
     html = replaceRequired(html, /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/, `<meta property="og:description" content="${desc}" />`, 'og:description');
     html = replaceRequired(html, /<meta\s+name="twitter:title"\s+content="[^"]*"\s*\/?>/, `<meta name="twitter:title" content="${title}" />`, 'twitter:title');

@@ -51,6 +51,16 @@ describe('SEO & Structured Data Verification Tests', () => {
     assert.ok(webApp, 'Missing WebApplication JSON-LD schema');
     assert.equal(webApp.name, 'AI Rig Builder');
 
+    // The FAQ quotes prices, so the build generates it; a hand-written copy here would go stale
+    assert.ok(!parsed['@graph'].some(item => item['@type'] === 'FAQPage'), 'index.html must not hard-code the FAQPage');
+  });
+
+  it('builds the home page FAQPage JSON-LD from the current data', async () => {
+    const { renderPage } = await import('../scripts/prerender.js');
+    const { parseRoute } = await import('../src/routes.js');
+    const home = renderPage(indexHtml, parseRoute('/'));
+    const parsed = JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(parsed['@graph'].find(item => item['@type'] === 'WebApplication'), 'home keeps the WebApplication node');
     const faq = parsed['@graph'].find(item => item['@type'] === 'FAQPage');
     assert.ok(faq, 'Missing FAQPage JSON-LD schema');
     assert.ok(faq.mainEntity.length >= 3, 'FAQPage should contain at least 3 high-value Q&A entries');
