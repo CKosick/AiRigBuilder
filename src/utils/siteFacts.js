@@ -45,6 +45,11 @@ export function gpuSummary(gpu) {
     .replace(/\{dualPrice\}/g, usd(gpu.usedStreetPrice * 2));
 }
 
+/** Text with each {price:<gpu-id>} placeholder replaced by that GPU's current used price. */
+export function fillGpuPrices(text) {
+  return String(text).replace(/\{price:([a-z0-9-]+)\}/g, (_, id) => usd(gpuById(id).usedStreetPrice));
+}
+
 /** Home page FAQ as [{ question, answer }], for the FAQPage JSON-LD. */
 export function homeFaq() {
   const f = siteFacts();

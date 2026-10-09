@@ -72,7 +72,7 @@ npm run prices:apply
 - Recalculates `pricePerGb` ($/GB VRAM) and appends to the historical price-trajectory data.
 - Automatically syncs dependent GPU parts in [`src/data/builds.js`](file:///c:/Users/Cliff/Documents/AiRigBuilder/src/data/builds.js) (e.g. dual-3090 rig totals).
 - Records an audit log entry in [`data/price_history_log.json`](file:///c:/Users/Cliff/Documents/AiRigBuilder/data/price_history_log.json) and recomputes each GPU's 7d/30d trend from it: the % change since the price applied about 7 (5-10) or 30 (25-40) days before the latest run, or `null` (shown as "n/a") when the log has no price that old. A later run on the same UTC day replaces earlier ones, so a same-day correction is never used as a baseline. With weekly runs, 7d appears on the next run and 30d on the fourth.
-- Price-dependent copy (GPU summaries via `{price}`/`{dualPrice}`, hardware guide, home FAQ) is generated at build time by `src/utils/siteFacts.js`, so the rebuild updates it too. The visible home FAQ and its FAQPage JSON-LD come from the same `homeFaq()` entries.
+- Price-dependent copy (GPU summaries via `{price}`/`{dualPrice}`, model descriptions via `{price:<gpu-id>}`, hardware guide, home FAQ) is generated at build time by `src/utils/siteFacts.js`, so the rebuild updates it too. The visible home FAQ and its FAQPage JSON-LD come from the same `homeFaq()` entries.
 - Runs `npm run build` to guarantee zero production syntax or bundler errors.
 
 ### Step 4: Commit & Deploy

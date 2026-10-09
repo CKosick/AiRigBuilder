@@ -3,6 +3,7 @@ import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
+import { fillGpuPrices } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID } from '../routes.js';
 
 export const MODEL_PICKER_DEFAULTS = {
@@ -38,7 +39,7 @@ function filterModels(activeCategory, searchQuery) {
       const q = searchQuery.toLowerCase();
       const matchesName = m.name.toLowerCase().includes(q);
       const matchesCreator = m.creator.toLowerCase().includes(q);
-      const matchesDesc = (m.description || '').toLowerCase().includes(q);
+      const matchesDesc = fillGpuPrices(m.description || '').toLowerCase().includes(q);
       if (!matchesName && !matchesCreator && !matchesDesc) return false;
     }
 
@@ -166,7 +167,7 @@ export function renderModelPickerHtml(state = {}) {
     <div class="model-spec-panel">
       <div class="model-info-block">
         <h3>${currentModel.name}</h3>
-        <p class="model-info-desc">${currentModel.description}</p>
+        <p class="model-info-desc">${fillGpuPrices(currentModel.description)}</p>
         <div style="margin-top: 8px; font-size: 0.78rem; color: var(--cyan); font-family: var(--font-mono);">
           ⚡ Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
         </div>

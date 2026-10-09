@@ -4,7 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GPUS_DATA } from '../src/data/gpus.js';
-import { siteFacts, gpuSummary, homeFaq, usd } from '../src/utils/siteFacts.js';
+import { MODELS_DATA } from '../src/data/models.js';
+import { siteFacts, gpuSummary, homeFaq, usd, fillGpuPrices } from '../src/utils/siteFacts.js';
+import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
@@ -30,6 +32,22 @@ describe('Price-derived copy is generated from the data files', () => {
       const text = gpuSummary(gpu);
       assert.ok(!/[{}]/.test(text), `${gpu.id} summary has an unfilled placeholder: ${text}`);
     }
+  });
+
+  it('model descriptions use {price:<gpu-id>} placeholders, never hard-coded dollar amounts', () => {
+    for (const model of MODELS_DATA) {
+      assert.ok(!/\$\d/.test(model.description || ''), `${model.id} description hard-codes a price: ${model.description}`);
+      const text = fillGpuPrices(model.description || '');
+      assert.ok(!/[{}]/.test(text), `${model.id} description has an unfilled placeholder: ${text}`);
+    }
+    assert.throws(() => fillGpuPrices('{price:no-such-gpu}'), /no-such-gpu/);
+  });
+
+  it('the model picker shows model descriptions with current GPU prices', () => {
+    const rtx3060 = GPUS_DATA.find(g => g.id === 'rtx-3060-12gb');
+    const html = renderModelPickerHtml({ activeModelId: 'llama-3.1-8b' });
+    assert.ok(html.includes(`RTX 3060 12GB (about ${usd(rtx3060.usedStreetPrice)} used)`));
+    assert.ok(!html.includes('{price:'));
   });
 
   it('the RTX 3090 summary quotes the current dual-card GPU cost', () => {

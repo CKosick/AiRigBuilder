@@ -9,6 +9,7 @@ import { renderAllPages, renderPage, renderNotFound, renderSitemap, outputFileFo
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
+import { fillGpuPrices } from '../src/utils/siteFacts.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const template = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf-8');
@@ -199,7 +200,7 @@ describe('Generated page content without JavaScript', () => {
       const text = visibleAppText(byPath[`/builds/${m.id}`]);
       const sheet = BUILDS_DATA[m.id];
       assert.ok(text.includes(m.name), `${m.id} name`);
-      assert.ok(text.includes(decode(m.description)), `${m.id} description`);
+      assert.ok(text.includes(decode(fillGpuPrices(m.description))), `${m.id} description`);
       for (const t of sheet.tiers) assert.ok(text.includes(t.name), `${m.id} tier ${t.name}`);
       for (const part of sheet.tiers[0].parts) assert.ok(text.includes(decode(part.name)), `${m.id} part ${part.name}`);
     }
