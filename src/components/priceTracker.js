@@ -6,6 +6,7 @@ import { preserveFocus } from '../utils/focus.js';
 import { gpuPath } from '../routes.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
 import { trendBadgeHtml } from '../utils/priceTrends.js';
+import { sparklineSvg } from '../utils/sparkline.js';
 import { gpuSummary } from '../utils/siteFacts.js';
 
 function sortGpus(sortBy, sortAsc) {
@@ -36,6 +37,10 @@ function sortGpus(sortBy, sortAsc) {
  */
 export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true } = {}) {
     const gpus = sortGpus(sortBy, sortAsc);
+    // The 7d column appears once the weekly price log has a week of history (see utils/priceTrends.js)
+    const showTrend = GPUS_DATA.some(g => typeof g.trend7d === 'number');
+    // Best value is the lowest price per GB of VRAM, whatever the current sort
+    const bestValueId = [...GPUS_DATA].sort((a, b) => a.pricePerGb - b.pricePerGb)[0].id;
 
     return `
       <div class="tracker-header-row">
@@ -58,6 +63,63 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             Bandwidth ${sortBy === 'bandwidth' ? (sortAsc ? '▲' : '▼') : ''}
           </button>
         </div>
+      </div>
+
+      <div class="gpu-table-card">
+        <table class="gpu-table stack-table">
+          <thead>
+            <tr>
+              <th scope="col">GPU & AI Suitability</th>
+              <th scope="col">VRAM & Bus</th>
+              <th scope="col">Bandwidth</th>
+              <th scope="col">Avg Used Street Price</th>
+              <th scope="col">Price / GB</th>
+              <th scope="col">Price History</th>
+              ${showTrend ? '<th scope="col">7d Trend</th>' : ''}
+              <th scope="col" style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${gpus.map(gpu => `
+                <tr${gpu.id === bestValueId ? ' class="is-best-value"' : ''}>
+                  <td class="gpu-name-cell stack-head">
+                    ${gpu.id === bestValueId ? '<span class="best-value-badge">Best value per GB</span>' : ''}
+                    <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                      ${gpu.aiRating}
+                    </div>
+                  </td>
+                  <td data-label="VRAM">
+                    <span class="gpu-vram-pill">${gpu.vram} GB ${gpu.vramType}</span>
+                    <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">TDP: ${gpu.tdp}W</div>
+                  </td>
+                  <td data-label="Bandwidth">
+                    <strong style="font-family: var(--font-mono); color: var(--text-highlight);">${gpu.bandwidth} GB/s</strong>
+                    <div style="font-size: 0.72rem; color: var(--text-dim);">Memory Bus</div>
+                  </td>
+                  <td data-label="Avg used price">
+                    <div class="price-main">$${gpu.usedStreetPrice.toLocaleString()}</div>
+                    <div class="price-range-sub">Range: $${gpu.usedPriceLow} - $${gpu.usedPriceHigh}</div>
+                  </td>
+                  <td data-label="Price / GB">
+                    <div class="price-per-gb-badge">
+                      <span>$${gpu.pricePerGb.toFixed(2)}</span>
+                      <span style="font-size: 0.7rem; color: var(--text-dim);">/ GB</span>
+                    </div>
+                  </td>
+                  <td data-label="Price history">
+                    ${sparklineSvg(gpu.history)}
+                  </td>
+                  ${showTrend ? `<td data-label="7d trend">${trendBadgeHtml(gpu.trend7d)}</td>` : ''}
+                  <td class="stack-action" style="text-align: right; white-space: nowrap;">
+                    <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
+                      📈 History
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+          </tbody>
+        </table>
       </div>
 
       <!-- Price Drop Email Alerts Banner -->
@@ -94,60 +156,6 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
           </form>
           <div class="alert-status-msg" id="alert-status-msg" role="status" aria-live="polite" style="display: none;"></div>
         </div>
-      </div>
-
-      <div class="gpu-table-card">
-        <table class="gpu-table stack-table">
-          <thead>
-            <tr>
-              <th style="width: 28%;">GPU & AI Suitability</th>
-              <th style="width: 14%;">VRAM & Bus</th>
-              <th style="width: 14%;">Bandwidth</th>
-              <th style="width: 15%;">Avg Used Street Price</th>
-              <th style="width: 13%;">Price / GB</th>
-              <th style="width: 8%;">7d Trend</th>
-              <th style="width: 8%; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${gpus.map(gpu => `
-                <tr>
-                  <td class="gpu-name-cell stack-head">
-                    <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                      ${gpu.aiRating}
-                    </div>
-                  </td>
-                  <td data-label="VRAM">
-                    <span class="gpu-vram-pill">${gpu.vram} GB ${gpu.vramType}</span>
-                    <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">TDP: ${gpu.tdp}W</div>
-                  </td>
-                  <td data-label="Bandwidth">
-                    <strong style="font-family: var(--font-mono); color: var(--text-highlight);">${gpu.bandwidth} GB/s</strong>
-                    <div style="font-size: 0.72rem; color: var(--text-dim);">Memory Bus</div>
-                  </td>
-                  <td data-label="Avg used price">
-                    <div class="price-main">$${gpu.usedStreetPrice.toLocaleString()}</div>
-                    <div class="price-range-sub">Range: $${gpu.usedPriceLow} - $${gpu.usedPriceHigh}</div>
-                  </td>
-                  <td data-label="Price / GB">
-                    <div class="price-per-gb-badge">
-                      <span>$${gpu.pricePerGb.toFixed(2)}</span>
-                      <span style="font-size: 0.7rem; color: var(--text-dim);">/ GB</span>
-                    </div>
-                  </td>
-                  <td data-label="7d trend">
-                    ${trendBadgeHtml(gpu.trend7d)}
-                  </td>
-                  <td class="stack-action" style="text-align: right; white-space: nowrap;">
-                    <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
-                      📈 History
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-          </tbody>
-        </table>
       </div>
 
       <!-- Price History Modal -->

@@ -1492,6 +1492,58 @@ input[type="range"] {
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Tracker ranking: price history line per row, best value per GB */
+.sparkline {
+  display: block;
+  overflow: visible;
+}
+
+.sparkline-line path {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sparkline-line circle {
+  fill: var(--cyan);
+}
+
+.sparkline-gap path {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.7;
+}
+
+.sparkline-last {
+  fill: var(--emerald);
+}
+
+.gpu-table tr.is-best-value {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.gpu-table tr.is-best-value td:first-child {
+  box-shadow: inset 3px 0 0 var(--emerald);
+}
+
+.best-value-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--emerald);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+  padding: 1px 8px;
+  margin-bottom: 4px;
+}
+
 /* ==========================================================================
    PRICE DROP EMAIL ALERTS BANNER & FORM
    ========================================================================== */
@@ -2234,6 +2286,13 @@ input[type="range"] {
   .stack-table .stack-action > * {
     width: 100%;
     justify-content: center;
+  }
+  /* The best-value marker spans the whole card, not just its first cell */
+  .gpu-table tr.is-best-value {
+    box-shadow: inset 3px 0 0 var(--emerald);
+  }
+  .gpu-table tr.is-best-value td:first-child {
+    box-shadow: none;
   }
 }
 
