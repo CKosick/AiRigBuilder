@@ -97,7 +97,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
       </div>
 
       <div class="gpu-table-card">
-        <table class="gpu-table">
+        <table class="gpu-table stack-table">
           <thead>
             <tr>
               <th style="width: 28%;">GPU & AI Suitability</th>
@@ -112,34 +112,34 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
           <tbody>
             ${gpus.map(gpu => `
                 <tr>
-                  <td class="gpu-name-cell">
+                  <td class="gpu-name-cell stack-head">
                     <strong><a href="${gpuPath(gpu.id)}" class="gpu-page-link">${gpu.name}</a></strong>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
                       ${gpu.aiRating}
                     </div>
                   </td>
-                  <td>
+                  <td data-label="VRAM">
                     <span class="gpu-vram-pill">${gpu.vram} GB ${gpu.vramType}</span>
                     <div style="font-size: 0.72rem; color: var(--text-dim); margin-top: 2px;">TDP: ${gpu.tdp}W</div>
                   </td>
-                  <td>
+                  <td data-label="Bandwidth">
                     <strong style="font-family: var(--font-mono); color: var(--text-highlight);">${gpu.bandwidth} GB/s</strong>
                     <div style="font-size: 0.72rem; color: var(--text-dim);">Memory Bus</div>
                   </td>
-                  <td>
+                  <td data-label="Avg used price">
                     <div class="price-main">$${gpu.usedStreetPrice.toLocaleString()}</div>
                     <div class="price-range-sub">Range: $${gpu.usedPriceLow} - $${gpu.usedPriceHigh}</div>
                   </td>
-                  <td>
+                  <td data-label="Price / GB">
                     <div class="price-per-gb-badge">
                       <span>$${gpu.pricePerGb.toFixed(2)}</span>
                       <span style="font-size: 0.7rem; color: var(--text-dim);">/ GB</span>
                     </div>
                   </td>
-                  <td>
+                  <td data-label="7d trend">
                     ${trendBadgeHtml(gpu.trend7d)}
                   </td>
-                  <td style="text-align: right; white-space: nowrap;">
+                  <td class="stack-action" style="text-align: right; white-space: nowrap;">
                     <button class="btn-secondary btn-view-history" data-gpu-id="${gpu.id}" aria-label="Price history for ${gpu.name}" style="padding: 5px 10px; font-size: 0.75rem;">
                       📈 History
                     </button>

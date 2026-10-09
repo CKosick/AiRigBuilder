@@ -199,7 +199,7 @@ export function renderModelPickerHtml(state = {}) {
         <span>${currentModel.name}: Quantization Options</span>
       </div>
       <div class="parts-table-wrap">
-        <table class="parts-table">
+        <table class="parts-table stack-table">
           <thead>
             <tr>
               <th scope="col">Quant</th>
@@ -211,10 +211,10 @@ export function renderModelPickerHtml(state = {}) {
           <tbody>
             ${currentModel.quants.map(q => `
               <tr>
-                <td><strong>${q.name}</strong>${q.recommended ? ' <span class="condition-badge condition-new">Recommended</span>' : ''}</td>
-                <td class="part-price-cell">${q.vram} GB</td>
-                <td>${q.speed}</td>
-                <td>${q.quality}</td>
+                <td class="stack-head"><strong>${q.name}</strong>${q.recommended ? ' <span class="condition-badge condition-new">Recommended</span>' : ''}</td>
+                <td class="part-price-cell" data-label="VRAM for weights">${q.vram} GB</td>
+                <td data-label="Typical speed">${q.speed}</td>
+                <td class="stack-wide" data-label="Quality notes">${q.quality}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -263,7 +263,7 @@ export function renderModelPickerHtml(state = {}) {
       </div>
 
       <div class="parts-table-wrap">
-        <table class="parts-table">
+        <table class="parts-table stack-table">
           <thead>
             <tr>
               <th style="width: 14%;">Component</th>
@@ -278,23 +278,23 @@ export function renderModelPickerHtml(state = {}) {
               const condClass = part.condition.includes('Used') ? 'condition-used' : (part.condition.includes('New') ? 'condition-new' : 'condition-included');
               return `
                 <tr>
-                  <td>
+                  <td class="stack-head">
                     <span class="part-category-tag">${part.category}</span>
                   </td>
-                  <td class="part-name-cell">
+                  <td class="part-name-cell stack-head">
                     <strong>${part.name}</strong>
                     <div class="part-spec-sub">${part.spec}</div>
                     ${part.notes ? `<div class="part-notes">💡 ${part.notes}</div>` : ''}
                   </td>
-                  <td>
+                  <td data-label="Condition">
                     <span class="condition-badge ${condClass}">
                       ${part.condition}
                     </span>
                   </td>
-                  <td class="part-price-cell">
+                  <td class="part-price-cell" data-label="Price">
                     ${part.price > 0 ? `$${part.price.toLocaleString()}` : '<span style="color: var(--text-dim);">Included</span>'}
                   </td>
-                  <td style="text-align: right;">
+                  <td class="stack-action" style="text-align: right;">
                     ${part.url !== '#' ? (() => {
                       const urlLower = (part.url || '').toLowerCase();
                       const merchLower = (part.merchant || '').toLowerCase();

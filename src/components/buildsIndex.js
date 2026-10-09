@@ -30,14 +30,14 @@ export function renderBuildsIndexHtml() {
       const cheapest = Math.min(...sheet.tiers.map(partsTotal));
       return `
               <tr>
-                <td class="part-name-cell">
+                <td class="part-name-cell stack-head">
                   <strong><a href="${buildPath(m.id)}">${m.name}</a></strong>
                   <div class="part-spec-sub">${m.creator} · ${m.parameters}</div>
                 </td>
-                <td>${sheet.vramTarget}</td>
-                <td>${m.sweetSpotQuant}</td>
-                <td>${m.typicalSpeedDual3090}</td>
-                <td class="part-price-cell">$${cheapest.toLocaleString('en-US')}</td>
+                <td data-label="VRAM target">${sheet.vramTarget}</td>
+                <td data-label="Sweet spot quant">${m.sweetSpotQuant}</td>
+                <td data-label="Speed on dual 3090">${m.typicalSpeedDual3090}</td>
+                <td class="part-price-cell" data-label="Rigs from">$${cheapest.toLocaleString('en-US')}</td>
               </tr>`;
     }).join('');
 
@@ -46,7 +46,7 @@ export function renderBuildsIndexHtml() {
         <h3 id="builds-group-${gi}">${g.title}</h3>
         <p>${g.blurb}${sharedRig ? ' These models share the same three hardware tiers; they differ in quantization, context cost and speed.' : ''}</p>
         <div class="parts-table-wrap">
-          <table class="parts-table">
+          <table class="parts-table stack-table">
             <thead>
               <tr>
                 <th scope="col" style="width: 30%;">Model</th>

@@ -1201,6 +1201,7 @@ input[type="range"] {
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  overflow-x: auto; /* between phone cards and full desktop width the table scrolls instead of clipping */
   box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
 }
@@ -1562,6 +1563,7 @@ input[type="range"] {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0; /* the long GPU option labels must not widen the column */
 }
 
 .alert-input-group label {
@@ -1894,7 +1896,7 @@ input[type="range"] {
   list-style: none;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 8px 1.5rem;
   font-size: 0.85rem;
 }
@@ -2034,4 +2036,217 @@ input[type="range"] {
 
 .quant-options {
   margin-bottom: 1.5rem;
+}
+
+/* =========================================================
+   Phone layout (max-width 640px)
+   Everything stays on screen at 320-640px: no clipped content and no
+   sideways page scroll. Wide tables become one labelled card per row
+   (cells marked stack-head / data-label / stack-wide / stack-action).
+   ========================================================= */
+@media (max-width: 640px) {
+  /* The header scrolls away: pinned, it covered a third of the screen */
+  .header-container {
+    position: static;
+  }
+
+  /* Ticker: the two headline items, wrapped instead of scrolled */
+  .market-ticker {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    white-space: normal;
+    overflow-x: visible;
+    gap: 0.25rem 1rem;
+    padding: 6px 1rem;
+  }
+  .ticker-item {
+    flex-wrap: wrap;
+  }
+  .ticker-item:nth-child(n + 3) {
+    display: none;
+  }
+
+  /* The dim footnote on the rig item ("[Q4_K_M @ ~20 tok/s]") would take its own line */
+  .ticker-item:nth-child(2) > span:last-child {
+    display: none;
+  }
+
+  /* Brand and "Why used 3090?" share a row; the tabs sit below as a 2x2 grid */
+  .nav-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'brand actions'
+      'tabs tabs';
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+  .brand-wrapper {
+    grid-area: brand;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+  .brand-icon-box {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .brand-title-group h1 {
+    font-size: 1.05rem;
+  }
+  .domain-suffix {
+    font-size: 0.8rem;
+  }
+  .brand-tagline {
+    display: none;
+  }
+  .header-actions {
+    grid-area: actions;
+  }
+  .header-actions .btn-secondary {
+    font-size: 0.78rem;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+  .nav-tabs {
+    grid-area: tabs;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    overflow-x: visible;
+    border-radius: var(--radius-md);
+  }
+  .nav-tab-btn {
+    justify-content: center;
+    padding: 8px 6px;
+    font-size: 0.82rem;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+
+  /* Hero: smaller type, the three stats in one row that fits */
+  .hero-banner {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+  .hero-card {
+    padding: 1.25rem 1rem;
+  }
+  .hero-text h2 {
+    font-size: 1.35rem;
+  }
+  .hero-text p {
+    font-size: 0.88rem;
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .hero-stat-pill {
+    padding: 0.6rem 0.35rem;
+  }
+  .hero-stat-val {
+    font-size: 1rem;
+  }
+  .hero-stat-lbl {
+    font-size: 0.62rem;
+    letter-spacing: 0.3px;
+  }
+
+  .main-wrapper {
+    padding: 0 1rem;
+  }
+
+  /* Section labels stack above their side link instead of squeezing beside it */
+  .selector-label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  /* Grid children may shrink below their content's natural width */
+  .calc-grid > *,
+  .alert-select,
+  .alert-input {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .calc-inputs-card,
+  .calc-results-card,
+  .price-alert-banner {
+    padding: 1.15rem 1rem;
+  }
+
+  /* Rows of controls and legends wrap instead of running off the edge */
+  .tracker-filter-group,
+  .chart-legend-row {
+    flex-wrap: wrap;
+  }
+  .kpi-row > * {
+    min-width: 0;
+  }
+
+  /* Tables that stay tables (e.g. GPU price history) get tighter cells */
+  .parts-table th,
+  .parts-table td {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* Wide tables: one card per row, a 2-column grid of labelled values */
+  .stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .stack-table,
+  .stack-table tbody {
+    display: block;
+    width: 100%;
+  }
+  .stack-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .stack-table td {
+    display: block;
+    padding: 0;
+    border: none;
+    text-align: left !important;
+    white-space: normal !important;
+    min-width: 0;
+  }
+  .stack-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+  .stack-table .stack-head,
+  .stack-table .stack-wide,
+  .stack-table .stack-action {
+    grid-column: 1 / -1;
+  }
+  .stack-table .stack-action > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
 }
