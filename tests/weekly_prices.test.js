@@ -111,7 +111,7 @@ describe('Price-drop alert cron', () => {
 });
 
 describe('Weekly price workflow', () => {
-  const wf = read('.github/workflows/weekly-prices.yml');
+  const wf = read('.github/workflows/weekly-prices.yml').replace(/\r\n/g, '\n');
 
   it('runs Tuesdays at 23:00 UTC and on demand', () => {
     assert.match(wf, /- cron: '0 23 \* \* 2'/);
@@ -125,6 +125,18 @@ describe('Weekly price workflow', () => {
     assert.match(wf, /EBAY_CLIENT_SECRET: \$\{\{ secrets\.EBAY_CLIENT_SECRET \}\}/);
     assert.ok(!/git push[^\n]*\bmain\b/.test(wf), 'never pushes to main');
     assert.match(wf, /branch="prices\/\$\{day\}-run\$\{\{ github\.run_number \}\}"/);
+  });
+
+  it('skips cleanly (success, no branch or PR) until both eBay keys are set', () => {
+    const steps = wf.split(/\n      - /).slice(1);
+    assert.match(steps[0], /^name: Check for eBay keys\n\s+id: keys/, 'the key check runs first');
+    assert.match(steps[0], /if \[ -z "\$EBAY_CLIENT_ID" \] \|\| \[ -z "\$EBAY_CLIENT_SECRET" \]; then/);
+    assert.match(steps[0], /echo "eBay keys not set, skipping price update"/);
+    assert.match(steps[0], /echo "ready=false" >> "\$GITHUB_OUTPUT"/);
+    assert.ok(!/exit 1/.test(steps[0]), 'a missing key is not a failure');
+    for (const step of steps.slice(1)) {
+      assert.match(step, /\n\s+if: steps\.keys\.outputs\.ready == 'true'\n/, `gated: ${step.split('\n')[0]}`);
+    }
   });
 
   it('keeps email and alert-storage secrets out of GitHub', () => {

@@ -54,7 +54,7 @@ We maintain street prices for the 10 GPUs that matter for local AI via a **semi-
 `.github/workflows/weekly-prices.yml` runs Tuesdays at 23:00 UTC (and on demand from the Actions tab). It fetches listings from the eBay Browse API, applies the approved prices on a new `prices/<date>-run<N>` branch, runs the tests and opens a pull request with the review table. Nothing reaches `main` until someone checks the numbers and merges; Vercel deploys on merge. An older unmerged price PR is closed as superseded.
 
 Setup, once:
-- Repository secrets `EBAY_CLIENT_ID` and `EBAY_CLIENT_SECRET` (an eBay developer app's production keys; no eBay account login is involved).
+- Repository secrets `EBAY_CLIENT_ID` and `EBAY_CLIENT_SECRET` (an eBay developer app's production keys; no eBay account login is involved). Until both exist, each run logs "eBay keys not set, skipping price update" and ends successfully, with no branch or PR.
 - Settings → Actions → General → Workflow permissions: allow GitHub Actions to create and approve pull requests.
 - Vercel: an environment variable `CRON_SECRET` (any long random string). The daily cron in `vercel.json` calls `/api/cron/check-alerts`, which emails price-drop alerts against the deployed prices. Email and alert-storage secrets stay in Vercel.
 
