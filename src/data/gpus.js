@@ -1,4 +1,4 @@
-// The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)
+// The 10 GPUs that matter for local AI, with used prices estimated from current eBay listings
 // Last updated: 2026-10-07T03:56:24.849Z
 export const GPUS_UPDATED_AT = '2026-10-07T03:56:24.849Z';
 export const GPUS_DATA = [

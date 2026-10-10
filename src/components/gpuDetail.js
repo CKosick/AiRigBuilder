@@ -42,7 +42,7 @@ export function renderGpuDetailHtml(gpu) {
           <p>${gpu.aiRating} · ${gpu.vram} GB ${gpu.vramType} · Prices last updated ${formatDate(GPUS_UPDATED_AT)}</p>
         </div>
         <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold')}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary">
-          ${icon('search')}View Live eBay Sold Listings →
+          ${icon('search')}Check eBay Sold Listings →
         </a>
       </div>
 
@@ -50,7 +50,7 @@ export function renderGpuDetailHtml(gpu) {
         <div class="kpi-card hero-kpi">
           <div class="kpi-label">Avg Used Street Price</div>
           <div class="kpi-value">$${gpu.usedStreetPrice.toLocaleString('en-US')}</div>
-          <div class="kpi-sub">From verified eBay sold listings</div>
+          <div class="kpi-sub">Estimated from current eBay listings</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Typical Range</div>
@@ -72,11 +72,11 @@ export function renderGpuDetailHtml(gpu) {
       <p class="gpu-detail-summary">${gpuSummary(gpu)}</p>
 
       <section class="gpu-detail-card" aria-labelledby="gpu-chart-title">
-        <h3 id="gpu-chart-title">Monthly Average Sold Price</h3>
+        <h3 id="gpu-chart-title">Monthly Average Price</h3>
         <div class="gpu-detail-chart">
-          <canvas id="gpu-detail-chart" role="img" aria-label="Monthly average sold price chart for ${gpu.name}. The same data is in the price history table below."></canvas>
+          <canvas id="gpu-detail-chart" role="img" aria-label="Monthly average price chart for ${gpu.name}. The same data is in the price history table below."></canvas>
         </div>
-        ${missingMonths > 0 ? `<p class="gpu-detail-note">Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).</p>` : ''}
+        ${missingMonths > 0 ? `<p class="gpu-detail-note">Gaps in the chart are months with no recorded price data (${missingMonths} months).</p>` : ''}
       </section>
 
       <div class="gpu-detail-grid">
@@ -109,7 +109,7 @@ export function renderGpuDetailHtml(gpu) {
             <thead>
               <tr>
                 <th scope="col">Month</th>
-                <th scope="col">Avg Sold Price</th>
+                <th scope="col">Avg Price</th>
                 <th scope="col">Change vs Previous Month on Record</th>
               </tr>
             </thead>

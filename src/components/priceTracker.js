@@ -47,7 +47,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
       <div class="tracker-header-row">
         <div class="tracker-title">
           <h1>Used GPU Price Tracker for Local AI</h1>
-          <p>Updated weekly from verified eBay sold listings. Sorted by the metric that actually matters: <strong>Price per GB of VRAM</strong>.</p>
+          <p>Estimated weekly from current eBay listings. Sorted by the metric that actually matters: <strong>Price per GB of VRAM</strong>.</p>
         </div>
         <div class="tracker-filter-group">
           <span class="filter-label">SORT BY:</span>
@@ -129,7 +129,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
           <div class="price-alert-header">
             <div class="price-alert-badge">${icon('bell')}Instant Price-Drop Alerts</div>
             <h3>Never overpay for local AI VRAM</h3>
-            <p>Select any tracked GPU and your target price. When weekly verified eBay sold prices drop to or below your target, we'll send a one-time notification email. Resend double opt-in, zero spam, instant unsubscribe.</p>
+            <p>Select any tracked GPU and your target price. When our weekly price estimate drops to or below your target, we'll send a one-time notification email (alerts are checked daily). Resend double opt-in, zero spam, instant unsubscribe.</p>
           </div>
           <form class="price-alert-form" id="tracker-alert-form">
             <div class="alert-input-group">
@@ -173,7 +173,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             <div class="modal-summary" id="modal-gpu-summary"></div>
 
             <div class="modal-chart">
-              <canvas id="modal-history-chart" role="img" aria-label="Monthly average sold price chart"></canvas>
+              <canvas id="modal-history-chart" role="img" aria-label="Monthly average price chart"></canvas>
             </div>
 
             <!-- Pros & Cons -->
@@ -208,7 +208,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
 
             <div class="modal-footer-actions">
               <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm">
-                ${icon('search')}View Live eBay Sold Listings →
+                ${icon('search')}Check eBay Sold Listings →
               </a>
             </div>
           </div>
@@ -412,7 +412,7 @@ export function createPriceTracker(container) {
     if (!backdrop) return;
 
     container.querySelector('#modal-gpu-title').textContent = `${gpu.name} (${gpu.vram}GB)`;
-    container.querySelector('#modal-gpu-subtitle').textContent = `Current eBay Sold Avg: $${gpu.usedStreetPrice} ($${gpu.pricePerGb.toFixed(2)} / GB VRAM)`;
+    container.querySelector('#modal-gpu-subtitle').textContent = `Current estimate: $${gpu.usedStreetPrice} ($${gpu.pricePerGb.toFixed(2)} / GB VRAM)`;
     container.querySelector('#modal-gpu-summary').textContent = gpuSummary(gpu);
     container.querySelector('#modal-alert-desc').textContent = `Alert me when ${gpu.name} drops below $${gpu.usedPriceLow}`;
     const targetInput = container.querySelector('#modal-target-price-input');
@@ -457,7 +457,7 @@ export function createPriceTracker(container) {
     const summaryEl = container.querySelector('#modal-gpu-summary');
     if (summaryEl) {
       summaryEl.textContent = missingMonths > 0
-        ? `${gpuSummary(gpu)} Gaps in the chart are months with no recorded sold-price data (${missingMonths} months).`
+        ? `${gpuSummary(gpu)} Gaps in the chart are months with no recorded price data (${missingMonths} months).`
         : gpuSummary(gpu);
     }
   }

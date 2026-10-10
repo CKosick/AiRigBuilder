@@ -119,7 +119,7 @@ export function pageMeta(route) {
     const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090');
     meta = {
       title: `Used GPU Prices for Local AI: RTX 3090, P40 & More | ${SITE_NAME}`,
-      description: `Used prices from eBay sold listings for the ${GPUS_DATA.length} GPUs that matter for local LLMs, ranked by price per GB of VRAM. RTX 3090 now $${rtx3090.usedStreetPrice} ($${rtx3090.pricePerGb.toFixed(2)}/GB).`
+      description: `Used prices estimated from current eBay listings for the ${GPUS_DATA.length} GPUs that matter for local LLMs, ranked by price per GB of VRAM. RTX 3090 now $${rtx3090.usedStreetPrice} ($${rtx3090.pricePerGb.toFixed(2)}/GB).`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' });
   } else if (route.view === 'guide') {
@@ -132,7 +132,7 @@ export function pageMeta(route) {
     const gpu = GPUS_DATA.find(g => g.id === route.gpuId);
     meta = {
       title: `${shortGpuName(gpu)} Used Price & History ($${gpu.usedStreetPrice}) | ${SITE_NAME}`,
-      description: `${gpu.name} used price: $${gpu.usedStreetPrice} from eBay sold listings (range $${gpu.usedPriceLow}–$${gpu.usedPriceHigh}, $${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
+      description: `${gpu.name} used price: about $${gpu.usedStreetPrice} on eBay (range $${gpu.usedPriceLow}–$${gpu.usedPriceHigh}, $${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: gpu.name, path: route.path });
   }

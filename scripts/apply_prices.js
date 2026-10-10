@@ -93,7 +93,7 @@ async function applyPrices() {
   });
 
   // Write updated gpus.js
-  const updatedGpusCode = `// The 10 GPUs that matter for local AI with real used/street market pricing (eBay sold listings baseline)\n// Last updated: ${updatedAt}\nexport const GPUS_UPDATED_AT = '${updatedAt}';\nexport const GPUS_DATA = ${JSON.stringify(GPUS_DATA, null, 2)};\n`;
+  const updatedGpusCode = `// The 10 GPUs that matter for local AI, with used prices estimated from current eBay listings\n// Last updated: ${updatedAt}\nexport const GPUS_UPDATED_AT = '${updatedAt}';\nexport const GPUS_DATA = ${JSON.stringify(GPUS_DATA, null, 2)};\n`;
   fs.writeFileSync(GPUS_FILE, updatedGpusCode, 'utf-8');
   console.log(`✓ Updated: ${GPUS_FILE}`);
 

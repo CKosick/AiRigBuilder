@@ -305,7 +305,7 @@ export async function sendPriceDropNotificationEmail(alert, currentGpu, appUrl =
       <div style="max-width: 560px; margin: 0 auto; background-color: #121824; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
         <div style="margin-bottom: 24px;">
           <h1 style="font-size: 22px; font-weight: 800; color: #10b981; margin: 0 0 8px 0;">🎉 Price Drop Alert Triggered!</h1>
-          <p style="font-size: 14px; color: #94a3b8; margin: 0;">The market moved in your favor on eBay sold listings.</p>
+          <p style="font-size: 14px; color: #94a3b8; margin: 0;">Our weekly estimate from current eBay listings moved in your favor.</p>
         </div>
         
         <div style="background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 20px; margin-bottom: 24px;">

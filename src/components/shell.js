@@ -125,7 +125,7 @@ export function renderShell(route, panels = {}) {
           <strong class="footer-title">
             airigbuilder.com — Independent Local AI Hardware Intelligence
           </strong>
-          Used GPU prices are aggregated from real eBay sold listings. When you buy components through our merchant links (Amazon Associates, B&H Photo, eBay Partner Network), we may earn a small referral commission at no additional cost to you. True electricity costs assume continuous model evaluation cycles.
+          Used GPU prices are estimated weekly from current eBay listings: asking prices, adjusted down to approximate what cards sell for. When you buy components through our merchant links (Amazon Associates, B&H Photo, eBay Partner Network), we may earn a small referral commission at no additional cost to you. True electricity costs assume continuous model evaluation cycles.
         </div>
         <nav aria-label="Footer" class="footer-nav">
           <a href="/builds" class="footer-link">Build Sheets</a>

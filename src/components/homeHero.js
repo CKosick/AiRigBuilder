@@ -26,7 +26,7 @@ export function renderHomeHeroHtml() {
           <a class="btn-primary" href="#parts-list">See the parts list ↓</a>
           <a class="btn-secondary" href="/calculator">Compare with cloud rental →</a>
         </div>
-        <p class="hero-note">Used prices from eBay sold listings, last updated ${formatDate(GPUS_UPDATED_AT)}.</p>
+        <p class="hero-note">Used prices estimated from current eBay listings, last updated ${formatDate(GPUS_UPDATED_AT)}.</p>
       </div>
     </section>
   `;

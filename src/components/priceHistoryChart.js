@@ -1,4 +1,4 @@
-// Monthly sold-price line chart shared by the tracker's history modal and the /gpu/:id pages
+// Monthly average-price line chart shared by the tracker's history modal and the /gpu/:id pages
 import { fillMonthGaps } from '../utils/priceHistory.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Filler } from 'chart.js';
 
@@ -18,7 +18,7 @@ export function drawPriceHistoryChart(canvas, gpu) {
     data: {
       labels: labels,
       datasets: [{
-        label: `${gpu.name} Avg Sold Price`,
+        label: `${gpu.name} Avg Price`,
         data: data,
         borderColor: '#10b981',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -41,7 +41,7 @@ export function drawPriceHistoryChart(canvas, gpu) {
           borderColor: 'rgba(255, 255, 255, 0.1)',
           borderWidth: 1,
           callbacks: {
-            label: (context) => ` Average Sold: $${context.parsed.y}`
+            label: (context) => ` Average: $${context.parsed.y}`
           }
         }
       },

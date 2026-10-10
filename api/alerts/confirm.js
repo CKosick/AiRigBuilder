@@ -26,7 +26,7 @@ export default async function handler(req, res) {
     res,
     200,
     'Alert Confirmed & Activated! 🚀',
-    `Your price drop alert for <strong>${alert.gpuName}</strong> at <strong>$${alert.targetPrice}</strong> or lower is now active. We'll send you an email the instant verified eBay sold averages drop to your target!`,
+    `Your price drop alert for <strong>${alert.gpuName}</strong> at <strong>$${alert.targetPrice}</strong> or lower is now active. We'll email you once our weekly price estimate (from current eBay listings) drops to your target. Alerts are checked daily.`,
     true,
     alert
   );
