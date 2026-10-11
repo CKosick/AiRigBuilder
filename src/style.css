@@ -2387,3 +2387,19 @@ input[type="range"] {
     grid-template-columns: 1fr;
   }
 }
+
+/* Build tiers that cannot run the selected model (see utils/tierFit.js): amber = warning */
+.tier-badge-nofit {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.tier-tab-card.tier-no-fit:not(.active) {
+  opacity: 0.7;
+}
+
+.tier-tab-card.tier-no-fit .tier-subtitle,
+.no-fit-note {
+  color: var(--amber);
+}

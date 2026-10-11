@@ -8,6 +8,7 @@ import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonica
 import { renderAllPages, renderPage, renderNotFound, renderSitemap, outputFileFor } from '../scripts/prerender.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
+import { defaultTierId } from '../src/utils/tierFit.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { fillGpuPrices } from '../src/utils/siteFacts.js';
 
@@ -202,7 +203,10 @@ describe('Generated page content without JavaScript', () => {
       assert.ok(text.includes(m.name), `${m.id} name`);
       assert.ok(text.includes(decode(fillGpuPrices(m.description))), `${m.id} description`);
       for (const t of sheet.tiers) assert.ok(text.includes(t.name), `${m.id} tier ${t.name}`);
-      for (const part of sheet.tiers[0].parts) assert.ok(text.includes(decode(part.name)), `${m.id} part ${part.name}`);
+      // The page opens on the model's default tier: the first one it actually fits
+      const shown = sheet.tiers.find(t => t.id === defaultTierId(sheet));
+      for (const part of shown.parts) assert.ok(text.includes(decode(part.name)), `${m.id} part ${part.name}`);
+      for (const t of sheet.tiers) assert.ok(text.includes(decode(t.headline)), `${m.id} tier headline ${t.headline}`);
     }
   });
 

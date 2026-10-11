@@ -1,6 +1,7 @@
 // Build sheets per model for AI Rig Builder
 // Each model has 3 tiers: Budget Used, Balanced Mix, Best New
 import { MODELS_DATA } from './models.js';
+import { tierFit, fitHeadline, fitDetail } from '../utils/tierFit.js';
 
 // Speed is stored once, on the model (models.js typicalSpeedDual3090); build sheets read it
 const speedOf = (modelId) => MODELS_DATA.find(m => m.id === modelId).typicalSpeedDual3090;
@@ -24,6 +25,8 @@ export const BUILDS_DATA = {
         accentColor: '#10b981', // emerald
         headline: 'Cheapest way to run full 70B locally at ~20 tokens/sec',
         rigSummary: 'Dual used RTX 3090 24GB cards on a budget AM4/B550 platform. Delivers 48GB VRAM with NVLink support for the lowest total cost of any 70B-capable build.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 820,
         parts: [
           {
@@ -116,6 +119,8 @@ export const BUILDS_DATA = {
         accentColor: '#3b82f6', // blue
         headline: 'Modern AM5 platform with DDR5 + 2x used 3090s & true x8/x8 PCIe lanes',
         rigSummary: 'Pair 2x used RTX 3090s with a modern AMD Ryzen 7000 AM5 motherboard featuring native x8/x8 PCIe lane bifurcation and ATX 3.0 1200W power supply.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 860,
         parts: [
           {
@@ -208,6 +213,8 @@ export const BUILDS_DATA = {
         accentColor: '#8b5cf6', // purple
         headline: 'Mac Studio M2 Ultra (64GB/128GB) or New Ada/Blackwell Turnkey',
         rigSummary: 'Apple Mac Studio M2 Ultra with 64GB-128GB unified memory or a single next-gen 32GB+ flagship GPU with CPU offload. Zero multi-GPU cabling, 140W whisper-quiet power draw.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 160,
         parts: [
           {
@@ -273,6 +280,8 @@ export const BUILDS_DATA = {
         accentColor: '#10b981',
         headline: 'Uncompromising chain-of-thought speed on used hardware',
         rigSummary: 'Dual used RTX 3090s running exllamav2 or vLLM. Retains near 100% of o1-level reasoning performance with 48GB VRAM headroom for extended scratchpads.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 820,
         parts: [
           {
@@ -365,6 +374,8 @@ export const BUILDS_DATA = {
         accentColor: '#3b82f6',
         headline: 'Dual 24GB GPUs with true x8/x8 PCIe lanes and AM5 upgrade path',
         rigSummary: 'Clean dual GPU spacing with Ryzen 7 7700X and 1200W ATX 3.0 power supply. Ready for continuous 24/7 coding agent loops.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 860,
         parts: [
           {
@@ -457,6 +468,8 @@ export const BUILDS_DATA = {
         accentColor: '#8b5cf6',
         headline: 'Run DeepSeek-R1 at Q8 with 64K+ context without memory limits',
         rigSummary: 'Apple Mac Studio M2 Ultra with 128GB unified memory. Zero multi-GPU tensor-parallel sync latency, runs MLX natively with massive reasoning contexts.',
+        memoryGb: 96,
+
         estimatedTdpWatts: 150,
         parts: [
           {
@@ -512,6 +525,8 @@ export const BUILDS_DATA = {
         accentColor: '#10b981',
         headline: 'Full 72B coding monster at home on used hardware',
         rigSummary: 'Dual used RTX 3090s providing 48GB VRAM. Handles full repositories and long coding generation in Cursor/Aider with local privacy.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 820,
         parts: [
           {
@@ -604,6 +619,8 @@ export const BUILDS_DATA = {
         accentColor: '#3b82f6',
         headline: '1x RTX 4090 + 1x RTX 3090 (48GB total) or Dual 3090 AM5',
         rigSummary: 'Combines Ada compute speed with Ampere VRAM capacity on a PCIe 5.0 AM5 platform with 64GB DDR5 memory.',
+        memoryGb: 48,
+
         estimatedTdpWatts: 880,
         parts: [
           {
@@ -696,6 +713,8 @@ export const BUILDS_DATA = {
         accentColor: '#8b5cf6',
         headline: 'Run Qwen 2.5 72B with 64K+ coding context seamlessly',
         rigSummary: 'Apple Mac Studio M2 Ultra with 96GB or 128GB unified memory. Zero multi-GPU cabling, 140W whisper-quiet power draw.',
+        memoryGb: 72,
+
         estimatedTdpWatts: 150,
         parts: [
           {
@@ -751,6 +770,8 @@ export const BUILDS_DATA = {
         accentColor: '#10b981',
         headline: 'Full unquantized FP16 weights on a budget build',
         rigSummary: 'Single used RTX 3090 24GB card with a budget AM4 platform. Delivers 24GB VRAM to run 12B-24B models with zero quantization loss at 50+ tokens/sec.',
+        memoryGb: 24,
+
         estimatedTdpWatts: 480,
         parts: [
           {
@@ -843,6 +864,8 @@ export const BUILDS_DATA = {
         accentColor: '#3b82f6',
         headline: 'Modern Ada Lovelace 16GB rig with sub-250W power draw',
         rigSummary: 'Brand new RTX 4060 Ti 16GB with 165W TDP. Silent, brand-new components with 3-year warranties throughout.',
+        memoryGb: 16,
+
         estimatedTdpWatts: 240,
         parts: [
           {
@@ -853,7 +876,7 @@ export const BUILDS_DATA = {
             price: 449,
             merchant: 'Amazon / B&H',
             url: 'https://www.amazon.com/s?k=RTX+4060+Ti+16GB',
-            notes: '16GB VRAM runs Mistral NeMo at Q8_0 with 32K context with <165W power draw.'
+            notes: '16GB runs Mistral NeMo at Q6_K (12 GB) with ~16K context, all under 165W. Q8_0 (15 GB) leaves almost no room for context on this card.'
           },
           {
             category: 'CPU',
@@ -935,6 +958,8 @@ export const BUILDS_DATA = {
         accentColor: '#8b5cf6',
         headline: 'Maximum tok/s speed: 90+ tok/s on 12B-24B models',
         rigSummary: 'Single RTX 4090 24GB on AM5 platform. Top tier for real-time conversational streaming, coding autocomplete, and local fine-tuning.',
+        memoryGb: 24,
+
         estimatedTdpWatts: 580,
         parts: [
           {
@@ -1040,6 +1065,8 @@ export const BUILDS_DATA = {
         accentColor: '#10b981',
         headline: 'Run full Q8 8B models entirely in VRAM on a budget build',
         rigSummary: 'Pair a used RTX 3060 12GB with a refurbished office PC or budget AM4 kit. 12GB VRAM lets you fit Llama 3.1 8B at Q8_0 plus 16K context with zero offload.',
+        memoryGb: 12,
+
         estimatedTdpWatts: 280,
         parts: [
           {
@@ -1132,6 +1159,8 @@ export const BUILDS_DATA = {
         accentColor: '#3b82f6',
         headline: '760 GB/s memory bandwidth for ultra-fast responses',
         rigSummary: 'Used RTX 3080 10GB card delivering 760 GB/s bandwidth. Token generation speeds exceed 100 tok/s on 8B models.',
+        memoryGb: 10,
+
         estimatedTdpWatts: 420,
         parts: [
           {
@@ -1142,7 +1171,7 @@ export const BUILDS_DATA = {
             price: 370,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1',
-            notes: 'Incredible memory bandwidth for the price. 10GB fits 8B at Q8 or FP16.'
+            notes: 'Incredible memory bandwidth for the price. 10GB runs 8B at Q6_K (7.8 GB) with ~8K context; Q8_0 (9.2 GB) does not fit once runtime overhead is counted.'
           },
           {
             category: 'CPU',
@@ -1224,6 +1253,8 @@ export const BUILDS_DATA = {
         accentColor: '#8b5cf6',
         headline: 'Modern 16GB VRAM on AM5: run 8B today, 14B tomorrow',
         rigSummary: 'Brand new RTX 4060 Ti 16GB on AM5 platform. Extra VRAM headroom allows running 14B models or 64K context windows without hardware bottlenecks.',
+        memoryGb: 16,
+
         estimatedTdpWatts: 260,
         parts: [
           {
@@ -1312,30 +1343,64 @@ export const BUILDS_DATA = {
   }
 };
 
-// Automatically synthesize tailored build sheets for all 30+ model profiles in MODELS_DATA
+// Every tier records whether its model fits (status 'fits' | 'reduced' | 'none'); see utils/tierFit.js
+for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+  const model = MODELS_DATA.find(m => m.id === modelId);
+  for (const tier of sheet.tiers) tier.fit = tierFit(model, tier);
+}
+
+// Notes copied from a template that describe the template's own model (sizes like "70B" or
+// "42GB model", or model names) are wrong on another model's sheet
+const MODEL_SPECIFIC_NOTE = /\b\d+(\.\d+)?B\b|\d+\s?GB model|model files|Llama|Mistral|NeMo|Qwen|DeepSeek|Gemma|Phi\b/i;
+const isGpuPart = (part) => /GPU|Compute Unit/i.test(part.category);
+const isStoragePart = (part) => /Storage/i.test(part.category);
+const GENERIC_BADGES = { used: 'Best Value', balanced: 'Balanced Pick', new: 'Premium Pick' };
+
+// Synthesize build sheets for every other model in MODELS_DATA from the closest hand-written
+// template, with the model-specific text (headline, summary, GPU and storage notes) computed
+// from the model's own quant sizes
 for (const model of MODELS_DATA) {
   if (BUILDS_DATA[model.id]) continue;
 
-  let baseTemplateId = 'llama-3.1-8b';
-  if (model.recommendedVram >= 64) {
-    baseTemplateId = 'llama-3.3-70b';
-  } else if (model.recommendedVram >= 40) {
-    baseTemplateId = 'llama-3.3-70b';
-  } else if (model.recommendedVram >= 20) {
-    baseTemplateId = 'mistral-nemo-12b';
-  } else if (model.recommendedVram >= 14) {
-    baseTemplateId = 'mistral-nemo-12b';
-  } else {
-    baseTemplateId = 'llama-3.1-8b';
+  // Templates from smallest to largest; deepseek-r1-70b's top tier is a 128GB Mac Studio
+  const templates = ['llama-3.1-8b', 'mistral-nemo-12b', 'llama-3.3-70b', 'deepseek-r1-70b'];
+  let templateIdx;
+  if (model.recommendedVram >= 64) templateIdx = 3;
+  else if (model.recommendedVram >= 40) templateIdx = 2;
+  else if (model.recommendedVram >= 14) templateIdx = 1;
+  else templateIdx = 0;
+  // Step up to a larger template if the model fits none of this one's tiers
+  const fitsAnyTier = (id) => BUILDS_DATA[id].tiers.some(t => tierFit(model, t).status !== 'none');
+  while (templateIdx < templates.length - 1 && !fitsAnyTier(templates[templateIdx])) templateIdx++;
+  const baseTemplateId = templates[templateIdx];
+
+  const tiers = JSON.parse(JSON.stringify(BUILDS_DATA[baseTemplateId].tiers));
+  for (const tier of tiers) {
+    const fit = tierFit(model, tier);
+    tier.fit = fit;
+    tier.name = tier.name.replace(/ (Reasoning|Coding) Rig$/, ' Rig');
+    tier.headline = fitHeadline(model, fit);
+    tier.rigSummary = `${tier.name} with ${tier.memoryGb} GB of usable GPU memory. ${fitDetail(model, fit)}`;
+    // Template badges make claims about the template's model ("Unquantized FP16", "100+ Tokens/sec")
+    tier.badge = fit.status === 'none' ? "Won't Fit This Model" : GENERIC_BADGES[tier.type];
+
+    for (const part of tier.parts) {
+      if (isGpuPart(part)) {
+        part.notes = fitDetail(model, fit);
+      } else if (isStoragePart(part) && fit.quant) {
+        part.notes = `${model.name} at ${fit.quant} is about ${Math.ceil(fit.quantVram)} GB on disk.`;
+      } else if (part.notes && MODEL_SPECIFIC_NOTE.test(part.notes)) {
+        delete part.notes;
+      }
+    }
   }
 
-  const base = BUILDS_DATA[baseTemplateId];
   BUILDS_DATA[model.id] = {
     modelId: model.id,
     title: `${model.name} Inference Rigs`,
     vramTarget: `${model.recommendedVram} GB VRAM (${model.minVram}GB Min)`,
     quantTarget: model.sweetSpotQuant,
     speedTarget: model.typicalSpeedDual3090,
-    tiers: JSON.parse(JSON.stringify(base.tiers))
+    tiers
   };
 }

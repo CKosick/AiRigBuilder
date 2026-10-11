@@ -4,6 +4,7 @@ import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
 import { buildPath } from '../routes.js';
 import { icon } from './icons.js';
+import { cheapestFittingTotal } from '../utils/tierFit.js';
 
 const VRAM_GROUPS = [
   { min: 48, title: '48 GB+ VRAM: 70B, MoE and Larger', blurb: 'Dual-GPU and bigger rigs. A pair of used RTX 3090s is the cheapest way into this class.' },
@@ -28,7 +29,7 @@ export function renderBuildsIndexHtml() {
     const sharedRig = g.models.length > 1 && new Set(g.models.map(m => rigSignature(BUILDS_DATA[m.id]))).size === 1;
     const rows = g.models.map(m => {
       const sheet = BUILDS_DATA[m.id];
-      const cheapest = Math.min(...sheet.tiers.map(partsTotal));
+      const cheapest = cheapestFittingTotal(sheet);
       return `
               <tr>
                 <td class="part-name-cell stack-head">
@@ -38,7 +39,7 @@ export function renderBuildsIndexHtml() {
                 <td data-label="VRAM target">${sheet.vramTarget}</td>
                 <td data-label="Sweet spot quant">${m.sweetSpotQuant}</td>
                 <td data-label="Speed on dual 3090">${m.typicalSpeedDual3090}</td>
-                <td class="part-price-cell" data-label="Rigs from">$${cheapest.toLocaleString('en-US')}</td>
+                <td class="part-price-cell" data-label="Rigs from">${cheapest === null ? '<span class="no-fit-note">No listed rig fits</span>' : `$${cheapest.toLocaleString('en-US')}`}</td>
               </tr>`;
     }).join('');
 

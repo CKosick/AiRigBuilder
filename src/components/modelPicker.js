@@ -6,10 +6,11 @@ import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID } from '../routes.js';
 import { icon } from './icons.js';
+import { defaultTierId } from '../utils/tierFit.js';
 
 export const MODEL_PICKER_DEFAULTS = {
   activeModelId: DEFAULT_MODEL_ID,
-  activeTierId: 'tier-budget-used',
+  activeTierId: null, // null = the model's default tier (first one it fits)
   vramBudget: null, // GB; null = any. Shows models whose recommended VRAM fits
   codingOnly: false,
   searchQuery: '',
@@ -55,7 +56,7 @@ function visibleModels(filtered, activeModelId, showAll) {
 
 export function findBuild(modelId, tierId) {
   const buildSheet = BUILDS_DATA[modelId] || BUILDS_DATA[DEFAULT_MODEL_ID];
-  const currentTier = buildSheet.tiers.find(t => t.id === tierId) || buildSheet.tiers[0];
+  const currentTier = buildSheet.tiers.find(t => t.id === tierId) || buildSheet.tiers.find(t => t.id === defaultTierId(buildSheet));
   return { buildSheet, currentTier };
 }
 
@@ -231,9 +232,10 @@ export function renderModelPickerHtml(state = {}) {
     <div class="tier-tabs-container">
       ${buildSheet.tiers.map((tier, idx) => {
         const tierSubtotal = tier.parts.reduce((s, p) => s + (p.price || 0), 0);
-        const badgeClass = tier.type === 'used' ? 'tier-badge-budget' : (tier.type === 'balanced' ? 'tier-badge-balanced' : 'tier-badge-new');
+        const noFit = tier.fit && tier.fit.status === 'none';
+        const badgeClass = noFit ? 'tier-badge-nofit' : tier.type === 'used' ? 'tier-badge-budget' : (tier.type === 'balanced' ? 'tier-badge-balanced' : 'tier-badge-new');
         return `
-          <div class="tier-tab-card ${tier.id === activeTierId ? 'active' : ''}" data-tier-id="${tier.id}" role="button" tabindex="0" aria-pressed="${tier.id === activeTierId}">
+          <div class="tier-tab-card ${tier.id === currentTier.id ? 'active' : ''}${noFit ? ' tier-no-fit' : ''}" data-tier-id="${tier.id}" role="button" tabindex="0" aria-pressed="${tier.id === currentTier.id}">
             <span class="tier-badge-label ${badgeClass}">${tier.badge}</span>
             <div class="tier-title-row">
               <span class="tier-name">${tier.name}</span>
@@ -451,7 +453,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
     container.querySelectorAll('.model-option').forEach(btn => {
       btn.addEventListener('click', () => {
         activeModelId = btn.getAttribute('data-model-id');
-        activeTierId = 'tier-budget-used';
+        activeTierId = null;
         render();
         if (onModelChange) onModelChange(activeModelId);
       });
@@ -566,7 +568,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
     // home: whether the page is / (the model name is then an h2 under the hero's h1)
     selectModel: (modelId, { home = isHome } = {}) => {
       if (modelId === activeModelId && home === isHome) return;
-      if (modelId !== activeModelId) activeTierId = 'tier-budget-used';
+      if (modelId !== activeModelId) activeTierId = null;
       activeModelId = modelId;
       isHome = home;
       render();

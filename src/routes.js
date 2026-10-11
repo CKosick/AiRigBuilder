@@ -3,6 +3,7 @@
 import { GPUS_DATA } from './data/gpus.js';
 import { MODELS_DATA } from './data/models.js';
 import { BUILDS_DATA } from './data/builds.js';
+import { cheapestFittingTotal } from './utils/tierFit.js';
 
 export const SITE_URL = 'https://airigbuilder.com';
 export const SITE_NAME = 'AI Rig Builder';
@@ -97,10 +98,15 @@ export function pageMeta(route) {
   } else if (route.view === 'builds' && route.modelId) {
     const model = MODELS_DATA.find(m => m.id === route.modelId);
     const sheet = BUILDS_DATA[route.modelId];
-    const tierPrices = sheet.tiers.map(t => t.parts.reduce((s, p) => s + (p.price || 0), 0));
+    // Only quote tiers that can actually run the model
+    const fitting = sheet.tiers.filter(t => !t.fit || t.fit.status !== 'none');
+    const cheapest = cheapestFittingTotal(sheet);
+    const tiersText = cheapest === null
+      ? `None of our ${sheet.tiers.length} listed rigs has enough memory for it yet; see the closest builds and what it needs.`
+      : `${fitting.length} build ${fitting.length === 1 ? 'tier' : 'tiers'} from $${cheapest.toLocaleString('en-US')}, with full parts lists, power draw and first-year cost.`;
     meta = {
       title: `${model.name} Local Build: Parts & Cost | ${SITE_NAME}`,
-      description: `What hardware runs ${model.name} locally? ${sheet.vramTarget}, ${sheet.tiers.length} build tiers from $${Math.min(...tierPrices).toLocaleString('en-US')} with full parts lists, power draw and first-year cost.`
+      description: `What hardware runs ${model.name} locally? ${sheet.vramTarget}. ${tiersText}`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' }, { name: model.name, path: route.path });
   } else if (route.view === 'builds') {
