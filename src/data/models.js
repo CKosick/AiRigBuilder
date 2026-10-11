@@ -1,5 +1,53 @@
 // Flagship and top open-weights local AI models for airigbuilder.com
 // Expanded in Phase 3 to 32 comprehensive profiles with VRAM footprints across quantization levels
+// KV-cache architecture specs behind contextCostPer8k (GB of fp16 KV cache per 8K tokens).
+// Verified 2026-10-10 against each model's HuggingFace config.json (num_hidden_layers,
+// num_key_value_heads, head_dim) and official papers for attention patterns.
+// Formulas (fp16 = 2 bytes per element):
+//   standard/GQA: 2 * layers * kvHeads * headDim * 2 * 8192 / 1e9
+//   MLA (DeepSeek V3/R1): layers * (kvLoraRank + qkRopeHeadDim) * 2 * 8192 / 1e9
+//   sliding-window: standard formula with tokens capped at the window; Gemma 2 alternates
+//   local/global layers 1:1, Gemma 3 uses 5 local + 1 global. Values are the effective
+//   cache at 8K tokens of context.
+// Judgment calls: Mistral 7B v0.3 models the paper's SWA-4096 (its config ships
+// sliding_window: null, which HF/vLLM treat as full attention; GGUF builds encode the
+// window). Mixtral 8x7B/8x22B and Codestral 22B use full attention per the Mixtral paper
+// ("fully dense context length of 32k") and their null configs. Llama 3.2 11B Vision
+// uses the 40-layer text backbone; cross-attention/vision-encoder cache not counted.
+export const KV_SPECS = {
+  'llama-3.3-70b': { layers: 80, kvHeads: 8, headDim: 128 },
+  'deepseek-r1-70b': { layers: 80, kvHeads: 8, headDim: 128 },
+  'qwen-2.5-72b': { layers: 80, kvHeads: 8, headDim: 128 },
+  'llama-3.1-70b': { layers: 80, kvHeads: 8, headDim: 128 },
+  'qwen-2.5-coder-32b': { layers: 64, kvHeads: 8, headDim: 128 },
+  'qwen-2.5-32b': { layers: 64, kvHeads: 8, headDim: 128 },
+  'deepseek-r1-distill-32b': { layers: 64, kvHeads: 8, headDim: 128 },
+  'gemma-2-27b': { layers: 46, kvHeads: 16, headDim: 128, swa: { window: 4096, localLayers: 23, globalLayers: 23 } },
+  'gemma-3-27b': { layers: 62, kvHeads: 16, headDim: 128, swa: { window: 1024, localLayers: 52, globalLayers: 10 } },
+  'qwen-3-32b': { layers: 64, kvHeads: 8, headDim: 128 },
+  'command-r-35b': { layers: 40, kvHeads: 64, headDim: 128 },
+  'codestral-22b': { layers: 56, kvHeads: 8, headDim: 128 },
+  'mistral-nemo-12b': { layers: 40, kvHeads: 8, headDim: 128 },
+  'qwen-2.5-14b': { layers: 48, kvHeads: 8, headDim: 128 },
+  'deepseek-r1-distill-14b': { layers: 48, kvHeads: 8, headDim: 128 },
+  'gemma-3-12b': { layers: 48, kvHeads: 8, headDim: 256, swa: { window: 1024, localLayers: 40, globalLayers: 8 } },
+  'phi-4-14b': { layers: 40, kvHeads: 10, headDim: 128 },
+  'llama-3.2-11b-vision': { layers: 40, kvHeads: 8, headDim: 128 },
+  'starcoder2-15b': { layers: 40, kvHeads: 4, headDim: 128, swa: { window: 4096, localLayers: 40, globalLayers: 0 } },
+  'llama-3.1-8b': { layers: 32, kvHeads: 8, headDim: 128 },
+  'qwen-2.5-7b': { layers: 28, kvHeads: 4, headDim: 128 },
+  'deepseek-r1-distill-8b': { layers: 32, kvHeads: 8, headDim: 128 },
+  'gemma-2-9b': { layers: 42, kvHeads: 8, headDim: 256, swa: { window: 4096, localLayers: 21, globalLayers: 21 } },
+  'mistral-7b-v03': { layers: 32, kvHeads: 8, headDim: 128, swa: { window: 4096, localLayers: 32, globalLayers: 0 } },
+  'qwen-3-8b': { layers: 36, kvHeads: 8, headDim: 128 },
+  'phi-4-mini': { layers: 32, kvHeads: 8, headDim: 128 },
+  'llama-3.2-3b': { layers: 28, kvHeads: 8, headDim: 128 },
+  'mixtral-8x7b': { layers: 32, kvHeads: 8, headDim: 128 },
+  'mixtral-8x22b': { layers: 56, kvHeads: 8, headDim: 128 },
+  'command-r-plus': { layers: 64, kvHeads: 8, headDim: 128 },
+  'deepseek-v3-moe': { layers: 61, mla: { kvLoraRank: 512, qkRopeHeadDim: 64 } },
+  'deepseek-r1-full': { layers: 61, mla: { kvLoraRank: 512, qkRopeHeadDim: 64 } },
+};
 export const MODELS_DATA = [
   // ==========================================
   // 1. 70B - 72B FLAGSHIP DENSE & REASONING
@@ -22,7 +70,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~11 tok/s on Mac 64GB/96GB', quality: 'Maximum fidelity dense' },
       { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~8 tok/s (requires 4x 3090 / Mac 96GB)', quality: 'Bit-exact research grade' }
     ],
-    contextCostPer8k: 2.2,
+    contextCostPer8k: 2.7,
     typicalSpeedDual3090: '17 - 21 tokens/sec (exllamav2 / llama.cpp)',
     cloudOffers: ['runpod-dual-3090', 'runpod-dual-a6000']
   },
@@ -44,7 +92,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 60, speed: '~10 tok/s on Mac Studio 64GB+', quality: 'Flawless math proof retention' },
       { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~9 tok/s (4x 24GB or Mac 96GB+)', quality: 'Maximum mathematical fidelity' }
     ],
-    contextCostPer8k: 2.4,
+    contextCostPer8k: 2.7,
     typicalSpeedDual3090: '18 - 23 tokens/sec (vLLM / exllamav2)',
     cloudOffers: ['vast-dual-3090']
   },
@@ -66,7 +114,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 62, speed: '~10 tok/s on Mac Studio 64GB', quality: 'Exceptional multilingual accuracy' },
       { name: 'Q8_0 (8.5 bpw)', vram: 78, speed: '~7 tok/s (needs Mac Studio 128GB or 4x 3090)', quality: 'Full precision equivalent' }
     ],
-    contextCostPer8k: 2.5,
+    contextCostPer8k: 2.7,
     typicalSpeedDual3090: '16 - 20 tokens/sec (vLLM / llama.cpp)',
     cloudOffers: ['runpod-dual-4090']
   },
@@ -88,7 +136,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~11 tok/s on Mac 64GB', quality: 'Near lossless 128k context' },
       { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~8 tok/s (4x 24GB)', quality: 'Reference FP16 match' }
     ],
-    contextCostPer8k: 2.2,
+    contextCostPer8k: 2.7,
     typicalSpeedDual3090: '17 - 21 tokens/sec',
     cloudOffers: ['runpod-dual-3090']
   },
@@ -110,7 +158,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 28, speed: '~22 tok/s on dual GPU', quality: 'Zero syntax errors' },
       { name: 'Q8_0 (8.5 bpw)', vram: 36, speed: '~25 tok/s on 2x 3090', quality: 'Full FP16 coding performance' }
     ],
-    contextCostPer8k: 1.8,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: '28 - 36 tokens/sec',
     cloudOffers: ['vast-single-4090']
   },
@@ -136,7 +184,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 28, speed: '~22 tok/s on 2x GPU', quality: 'Flawless factual accuracy' },
       { name: 'Q8_0 (8.5 bpw)', vram: 36, speed: '~26 tok/s on 2x 3090', quality: 'Bit-exact FP16' }
     ],
-    contextCostPer8k: 1.8,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: '30 - 38 tokens/sec',
     cloudOffers: ['runpod-single-4090']
   },
@@ -158,7 +206,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 28, speed: '~22 tok/s on 2x GPU', quality: 'Near-lossless proof generation' },
       { name: 'Q8_0 (8.5 bpw)', vram: 36, speed: '~24 tok/s on 2x 3090', quality: 'Reference accuracy' }
     ],
-    contextCostPer8k: 1.8,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: '28 - 35 tokens/sec',
     cloudOffers: ['vast-single-4090']
   },
@@ -180,7 +228,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 23.8, speed: '~26 tok/s on 1x 3090', quality: 'Max quality on 1 card' },
       { name: 'Q8_0 (8.5 bpw)', vram: 30, speed: '~28 tok/s on 2x GPU', quality: 'Lossless' }
     ],
-    contextCostPer8k: 1.5,
+    contextCostPer8k: 2.3,
     typicalSpeedDual3090: '32 - 42 tokens/sec',
     cloudOffers: ['runpod-single-3090']
   },
@@ -202,7 +250,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 24.1, speed: '~25 tok/s on 1x 3090', quality: 'Zero quality degradation' },
       { name: 'Q8_0 (8.5 bpw)', vram: 30.5, speed: '~27 tok/s on 2x GPU', quality: 'Reference grade' }
     ],
-    contextCostPer8k: 1.6,
+    contextCostPer8k: 1.1,
     typicalSpeedDual3090: '30 - 40 tokens/sec',
     cloudOffers: ['vast-single-3090']
   },
@@ -224,7 +272,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 28.5, speed: '~24 tok/s on 2x GPU', quality: 'Maximum precision' },
       { name: 'Q8_0 (8.5 bpw)', vram: 36.8, speed: '~27 tok/s on 2x 3090', quality: 'Lossless' }
     ],
-    contextCostPer8k: 1.8,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: '32 - 40 tokens/sec',
     cloudOffers: ['runpod-single-4090']
   },
@@ -246,7 +294,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 31.0, speed: '~19 tok/s on dual GPU', quality: 'Grounded citation fidelity' },
       { name: 'Q8_0 (8.5 bpw)', vram: 39.5, speed: '~22 tok/s on 2x 3090', quality: 'Research grade' }
     ],
-    contextCostPer8k: 2.1,
+    contextCostPer8k: 10.7,
     typicalSpeedDual3090: '24 - 32 tokens/sec',
     cloudOffers: ['runpod-single-a6000']
   },
@@ -268,7 +316,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 19.8, speed: '~32 tok/s on 1x 3090', quality: 'Complex refactoring retention' },
       { name: 'Q8_0 (8.5 bpw)', vram: 25.0, speed: '~34 tok/s on dual GPU', quality: 'Full precision FP16' }
     ],
-    contextCostPer8k: 1.4,
+    contextCostPer8k: 1.9,
     typicalSpeedDual3090: '38 - 50 tokens/sec',
     cloudOffers: ['vast-single-3090']
   },
@@ -294,7 +342,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 12.0, speed: '~52 tok/s on RTX 3090', quality: 'Very high fidelity' },
       { name: 'Q8_0 (8.5 bpw)', vram: 15.0, speed: '~45 tok/s on RTX 3090', quality: 'Flawless precision on 1 card', recommended: true }
     ],
-    contextCostPer8k: 1.1,
+    contextCostPer8k: 1.3,
     typicalSpeedDual3090: '50 - 85 tokens/sec',
     cloudOffers: ['vast-single-3090']
   },
@@ -316,7 +364,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 13.5, speed: '~44 tok/s on 1x 3090', quality: 'High accuracy math', recommended: true },
       { name: 'Q8_0 (8.5 bpw)', vram: 17.0, speed: '~38 tok/s on 1x 3090', quality: 'Native FP16 benchmark' }
     ],
-    contextCostPer8k: 1.2,
+    contextCostPer8k: 1.6,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
     cloudOffers: ['runpod-single-3080']
   },
@@ -338,7 +386,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 13.6, speed: '~43 tok/s on 1x 3090', quality: 'Near-zero reasoning loss' },
       { name: 'Q8_0 (8.5 bpw)', vram: 17.2, speed: '~38 tok/s on 1x 3090', quality: 'Lossless' }
     ],
-    contextCostPer8k: 1.2,
+    contextCostPer8k: 1.6,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
     cloudOffers: ['vast-single-3080']
   },
@@ -360,7 +408,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 11.8, speed: '~50 tok/s on 1x 3090', quality: 'High reasoning retention', recommended: true },
       { name: 'Q8_0 (8.5 bpw)', vram: 14.8, speed: '~44 tok/s on 1x 3090', quality: 'Reference accuracy' }
     ],
-    contextCostPer8k: 1.1,
+    contextCostPer8k: 0.9,
     typicalSpeedDual3090: '50 - 75 tokens/sec',
     cloudOffers: ['runpod-single-3070']
   },
@@ -382,7 +430,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 13.7, speed: '~44 tok/s on 1x 3090', quality: 'Near lossless proofs' },
       { name: 'Q8_0 (8.5 bpw)', vram: 17.2, speed: '~39 tok/s on 1x 3090', quality: 'Full accuracy' }
     ],
-    contextCostPer8k: 1.2,
+    contextCostPer8k: 1.7,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
     cloudOffers: ['vast-single-3080']
   },
@@ -404,7 +452,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 11.9, speed: '~47 tok/s on 1x 3090', quality: 'Fine visual detail retention' },
       { name: 'Q8_0 (8.5 bpw)', vram: 14.8, speed: '~41 tok/s on 1x 3090', quality: 'Bit-exact visual embeddings' }
     ],
-    contextCostPer8k: 1.1,
+    contextCostPer8k: 1.3,
     typicalSpeedDual3090: '48 - 70 tokens/sec',
     cloudOffers: ['runpod-single-3080']
   },
@@ -426,7 +474,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 14.0, speed: '~41 tok/s on 1x 3090', quality: 'Complex syntax accuracy' },
       { name: 'Q8_0 (8.5 bpw)', vram: 17.8, speed: '~36 tok/s on 1x 3090', quality: 'Full precision FP16' }
     ],
-    contextCostPer8k: 1.2,
+    contextCostPer8k: 0.3,
     typicalSpeedDual3090: '42 - 60 tokens/sec',
     cloudOffers: ['vast-single-3080']
   },
@@ -452,7 +500,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 7.8, speed: '~68 tok/s on RTX 3060 12GB', quality: 'Near lossless' },
       { name: 'Q8_0 (8.5 bpw)', vram: 9.2, speed: '~60 tok/s on RTX 3060 12GB', quality: 'Full accuracy on budget card', recommended: true }
     ],
-    contextCostPer8k: 0.8,
+    contextCostPer8k: 1.1,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
     cloudOffers: ['runpod-single-3070']
   },
@@ -474,7 +522,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 7.6, speed: '~70 tok/s on RTX 3060 12GB', quality: 'Near lossless' },
       { name: 'Q8_0 (8.5 bpw)', vram: 8.9, speed: '~62 tok/s on RTX 3060 12GB', quality: 'Lossless FP16 parity', recommended: true }
     ],
-    contextCostPer8k: 0.8,
+    contextCostPer8k: 0.5,
     typicalSpeedDual3090: '95 - 135 tokens/sec',
     cloudOffers: ['vast-single-3070']
   },
@@ -496,7 +544,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 8.0, speed: '~65 tok/s on RTX 3060', quality: 'High reasoning fidelity' },
       { name: 'Q8_0 (8.5 bpw)', vram: 9.5, speed: '~58 tok/s on RTX 3060', quality: 'Lossless reasoning', recommended: true }
     ],
-    contextCostPer8k: 0.8,
+    contextCostPer8k: 1.1,
     typicalSpeedDual3090: '85 - 125 tokens/sec',
     cloudOffers: ['runpod-single-3070']
   },
@@ -518,7 +566,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 8.8, speed: '~64 tok/s on RTX 3060', quality: 'High writing fidelity' },
       { name: 'Q8_0 (8.5 bpw)', vram: 10.8, speed: '~55 tok/s on RTX 3060', quality: 'Full accuracy', recommended: true }
     ],
-    contextCostPer8k: 0.9,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: '80 - 120 tokens/sec',
     cloudOffers: ['runpod-single-3070']
   },
@@ -540,7 +588,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 7.3, speed: '~72 tok/s on RTX 3060', quality: 'High quality tool use' },
       { name: 'Q8_0 (8.5 bpw)', vram: 8.6, speed: '~64 tok/s on RTX 3060', quality: 'Lossless standard', recommended: true }
     ],
-    contextCostPer8k: 0.8,
+    contextCostPer8k: 0.5,
     typicalSpeedDual3090: '95 - 135 tokens/sec',
     cloudOffers: ['vast-single-3070']
   },
@@ -562,7 +610,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 8.0, speed: '~70 tok/s on RTX 3060', quality: 'Zero quantization loss in code' },
       { name: 'Q8_0 (8.5 bpw)', vram: 9.4, speed: '~62 tok/s on RTX 3060', quality: 'Full accuracy', recommended: true }
     ],
-    contextCostPer8k: 0.8,
+    contextCostPer8k: 1.2,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
     cloudOffers: ['runpod-single-3070']
   },
@@ -584,7 +632,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 4.1, speed: '~115 tok/s on RTX 3060', quality: 'Flawless math chains' },
       { name: 'Q8_0 (8.5 bpw)', vram: 4.8, speed: '~100 tok/s on RTX 3060', quality: 'Uncompressed precision', recommended: true }
     ],
-    contextCostPer8k: 0.5,
+    contextCostPer8k: 1.1,
     typicalSpeedDual3090: '140 - 200 tokens/sec',
     cloudOffers: ['vast-single-3060']
   },
@@ -606,7 +654,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 3.4, speed: '~130 tok/s on RTX 3060', quality: 'High quality summary' },
       { name: 'Q8_0 (8.5 bpw)', vram: 4.0, speed: '~115 tok/s on RTX 3060', quality: 'FP16 equivalent', recommended: true }
     ],
-    contextCostPer8k: 0.4,
+    contextCostPer8k: 0.9,
     typicalSpeedDual3090: '160 - 220 tokens/sec',
     cloudOffers: ['runpod-single-3060']
   },
@@ -632,7 +680,7 @@ export const MODELS_DATA = [
       { name: 'Q6_K (6.5 bpw)', vram: 41.0, speed: '~25 tok/s on 2x 3090', quality: 'Maximum fidelity MoE' },
       { name: 'Q8_0 (8.5 bpw)', vram: 52.0, speed: '~18 tok/s on 3x GPU / Mac', quality: 'Bit-exact FP16' }
     ],
-    contextCostPer8k: 1.8,
+    contextCostPer8k: 1.1,
     typicalSpeedDual3090: '32 - 42 tokens/sec',
     cloudOffers: ['runpod-dual-3090']
   },
@@ -654,7 +702,7 @@ export const MODELS_DATA = [
       { name: 'Q5_K_M (5.5 bpw)', vram: 102, speed: '~10 tok/s on Mac 128GB', quality: 'Near lossless 141B' },
       { name: 'Q8_0 (8.5 bpw)', vram: 155, speed: '~6 tok/s on Mac 192GB', quality: 'Full precision' }
     ],
-    contextCostPer8k: 3.5,
+    contextCostPer8k: 1.9,
     typicalSpeedDual3090: 'Needs 4x GPU or Mac Studio 128GB',
     cloudOffers: ['lambda-quad-a100']
   },
@@ -676,7 +724,7 @@ export const MODELS_DATA = [
       { name: 'Q5_K_M (5.5 bpw)', vram: 76, speed: '~8 tok/s on Mac 96GB/128GB', quality: 'Flawless enterprise citations' },
       { name: 'Q8_0 (8.5 bpw)', vram: 112, speed: '~5 tok/s on Mac 128GB+', quality: 'Bit-exact FP16' }
     ],
-    contextCostPer8k: 3.2,
+    contextCostPer8k: 2.1,
     typicalSpeedDual3090: 'Needs 3x-4x 3090 or Mac Studio 96GB+',
     cloudOffers: ['runpod-quad-4090']
   },
@@ -698,7 +746,7 @@ export const MODELS_DATA = [
       { name: 'Q4_K_M (4.5 bpw)', vram: 240, speed: '~6 tok/s (dual Mac Studio)', quality: 'Zero quantization degradation' },
       { name: 'FP8 (8.0 bpw)', vram: 420, speed: '~14 tok/s (8x H100 cluster)', quality: 'Official datacenter release' }
     ],
-    contextCostPer8k: 4.8,
+    contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual GPU memory (Mac 192GB required)',
     cloudOffers: ['vast-8x-h100'],
     cloudNote: 'or the DeepSeek API'
@@ -721,7 +769,7 @@ export const MODELS_DATA = [
       { name: 'Q4_K_M (4.5 bpw)', vram: 245, speed: '~6 tok/s (clustered node)', quality: 'Near-lossless frontier' },
       { name: 'FP8 (8.0 bpw)', vram: 425, speed: '~14 tok/s (8x H100 cluster)', quality: 'Datacenter reference' }
     ],
-    contextCostPer8k: 4.8,
+    contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual GPU memory (Mac 192GB required)',
     cloudOffers: ['vast-8x-h100'],
     cloudNote: 'or the DeepSeek API'

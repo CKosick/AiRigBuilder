@@ -198,6 +198,7 @@ export function renderModelPickerHtml(state = {}) {
     <div class="quant-options">
       <div class="selector-label">
         <span>${currentModel.name}: Quantization Options</span>
+        ${currentModel.contextCostPer8k ? `<span class="context-cost-note">Context adds ~${currentModel.contextCostPer8k} GB VRAM per 8K tokens</span>` : ''}
       </div>
       <div class="parts-table-wrap">
         <table class="parts-table stack-table">

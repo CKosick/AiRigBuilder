@@ -371,6 +371,15 @@ body {
   justify-content: space-between;
 }
 
+/* KV-cache cost note beside the quant-options heading (derived per model in KV_SPECS) */
+.context-cost-note {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
 /* Model chooser: filters, then a wrapping grid of models by full name */
 .model-filters {
   display: flex;

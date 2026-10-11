@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { GPUS_DATA } from '../src/data/gpus.js';
-import { MODELS_DATA } from '../src/data/models.js';
+import { MODELS_DATA, KV_SPECS } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { CLOUD_PROVIDERS } from '../src/data/providers.js';
 import { formatAffiliateUrl } from '../src/config/affiliates.js';
@@ -71,6 +71,31 @@ describe('Data Integrity & Consistency Contracts', () => {
         
         const hasRecommended = model.quants.some(q => q.recommended);
         assert.ok(hasRecommended, `Model ${model.id} must have at least one recommended quantization level`);
+      }
+    });
+
+    it('derives contextCostPer8k from the documented KV-cache architecture specs', () => {
+      // fp16 KV cache per 8K tokens; must match KV_SPECS exactly so the figure
+      // shown on build pages is never a hand-typed guess again
+      const std = (layers, kvHeads, headDim, tokens = 8192) =>
+        (2 * layers * kvHeads * headDim * 2 * tokens) / 1e9;
+      for (const model of MODELS_DATA) {
+        const spec = KV_SPECS[model.id];
+        assert.ok(spec, `Model ${model.id} missing KV_SPECS entry`);
+        let gb;
+        if (spec.mla) {
+          gb = (spec.layers * (spec.mla.kvLoraRank + spec.mla.qkRopeHeadDim) * 2 * 8192) / 1e9;
+        } else if (spec.swa) {
+          const w = spec.swa;
+          gb = std(w.localLayers, spec.kvHeads, spec.headDim, Math.min(8192, w.window))
+             + std(w.globalLayers, spec.kvHeads, spec.headDim, 8192);
+        } else {
+          gb = std(spec.layers, spec.kvHeads, spec.headDim);
+        }
+        assert.equal(
+          model.contextCostPer8k, Number(gb.toFixed(1)),
+          `Model ${model.id} contextCostPer8k (${model.contextCostPer8k}) does not match KV-cache math (${gb.toFixed(1)})`
+        );
       }
     });
   });
