@@ -86,9 +86,9 @@ describe('SEO & Structured Data Verification Tests', () => {
     assert.ok(!sitemap.includes('#'), 'sitemap must not list #hash URLs (search engines treat them as one page)');
   });
 
-  it('verifies eBay Partner Network (Impact) site verification meta tag exists in <head>', () => {
+  it('verifies the impact.com site verification meta tag exists in <head>', () => {
     assert.ok(
-      indexHtml.includes("<meta name='impact-site-verification' value='05402127-5a7e-4b92-9ee9-b640c645a147'>"),
+      indexHtml.includes("<meta name='impact-site-verification' value='890fb0c7-e571-423e-9f49-8a376e267bd0'>"),
       "index.html must contain exact impact-site-verification meta tag with value attribute"
     );
   });

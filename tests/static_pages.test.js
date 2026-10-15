@@ -91,7 +91,7 @@ describe('Generated page <head> SEO', () => {
       assert.equal((html.match(/rel="canonical"/g) || []).length, 1, 'exactly one canonical');
       assert.ok(html.includes('name="robots" content="index, follow'), 'indexable');
       assert.ok(html.includes('property="og:image" content="https://airigbuilder.com/og-image.jpg"'), 'og:image kept');
-      assert.ok(html.includes("<meta name='impact-site-verification'"), 'EPN verification tag kept');
+      assert.ok(html.includes("<meta name='impact-site-verification' value='890fb0c7-e571-423e-9f49-8a376e267bd0'>"), 'impact.com verification tag kept');
       assert.ok(/<script type="module"[^>]*src="\/src\/main\.js"/.test(html), 'app script kept so the page stays interactive');
     });
 
