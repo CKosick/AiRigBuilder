@@ -97,7 +97,7 @@ export function validateAlertInput({ email, gpuId, targetPrice }) {
 
   const gpu = GPUS_DATA.find(g => g.id === gpuId);
   if (!gpu) {
-    return { valid: false, error: `Invalid GPU ID. Must be one of the 10 tracked GPUs.` };
+    return { valid: false, error: `Invalid GPU ID. Must be one of the tracked GPUs.` };
   }
 
   const price = Number(targetPrice);

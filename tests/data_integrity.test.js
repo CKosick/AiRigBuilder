@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { GPUS_DATA } from '../src/data/gpus.js';
+import { SEARCH_TARGETS } from '../scripts/price_review.js';
 import { MODELS_DATA, KV_SPECS } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { CLOUD_PROVIDERS } from '../src/data/providers.js';
@@ -8,18 +9,21 @@ import { formatAffiliateUrl } from '../src/config/affiliates.js';
 
 describe('Data Integrity & Consistency Contracts', () => {
   describe('GPUS_DATA Contract', () => {
-    it('contains exactly the 10 tracked GPUs with unique IDs', () => {
-      assert.equal(GPUS_DATA.length, 10);
+    it('tracks every GPU once, each with an eBay search target in the price review', () => {
       const ids = GPUS_DATA.map(g => g.id);
-      const uniqueIds = new Set(ids);
-      assert.equal(uniqueIds.size, 10, 'All GPU IDs must be unique');
+      assert.equal(new Set(ids).size, ids.length, 'All GPU IDs must be unique');
+      assert.deepEqual([...ids].sort(), SEARCH_TARGETS.map(t => t.id).sort(), 'GPUS_DATA and SEARCH_TARGETS must list the same GPUs');
     });
 
     it('ensures each GPU has valid pricing bounds and mathematical consistency', () => {
       for (const gpu of GPUS_DATA) {
         assert.ok(gpu.name, `GPU ${gpu.id} missing name`);
         assert.ok(gpu.vram > 0, `GPU ${gpu.id} invalid VRAM`);
-        assert.ok(gpu.usedStreetPrice > 0, `GPU ${gpu.id} street price must be > 0`);
+        // A newly added row stays unpriced until its first price is approved and applied
+        assert.ok(
+          gpu.usedStreetPrice > 0,
+          `GPU ${gpu.id} has no price yet: run npm run prices:scrape, approve its first price in data/pending_price_review.json, then npm run prices:apply`
+        );
         assert.ok(gpu.usedPriceLow > 0, `GPU ${gpu.id} priceLow must be > 0`);
         assert.ok(gpu.usedPriceHigh >= gpu.usedPriceLow, `GPU ${gpu.id} priceHigh must be >= priceLow`);
         
@@ -37,7 +41,8 @@ describe('Data Integrity & Consistency Contracts', () => {
         );
 
         // History array validation
-        assert.ok(Array.isArray(gpu.history) && gpu.history.length >= 2, `GPU ${gpu.id} must have >= 2 history points`);
+        // A newly tracked GPU starts with the one point its first applied price creates
+        assert.ok(Array.isArray(gpu.history) && gpu.history.length >= 1, `GPU ${gpu.id} must have at least 1 history point`);
         const lastHistory = gpu.history[gpu.history.length - 1];
         assert.match(lastHistory.date, /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}$/, `GPU ${gpu.id} last history point must be a 'Mon YYYY' month label`);
         assert.equal(lastHistory.price, gpu.usedStreetPrice, `GPU ${gpu.id} last history price must match usedStreetPrice`);

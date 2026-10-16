@@ -32,7 +32,8 @@ describe('Weekly price review pipeline', () => {
     });
 
     it("keeps each GPU's live price inside its sensible range, so the search can find it", () => {
-      for (const t of reviewTargets()) {
+      // Unpriced new rows are reported by the data-integrity test instead
+      for (const t of reviewTargets().filter(x => x.currentPrice !== null)) {
         assert.ok(t.currentPrice >= t.minSensiblePrice && t.currentPrice <= t.maxSensiblePrice * 0.85,
           `${t.id}: $${t.currentPrice} vs range $${t.minSensiblePrice}-$${t.maxSensiblePrice}`);
       }
@@ -95,6 +96,33 @@ describe('Weekly price review pipeline', () => {
     });
   });
 
+  describe('First price for a newly tracked GPU', () => {
+    const fresh = target({ id: 'new-gpu', currentPrice: null });
+
+    it('is always held for approval, with no change percentage', () => {
+      const card = priceCard(fresh, listings(600, 650, 700, 720, 750), 'EBAY_BROWSE_API');
+      assert.equal(card.status, STATUS.FLAGGED_FIRST_PRICE);
+      assert.equal(card.changePct, null);
+      assert.ok(card.proposedPrice > 0 && card.priceLow > 0 && card.priceHigh >= card.priceLow);
+      assert.match(reviewMarkdown([card]), /\| first price \|[^\n]*Held: first price, needs approval/);
+    });
+
+    it('proposes nothing when there are too few listings', () => {
+      const card = priceCard(fresh, listings(700), 'EBAY_BROWSE_API');
+      assert.equal(card.status, STATUS.NO_DATA);
+      assert.equal(card.proposedPrice, null);
+    });
+
+    it('is applied only once approved', () => {
+      const gpus = [{ id: 'new-gpu', usedStreetPrice: null }];
+      const card = priceCard(fresh, listings(600, 650, 700, 720, 750), 'EBAY_BROWSE_API');
+      assert.deepEqual(selectApplicable([card], gpus).apply, []);
+      assert.equal(selectApplicable([card], gpus).held[0].reason, STATUS.FLAGGED_FIRST_PRICE);
+      const approved = { ...card, status: STATUS.APPROVED };
+      assert.deepEqual(selectApplicable([approved], gpus).apply, [approved]);
+    });
+  });
+
   describe('What prices:apply may apply', () => {
     const live = GPUS_DATA.find(g => g.id === 'rtx-3090');
     const good = { id: live.id, name: live.name, currentPrice: live.usedStreetPrice, proposedPrice: live.usedStreetPrice + 10, priceLow: 600, priceHigh: 800, status: STATUS.APPROVED };
@@ -141,9 +169,12 @@ describe('Weekly price review pipeline', () => {
 
     it('the committed review file has a valid shape', () => {
       const data = JSON.parse(read('data/pending_price_review.json'));
-      assert.ok(data.scrapedAt && Array.isArray(data.cards) && data.cards.length === 10);
+      assert.ok(data.scrapedAt && Array.isArray(data.cards) && data.cards.length > 0);
       for (const card of data.cards) {
-        assert.ok(card.id && card.name && card.proposedPrice > 0, card.id);
+        assert.ok(card.id && card.name, card.id);
+        assert.ok(GPUS_DATA.some(g => g.id === card.id), `${card.id} is a tracked GPU`);
+        // a newly tracked GPU with too few listings has no price to propose yet
+        assert.ok(card.proposedPrice > 0 || (card.status === STATUS.NO_DATA && card.currentPrice === null), card.id);
         assert.ok(Object.values(STATUS).includes(card.status) || card.status === 'HELD_FOR_REVIEW', `${card.id}: ${card.status}`);
       }
     });

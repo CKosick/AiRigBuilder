@@ -16,8 +16,12 @@ export const ASKING_TO_SOLD = 0.96;
 export const STATUS = {
   APPROVED: 'APPROVED',          // applied by prices:apply
   FLAGGED_SWING: 'FLAGGED_SWING', // big move: held until someone approves it
+  FLAGGED_FIRST_PRICE: 'FLAGGED_FIRST_PRICE', // newly tracked GPU, no price yet: held until someone approves it
   NO_DATA: 'NO_DATA'              // not enough listings: no change proposed, never applied
 };
+
+/** A newly added GPU row has no price until its first approved review. */
+const hasPrice = (price) => typeof price === 'number' && price > 0;
 
 // Terms that mark a listing as not a working card, whatever the GPU
 export const GLOBAL_EXCLUDE_TERMS = [
@@ -40,7 +44,19 @@ export const SEARCH_TARGETS = [
   { id: 'rtx-4080-super', category: '27386', query: 'RTX 4080 Super 16GB -(box,cooler,broken,parts)', minSensiblePrice: 650, maxSensiblePrice: 1400, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only'] },
   { id: 'rtx-3080-10gb', category: '27386', query: 'RTX 3080 10GB -(12GB,box,cooler,broken,parts)', minSensiblePrice: 260, maxSensiblePrice: 500, excludeKeywords: ['12gb', '12 gb', 'parts', 'box only', 'broken'] },
   { id: 'rtx-a5000', category: '27386', query: 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)', minSensiblePrice: 850, maxSensiblePrice: 1600, excludeKeywords: ['laptop', 'mobile', 'parts', 'box only', 'broken'] },
-  { id: 'mac-studio-m2-ultra', category: '', query: 'Mac Studio M2 Ultra -(Max,broken,parts,box,m1,m3)', minSensiblePrice: 1900, maxSensiblePrice: 4200, excludeKeywords: ['m2 max', 'm1 max', 'parts only', 'box only', 'broken', 'accessory'] }
+  // The row prices the 64GB configuration, so larger-memory listings are excluded
+  { id: 'mac-studio-m2-ultra', category: '', query: 'Mac Studio M2 Ultra 64GB -(Max,128GB,192GB,broken,parts,box,m1,m3)', minSensiblePrice: 1900, maxSensiblePrice: 4200, excludeKeywords: ['m2 max', 'm1 max', '128gb', '128 gb', '192gb', '192 gb', 'parts only', 'box only', 'broken', 'accessory'] },
+  // Catalog refresh batch 1 (2026-10-16). Unpriced until their first price is approved.
+  // Sensible-price bounds are deliberately wide; the first review is checked by hand.
+  { id: 'rtx-5090', category: '27386', query: 'RTX 5090 32GB -(box,cooler,broken,parts,waterblock,damaged,read,pc,desktop,system,laptop)', minSensiblePrice: 1500, maxSensiblePrice: 9000, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'waterblock', 'damaged', 'read description', 'for repair', 'laptop'] },
+  { id: 'rtx-5080', category: '27386', query: 'RTX 5080 16GB -(box,cooler,broken,parts,pc,desktop,system,laptop)', minSensiblePrice: 700, maxSensiblePrice: 2600, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'laptop', '5070', '5090'] },
+  { id: 'rtx-5060-ti-16gb', category: '27386', query: 'RTX 5060 Ti 16GB -(8GB,box,broken,parts,laptop)', minSensiblePrice: 300, maxSensiblePrice: 1300, excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken', 'laptop'] },
+  { id: 'rtx-pro-6000-blackwell', category: '27386', query: 'RTX PRO 6000 Blackwell 96GB -(Max-Q,server,box,broken,parts)', minSensiblePrice: 5000, maxSensiblePrice: 22000, excludeKeywords: ['max-q', 'max q', 'server edition', 'ada', 'parts', 'box only', 'broken'] },
+  { id: 'arc-pro-b60', category: '27386', query: 'Arc Pro B60 24GB -(dual,48GB,B50,box,broken,parts)', minSensiblePrice: 350, maxSensiblePrice: 1500, excludeKeywords: ['dual', '48gb', '48 gb', 'b50', 'b580', 'b70', 'parts', 'box only', 'broken'] },
+  { id: 'radeon-ai-pro-r9700', category: '27386', query: 'Radeon AI PRO R9700 32GB -(box,broken,parts)', minSensiblePrice: 900, maxSensiblePrice: 2800, excludeKeywords: ['parts', 'box only', 'broken', '9070'] },
+  { id: 'strix-halo-128gb', category: '', query: 'Ryzen AI Max+ 395 128GB mini PC -(64GB,32GB,laptop,tablet,parts,broken)', minSensiblePrice: 1300, maxSensiblePrice: 4500, excludeKeywords: ['64gb', '64 gb', '32gb', '32 gb', 'laptop', 'tablet', 'z13', 'flow', 'barebone', 'parts', 'broken'] },
+  { id: 'dgx-spark', category: '', query: 'NVIDIA DGX Spark 128GB -(parts,broken,box)', minSensiblePrice: 2500, maxSensiblePrice: 7000, excludeKeywords: ['parts', 'box only', 'broken', 'cable', 'ascent', 'gx10'] },
+  { id: 'mac-studio-m3-ultra', category: '', query: 'Mac Studio M3 Ultra 96GB -(256GB,512GB,M4,M2,M1,broken,parts,box)', minSensiblePrice: 2500, maxSensiblePrice: 6500, excludeKeywords: ['256gb', '256 gb', '512gb', '512 gb', 'm4 max', 'm2', 'm1', 'parts only', 'box only', 'broken'] }
 ];
 
 /** Search targets joined with the live name, VRAM and current price from gpus.js. */
@@ -95,7 +111,12 @@ export function priceCard(target, rawListings, source, { error } = {}) {
   const proposedPrice = Math.round(median * spread);
   const priceLow = Math.round(pick(sorted, 0.15) * spread);
   const priceHigh = Math.round(pick(sorted, 0.85) * spread);
-  const changePct = parseFloat((((proposedPrice - target.currentPrice) / target.currentPrice) * 100).toFixed(1)); // vs the live site price
+  // vs the live site price; a first price has nothing to compare against, so it is always held
+  const firstPrice = !hasPrice(target.currentPrice);
+  const changePct = firstPrice ? null : parseFloat((((proposedPrice - target.currentPrice) / target.currentPrice) * 100).toFixed(1));
+  let status;
+  if (firstPrice) status = STATUS.FLAGGED_FIRST_PRICE;
+  else status = Math.abs(changePct) > SWING_LIMIT_PCT ? STATUS.FLAGGED_SWING : STATUS.APPROVED;
 
   return {
     ...base,
@@ -103,7 +124,7 @@ export function priceCard(target, rawListings, source, { error } = {}) {
     priceLow,
     priceHigh,
     changePct,
-    status: Math.abs(changePct) > SWING_LIMIT_PCT ? STATUS.FLAGGED_SWING : STATUS.APPROVED,
+    status,
     source,
     notes: spread === 1
       ? `${listings.length} sold listings (median $${median}).`
@@ -113,7 +134,7 @@ export function priceCard(target, rawListings, source, { error } = {}) {
 }
 
 const SOURCE_LABEL = { REAL_EBAY_SOLD: 'Sold listings', REAL_EBAY_ACTIVE_COMPS: 'Active listings (scraped)', EBAY_BROWSE_API: 'Active listings (eBay API)', NO_DATA: 'No data' };
-const STATUS_LABEL = { APPROVED: 'Approved', FLAGGED_SWING: `Held: moves more than ${SWING_LIMIT_PCT}%`, NO_DATA: 'No change: not enough listings' };
+const STATUS_LABEL = { APPROVED: 'Approved', FLAGGED_SWING: `Held: moves more than ${SWING_LIMIT_PCT}%`, FLAGGED_FIRST_PRICE: 'Held: first price, needs approval', NO_DATA: 'No change: not enough listings' };
 const money = (n) => (n === null || n === undefined ? '—' : `$${Number(n).toLocaleString('en-US')}`);
 
 /** Markdown summary of a review, for PENDING_PRICE_REVIEW.md and pull request descriptions. */
@@ -122,14 +143,17 @@ export function reviewMarkdown(cards, date = new Date()) {
   const lines = [
     `# Weekly Used GPU Price Review — ${day}`,
     '',
-    `Approved cards are applied by \`npm run prices:apply\`. Cards held for a big move are not applied until their status is changed to APPROVED in \`data/pending_price_review.json\`. Cards with no data keep their current price.`,
+    `Approved cards are applied by \`npm run prices:apply\`. Cards held for a big move, or for a newly tracked GPU's first price, are not applied until their status is changed to APPROVED in \`data/pending_price_review.json\`. Cards with no data keep their current price.`,
     '',
     '| GPU | Current | Proposed | Change | Range | Listings | Source | Status |',
     '| :--- | ---: | ---: | ---: | :--- | ---: | :--- | :--- |'
   ];
   for (const c of cards) {
     const diff = c.proposedPrice - c.currentPrice;
-    const change = c.status === STATUS.NO_DATA ? '—' : `${diff >= 0 ? '+' : '-'}$${Math.abs(diff)} (${c.changePct >= 0 ? '+' : ''}${c.changePct}%)`;
+    let change;
+    if (c.status === STATUS.NO_DATA) change = '—';
+    else if (c.changePct === null) change = 'first price';
+    else change = `${diff >= 0 ? '+' : '-'}$${Math.abs(diff)} (${c.changePct >= 0 ? '+' : ''}${c.changePct}%)`;
     const range = c.priceLow === null ? '—' : `${money(c.priceLow)} – ${money(c.priceHigh)}`;
     lines.push(`| ${c.name} | ${money(c.currentPrice)} | ${c.status === STATUS.NO_DATA ? '—' : `**${money(c.proposedPrice)}**`} | ${change} | ${range} | ${c.sampleCount} | ${SOURCE_LABEL[c.source] || c.source} | ${STATUS_LABEL[c.status] || c.status} |`);
   }

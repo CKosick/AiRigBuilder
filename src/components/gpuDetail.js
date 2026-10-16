@@ -55,7 +55,7 @@ export function renderGpuDetailHtml(gpu) {
         <div class="kpi-card">
           <div class="kpi-label">Typical Range</div>
           <div class="kpi-value kpi-value-md">$${gpu.usedPriceLow}–$${gpu.usedPriceHigh}</div>
-          <div class="kpi-sub">${gpu.newPrice ? `New: $${gpu.newPrice.toLocaleString('en-US')}` : 'No longer sold new'}</div>
+          <div class="kpi-sub">${gpu.newPrice ? `New: $${gpu.newPrice.toLocaleString('en-US')}` : (gpu.soldNew ? 'Sold new; new price not tracked' : 'No longer sold new')}</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Price / GB VRAM</div>
@@ -88,7 +88,7 @@ export function renderGpuDetailHtml(gpu) {
               <tr><th scope="row">Memory bandwidth</th><td>${gpu.bandwidth} GB/s</td></tr>
               <tr><th scope="row">TDP</th><td>${gpu.tdp} W</td></tr>
               <tr><th scope="row">Multi-GPU score</th><td>${gpu.multiGpuScore} / 10</td></tr>
-              <tr><th scope="row">New price</th><td>${gpu.newPrice ? `$${gpu.newPrice.toLocaleString('en-US')}` : 'Discontinued'}</td></tr>
+              <tr><th scope="row">New price</th><td>${gpu.newPrice ? `$${gpu.newPrice.toLocaleString('en-US')}` : (gpu.soldNew ? 'Still sold new (not tracked)' : 'Discontinued')}</td></tr>
             </tbody>
           </table>
         </section>

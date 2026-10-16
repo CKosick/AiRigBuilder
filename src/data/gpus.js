@@ -1,4 +1,4 @@
-// The 10 GPUs that matter for local AI, with used prices estimated from current eBay listings
+// The GPUs and AI systems tracked for local AI, with used prices estimated from current eBay listings
 // Last updated: 2026-10-07T03:56:24.849Z
 export const GPUS_UPDATED_AT = '2026-10-07T03:56:24.849Z';
 export const GPUS_DATA = [
@@ -610,7 +610,7 @@ export const GPUS_DATA = [
   },
   {
     "id": "mac-studio-m2-ultra",
-    "name": "Apple Mac Studio (M2/M4 Ultra 64-192GB)",
+    "name": "Apple Mac Studio M2 Ultra (64GB, used)",
     "vram": 64,
     "vramType": "Unified LPDDR5",
     "bandwidth": 800,
@@ -618,23 +618,23 @@ export const GPUS_DATA = [
     "usedStreetPrice": 3311,
     "usedPriceLow": 3167,
     "usedPriceHigh": 3551,
-    "newPrice": 3999,
+    "newPrice": null,
     "trend7d": null,
     "trend30d": null,
     "pricePerGb": 51.73,
     "multiGpuScore": 10,
     "aiRating": "Unified Memory Champion",
-    "summary": "Up to 192GB unified memory in a silent, 140W desktop box. Runs 70B models unquantized or Q8, and can even fit 405B at Q3/Q4. Slower prompt processing than dual 3090, but zero setup friction.",
+    "summary": "A used 2023 Mac Studio with M2 Ultra and 64GB of unified memory, the configuration this row prices. At 800GB/s, and with about 48GB usable as GPU memory (macOS defaults to 75% of RAM), it runs 70B models at Q4 in a silent desktop. 128GB and 192GB configurations sell for more and are not covered by this price.",
     "pros": [
-      "Up to 192GB unified memory on one SOC",
-      "Whisper quiet at ~140W draw",
-      "Runs 70B at Q8 or 405B at Q3",
-      "No PCIe lanes or power cabling nightmares"
+      "800GB/s unified memory bandwidth",
+      "Silent, low power draw",
+      "Runs 70B at Q4 in about 48GB of GPU memory",
+      "No PCIe lanes or power cabling to plan"
     ],
     "cons": [
-      "High upfront cost",
-      "Slower prompt ingestion / TTFT than CUDA",
-      "Non-upgradable"
+      "64GB caps it at 70B-class models",
+      "Slower prompt processing than CUDA cards",
+      "Not upgradable; no longer sold new"
     ],
     "history": [
       {
@@ -675,5 +675,286 @@ export const GPUS_DATA = [
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M2+Ultra+unified+memory&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "rtx-5090",
+    "name": "NVIDIA GeForce RTX 5090",
+    "vram": 32,
+    "vramType": "GDDR7",
+    "bandwidth": 1792,
+    "tdp": 575,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 5,
+    "aiRating": "Fastest 32GB Consumer Card",
+    "summary": "The fastest consumer card for local AI: 32GB of GDDR7 at 1,792 GB/s, nearly double a 3090's bandwidth. Fits 30B-class models at Q8 and MoE models like Qwen 3 30B-A3B with long context on one card. It has sold far above its launch MSRP through 2026, so the price here comes from current listings.",
+    "pros": [
+      "32GB GDDR7 on one card",
+      "1,792 GB/s memory bandwidth",
+      "Blackwell FP4/FP8 tensor cores",
+      "Full CUDA software support"
+    ],
+    "cons": [
+      "575W board power, 12V-2x6 connector",
+      "Street price far above launch MSRP",
+      "No NVLink; large partner coolers make two-card builds hard"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "rtx-5080",
+    "name": "NVIDIA GeForce RTX 5080",
+    "vram": 16,
+    "vramType": "GDDR7",
+    "bandwidth": 960,
+    "tdp": 360,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 5,
+    "aiRating": "Fast but 16GB-Limited",
+    "summary": "16GB of GDDR7 at 960 GB/s: about as fast as a 3090 for models that fit, but 16GB tops out around 14B dense models at high quants, or MoE models such as gpt-oss-20b and Gemma 4 26B MoE at Q4.",
+    "pros": [
+      "960 GB/s memory bandwidth",
+      "Blackwell FP4/FP8 tensor cores",
+      "Full CUDA software support"
+    ],
+    "cons": [
+      "Only 16GB of VRAM",
+      "360W board power",
+      "Poor $/GB next to used 24GB cards"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5080+16GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "rtx-5060-ti-16gb",
+    "name": "NVIDIA GeForce RTX 5060 Ti 16GB",
+    "vram": 16,
+    "vramType": "GDDR7",
+    "bandwidth": 448,
+    "tdp": 180,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 7,
+    "aiRating": "Cheapest New 16GB NVIDIA",
+    "summary": "The cheapest current-generation 16GB NVIDIA card: 448 GB/s at 180W. Runs 8-14B models at Q8 and small-active MoE models such as gpt-oss-20b comfortably. Check listings are the 16GB card; an 8GB version uses the same name.",
+    "pros": [
+      "16GB VRAM at low power (180W)",
+      "Compact, easy to fit two",
+      "Full CUDA software support"
+    ],
+    "cons": [
+      "448 GB/s limits speed on dense models",
+      "Narrow 128-bit memory bus",
+      "8GB version sold under the same name"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5060+Ti+16GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "rtx-pro-6000-blackwell",
+    "name": "NVIDIA RTX PRO 6000 Blackwell (96GB)",
+    "vram": 96,
+    "vramType": "GDDR7 ECC",
+    "bandwidth": 1792,
+    "tdp": 600,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 8,
+    "aiRating": "One-Card 96GB Answer",
+    "summary": "One card with 96GB of ECC GDDR7 at 1,792 GB/s: runs 70B at Q8, gpt-oss-120b at native precision and Llama 4 Scout at Q4 on a single GPU, with no multi-card setup. A workstation card whose price has climbed sharply through 2026, so this row goes stale fastest. The 300W Max-Q version is a different card and is excluded from the price.",
+    "pros": [
+      "96GB VRAM on a single card",
+      "1,792 GB/s memory bandwidth",
+      "ECC memory, dual-slot",
+      "Full CUDA software support"
+    ],
+    "cons": [
+      "Very high price",
+      "600W board power",
+      "Thin used market"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "arc-pro-b60",
+    "name": "Intel Arc Pro B60 24GB",
+    "vram": 24,
+    "vramType": "GDDR6",
+    "bandwidth": 456,
+    "tdp": 200,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 7,
+    "aiRating": "Budget 24GB, Linux Dual-Card",
+    "summary": "24GB of GDDR6 at 456 GB/s for far less than other 24GB cards, at 120-200W depending on the partner board. Its local AI story is two cards on Linux with Intel's inference stack; software support still lags CUDA, especially on Windows. Intel sells no reference card, so every B60 is a partner board. Dual-GPU 48GB boards are excluded from the price.",
+    "pros": [
+      "24GB VRAM at a low price",
+      "Low power (120-200W)",
+      "Built for multi-card workstations"
+    ],
+    "cons": [
+      "456 GB/s, about half a 3090",
+      "No CUDA; smaller software ecosystem",
+      "Best results need Linux"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Arc+Pro+B60+24GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "radeon-ai-pro-r9700",
+    "name": "AMD Radeon AI PRO R9700 32GB",
+    "vram": 32,
+    "vramType": "GDDR6",
+    "bandwidth": 640,
+    "tdp": 300,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 9,
+    "aiRating": "32GB Blower for Multi-GPU",
+    "summary": "32GB of GDDR6 at 640 GB/s in a two-slot blower card designed for multi-GPU workstations, with ROCm support. Same VRAM as an RTX 5090 at a fraction of the price, though about a third of its bandwidth and without CUDA.",
+    "pros": [
+      "32GB VRAM",
+      "Two-slot blower: stacks for multi-GPU",
+      "ROCm support"
+    ],
+    "cons": [
+      "640 GB/s bandwidth",
+      "No CUDA; some tools need extra setup",
+      "300W board power"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Radeon+AI+PRO+R9700+32GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "strix-halo-128gb",
+    "name": "AMD Ryzen AI Max+ 395 Mini PC (128GB)",
+    "vram": 128,
+    "vramType": "Unified LPDDR5X-8000",
+    "bandwidth": 256,
+    "tdp": 120,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 3,
+    "aiRating": "Cheapest 96GB-Class System",
+    "summary": "A complete \"Strix Halo\" mini PC, not a graphics card: AMD's Ryzen AI Max+ 395 with 128GB of LPDDR5X-8000 shared memory, of which up to 96GB can be assigned to its built-in Radeon 8060S graphics. It fits 70B models at Q4-Q6 and Qwen 3 235B at Q2_K, but slowly: 256 GB/s means single-digit tokens per second on dense 70B; MoE models run much faster. Systems come from several makers (GMKtec EVO-X2, Framework Desktop and others) and prices vary.",
+    "pros": [
+      "Up to 96GB usable as GPU memory",
+      "Complete low-power system (45-120W chip)",
+      "Fits models no single consumer card can"
+    ],
+    "cons": [
+      "256 GB/s: slow on large dense models",
+      "Not upgradable (soldered memory)",
+      "ROCm/Vulkan only, no CUDA"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "dgx-spark",
+    "name": "NVIDIA DGX Spark (128GB system)",
+    "vram": 128,
+    "vramType": "Unified LPDDR5X",
+    "bandwidth": 273,
+    "tdp": 140,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": true,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 6,
+    "aiRating": "CUDA in a 128GB Box",
+    "summary": "A complete desktop AI system, not a graphics card: NVIDIA's GB10 Grace Blackwell chip with 128GB of unified LPDDR5X and the full CUDA stack in a small box. The catch is bandwidth: 273 GB/s is under a third of a 3090's, so large dense models generate slowly for the price; MoE models suit it better.",
+    "pros": [
+      "128GB unified memory",
+      "Full CUDA software stack",
+      "Small and quiet (240W power supply)"
+    ],
+    "cons": [
+      "273 GB/s: slow for its price",
+      "Arm-based system, not a standard PC",
+      "Not upgradable"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=NVIDIA+DGX+Spark&LH_Sold=1&LH_Complete=1"
+  },
+  {
+    "id": "mac-studio-m3-ultra",
+    "name": "Apple Mac Studio M3 Ultra (96GB)",
+    "vram": 96,
+    "vramType": "Unified LPDDR5",
+    "bandwidth": 819,
+    "tdp": 480,
+    "usedStreetPrice": null,
+    "usedPriceLow": null,
+    "usedPriceHigh": null,
+    "newPrice": null,
+    "soldNew": false,
+    "trend7d": null,
+    "trend30d": null,
+    "pricePerGb": null,
+    "multiGpuScore": 9,
+    "aiRating": "Silent 96GB Unified Box",
+    "summary": "A complete desktop system, not a graphics card: the 2025 Mac Studio with M3 Ultra and 96GB of unified memory at 819GB/s, the base configuration this row prices (256GB versions cost far more and are excluded). About 72GB is usable as GPU memory by default, enough for 70B at Q5 or Llama 4 Scout at Q4. Apple now sells the M5 Ultra instead, so this is a used price.",
+    "pros": [
+      "819GB/s unified memory bandwidth",
+      "About 72GB usable as GPU memory",
+      "Silent, no multi-GPU setup"
+    ],
+    "cons": [
+      "Slower prompt processing than CUDA cards",
+      "Not upgradable",
+      "No longer sold new"
+    ],
+    "history": [],
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1"
   }
 ];

@@ -1,5 +1,5 @@
 // Used GPU Price Tracker Component (airigbuilder.com)
-// The SEO moat tracking street prices for the 10 GPUs that matter for local AI
+// The SEO moat tracking street prices for the GPUs and AI systems that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
