@@ -54,6 +54,12 @@ function visibleModels(filtered, activeModelId, showAll) {
   return filtered.filter((m, i) => i < VISIBLE_MODELS || m.id === activeModelId);
 }
 
+/** Sub-note under the sweet-spot quant: that quant's own quality note, so it fits every format (e.g. MXFP4). */
+export function sweetSpotNote(model) {
+  const rec = model.quants.find(q => q.recommended);
+  return rec ? rec.quality : '';
+}
+
 export function findBuild(modelId, tierId) {
   const buildSheet = BUILDS_DATA[modelId] || BUILDS_DATA[DEFAULT_MODEL_ID];
   const currentTier = buildSheet.tiers.find(t => t.id === tierId) || buildSheet.tiers.find(t => t.id === defaultTierId(buildSheet));
@@ -183,7 +189,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="spec-badge-box">
         <div class="spec-badge-label">Sweet Spot Quant</div>
         <div class="spec-badge-value spec-badge-quant">${currentModel.sweetSpotQuant}</div>
-        <div class="sub-note">99% FP16 accuracy</div>
+        ${sweetSpotNote(currentModel) ? `<div class="sub-note">${sweetSpotNote(currentModel)}</div>` : ''}
       </div>
 
       <div class="spec-badge-box">

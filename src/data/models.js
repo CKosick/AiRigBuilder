@@ -800,7 +800,9 @@ export const MODELS_DATA = [
   // Parameters, context and licence: each model's HuggingFace card. Quant sizes are GGUF file
   // sizes (GB) from the repo named on each entry. MoE memory needs use all parameters; speed
   // uses only the active ones. Speeds are bandwidth-bound estimates on 2x RTX 3090:
-  // [0.5, 0.75] x 936 GB/s / (active params x bytes per param of the quant), shown only when the
+  // [0.5, 0.75] x 936 GB/s / (active params x bytes per param of the quant), halved again for
+  // MoE models (routing / per-token overhead; Qwen3-30B-A3B measures ~192 tok/s on an RTX 5090,
+  // far under its raw bound). Shown only when the
   // quant fits 48 GB with 1 GB overhead and 8K context. minVram = smallest listed quant;
   // recommendedVram = recommended quant + 1 GB overhead + 16K context.
   // Sizes: ggml-org/gpt-oss-20b-GGUF
@@ -822,13 +824,13 @@ export const MODELS_DATA = [
       {
         name: 'MXFP4 (~4.25 bpw experts)',
         vram: 12.1,
-        speed: '~225-337 tok/s on 2x 3090 (bandwidth-bound est.)',
-        quality: 'Native release precision (MXFP4 expert weights): no extra quantization loss',
+        speed: '~112-168 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Native MXFP4 release: no extra quantization loss',
         recommended: true
       }
     ],
     contextCostPer8k: 0.2,
-    typicalSpeedDual3090: '225 - 337 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.1 GB of active weights at MXFP4; real speeds often lower, especially for MoE)',
+    typicalSpeedDual3090: '112 - 168 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.1 GB of active weights at MXFP4; real speeds often lower, especially for MoE)',
     cloudOffers: ['runpod-single-3090', 'vast-single-3090']
   },
   // Sizes: ggml-org/gpt-oss-120b-GGUF
@@ -851,7 +853,7 @@ export const MODELS_DATA = [
         name: 'MXFP4 (~4.25 bpw experts)',
         vram: 63.4,
         speed: 'Needs more than 48 GB (no dual-3090 figure)',
-        quality: 'Native release precision (MXFP4 expert weights): no extra quantization loss',
+        quality: 'Native MXFP4 release: no extra quantization loss',
         recommended: true
       }
     ],
@@ -878,16 +880,16 @@ export const MODELS_DATA = [
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 18.6,
-        speed: '~233-349 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~116-174 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 21.7, speed: '~199-299 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q6_K (6.6 bpw)', vram: 25.1, speed: '~172-258 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 32.5, speed: '~133-200 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 21.7, speed: '~100-149 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 25.1, speed: '~86-129 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 32.5, speed: '~67-100 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.8,
-    typicalSpeedDual3090: '233 - 349 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
+    typicalSpeedDual3090: '116 - 174 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
     cloudOffers: ['runpod-single-3090', 'vast-single-3090']
   },
   // Sizes: unsloth/Qwen3-235B-A22B-GGUF
@@ -997,16 +999,16 @@ export const MODELS_DATA = [
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 17,
-        speed: '~183-274 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~91-137 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 19.3, speed: '~161-241 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q6_K (6.6 bpw)', vram: 22.9, speed: '~136-203 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 27.3, speed: '~114-171 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 19.3, speed: '~80-121 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 22.9, speed: '~68-102 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 27.3, speed: '~57-85 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.4,
-    typicalSpeedDual3090: '183 - 274 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.6 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
+    typicalSpeedDual3090: '91 - 137 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.6 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
     cloudOffers: ['runpod-single-3090', 'vast-single-3090']
   },
   // Sizes: bartowski/Qwen_Qwen3.5-27B-GGUF
@@ -1049,7 +1051,7 @@ export const MODELS_DATA = [
     totalParamsB: 36,
     activeParamsB: 3,
     releaseDate: 'Apr 2026',
-    description: 'First open-weights Qwen 3.6 model, Apache 2.0, with vision and a 262K context. All 35B parameters must fit in memory (about 22 GB at Q4_K_M, a tight fit on a 24 GB card) while only 3B are active per token, so it generates quickly.',
+    description: 'First open-weights Qwen 3.6 model, Apache 2.0, with vision and a 262K context. The weights hold 36B parameters: the 35B language model in its name plus a vision encoder (about 0.45B) and a multi-token-prediction layer. All of them must fit in memory (about 22 GB at Q4_K_M, a tight fit on a 24 GB card) while only 3B are active per token, so it generates quickly.',
     architecture: 'Hybrid-attention Sparse MoE (256 experts, 8 routed + 1 shared), multimodal',
     flagship: false,
     minVram: 23,
@@ -1059,16 +1061,16 @@ export const MODELS_DATA = [
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 22.3,
-        speed: '~252-378 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~126-189 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 25.9, speed: '~217-325 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q6_K (6.6 bpw)', vram: 30.9, speed: '~182-273 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 39.8, speed: '~141-212 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 25.9, speed: '~108-163 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 30.9, speed: '~91-136 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 39.8, speed: '~71-106 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.2,
-    typicalSpeedDual3090: '252 - 378 tokens/sec (bandwidth-bound estimate: 936 GB/s over 1.9 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
+    typicalSpeedDual3090: '126 - 189 tokens/sec (bandwidth-bound estimate: 936 GB/s over 1.9 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
     cloudOffers: ['runpod-single-4090', 'vast-single-4090']
   }
 ];

@@ -56,6 +56,17 @@ describe('Model chooser', () => {
     assert.match(all, /aria-expanded="true"[^>]*>\s*Show fewer models/);
   });
 
+  it("shows the sweet-spot quant's own quality note, never a blanket FP16 claim", () => {
+    for (const m of MODELS_DATA) {
+      const html = renderModelPickerHtml({ activeModelId: m.id });
+      const rec = m.quants.find(q => q.recommended);
+      assert.ok(html.includes(`<div class="sub-note">${rec.quality}</div>`), `${m.id} sweet-spot note`);
+    }
+    const gptOss = renderModelPickerHtml({ activeModelId: 'gpt-oss-20b' });
+    const badge = gptOss.slice(gptOss.indexOf('Sweet Spot Quant'), gptOss.indexOf('Cloud Alternative'));
+    assert.ok(!/FP16/.test(badge), 'MXFP4 sweet spot must not claim FP16 accuracy');
+  });
+
   it('has no carousel, scroll arrows or row/grid toggle left', () => {
     const html = renderModelPickerHtml();
     for (const gone of ['model-pill-btn', 'btn-pills-left', 'btn-pills-right', 'btn-toggle-model-layout']) {
