@@ -92,8 +92,19 @@ describe('Generated build sheets', () => {
     }
   });
 
-  it('only the 671B DeepSeek models have no listed rig that fits', () => {
+  it('only the 671B DeepSeeks and Qwen 3 235B have no listed rig that fits', () => {
     const noRig = Object.entries(BUILDS_DATA).filter(([, s]) => cheapestFittingTotal(s) === null).map(([id]) => id).sort();
-    assert.deepEqual(noRig, ['deepseek-r1-full', 'deepseek-v3-moe']);
+    assert.deepEqual(noRig, ['deepseek-r1-full', 'deepseek-v3-moe', 'qwen-3-235b-a22b']);
+  });
+
+  it('every batch-1 model fits a listed tier or is flagged as a unified-memory / offload candidate', () => {
+    const batch1 = ['gpt-oss-20b', 'gpt-oss-120b', 'qwen-3-30b-a3b', 'qwen-3-235b-a22b', 'llama-4-scout',
+      'gemma-4-31b', 'gemma-4-26b-moe', 'qwen-3.5-27b', 'qwen-3.6-35b-a3b'];
+    for (const id of batch1) {
+      const m = model(id);
+      assert.ok(m, `${id} is in MODELS_DATA`);
+      const fitsSomewhere = BUILDS_DATA[id].tiers.some(t => t.fit.status !== 'none');
+      assert.ok(fitsSomewhere || m.largeModelPath === 'unified-memory-or-offload', `${id} fits a tier or is flagged`);
+    }
   });
 });

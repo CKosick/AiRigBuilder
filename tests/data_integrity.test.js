@@ -85,10 +85,15 @@ describe('Data Integrity & Consistency Contracts', () => {
         let gb;
         if (spec.mla) {
           gb = (spec.layers * (spec.mla.kvLoraRank + spec.mla.qkRopeHeadDim) * 2 * 8192) / 1e9;
+        } else if (spec.linearAttn) {
+          // linear-attention layers keep a fixed-size state; only full-attention layers grow
+          gb = std(spec.linearAttn.fullLayers, spec.kvHeads, spec.headDim);
         } else if (spec.swa) {
           const w = spec.swa;
+          // full-attention layers may use their own kv heads / head dim (Gemma 4)
+          const g = spec.globalAttn || { kvHeads: spec.kvHeads, headDim: spec.headDim };
           gb = std(w.localLayers, spec.kvHeads, spec.headDim, Math.min(8192, w.window))
-             + std(w.globalLayers, spec.kvHeads, spec.headDim, 8192);
+             + std(w.globalLayers, g.kvHeads, g.headDim, 8192);
         } else {
           gb = std(spec.layers, spec.kvHeads, spec.headDim);
         }
@@ -96,6 +101,27 @@ describe('Data Integrity & Consistency Contracts', () => {
           model.contextCostPer8k, Number(gb.toFixed(1)),
           `Model ${model.id} contextCostPer8k (${model.contextCostPer8k}) does not match KV-cache math (${gb.toFixed(1)})`
         );
+      }
+    });
+
+    it('carries the corrected release dates (Qwen3: Apr 29 2025, Gemma 3: Mar 12 2025)', () => {
+      const date = (id) => MODELS_DATA.find(m => m.id === id).releaseDate;
+      assert.equal(date('qwen-3-8b'), 'Apr 2025');
+      assert.equal(date('qwen-3-32b'), 'Apr 2025');
+      assert.equal(date('gemma-3-12b'), 'Mar 2025');
+      assert.equal(date('gemma-3-27b'), 'Mar 2025');
+    });
+
+    it('records total and active parameters separately for MoE models that declare them', () => {
+      for (const m of MODELS_DATA.filter(x => x.totalParamsB !== undefined)) {
+        assert.ok(m.activeParamsB > 0 && m.activeParamsB <= m.totalParamsB, `${m.id} active <= total`);
+        if (m.activeParamsB < m.totalParamsB) {
+          // the page must say which is which: "235.1B MoE (22B active)", never just the active size
+          assert.equal(m.parameters, `${m.totalParamsB}B MoE (${m.activeParamsB}B active)`, `${m.id} parameters label`);
+          // memory needs come from the total, so the recommended quant is far larger than the active weights
+          const rec = m.quants.find(q => q.recommended);
+          assert.ok(rec.vram > m.activeParamsB * 0.5, `${m.id} recommended quant size reflects total parameters`);
+        }
       }
     });
   });

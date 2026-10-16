@@ -43,7 +43,7 @@ describe('Model chooser', () => {
   it(`shows ${VISIBLE_MODELS} models until "Show all", always including the selected one`, () => {
     const collapsed = renderModelPickerHtml();
     assert.equal(optionIds(collapsed).length, VISIBLE_MODELS);
-    assert.match(collapsed, /Show all 32 models/);
+    assert.match(collapsed, new RegExp(`Show all ${MODELS_DATA.length} models`));
     assert.match(collapsed, /class="model-options is-collapsed"/);
 
     const last = MODELS_DATA[MODELS_DATA.length - 1];
