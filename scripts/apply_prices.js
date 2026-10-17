@@ -179,9 +179,9 @@ async function applyPrices() {
   console.log('====================================================');
   console.table(appliedSummary.map(s => ({
     GPU: s.name,
-    'Old Price': `$${s.oldPrice}`,
+    'Old Price': s.oldPrice === null ? 'new' : `$${s.oldPrice}`,
     'New Price': `$${s.newPrice}`,
-    Change: s.diff >= 0 ? `+$${s.diff}` : `-$${Math.abs(s.diff)}`,
+    Change: s.oldPrice === null ? 'first price' : (s.diff >= 0 ? `+$${s.diff}` : `-$${Math.abs(s.diff)}`),
     '$/GB VRAM': `$${s.pricePerGb.toFixed(2)}`
   })));
   console.log('\nYou can now commit and push the updated prices:');

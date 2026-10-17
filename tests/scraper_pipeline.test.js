@@ -6,7 +6,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import {
   reviewTargets, isUsableListing, priceCard, selectApplicable, writeReview, reviewMarkdown,
-  SEARCH_TARGETS, STATUS, MIN_LISTINGS, SWING_LIMIT_PCT, ASKING_TO_SOLD
+  SEARCH_TARGETS, GLOBAL_EXCLUDE_TERMS, STATUS, MIN_LISTINGS, SWING_LIMIT_PCT, ASKING_TO_SOLD
 } from '../scripts/price_review.js';
 import { parsePrice } from '../scripts/scrape_ebay_prices.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
@@ -57,6 +57,34 @@ describe('Weekly price review pipeline', () => {
     });
     it('accepts working cards in range', () => {
       assert.equal(isUsableListing({ title: 'EVGA GeForce RTX 3090 FTW3 ULTRA 24GB Tested', price: 720 }, t), true);
+    });
+
+    // The 2026-10-16 scrape: eBay mixed Apple Mac mini sold listings into the RTX A5000 search.
+    // They sat inside the A5000's price bounds and tripped no exclude keyword, so the A5000's whole
+    // "price" came from Mac minis. A listing must name the card it is counted for.
+    const a5000 = target({ ...reviewTargets().find(x => x.id === 'rtx-a5000') });
+    const macMini = { title: 'Apple Mac mini 2023 M2 Pro 32GB RAM 1TB SSD Silver Excellent', price: 1170 };
+
+    it('rejects a listing whose title never names the card, even in range with no excluded word', () => {
+      assert.ok(macMini.price >= a5000.minSensiblePrice && macMini.price <= a5000.maxSensiblePrice, 'the Mac mini is inside the A5000 bounds');
+      const title = macMini.title.toLowerCase();
+      assert.ok(!GLOBAL_EXCLUDE_TERMS.some(term => title.includes(term)) && !a5000.excludeKeywords.some(kw => title.includes(kw)), 'and trips no exclude keyword');
+      assert.equal(isUsableListing(macMini, a5000), false);
+      assert.equal(isUsableListing({ title: 'PNY NVIDIA RTX A5000 24GB GDDR6 Workstation GPU', price: 1170 }, a5000), true);
+    });
+
+    it('rejects multi-card "lot of" listings', () => {
+      assert.equal(isUsableListing({ title: 'Lot of 2 EVGA RTX 3090 24GB FTW3', price: 900 }, t), false);
+      assert.equal(isUsableListing({ title: '(LOT OF 3) PNY RTX 3090 24GB', price: 900 }, t), false);
+    });
+
+    it("every search target's title pattern names its own GPU and rejects the Mac mini", () => {
+      for (const target of reviewTargets()) {
+        assert.ok(typeof target.titlePattern === 'string' && target.titlePattern.length > 0, `${target.id} has a titlePattern`);
+        const re = new RegExp(target.titlePattern, 'i');
+        assert.ok(re.test(target.name), `${target.id}: /${target.titlePattern}/ must match "${target.name}"`);
+        assert.ok(!re.test(macMini.title), `${target.id}: /${target.titlePattern}/ must not match the Mac mini`);
+      }
     });
   });
 
