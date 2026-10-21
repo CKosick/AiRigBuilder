@@ -39,15 +39,16 @@ export const GLOBAL_EXCLUDE_TERMS = [
 // the price bounds without tripping any exclude keyword. Names, VRAM and the current price come
 // from src/data/gpus.js, so there is no second copy of the price here to go stale.
 export const SEARCH_TARGETS = [
-  { id: 'rtx-3090', titlePattern: '3090', category: '27386', query: 'RTX 3090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system,dell,alienware)', minSensiblePrice: 450, maxSensiblePrice: 1000, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'damaged', 'read description', 'for repair', 'board for', 'no fans', 'heatsink only'] },
-  { id: 'rtx-4090', titlePattern: '4090', category: '27386', query: 'RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system)', minSensiblePrice: 1100, maxSensiblePrice: 2200, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'damaged', 'read description', 'for repair'] },
+  // The tracked card is the base 3090: the 3090 Ti is excluded in the query and by rejectPattern
+  { id: 'rtx-3090', titlePattern: '3090', rejectPattern: String.raw`3090\s*-?\s*ti\b`, rejectSystems: true, category: '27386', query: 'RTX 3090 24GB -(ti,box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system,dell,alienware)', minSensiblePrice: 450, maxSensiblePrice: 1000, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'damaged', 'read description', 'for repair', 'board for', 'no fans', 'heatsink only'] },
+  { id: 'rtx-4090', titlePattern: '4090', rejectSystems: true, category: '27386', query: 'RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system)', minSensiblePrice: 1100, maxSensiblePrice: 2200, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'damaged', 'read description', 'for repair'] },
   { id: 'rx-7900-xtx', titlePattern: '7900\\s*xtx', category: '27386', query: 'RX 7900 XTX 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,pc,desktop)', minSensiblePrice: 550, maxSensiblePrice: 1400, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'xt ', '7900 xt -xtx'] },
   { id: 'rtx-4060-ti-16gb', titlePattern: '4060\\s*ti', category: '27386', query: 'RTX 4060 Ti 16GB -(8GB,box,broken,parts)', minSensiblePrice: 280, maxSensiblePrice: 520, excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken'] },
   { id: 'rtx-3060-12gb', titlePattern: '3060', category: '27386', query: 'RTX 3060 12GB -(8GB,box,cooler,broken,parts)', minSensiblePrice: 150, maxSensiblePrice: 400, excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken'] },
   { id: 'tesla-p40', titlePattern: 'p40', category: '27386', query: 'Tesla P40 24GB -(cooler,fan,bracket,shroud,parts,heatsink)', minSensiblePrice: 120, maxSensiblePrice: 400, excludeKeywords: ['fan only', 'shroud only', 'bracket', 'parts only', 'heatsink', 'cooler only', 'p4 ', 'k80', 'm40', 'p100', '8gb', '16gb'] },
   { id: 'rtx-4080-super', titlePattern: '4080', category: '27386', query: 'RTX 4080 Super 16GB -(box,cooler,broken,parts)', minSensiblePrice: 650, maxSensiblePrice: 1400, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only'] },
   { id: 'rtx-3080-10gb', titlePattern: '3080', category: '27386', query: 'RTX 3080 10GB -(12GB,box,cooler,broken,parts)', minSensiblePrice: 260, maxSensiblePrice: 500, excludeKeywords: ['12gb', '12 gb', 'parts', 'box only', 'broken'] },
-  { id: 'rtx-a5000', titlePattern: 'a5000', category: '27386', query: 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)', minSensiblePrice: 850, maxSensiblePrice: 1600, excludeKeywords: ['laptop', 'mobile', 'parts', 'box only', 'broken'] },
+  { id: 'rtx-a5000', titlePattern: 'a5000', rejectSystems: true, category: '27386', query: 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)', minSensiblePrice: 850, maxSensiblePrice: 1600, excludeKeywords: ['laptop', 'mobile', 'parts', 'box only', 'broken'] },
   // The row prices the 64GB configuration, so larger-memory listings are excluded
   { id: 'mac-studio-m2-ultra', titlePattern: 'm2\\s*ultra', category: '', query: 'Mac Studio M2 Ultra 64GB -(Max,128GB,192GB,broken,parts,box,m1,m3)', minSensiblePrice: 1900, maxSensiblePrice: 4200, excludeKeywords: ['m2 max', 'm1 max', '128gb', '128 gb', '192gb', '192 gb', 'parts only', 'box only', 'broken', 'accessory'] },
   // Catalog refresh batch 1 (2026-10-16). Unpriced until their first price is approved.
@@ -73,15 +74,49 @@ export function reviewTargets(gpus = GPUS_DATA) {
 }
 
 /** True when a listing looks like a working card within the target's sensible price range. */
-export function isUsableListing(listing, target) {
+// Complete computers that merely contain the card: prebuilt/gaming/workstation PCs, a CPU model,
+// system RAM or a system drive in the title, or a named workstation line. Only applied to targets
+// with rejectSystems (a graphics card tracked on its own).
+export const SYSTEM_TITLE_PATTERN = String.raw`\b(gaming|desktop|workstation|tower)\s+(pc|computer)\b|\bprebuilt\b|\bi[3579][- ]\d{4,5}|\bryzen\s*[3579]\s*\d{4}|\bthreadripper\b|\bxeon\b|\b\d{1,4}\s*gb\s*(ddr[345]|ram)\b|\b\d+\s*(tb|gb)\s*(ssd|nvme|hdd)\b|\bprecision\s*\d{4}\b|\bthinkstation\b|\bhp\s*z\d\b|\bz[2468]\s*g\d\b|\baurora\s*r\d+\b`;
+const SYSTEM_TITLE_RE = new RegExp(SYSTEM_TITLE_PATTERN, 'i');
+
+/**
+ * Why a listing does not count for a target, or null if it is usable. Reasons, in the order
+ * they are checked: invalid, excluded-term (global), excluded-keyword (target), title-mismatch
+ * (does not name the card), wrong-variant (target's rejectPattern, e.g. 3090 Ti), complete-system
+ * (targets with rejectSystems), out-of-range (outside the sensible price bounds).
+ */
+export function listingRejection(listing, target) {
   const title = String(listing.title || '').toLowerCase();
   const price = Number(listing.price);
-  if (!title || !Number.isFinite(price)) return false;
-  if (title.includes('shop on ebay')) return false;
-  if (GLOBAL_EXCLUDE_TERMS.some(term => title.includes(term))) return false;
-  if (target.excludeKeywords.some(kw => title.includes(kw.toLowerCase()))) return false;
-  if (!new RegExp(target.titlePattern, 'i').test(title)) return false; // the title must name the card
-  return price >= target.minSensiblePrice && price <= target.maxSensiblePrice;
+  if (!title || !Number.isFinite(price) || title.includes('shop on ebay')) return 'invalid';
+  if (GLOBAL_EXCLUDE_TERMS.some(term => title.includes(term))) return 'excluded-term';
+  if (target.excludeKeywords.some(kw => title.includes(kw.toLowerCase()))) return 'excluded-keyword';
+  if (!new RegExp(target.titlePattern, 'i').test(title)) return 'title-mismatch'; // the title must name the card
+  if (target.rejectPattern && new RegExp(target.rejectPattern, 'i').test(title)) return 'wrong-variant';
+  if (target.rejectSystems && SYSTEM_TITLE_RE.test(title)) return 'complete-system';
+  if (price < target.minSensiblePrice || price > target.maxSensiblePrice) return 'out-of-range';
+  return null;
+}
+
+/** True when a listing looks like a working card of this target within its sensible price range. */
+export function isUsableListing(listing, target) {
+  return listingRejection(listing, target) === null;
+}
+
+/**
+ * One entry per eBay item: the same sale can come back from several query variants or pages.
+ * Only the item ID is trusted; two real sales can share a title and price, so listings without
+ * an ID are always kept.
+ */
+export function dedupeListings(listings) {
+  const seen = new Set();
+  return (listings || []).filter(l => {
+    if (!l.itemId) return true;
+    if (seen.has(l.itemId)) return false;
+    seen.add(l.itemId);
+    return true;
+  });
 }
 
 const pick = (sorted, q) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))];
@@ -93,7 +128,7 @@ const pick = (sorted, q) => sorted[Math.min(sorted.length - 1, Math.floor(sorted
  * Fewer than MIN_LISTINGS usable listings gives a NO_DATA card that proposes no change.
  */
 export function priceCard(target, rawListings, source, { error } = {}) {
-  const listings = (rawListings || []).filter(l => isUsableListing(l, target));
+  const listings = dedupeListings(rawListings).filter(l => isUsableListing(l, target));
   const base = { id: target.id, name: target.name, vram: target.vram, currentPrice: target.currentPrice, sampleCount: listings.length };
 
   if (listings.length < MIN_LISTINGS) {

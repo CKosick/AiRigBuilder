@@ -39,11 +39,18 @@ GLOBAL_EXCLUDE_TERMS = [
     "gaming pc", "gaming desktop", "custom pc", "desktop pc"
 ]
 
-def extract_listings_from_html(html, target, is_sold=False):
+ITEM_ID_RE = re.compile(r"/itm/(?:[^/?]*/)?(\d{9,})")
+FEWER_WORDS_RE = re.compile(r"matching fewer words", re.IGNORECASE)
+
+
+def extract_listings_from_html(html, target, is_sold=False, raw=None):
+    """Returns the listings that pass the basic filters (as before). If a list is passed as raw,
+    every parsed listing is appended to it unfiltered, with its eBay item ID and whether it sits
+    below eBay's "Results matching fewer words" divider (padding, not an exact match)."""
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select(".s-card, .s-item")
     valid = []
-    
+
     for c in cards:
         title_el = c.select_one(".s-card__title, [role='heading'], .s-item__title")
         price_el = c.select_one(".s-card__price, .s-item__price")
@@ -62,7 +69,14 @@ def extract_listings_from_html(html, target, is_sold=False):
                 
         if not title or "shop on ebay" in title.lower() or not price_raw:
             continue
-            
+
+        link = c.select_one("a[href*='/itm/']")
+        m_id = ITEM_ID_RE.search(link.get("href", "")) if link else None
+        item_id = m_id.group(1) if m_id else None
+        fewer_words = c.find_previous(string=FEWER_WORDS_RE) is not None
+        if raw is not None:
+            raw.append({"title": title, "price": parse_price(price_raw), "itemId": item_id, "fewerWords": fewer_words})
+
         title_lower = title.lower()
         if any(term in title_lower for term in GLOBAL_EXCLUDE_TERMS):
             continue
@@ -72,6 +86,8 @@ def extract_listings_from_html(html, target, is_sold=False):
         price = parse_price(price_raw)
         if price and target["minSensiblePrice"] <= price <= target["maxSensiblePrice"]:
             sample = {"title": title, "price": price}
+            if item_id:
+                sample["itemId"] = item_id
             
             # Extract sold date if available
             sold_date = ""
@@ -88,6 +104,59 @@ def extract_listings_from_html(html, target, is_sold=False):
             valid.append(sample)
             
     return valid
+
+def search_url(target, query, sold, page=1):
+    """Search URL for one results page. pageSize / page are only added for targets that set them,
+    so every other target keeps its exact original URL."""
+    cat_path = f"{target['category']}/" if target["category"] else ""
+    if sold:
+        url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={query}&LH_Sold=1&LH_Complete=1&_sop=13"
+    else:
+        url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={query}&LH_BIN=1&_sop=15"
+    if target.get("pageSize"):
+        url += f"&_ipg={target['pageSize']}"
+    if page > 1:
+        url += f"&_pgn={page}"
+    return url
+
+
+def search_plan(target):
+    """(query, page) pairs to fetch: every query variant (default: the one query) times its pages."""
+    queries = target.get("queries") or [target["query"]]
+    pages = int(target.get("pages") or 1)
+    return [(q, p) for q in queries for p in range(1, pages + 1)]
+
+
+def dedupe(listings):
+    """One entry per eBay item across query variants and pages. Only the item ID is trusted: two
+    real sales can share a title and price, so a listing without an ID is always kept."""
+    seen = set()
+    out = []
+    for l in listings:
+        key = l.get("itemId")
+        if key and key in seen:
+            continue
+        if key:
+            seen.add(key)
+        out.append(l)
+    return out
+
+
+def fetch_listings(driver, target, sold):
+    """Fetches every page of the target's search plan. Returns (valid, raw, error)."""
+    valid, raw, error = [], [], None
+    for query, page in search_plan(target):
+        url = search_url(target, query, sold, page)
+        driver.uc_open_with_reconnect(url, reconnect_time=3)
+        time.sleep(1)
+        if sold:
+            cur_url = driver.current_url.lower()
+            title = driver.title.lower()
+            if "signin.ebay.com" in cur_url or "sign in" in title or "security measure" in title:
+                return valid, raw, "sold search redirected to sign-in"
+        valid += extract_listings_from_html(driver.page_source, target, is_sold=sold, raw=raw)
+    return dedupe(valid), dedupe(raw), error
+
 
 def load_targets():
     """Targets (search terms plus the live current price) written by scrape_ebay_prices.js."""
@@ -153,39 +222,30 @@ def main():
 
         for idx, target in enumerate(targets, 1):
             print(f"\n[{idx}/{len(targets)}] Fetching: {target['name']}...")
-            cat_path = f"{target['category']}/" if target["category"] else ""
             valid_listings = []
+            raw_listings = []
             source_type = "NO_DATA"
             error = None
 
             # Step A: real sold listings (needs a signed-in session)
-            sold_url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={target['query']}&LH_Sold=1&LH_Complete=1&_sop=13"
             try:
-                driver.uc_open_with_reconnect(sold_url, reconnect_time=3)
-                time.sleep(1)
-                cur_url = driver.current_url.lower()
-                title = driver.title.lower()
-                if "signin.ebay.com" not in cur_url and "sign in" not in title and "security measure" not in title:
-                    valid_listings = extract_listings_from_html(driver.page_source, target, is_sold=True)
-                    if len(valid_listings) >= 3:
-                        source_type = "REAL_EBAY_SOLD"
-                        print(f"  ✓ Found {len(valid_listings)} sold listings")
-                    else:
-                        print(f"  ℹ️ Found {len(valid_listings)} sold listings (need >= 3).")
-                else:
-                    error = "sold search redirected to sign-in"
+                valid_listings, raw_listings, error = fetch_listings(driver, target, sold=True)
+                if error:
                     print("  ⚠️ eBay redirected the sold search to sign-in. A signed-in session is required.")
+                elif len(valid_listings) >= 3:
+                    source_type = "REAL_EBAY_SOLD"
+                    print(f"  ✓ Found {len(valid_listings)} sold listings")
+                else:
+                    print(f"  ℹ️ Found {len(valid_listings)} sold listings (need >= 3).")
             except Exception as e:
                 error = f"sold search error: {e}"
                 print(f"  ⚠️ Sold retrieval error: {e}")
 
-            # Step B: otherwise, active Buy-It-Now listings
-            if len(valid_listings) < 3:
-                bin_url = f"https://www.ebay.com/sch/{cat_path}i.html?_nkw={target['query']}&LH_BIN=1&_sop=15"
+            # Step B: otherwise, active Buy-It-Now listings (skipped in sold-only runs, e.g. the
+            # search experiment, which measures sold results)
+            if len(valid_listings) < 3 and os.environ.get("PRICE_SOLD_ONLY") != "1":
                 try:
-                    driver.uc_open_with_reconnect(bin_url, reconnect_time=3)
-                    time.sleep(1)
-                    valid_listings = extract_listings_from_html(driver.page_source, target, is_sold=False)
+                    valid_listings, raw_listings, _ = fetch_listings(driver, target, sold=False)
                     source_type = "REAL_EBAY_ACTIVE_COMPS"
                     print(f"  ✓ Found {len(valid_listings)} active listings")
                 except Exception as e:
@@ -193,8 +253,9 @@ def main():
                     print(f"  ⚠️ Live search error: {e}")
 
             # Prices, the minimum-listings rule and the review files are worked out in
-            # scripts/price_review.js; this engine only reports what it found
-            results.append({"id": target["id"], "source": source_type, "listings": valid_listings, "error": error})
+            # scripts/price_review.js; this engine only reports what it found. rawListings is
+            # everything parsed, unfiltered, for audits and the search experiment.
+            results.append({"id": target["id"], "source": source_type, "listings": valid_listings, "rawListings": raw_listings, "error": error})
 
     finally:
         driver.quit()

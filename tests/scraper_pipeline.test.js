@@ -5,10 +5,11 @@ import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
 import {
-  reviewTargets, isUsableListing, priceCard, selectApplicable, writeReview, reviewMarkdown,
+  reviewTargets, isUsableListing, listingRejection, dedupeListings, priceCard, selectApplicable, writeReview, reviewMarkdown,
   SEARCH_TARGETS, GLOBAL_EXCLUDE_TERMS, STATUS, MIN_LISTINGS, SWING_LIMIT_PCT, ASKING_TO_SOLD
 } from '../scripts/price_review.js';
 import { parsePrice } from '../scripts/scrape_ebay_prices.js';
+import { buildReport, reportMarkdown, experimentTargets, VARIANTS } from '../scripts/price_experiment.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -121,6 +122,100 @@ describe('Weekly price review pipeline', () => {
         assert.equal(card.priceLow, null);
       }
       assert.match(priceCard(t, [], 'EBAY_BROWSE_API', { error: 'HTTP 403' }).notes, /HTTP 403/);
+    });
+  });
+
+  describe('Thin-card filters (RTX 3090, 4090, A5000)', () => {
+    const card = (id) => reviewTargets().find(t => t.id === id);
+
+    it('accepts the base RTX 3090 and rejects the 3090 Ti in every spelling', () => {
+      const t3090 = card('rtx-3090');
+      for (const title of ['EVGA GeForce RTX 3090 FTW3 Ultra 24GB', 'NVIDIA RTX 3090 Founders Edition 24GB', 'Dell RTX 3090 24GB OEM']) {
+        assert.equal(listingRejection({ title, price: 700 }, t3090), null, title);
+      }
+      for (const title of ['ASUS ROG Strix RTX 3090 Ti 24GB', 'MSI RTX 3090Ti Gaming X Trio', 'Gigabyte RTX 3090-Ti Vision OC']) {
+        assert.equal(listingRejection({ title, price: 700 }, t3090), 'wrong-variant', title);
+      }
+      assert.match(t3090.query, /-\(ti,/, 'the 3090 query also excludes Ti');
+    });
+
+    it('rejects complete systems for a standalone-card target, but keeps OEM-branded cards', () => {
+      const t4090 = card('rtx-4090');
+      for (const title of [
+        'CyberPowerPC Gamer Xtreme i9-13900K RTX 4090 32GB DDR5 2TB SSD',
+        'Alienware Aurora R15 Desktop RTX 4090',
+        'Custom Prebuilt Ryzen 9 7950X RTX 4090 Tower'
+      ]) assert.equal(listingRejection({ title, price: 2000 }, t4090), 'complete-system', title);
+      assert.equal(listingRejection({ title: 'ASUS TUF Gaming RTX 4090 24GB GDDR6X', price: 1500 }, t4090), null);
+      assert.equal(listingRejection({ title: 'HP OMEN RTX 4090 24GB Graphics Card', price: 1500 }, t4090), null);
+
+      const tA5000 = card('rtx-a5000');
+      assert.equal(listingRejection({ title: 'Dell Precision 7920 Workstation Xeon RTX A5000 64GB RAM', price: 1500 }, tA5000), 'complete-system');
+      assert.equal(listingRejection({ title: 'Lenovo ThinkStation P620 RTX A5000', price: 1500 }, tA5000), 'complete-system');
+      assert.equal(listingRejection({ title: 'Dell NVIDIA RTX A5000 24GB GDDR6 Graphics Card', price: 1200 }, tA5000), null);
+      assert.equal(listingRejection({ title: 'PNY NVIDIA RTX A5000 24GB', price: 1200 }, tA5000), null);
+    });
+
+    it('counts a sale once when several query variants or pages return it', () => {
+      const t3090 = card('rtx-3090');
+      const sale = (itemId, price) => ({ title: `EVGA RTX 3090 24GB #${itemId}`, price, itemId });
+      const fromVariantA = [sale('1001', 700), sale('1002', 720), sale('1003', 740)];
+      const fromVariantB = [sale('1002', 720), sale('1003', 740), sale('1004', 760)];
+      assert.deepEqual(dedupeListings([...fromVariantA, ...fromVariantB]).map(l => l.itemId), ['1001', '1002', '1003', '1004']);
+      assert.equal(priceCard(t3090, [...fromVariantA, ...fromVariantB], 'REAL_EBAY_SOLD').sampleCount, 4);
+      // two real sales can share a title and price: without an item ID nothing is merged
+      const noIds = [{ title: 'EVGA RTX 3090 24GB', price: 700 }, { title: 'EVGA RTX 3090 24GB', price: 700 }];
+      assert.equal(dedupeListings(noIds).length, 2);
+    });
+
+    it('leaves every other card on its previous rules', () => {
+      for (const t of reviewTargets().filter(x => !['rtx-3090', 'rtx-4090', 'rtx-a5000'].includes(x.id))) {
+        assert.equal(t.rejectPattern, undefined, t.id);
+        assert.equal(t.rejectSystems, undefined, t.id);
+        assert.equal(t.queries, undefined, t.id);
+        assert.equal(t.pageSize, undefined, t.id);
+      }
+    });
+  });
+
+  describe('Search experiment report', () => {
+    const run = [
+      { id: 'rtx-3090::baseline', rawListings: [
+        { title: 'EVGA RTX 3090 24GB', price: 700, itemId: '1' },
+        { title: 'Apple Mac mini M2 Pro 32GB', price: 700, itemId: '2', fewerWords: true }
+      ] },
+      { id: 'rtx-3090::minimal', rawListings: [
+        { title: 'EVGA RTX 3090 24GB', price: 700, itemId: '1' },
+        { title: 'MSI RTX 3090 Ti 24GB', price: 800, itemId: '3' },
+        { title: 'Prebuilt i9-12900K RTX 3090 32GB DDR5', price: 900, itemId: '4' },
+        { title: 'ASUS RTX 3090 24GB', price: 720, itemId: '5' }
+      ] },
+      { id: 'rtx-3090::geforce', rawListings: [{ title: 'ASUS RTX 3090 24GB', price: 720, itemId: '5' }, { title: 'Zotac RTX 3090 24GB', price: 2000, itemId: '6' }] }
+    ];
+
+    it('counts each filter stage and combines variants, each eBay item once', () => {
+      const r = buildReport(run)['rtx-3090'];
+      assert.equal(r.gate, 20);
+      assert.equal(r.rows.baseline.raw, 2);
+      assert.equal(r.rows.baseline.fewerWords, 1);
+      assert.equal(r.rows.baseline.removed['title-mismatch'].length, 1);
+      assert.equal(r.rows.minimal.removed['wrong-variant'].length, 1);
+      assert.equal(r.rows.minimal.removed['complete-system'].length, 1);
+      // combined = minimal + geforce + the rest (baseline excluded): items 1, 3, 4, 5, 6
+      assert.equal(r.rows.combined.raw, 5);
+      assert.deepEqual(r.rows.combined.usable.map(l => l.itemId).sort(), ['1', '5']);
+      assert.equal(r.rows.combined.removed['out-of-range'].length, 1);
+      assert.match(reportMarkdown(buildReport(run)), /\| combined \|/);
+    });
+
+    it('fetches every variant with the card\'s own filters, sold-only, 240 per page', () => {
+      const targets = experimentTargets();
+      const v = targets.find(t => t.id === 'rtx-3090::minimal');
+      assert.deepEqual(v.queries, [VARIANTS['rtx-3090'].minimal.query]);
+      assert.equal(v.pageSize, 240);
+      assert.equal(v.rejectPattern, reviewTargets().find(t => t.id === 'rtx-3090').rejectPattern);
+      assert.equal(targets.length, Object.values(VARIANTS).reduce((n, vs) => n + Object.keys(vs).length, 0));
+      assert.match(read('scripts/price_experiment.js'), /PRICE_SOLD_ONLY: '1'/);
     });
   });
 
