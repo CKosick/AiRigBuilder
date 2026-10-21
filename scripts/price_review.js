@@ -73,12 +73,21 @@ export function reviewTargets(gpus = GPUS_DATA) {
   });
 }
 
-/** True when a listing looks like a working card within the target's sensible price range. */
 // Complete computers that merely contain the card: prebuilt/gaming/workstation PCs, a CPU model,
-// system RAM or a system drive in the title, or a named workstation line. Only applied to targets
-// with rejectSystems (a graphics card tracked on its own).
-export const SYSTEM_TITLE_PATTERN = String.raw`\b(gaming|desktop|workstation|tower)\s+(pc|computer)\b|\bprebuilt\b|\bi[3579][- ]\d{4,5}|\bryzen\s*[3579]\s*\d{4}|\bthreadripper\b|\bxeon\b|\b\d{1,4}\s*gb\s*(ddr[345]|ram)\b|\b\d+\s*(tb|gb)\s*(ssd|nvme|hdd)\b|\bprecision\s*\d{4}\b|\bthinkstation\b|\bhp\s*z\d\b|\bz[2468]\s*g\d\b|\baurora\s*r\d+\b`;
+// a system drive in the title, or a named workstation line. Only applied to targets with
+// rejectSystems (a graphics card tracked on its own).
+export const SYSTEM_TITLE_PATTERN = String.raw`\b(gaming|desktop|workstation|tower)\s+(pc|computer)\b|\bprebuilt\b|\bi[3579][- ]\d{4,5}|\bryzen\s*[3579]\s*\d{4}|\bthreadripper\b|\bxeon\b|\b\d+\s*(tb|gb)\s*(ssd|nvme|hdd)\b|\bprecision\s*\d{4}\b|\bthinkstation\b|\bhp\s*z\d\b|\bz[2468]\s*g\d\b|\baurora\s*r\d+\b`;
 const SYSTEM_TITLE_RE = new RegExp(SYSTEM_TITLE_PATTERN, 'i');
+// System RAM ("32GB DDR5", "64GB RAM") also marks a complete system, except when the amount is the
+// card's own VRAM: GPU sellers often write "24gb RAM" for the card's memory (an Oct 16 RTX 4090
+// listing did), while a system advertising exactly that much RAM is rare.
+const SYSTEM_RAM_RE = /\b(\d{1,4})\s*gb\s*(ddr[345]|ram)\b/gi;
+
+/** True when the title describes a complete computer rather than the card on its own. */
+export function looksLikeSystem(title, target) {
+  if (SYSTEM_TITLE_RE.test(title)) return true;
+  return [...title.matchAll(SYSTEM_RAM_RE)].some(m => Number(m[1]) !== target.vram);
+}
 
 /**
  * Why a listing does not count for a target, or null if it is usable. Reasons, in the order
@@ -94,7 +103,7 @@ export function listingRejection(listing, target) {
   if (target.excludeKeywords.some(kw => title.includes(kw.toLowerCase()))) return 'excluded-keyword';
   if (!new RegExp(target.titlePattern, 'i').test(title)) return 'title-mismatch'; // the title must name the card
   if (target.rejectPattern && new RegExp(target.rejectPattern, 'i').test(title)) return 'wrong-variant';
-  if (target.rejectSystems && SYSTEM_TITLE_RE.test(title)) return 'complete-system';
+  if (target.rejectSystems && looksLikeSystem(title, target)) return 'complete-system';
   if (price < target.minSensiblePrice || price > target.maxSensiblePrice) return 'out-of-range';
   return null;
 }

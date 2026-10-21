@@ -148,6 +148,10 @@ describe('Weekly price review pipeline', () => {
       ]) assert.equal(listingRejection({ title, price: 2000 }, t4090), 'complete-system', title);
       assert.equal(listingRejection({ title: 'ASUS TUF Gaming RTX 4090 24GB GDDR6X', price: 1500 }, t4090), null);
       assert.equal(listingRejection({ title: 'HP OMEN RTX 4090 24GB Graphics Card', price: 1500 }, t4090), null);
+      // Regression, Oct 16 scrape: the seller wrote "RAM" for the card's own 24GB of VRAM. One of
+      // only two real 4090 listings that day; RAM equal to the card's VRAM must not mark a system.
+      assert.equal(listingRejection({ title: 'ASUS NVIDIA GeForce RTX 4090 24gb RAM', price: 1500 }, t4090), null);
+      assert.equal(listingRejection({ title: 'RTX 4090 Build 64GB RAM', price: 2000 }, t4090), 'complete-system');
 
       const tA5000 = card('rtx-a5000');
       assert.equal(listingRejection({ title: 'Dell Precision 7920 Workstation Xeon RTX A5000 64GB RAM', price: 1500 }, tA5000), 'complete-system');
