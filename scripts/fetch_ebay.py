@@ -44,6 +44,14 @@ GLOBAL_EXCLUDE_TERMS = [
     "lot of"
 ]
 
+GLOBAL_EXCLUDE_WORDS = {"dead", "rust"}
+
+
+def matches_exclude_term(title, term):
+    if term in GLOBAL_EXCLUDE_WORDS:
+        return bool(re.search(rf"\b{re.escape(term)}\b", title, re.IGNORECASE))
+    return term in title
+
 ITEM_ID_RE = re.compile(r"/itm/(?:[^/?]*/)?(\d{9,})")
 FEWER_WORDS_RE = re.compile(r"matching fewer words", re.IGNORECASE)
 
@@ -82,8 +90,8 @@ def extract_listings_from_html(html, target, is_sold=False, raw=None):
         if raw is not None:
             raw.append({"title": title, "price": parse_price(price_raw), "itemId": item_id, "fewerWords": fewer_words})
 
-        title_lower = title.lower()
-        if any(term in title_lower for term in GLOBAL_EXCLUDE_TERMS):
+        title_lower = re.sub(r"opens in a new window.*", "", title, flags=re.IGNORECASE).strip().lower()
+        if any(matches_exclude_term(title_lower, term) for term in GLOBAL_EXCLUDE_TERMS):
             continue
         if any(kw.lower() in title_lower for kw in target["excludeKeywords"]):
             continue

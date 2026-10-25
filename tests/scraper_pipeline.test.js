@@ -6,7 +6,7 @@ import os from 'os';
 import { fileURLToPath } from 'url';
 import {
   reviewTargets, isUsableListing, listingRejection, dedupeListings, priceCard, selectApplicable, writeReview, reviewMarkdown,
-  SEARCH_TARGETS, GLOBAL_EXCLUDE_TERMS, STATUS, MIN_LISTINGS, SWING_LIMIT_PCT, ASKING_TO_SOLD
+  SEARCH_TARGETS, GLOBAL_EXCLUDE_TERMS, GLOBAL_EXCLUDE_WORDS, matchesExcludeTerm, STATUS, MIN_LISTINGS, SWING_LIMIT_PCT, ASKING_TO_SOLD
 } from '../scripts/price_review.js';
 import { parsePrice } from '../scripts/scrape_ebay_prices.js';
 import { buildReport, reportMarkdown, experimentTargets, VARIANTS } from '../scripts/price_experiment.js';
@@ -136,7 +136,7 @@ describe('Weekly price review pipeline', () => {
       for (const title of ['ASUS ROG Strix RTX 3090 Ti 24GB', 'MSI RTX 3090Ti Gaming X Trio', 'Gigabyte RTX 3090-Ti Vision OC']) {
         assert.equal(listingRejection({ title, price: 700 }, t3090), 'wrong-variant', title);
       }
-      assert.match(t3090.query, /-\(ti,/, 'the 3090 query also excludes Ti');
+      assert.match(t3090.query, /-ti\b/, 'the 3090 query also excludes Ti');
     });
 
     it('rejects complete systems for a standalone-card target, but keeps OEM-branded cards', () => {
@@ -177,6 +177,13 @@ describe('Weekly price review pipeline', () => {
       assert.equal(listingRejection({ title: 'ASUS TUF Gaming OC GeForce RTX 3090 24GB RAM - Graphics Card - Overheating Issue', price: 799.99 }, t3090), 'excluded-term');
       assert.equal(listingRejection({ title: 'EVGA RTX 3090 FTW3 24GB GDDR6X (24G-P5-3987-KR) NOTE: Rust', price: 949.99 }, t3090), 'excluded-term');
       assert.equal(listingRejection({ title: 'READ DESC, EVGA GeForce RTX 3090 FTW3 ULTRA 24GB GDDR6X Graphics Card, READ DESC', price: 900 }, t3090), 'excluded-term');
+
+      // "rust" and "dead" match as whole words, not substrings: "Trusted Seller" passes, "NOTE: Rust" stays rejected
+      assert.equal(matchesExcludeTerm('evga geforce rtx 3090 ftw3 ultra 24gb trusted seller', 'rust'), false);
+      assert.equal(matchesExcludeTerm('evga rtx 3090 ftw3 24gb gddr6x (24g-p5-3987-kr) note: rust', 'rust'), true);
+      assert.equal(matchesExcludeTerm('nvida geforce rtx3090 founder edition dead card', 'dead'), true);
+      assert.equal(matchesExcludeTerm('rtx 3090 undead edition', 'dead'), false);
+      assert.equal(listingRejection({ title: 'EVGA GeForce RTX 3090 FTW3 Ultra 24GB Trusted Seller', price: 750 }, t3090), null);
 
       // Non-functional 4090s
       assert.equal(listingRejection({ title: 'GIGABYTE Windforce V2 GeForce RTX 4090 24GB - Graphics Card - Non-Functional', price: 1479.99 }, t4090), 'excluded-term');
@@ -220,6 +227,25 @@ describe('Weekly price review pipeline', () => {
         assert.equal(t.queries, undefined, t.id);
         assert.equal(t.pageSize, undefined, t.id);
       }
+    });
+
+    it('configures production search targets for thin cards (3090, 4090, A5000)', () => {
+      const t3090 = card('rtx-3090');
+      assert.deepEqual(t3090.queries, ['RTX 3090 -ti']);
+      assert.equal(t3090.query, 'RTX 3090 -ti');
+      assert.equal(t3090.pageSize, 240);
+      assert.equal(t3090.pages, 2);
+
+      const t4090 = card('rtx-4090');
+      assert.deepEqual(t4090.queries, ['RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read)']);
+      assert.equal(t4090.query, 'RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read)');
+      assert.equal(t4090.pageSize, 240);
+      assert.equal(t4090.pages, 2);
+
+      const tA5000 = card('rtx-a5000');
+      assert.equal(tA5000.query, 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)');
+      assert.equal(tA5000.pageSize, 240);
+      assert.equal(tA5000.maxSensiblePrice, 1600);
     });
   });
 

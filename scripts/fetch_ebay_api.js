@@ -36,7 +36,7 @@ export async function getAppToken({ clientId, clientSecret, fetchImpl = fetch })
  * terms are filtered out by isUsableListing() in price_review.js.
  */
 export function searchUrl(target, { limit = 100 } = {}) {
-  const keywords = target.query.split(' -(')[0].trim();
+  const keywords = target.query.split(/\s+-/)[0].trim();
   const params = new URLSearchParams({
     q: keywords,
     filter: `buyingOptions:{FIXED_PRICE},conditions:{USED},price:[${target.minSensiblePrice}..${target.maxSensiblePrice}],priceCurrency:USD`,
