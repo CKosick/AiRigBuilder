@@ -1,6 +1,6 @@
 # Price search experiment: thin cards
 
-Run: 2026-10-25T18:40:30.575Z (live run). Sold listings only, 240 results per page. Nothing here is priced or applied.
+Run: 2026-10-25T19:04:09.116Z (from price_experiment_listings.json). Sold listings only, 240 results per page. Nothing here is priced or applied.
 
 Stage counts are in filter order: a listing is counted at the first stage that removes it. "Fewer words" = listings eBay added below its "Results matching fewer words" divider (padding, not an exact match).
 
@@ -8,41 +8,29 @@ Stage counts are in filter order: a listing is counted at the first stage that r
 
 | Variant | Query | Pages | Raw | Fewer words | Excl. term | Excl. kw | Title mismatch | Wrong variant | System | Out of range | **Usable** | Median | Range |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| baseline | `RTX 3090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system,dell,alienware)` | 1 | 247 | 0 | 4 | 0 | 5 | 26 | 0 | 207 | **5** | $710 | $493–$800 |
-| no-system-terms | `RTX 3090 24GB -ti -(box,cooler,broken,parts,shroud,waterblock,damaged,read)` | 1 | 247 | 0 | 3 | 0 | 5 | 0 | 0 | 233 | **6** | $750 | $559–$995 |
-| minimal | `RTX 3090 -ti` | 2 | 487 | 0 | 38 | 5 | 6 | 0 | 0 | 416 | **22** | $755 | $600–$950 |
+| baseline | `RTX 3090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system,dell,alienware)` | 1 | 247 | 0 | 8 | 0 | 5 | 26 | 0 | 205 | **3** | $710 | $493–$750 |
+| no-system-terms | `RTX 3090 24GB -ti -(box,cooler,broken,parts,shroud,waterblock,damaged,read)` | 1 | 247 | 0 | 8 | 0 | 5 | 0 | 0 | 230 | **4** | $750 | $600–$995 |
+| minimal | `RTX 3090 -ti` | 2 | 487 | 0 | 57 | 4 | 6 | 0 | 0 | 410 | **10** | $750 | $600–$995 |
 | exact-phrase | `"RTX 3090" -ti` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **0** | — | — |
-| geforce | `GeForce RTX 3090 24GB -ti` | 1 | 247 | 0 | 7 | 2 | 5 | 0 | 0 | 224 | **9** | $800 | $600–$995 |
-| brands | `3090 24GB (EVGA,ASUS,MSI,Gigabyte,Zotac,Founders) -ti` | 1 | 247 | 0 | 9 | 3 | 5 | 0 | 0 | 223 | **7** | $800 | $710–$950 |
-| combined | `all non-baseline variants, each eBay item counted once` | — | 489 | 0 | 38 | 6 | 7 | 0 | 0 | 416 | **22** | $755 | $600–$950 |
+| geforce | `GeForce RTX 3090 24GB -ti` | 1 | 247 | 0 | 13 | 1 | 5 | 0 | 0 | 223 | **5** | $750 | $600–$1,000 |
+| brands | `3090 24GB (EVGA,ASUS,MSI,Gigabyte,Zotac,Founders) -ti` | 1 | 247 | 0 | 16 | 2 | 5 | 0 | 0 | 221 | **3** | $750 | $710–$1,000 |
+| combined | `all non-baseline variants, each eBay item counted once` | — | 489 | 0 | 57 | 5 | 7 | 0 | 0 | 410 | **10** | $750 | $600–$995 |
 
-Combined: 22 usable (gate 20: reached).
+Combined: 10 usable (gate 20: NOT reached).
 
 <details><summary>Combined: usable titles, and titles removed as wrong variant / complete system / title mismatch</summary>
 
 Usable:
-- $559 New ListingZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB Graphics Card Part/Repair No VIDEO
 - $750 ZOTAC NVIDIA GeForce RTX 3090 Trinity 24GB GDDR6X Graphics Card ZT-A30900D-10P
 - $600 New ListingPNY GeForce RTX 3090 XLR8 Gaming EPIC-X RGB Triple Fan Edition P 24GB GDDR6X...
 - $710 EVGA HYBRID NVIDIA GeForce RTX 3090 24GB Liquid Cooled VERY DIRTY
-- $799.99 ASUS TUF Gaming OC GeForce RTX 3090 24GB RAM - Graphics Card - Overheating Issue
 - $995 DELL GeForce RTX 3090 24GB RAM - Graphics Card - Great Condition
-- $949.5 ZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB GDDR6X Graphics Card (Read Desc)
-- $749.99 NVIDIA  RTX NVLink Bridge 4-Slot for 3090 / 30 Series P3657 GPU SLI(Small Crack)
-- $880 NVIDIA GeForce RTX NVLink Bridge 4-Slot RTX 3090 30 Series GPUs Model P3657
-- $670 READ DESC, EVGA GeForce RTX 3090 FTW3 ULTRA GB GDDR6X Graphics Card
-- $1,000 NVIDIA GeForce RTX 30 Series NVLink Bridge 4-Slot (P3657) for Dual RTX 3090
 - $880 Nvidia Gigabyte Aorus Xtreme RTX 3090
-- $900 READ DESC, EVGA GeForce RTX 3090 FTW3 ULTRA 24GB GDDR6X Graphics Card, READ DESC
 - $599.99 ASUS ROG Strix NVIDIA GeForce RTX 3090 OC 24GB GDDR6X Triple Fan HDMI 2.1 Tested
 - $640 EVGA GeForce RTX 3090 FTW3 Ultra RGB Multi-Monitor Fan/Heatsink w/ Box
 - $995 DELL GeForce RTX 3090 24GB RAM - Graphics Card - Great Condition
-- $600 NVIDA GeForce RTX3090 founder edition DEAD card
 - $755 EVGA GeForce RTX 3090 FTW3 24GB GDDR6X CUDA PCIe HDMI/DP Multi-Monitor
 - $600 NVIDIA GeForce RTX 3090 Founders Edition 24GB GDDR6 Graphics Card -...
-- $949.99 EVGA RTX 3090 FTW3 24GB GDDR6X (24G-P5-3987-KR) NOTE: Rust
-- $949.99 MSI GeForce RTX 3090 GAMING X TRIO 24GB Tri-Frozr Graphics Card (Note: Rust)
-- $549.99 ZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB Graphics Card DOES NOT BOOT READ
 
 Removed as title-mismatch:
 - $1,825 Apple MacBook Pro 16” M4 Pro 48GB 1TB SSD 20-Core GPU Silver Z1FP000C6LL/A 2024
@@ -59,33 +47,29 @@ Removed as title-mismatch:
 
 | Variant | Query | Pages | Raw | Fewer words | Excl. term | Excl. kw | Title mismatch | Wrong variant | System | Out of range | **Usable** | Median | Range |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| baseline | `RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system)` | 1 | 247 | 0 | 3 | 0 | 5 | 0 | 0 | 225 | **14** | $1,600 | $1,480–$2,000 |
-| no-system-terms | `RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read)` | 1 | 247 | 0 | 3 | 0 | 5 | 0 | 0 | 225 | **14** | $1,600 | $1,480–$2,000 |
-| minimal | `RTX 4090` | 2 | 487 | 0 | 38 | 5 | 403 | 0 | 0 | 41 | **0** | — | — |
+| baseline | `RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read,pc,desktop,system)` | 1 | 247 | 0 | 9 | 0 | 5 | 1 | 0 | 225 | **7** | $1,550 | $1,500–$1,800 |
+| no-system-terms | `RTX 4090 24GB -(box,cooler,broken,parts,shroud,waterblock,damaged,read)` | 1 | 247 | 0 | 9 | 0 | 5 | 1 | 0 | 225 | **7** | $1,550 | $1,500–$1,800 |
+| minimal | `RTX 4090` | 2 | 487 | 0 | 47 | 4 | 397 | 0 | 0 | 39 | **0** | — | — |
 | exact-phrase | `"RTX 4090"` | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **0** | — | — |
-| geforce | `GeForce RTX 4090 24GB` | 1 | 247 | 0 | 15 | 0 | 6 | 0 | 0 | 217 | **9** | $1,550 | $1,500–$2,000 |
-| brands | `4090 24GB (ASUS,MSI,Gigabyte,Zotac,PNY,Founders)` | 1 | 247 | 0 | 17 | 1 | 5 | 0 | 0 | 210 | **14** | $1,600 | $1,480–$2,000 |
-| combined | `all non-baseline variants, each eBay item counted once` | — | 723 | 0 | 54 | 6 | 404 | 0 | 0 | 245 | **14** | $1,600 | $1,480–$2,000 |
+| geforce | `GeForce RTX 4090 24GB` | 1 | 247 | 0 | 19 | 0 | 6 | 0 | 0 | 216 | **6** | $1,700 | $1,500–$2,000 |
+| brands | `4090 24GB (ASUS,MSI,Gigabyte,Zotac,PNY,Founders)` | 1 | 247 | 0 | 25 | 1 | 5 | 1 | 0 | 208 | **7** | $1,550 | $1,500–$1,800 |
+| combined | `all non-baseline variants, each eBay item counted once` | — | 723 | 0 | 71 | 5 | 398 | 1 | 0 | 241 | **7** | $1,550 | $1,500–$1,800 |
 
-Combined: 14 usable (gate 15: NOT reached).
+Combined: 7 usable (gate 15: NOT reached).
 
 <details><summary>Combined: usable titles, and titles removed as wrong variant / complete system / title mismatch</summary>
 
 Usable:
 - $1,550 MSI GeForce RTX 4090 GAMING TRIO 24G 24GB PCIe x16 Triple Fan Silent
-- $1,479.99 GIGABYTE Windforce V2 GeForce RTX 4090 24GB - Graphics Card - Non-Functional
 - $2,000 GIGABYTE GeForce RTX 4090 WINDFORCE V2 24GB GDDR6X HDMI/DP PCIe
 - $1,500 ASUS NVIDIA GeForce RTX 4090 24gb RAM
-- $1,649.94 ASUS RTX 3090 Ti 24GB STRIX LC Liquid Cooled as new condition not 4090 5090 5080
 - $1,800 MSI GeForce RTX 4090 Graphics Card - 24GB GDDR6X, 2550 MHz, PCI Express Gen 4, 3
-- $1,499.99 ASUS TUF Gaming GeForce RTX 4090 24GB FOR PART-With core and VRAM
 - $1,700 GIGABYTE NVIDIA GeForce RTX 4090 Gaming OC 24GB Ray Tracing DLSS 3
 - $1,500 ZOTAC NVIDIA GeForce RTX 4090 Trinity OC 24GB GDDR6X RGB Dual BIOS PCIe
-- $1,600 *NON-WORKING* RTX 4090 (24GB) PNY Verto Triple Fan
-- $1,300 *NON WORKING* RTX 4090 (24gb) Zotac Amp Extreme Airo
-- $2,149.99 GIGABYTE Gaming OC GeForce RTX 4090 24GB RAM - Graphics Card - Non-Functional
 - $1,100 GIGABYTE GeForce RTX 4090 WINDFORCE V2 24GB GDDR6X HDMI/DP PCIe x16
-- $2,199.99 GIGABYTE Windforce V2 GeForce RTX 4090 24GB - Graphics Card - Non-Functional
+
+Removed as wrong-variant:
+- $1,649.94 ASUS RTX 3090 Ti 24GB STRIX LC Liquid Cooled as new condition not 4090 5090 5080
 
 Removed as title-mismatch:
 - $1,825 Apple MacBook Pro 16” M4 Pro 48GB 1TB SSD 20-Core GPU Silver Z1FP000C6LL/A 2024
@@ -94,7 +78,6 @@ Removed as title-mismatch:
 - $19.95 Disney Parks 2026 Star Wars Light Side Vs Dark Side Mystery Box Pin (You Choose)
 - $17.98 YOU PICK Disney Parks Star Wars LIGHT SIDE VS DARK SIDE Mystery Pin COMBINE SHIP
 - $1,639 New ListingNVIDIA GeForce RTX 3090 Founders Edition FE 24GB GDDR6X Graphics Card
-- $559 New ListingZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB Graphics Card Part/Repair No VIDEO
 - $349.99 *Read* MSI GeForce RTX 4070 Ti Super 16G Ventus 3X GDDR6X GPU No work
 - $300 GIGABYTE GeForce RTX 3070 Ti GAMING OC 8GB GDDR6X Graphics Card
 - $315 GIGABYTE GeForce RTX 3070 Ti Gaming OC 8G Graphics Card WINDFORCE 3X Cooling
@@ -144,7 +127,6 @@ Removed as title-mismatch:
 - $439 New ListingASUS ROG Strix RTX 3080 OC 10GB V2 LHR GDDR6X Graphics Card - Tested Working
 - $389 New ListingZOTAC GAMING GeForce RTX 3080 AMP HoloBlack 10GB GDDR6X - NON LHR
 - $1,200 MSI GeForce RTX 4080 SUPER 16G VENTUS 3X OC 16GB GDDR6X Graphics Card Excellent
-- $949.5 ZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB GDDR6X Graphics Card (Read Desc)
 - $750 ZOTAC NVIDIA GeForce RTX 3090 Trinity 24GB GDDR6X Graphics Card ZT-A30900D-10P
 - $395 New ListingDell GeForce RTX 3080 10GB GDDR6X Graphics Card Tested Working
 - $400.99 MSI GeForce RTX 5060 8GB Shadow 2X OC GDDR7 Graphics Card
@@ -208,7 +190,6 @@ Removed as title-mismatch:
 - $1,629 ZOTAC GeForce RTX 3090 24GB GDDR6X Trinity OC Graphics Card
 - $449.99 GIGABYTE GeForce RTX 3080 GAMING OC 10GB 3X GV-N3080GAMING OC-10GD Rev 2.0
 - $1,249.73 NEW Gigabyte RTX 5070 Ti WINDFORCE SFF 16GB GDDR7 [SEALED] [3-Year Warranty]
-- $96.47 NVIDIA NVLink bridge 6CM for RTX 2080TI/TITAN RTX/RTX 6000/8000 graphic card
 - $899.99 NVIDIA GeForce RTX 4080 16GB GDDR6X Graphics Card
 - $1,159.99 ASUS TUF Gaming GeForce RTX 4070 Ti Super 16GB OC TUF-RTX4070TIS-O16G-GAMING
 - $625 NVIDIA GeForce RTX 4070 Founders Edition 12GB Graphics Card With Original Box
@@ -325,7 +306,6 @@ Removed as title-mismatch:
 - $1,520 EVGA GeForce RTX 3090 FTW3 ULTRA 24GB GDDR6X Graphics Card
 - $600 Gigabyte NVIDIA GeForce RTX 4070 Windforce 3x OC 12GB
 - $339.99 RTX 3080 FOUNDERS EDITION Good Condition With Cable - 100% Working
-- $257.09 Partially faulty (has display): DELL NVIDIA GeForce RTX 3080 10GB (READ DESC)
 - $699.99 NVIDIA GeForce RTX 4070 SUPER Founders Edition 12GB - GPU / No Factory Box
 - $501.4 Open Box 10GB Gigabyte Rtx 3080 Gaming OC PCI-E GV-N3080GAMING OC-10GD
 - $154.99 EVGA GeForce RTX 3070 Ti FTW3 ULTRA GAMING 8GB GDDR6X GPU
@@ -373,12 +353,10 @@ Removed as title-mismatch:
 - $399 ASUS TUF Gaming NVIDIA GeForce RTX 3080 CLEAN AND WORKING
 - $843.62 MSI GeForce RTX 4070 Ti GAMING X SLIM 12GB GDDR6X Nvidia Graphics Card
 - $1,500 MSI NVIDIA GeForce RTX 3090 OC Edition Ventus 3X Graphics Card
-- $334 MSI GeForce RTX 4070 VENTUS 3X OC 12GB GDDR6X Graphics Card *READ DESC*
 - $615 ASUS TUF NVIDIA GeForce RTX 4070 Ti 12GB GDDR6X Gaming Graphics Card
 - $975 Asus TUF Gaming GeForce RTX 4070 TI Super 16 GB GDDR6X - Mint Condition
 - $500 GIGABYTE NVIDIA Graphics Card High Performance Fan Heatsink PCI Express GPU
 - $329.99 Dell OEM GeForce RTX 3080 10GB GDDR6X GPU / 04Y12V
-- $1,500 Dell OEM MSI RTX 3090 24GB GDDR6X M8HMD – Tested, NVLink
 - $788.99 ASUS TUF Gaming GeForce RTX 4070 Ti 12GB GDDR6X Graphics Card TUF-RTX4070TI-12G
 - $788.99 MSI GeForce RTX 4070 Ti Ventus 3X OC 12GB GDDR6X Graphics Card G407TV3X12C
 - $1,279.99 ASUS ROG Strix RTX 4080 OC 16GB Graphics Card ROG-STRIX-RTX4080-O16G-GAMING
@@ -499,33 +477,23 @@ Removed as title-mismatch:
 
 | Variant | Query | Pages | Raw | Fewer words | Excl. term | Excl. kw | Title mismatch | Wrong variant | System | Out of range | **Usable** | Median | Range |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | :--- |
-| baseline | `RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)` | 1 | 128 | 0 | 2 | 0 | 5 | 0 | 0 | 118 | **3** | $1,505 | $1,200–$1,600 |
-| minimal | `RTX A5000` | 2 | 188 | 0 | 5 | 4 | 8 | 0 | 7 | 160 | **4** | $1,505 | $1,022–$1,600 |
-| nvidia | `NVIDIA RTX A5000` | 1 | 187 | 0 | 5 | 4 | 8 | 0 | 7 | 159 | **4** | $1,505 | $1,022–$1,600 |
-| pny | `PNY RTX A5000` | 1 | 251 | 204 | 13 | 4 | 148 | 0 | 1 | 82 | **3** | $1,505 | $1,200–$1,600 |
-| quadro | `Quadro RTX A5000` | 1 | 255 | 225 | 9 | 5 | 133 | 0 | 1 | 105 | **2** | — | — |
-| gddr6 | `A5000 24GB GDDR6` | 1 | 123 | 0 | 4 | 0 | 5 | 0 | 0 | 111 | **3** | $1,505 | $1,200–$1,600 |
-| dell-hp-lenovo | `RTX A5000 (Dell,HP,Lenovo)` | 1 | 37 | 0 | 2 | 1 | 5 | 0 | 7 | 21 | **1** | — | — |
-| combined | `all non-baseline variants, each eBay item counted once` | — | 456 | 267 | 17 | 5 | 263 | 0 | 7 | 160 | **4** | $1,505 | $1,022–$1,600 |
+| baseline | `RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)` | 1 | 128 | 0 | 4 | 0 | 5 | 0 | 0 | 116 | **3** | $1,505 | $1,200–$1,600 |
+| minimal | `RTX A5000` | 2 | 188 | 0 | 29 | 16 | 8 | 0 | 0 | 132 | **3** | $1,505 | $1,200–$1,600 |
+| nvidia | `NVIDIA RTX A5000` | 1 | 187 | 0 | 29 | 16 | 8 | 0 | 0 | 131 | **3** | $1,505 | $1,200–$1,600 |
+| pny | `PNY RTX A5000` | 1 | 251 | 204 | 20 | 66 | 88 | 0 | 0 | 74 | **3** | $1,505 | $1,200–$1,600 |
+| quadro | `Quadro RTX A5000` | 1 | 255 | 225 | 16 | 95 | 42 | 0 | 0 | 100 | **2** | — | — |
+| gddr6 | `A5000 24GB GDDR6` | 1 | 123 | 0 | 6 | 0 | 5 | 0 | 0 | 109 | **3** | $1,505 | $1,200–$1,600 |
+| dell-hp-lenovo | `RTX A5000 (Dell,HP,Lenovo)` | 1 | 37 | 0 | 3 | 11 | 5 | 0 | 0 | 17 | **1** | — | — |
+| combined | `all non-baseline variants, each eBay item counted once` | — | 456 | 267 | 44 | 153 | 124 | 0 | 0 | 132 | **3** | $1,505 | $1,200–$1,600 |
 
-Combined: 4 usable (gate 8: NOT reached).
+Combined: 3 usable (gate 8: NOT reached).
 
 <details><summary>Combined: usable titles, and titles removed as wrong variant / complete system / title mismatch</summary>
 
 Usable:
 - $1,505 Dell NVIDIA RTX A5000 GPU / 24gb VRAM
-- $1,022 NVIDIA RTX A5000 GDDR6 16GB AI Graphics Card Excellent Condition USED from JAPAN
 - $1,199.99 PNY NVIDIA RTX A5000 4x DisplayPort 24GB GDDR6 Graphics Card VCNRTXA5000
 - $1,600 PNY NVIDIA RTX A5000 24GB GDDR6 Graphics Card
-
-Removed as complete-system:
-- $399.99 NVIDIA RTX A5000 16GB GDDR6  GPU Dell Precision 7760 Graphic Card
-- $149 Dell Precision 7760 NVIDIA RTX A5000 16GB GDDR6 GPU Video Card Module - READ
-- $168.26 DELL Precision 7760 SERIES NVIDIA RTX A3000 A4000 A5000 6GB 16GB VIDEO CARD
-- $548 HP ZBook Fury 16 G8 i7-11850H 32GB 1TB SSD RTX A5000 16GB Workstation
-- $249.1 Dell Precision 7560 RTX A3000 A4000 A5000 6GB 16GB GPU Video Card D/P F5NMK
-- $178.55 for DELL Precision 7760 SERIES NVIDIA RTX A3000 A4000 A5000 6GB 16GB VIDEO CARD
-- $285 NVidia RTX A5000 0F5NMK F5NMK for Dell Precision 7560 16GB GDDR6
 
 Removed as title-mismatch:
 - $13.5 Bracket for NVIDIA Quadro RTX 5000 RTX 6000 RTX 8000 Professional Graphics Card
@@ -538,114 +506,61 @@ Removed as title-mismatch:
 - $31.99 Thermaltake Smart 500W 80 PLUS ATX Power Supply PSU Black SPD-0500AH2NCW
 - $2,300 PNY NVIDIA RTX A5500 24GB GDDR6 Graphics Card
 - $999 PNY NVIDIA RTX A4500 20GB GDDR6 Graphics Card - MINT CONDITION
-- $650 New ListingPNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
 - $799 PNY NVIDIA RTX A4500 20GB GDDR6 Workstation GPU – Tested Working (1 DP Port Only
-- $899 NVIDIA RTX A4000 16GB GDDR6 Professional Workstation GPU Tested
 - $1,249.97 PNY Quadro RTX A4500 20GB GDDR6 VCNRTXA4500-PB GPU / 1yr Warranty, Fast Ship!
 - $1,239.95 Open Box - PNY NVIDIA RTX A4500 20GB GDDR6 PCIe 4.0 x16 Graphics VCNRTXA4500-PB
 - $325 PNY NVIDIA RTX A2000 Professional Graphics Card
-- $999.99 PNY RTX A4000 16GB GDDR6 900-5G190-1700-000 PCIe 4.0 x16 4x DP Graphics Card GPU
-- $949 PNY Quadro RTX A4000 16GB Nvidia GPU
 - $172.5 PNY Graphics Card NVIDIA RTX A400 4GB GDDR6 VCNRTXA400ATX-B - Black
-- $800 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $899.99 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $900 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $660 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card (Custom Cooler)
 - $3,975 PNY NVIDIA RTX A6000 48GB GDDR6 Graphics Card
-- $900 NVIDIA RTX A4000 16GB GDDR6 Graphics Card -- HP OEM
 - $300 PNY NVIDIA RTX A2000 PCIe x16 Graphics Card, Multi-Monitor, mDP DVI
-- $899.99 PNY NVIDIA RTX A4000 PCI Express Graphics Card Mini DisplayPort 6-Pin 16GB DDR6
 - $329.99 PNY NVIDIA RTX A2000 Graphics Card VCNRTXA2000ATX
-- $449.99 NVIDIA Quadro RTX 5000 16GB Graphics Card
-- $950 PNY Quadro RTX A4000 16GB Nvidia GPU
 - $525 PNY NVIDIA RTX A2000 12GB GDDR6 Graphics Card (‎VCNRTXA200012GB-PB)
-- $850 PNY Quadro RTX A4000 16GB
-- $999 NVIDIA RTX A4000 PG190 Graphics Video Card 16GB GDDR6 PNY 4x DP1.4a OCCT TESTED
-- $799 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card PCIe 4.0 x16 - 4 x DisplayPort
-- $949.99 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $749.99 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card - Used, Tested, Good Condition
 - $320 NVIDIA RTX A2000 6GB (GDDR6) Workstation GPU
-- $760 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 4x DisplayPort CUDA Multi-Monitor
-- $795 NVIDIA RTX A4000 16GB GDDR6 Graphics Cards
 - $450 PNY NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card VCNRTXA200012GB
 - $5,699 PNY NVIDIA RTX PRO 5000 Blackwell 48GB GDDR7 OEM PCIe 5.0 Workstation
-- $400 PNY NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe x16 NVLink DP/USB-C
 - $499 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
 - $950 PNY NVIDIA RTX A4500 20GB GDDR6 Graphics Card
-- $999 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 4x DisplayPort CUDA Multi-Monitor
 - $330 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card 4x Mini DisplayPort PCIe 4.0
 - $299.98 PNY NVIDIA RTX A2000 GRAPHICS CARD 6GB GDDR6 w/ 30 days warranty
-- $905.95 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $850 Used PNY NVIDIA RTX A4000 GDDR6 16GB PG190 VCNRTXA4000 Tested
 - $250 PNY NVIDIA RTX A4500 20GB GDDR6 PCIe 4.0 x16 Graphics card - VCNRTXA4500-PB
 - $1,294.97 PNY RTX A4500 20GB VCNRTXA4500PB GPU / Brand New, Fast Ship!
 - $910.49 NVIDIA RTX A4500 Workstation Graphics Card 20GB GDDR6
-- $950 USED PNY NVIDIA RTX A4000 GDDR6 16GB PG190 VCNRTXA4000 Tested Actual Item In Pic
-- $929.99 HP NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $799.99 PNY NVIDIA RTX A4000 Professional Graphics Card - 16GB GDDR6 - Tested & Working
 - $150 PNY NVIDIA RTX A400 ATX GPU Graphics Card - NVIDIA Chipset Manufacturer
-- $949 PNY Quadro RTX A4000 16GB Nvidia GPU
 - $3,975 PNY NVIDIA RTX A6000 48GB GDDR6 Graphics Card
 - $499 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
 - $425 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU
-- $841.49 PNY Nvidia RTX A4000 4x DisplayPort 16GB GDDR6 PCIe Graphics Card VCNRTXA4000
 - $350 PNY NVIDIA RTX A2000 6GB GDDR6 GPU — Hi/Lo Brackets, 3x mDP Adapters, Box
-- $870 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 4x DisplayPort CUDA
 - $1,249.95 PNY NVIDIA RTX A4500 20GB Graphics Card New Sealed
-- $750 PNY Quadro RTX A4000 16GB
-- $819.99 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 DisplayPort CUDA Multi-Monitor
-- $920 HP NVIDIA RTX A4000 16GB GDDR6 Graphics Card VCNRTXA4000 HP M12947-003
 - $900 PNY NVIDIA RTX A4500 20GB GDDR6 Graphics Card
-- $799.99 PNY Nvidia RTX A4000 16GB GDDR6 PCIe 4.0x16 Graphics Video Card VCNRTXA4000
-- $399.95 PNY Nvidia Quadro RTX 5000 16GB GDDR6 4x DisplayPort PCIe Video Card GPU
-- $759.99 USED PNY Nvidia RTX A4000  16GB GDDR6 PCIe Graphics Card VCNRTXA4000
-- $817 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 DisplayPort CUDA Multi-Monitor
 - $430 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU
 - $9,899 2x NVIDIA RTX A6000 48GB GDDR6 384-bit GPU Graphics Card
 - $329.99 PNY NVIDIA RTX A2000 6GB GDDR6 - PRISTINE - Original Box, 4x miniDP Adapters
 - $889.99 PNY NVIDIA RTX A4500 20GB GDDR6 ECC Workstation GPU PCIe 4.0 4x DP
 - $399 PNY NVIDIA RTX A1000 8GB GDDR6 Workstation GPU VCNRTXA1000ATX-PB NEW in Box
 - $900 PNY NVIDIA RTX A4500 20GB GDDR6 PCIe 4.0 x16 Graphics VCNRTXA4500-PB
-- $824.99 PNY RTX A4000 PG190 16GB GDDR6 Graphics Card VCNRTX4000
 - $300 PNY NVIDIA RTX A2000 Workstation Graphics Card 6GB GDDR6 ECC
 - $325 NVIDIA RTX A2000 6GB (GDDR6) Workstation GPU Low Profile 70W - great condition!
 - $325 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card (VCNRTXA2000-BLK)
-- $950 PNY NVIDIA RTX A4000 GPU Ampere 16GB EXCELLENT CONDITION
 - $1,199.95 PNY NVIDIA RTX A4500 20GB GDDR6 PCIe 4.0 x16 Graphics VCNRTXA4500-PB Exc 1 Year
 - $320 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card
 - $329.99 NVIDIA RTX A2000 6GB GDDR6 - PRISTINE CONDITION - Retail Box, 4x miniDP Adapters
-- $889.99 Dell HGP0F Nvidia PNY RTX A4000 16GB GDDR6 PCIe 4.0 x16 GPU Graphics Card 4x DP
 - $130 Used4GB PNY nVIDIA Quadro Rtx A400 PCI-E 4.0 x8 VCNRTXA400-PB Graphics
 - $850 PNY NVIDIA RTX A4000 PCIe x16 Graphics Card DisplayPort Multi-Monitor
 - $310 NVIDIA RTX A2000 6GB GDDR6 Graphics Card
-- $1,000 New PNY NVIDIA RTX A4000 16GB GPU GDDR6 PCIe PG190 Video Graphics Card
 - $3,749.99 New PNY RTX A6000 48GB GDDR6 Graphics Card READ
-- $849.99 PNY NVIDIA RTX A4000 16GB GDDR6 ECC PCIe 4.0 Workstation Graphics Card
-- $829 NVIDIA RTX A4000 16GB GDDR6 Graphics Card PNY
 - $3,500 PNY VCNRTX5000ADA-PB NVIDIA RTX 5000 ADA Gen 32GB PCIe 4.0 x16 DP Graphics Card
-- $488 PNY Nvidia Quadro RTX 5000 16GB GDDR6 4x DisplayPort PCIe Video Card
 - $459 PNY NVIDIA RTX A2000 12GB GDDR6 ECC Workstation GPU 4x Mini DisplayPort
 - $449 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
-- $415 PNY NVIDIA QUADRO RTX 5000 GRAPHICS CARD / VCQRTX5000 / 16GB GDDR6
 - $310 PNY NVIDIA RTX A2000 6GB GDDR6 PCIe 4.0 Graphics Card Tested Working *31
 - $549.99 New PNY RTX A2000 12GB GDDR6 Graphics Card VCNRTXA200012GB-PB
 - $329 NVIDIA RTX A2000 6GB (GDDR6) PNY Workstation GPU Low Profile 70W, Stress Tested
 - $325 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card 4x Mini DisplayPort
 - $420 PNY NVIDIA RTX A2000 12GB GDDR6 PCIe 4.0 GPU Graphics Card SKU: VCNRTXA200012GB
-- $760.5 PNY NVIDIA RTX A4000 16GB GDDR6 Graphics Card
 - $3,499 PNY NVIDIA RTX 5000 Ada 32GB GDDR6 NEW Sealed GPU
-- $429 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Video Card VCQRTX5000-PB
-- $400 Nvidia Quadro RTX 5000 16GB GDDR6 Graphic Card
 - $949.99 PNY NVIDIA RTX A4500 Graphics Card - 20GB GDDR6 - Workstation GPU w/ Accessories
-- $879.99 Dell HGP0F Nvidia PNY RTX A4000 16GB GDDR6 PCIe 4.0 x16 GPU Graphics Card 4x DP
-- $849.99 HP NVIDIA RTX A4000 16GB GDDR6 Graphics Card
-- $819 PNY NVIDIA RTX A4000 VCNRTXA4000 16GB GDDR6 PCIe 4.0 x16 Graphics Card
 - $289.99 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card
-- $750 PNY Nvidia Quadro RTX A4000 16GB DDR6 Graphics Card
-- $869 PNY NVIDIA RTX A4000 16GB GDDR6 Professional Graphics
 - $469.99 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
 - $549 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  (New)
-- $900 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe 4.0 Professional Workstation GPU
 - $3,750 NVIDIA RTX A6000 48GB GDDR6
 - $295 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card with Box and All Accessories
 - $3,359.99 NVIDIA Quadro RTX 5000 ADA 32GB GDDR6 Graphic Card
@@ -653,143 +568,57 @@ Removed as title-mismatch:
 - $395 PNY Nvidia RTX A1000 8GB PCI-E Video Card VCNRTXA1000ATX-PB
 - $3,998 NVIDIA RTX A6000 48GB GDDR6 384-bit GPU Graphics Card
 - $349.97 PNY RTX A2000 6GB GDDR6 Full/Low Profile + miniDP Adapters / 1yr Warranty, Fa...
-- $415 PNY NVIDIA QUADRO RTX 5000 GRAPHICS CARD / VCQRTX5000 / 16GB GDDR6
 - $1,000 PNY NVIDIA RTX A4500 Workstation Graphics Card 20GB GDDR6 ECC VCNRTXA4500
 - $449.99 NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card VCNRTXA200012GB
 - $3,975 PNY NVIDIA RTX A6000 48GB GDDR6 Graphics Card
 - $499 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
 - $420 PNY NVIDIA RTX A2000 12GB GDDR6 PCIe 4.0 GPU Graphics Card SKU: VCNRTXA200012GB
-- $885 PNY NVIDIA RTX A4000 16GB GDDR6 PCIe x16 DisplayPort CUDA Multi-Monitor
 - $315 PNY NVIDIA RTX A2000 6GB GDDR6 Graphics Card 4x Mini DisplayPort USA
 - $344.97 PNY RTX A2000 6GB GDDR6 Full Height / 1yr Warranty, Fast Ship!
 - $319.99 NVIDIA RTX A2000 6GB GDDR6 Graphics Card - Tested
-- $429.99 PNY NVIDIA QUADRO RTX 5000 GRAPHICS CARD / VCQRTX5000 / 16GB GDDR6
 - $450 PNY NVIDIA RTX A2000 12GB GDDR6 Graphics Card (‎VCNRTXA200012GB-PB)
 - $460 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  PG192/12GB
-- $849.99 PNY NVIDIA RTX A4000 256-bit 16GB GDDR6 PCIe Graphics Card
-- $949.95 PNY Nvidia RTX A4000 16GB GPU Very Good
 - $500 PNY NVIDIA RTX A4500 20GB GDDR6 PCIe 4.0 x16 Graphics card - VCNRTXA4500-PB
 - $299.98 PNY NVIDIA RTX A2000 GRAPHICS CARD 6GB GDDR6 w/ 30 days warranty
 - $484.49 PNY NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card VCNRTXA200012GB
 - $399 PNY NVIDIA RTX A1000 8 GB GDDR6 Graphics Card M3R8K
 - $310 PNY NVIDIA RTX A2000 6gb low profile graphics card GPU L7
-- $750 PNY NVIDIA RTX A4000 GRAPHICS CARD 16GB GDDR6 PG190XM132162002P5
 - $999 PNY NVIDIA RTX A4500 20GB GDDR6 w/ ECC PCIe 4.0 x16 VCNRTXA4500 Graphics Card
 - $874 PNY NVIDIA GRAPHICS CARD RTX A4500, Open Box
 - $3,499.99 New PNY RTX A6000 48GB GDDR6 Graphics Card READ
 - $1,600 PNY NVIDIA RTX A4000 ADA SFF 20G w/ Aftermarket Heatsink
-- $469.99 PNY NVIDIA Quadro RTX 5000 16 GB GDDR6 PCI Express 3.0 x16 Video Card
 - $499 NVIDIA RTX A2000 12GB GDDR6 PNY Graphics Card GPU  VCNRTXA200012GB
-- $949.99 NVIDIA Quadro RTX A4000 16GB RAM - Graphics Card - Excellent Condition
-- $925 NVIDIA Quadro RTX A4000 16GB VRAM (DELL Branded)
-- $3,599 NVIDIA Quadro RTX A6000 48GB RAM - Graphics Card - Excellent - NVLink Available
-- $372.77 DELL QUADRO RTX 5000 GRAPHICS CARD / 16GB GDDR6
-- $370 NVIDIA Quadro RTX 5000 16GB GDDR6 Workstation GPU - Used, ~10 Hrs, 4x DP
-- $775 Nvidia Quadro RTX A4000 16GB GDDR6
-- $945 NVIDIA Quadro RTX A4000 16GB GDDR6 Video Graphics Card
-- $430 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe x16 DirectX 12 DP/USB-C
-- $395 NVIDIA Quadro RTX 5000 16GB GDDR6
-- $391 Nvidia Quadro RTX 5000 Graphics Card 16 GB Dedicated Ram ￼
-- $410 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe x16 DisplayPort CUDA Multi-Monitor
 - $659.28 NVIDIA Quadro RTX A4500 20GB GDDR6 Workstation AI GPU (VCNRTXA4500)
-- $379 HP QUADRO RTX 5000 GRAPHICS CARD / L40548-002 / 16GB GDDR6
-- $358.59 NVIDIA Quadro RTX 5000 16GB GDDR6 Professional Graphics Card - Used
-- $999 Nvidia Quadro RTX-A4000* PG190*16GB GDDR6 Video Card*FRU 5V10Y65010 *VVGC
-- $300 NVIDIA Quadro RTX 5000 (Turing Architecture 16GB GDDR6) Workstation card only
 - $1,229.99 DELL Quadro RTX A4500 20GB RAM - Graphics Card - Very Good Condition
-- $430 PNY Nvidia Quadro RTX 5000 16GB GDDR6 4x DisplayPort PCIe Video Card GPU
-- $385 DELL QUADRO RTX 5000 GRAPHICS CARD / 0CRPRY / 16GB GDDR6
-- $355 NVIDIA Quadro RTX 5000 Graphics Card NVIDIA GPU SLI NVLink PCIe x16 Fan
-- $449.99 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
 - $293 PNY NVIDIA Quadro RTX A2000 12GB GDDR6 SFF PCIe x16 Mini DisplayPort CUDA
-- $399 Dell 7XK5H NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe 3 x16 Video Graphics Card
-- $400 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
 - $1,500 HP NVIDIA Quadro RTX A4500 20GB GDDR6 PCIe 4.0 x16 N02456-001/N02798-001
-- $415 DELL QUADRO RTX 5000 GRAPHICS CARD / 0CRPRY / 16GB GDDR6
-- $340 DELL QUADRO RTX 5000  GRAPHICS CARD / 16GB GDDR6
 - $460 NVIDIA Quadro RTX A2000 12GB GDDR6 PCIe 4.0 Cuda Graphics Card
-- $449.99 Dell NVIDIA Quadro RTX 5000, 16GB Graphics Card
-- $449.95 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
-- $449.95 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card / L44055-001 - VGC
-- $420 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
 - $3,500 NVIDIA Quadro RTX A6000 48GB RAM - Graphics Card
 - $485 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card N02455-001 N02797-001
-- $355 NVIDIA Quadro RTX 5000 16GB GDDR6 Workstation GPU - Used, ~10 Hrs, 4x DP
-- $395 DELL QUADRO RTX 5000 GRAPHICS CARD 16GB GDDR6
-- $385 HP QUADRO RTX 5000 GRAPHICS CARD / L40548-001 / 16GB GDDR6
 - $1,229.99 HP Quadro RTX A4500 20GB RAM - Graphics Card - Excellent Condition
 - $150 PNY Technology VCNRTXA400ATX-PB NVIDIA Quadro RTX A400 4GB GDDR6 64-Bit Card
-- $449.99 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
-- $999.99 699-5G190-0510-700 NVIDIA QUADRO RTX A4000 16GB GDDR6 GPU GRAPHICS CARD
-- $430 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card, fully tested
-- $765 Nvidia Quadro RTX A4000 16GB GDDR6
 - $900 NVIDIA Quadro RTX A4500 20GB GDDR6 Graphics Card
-- $445 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
 - $489.99 Dell 0YDNGM NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card 900-5G192-0150-000
-- $424.95 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
-- $350 NVIDIA Quadro RTX 5000 (Turing Architecture 16GB GDDR6) Workstation Graphics
 - $900 NVidia Quadro RTX A4000 GPU
-- $399.99 Nvidia Quadro RTX 5000 16GB GDDR6 Desktop Video Card (USED)
 - $350 NVIDIA Quadro RTX 5000 Graphics Card
-- $365 DELL QUADRO RTX 5000 GRAPHICS CARD / 0YH2P2 / 16GB GDDR6
-- $399 Nvidia Quadro RTX 5000 16GB GDDR6 GPU Graphics Card. USED. Free Shipping!
-- $800 NVIDIA Quadro RTX A4000 16GB GDDR6 4x DisplayPort Graphics Card
-- $780 Nvdia Quadro RTX A4000 16GB GDDR6 PCIe 4.0 x16 Graphics Desktop Video Card
 - $415 NVIDIA Quadro RTX A2000 12GB GDDR6 Professional Graphics Card
-- $824.99 NVIDIA Quadro RTX A4000 16GB GPU PCI-E 4.0 X16 GDDR6 Graphics Video Card
 - $1,999.99 NVIDIA Quadro RTX 8000 48GB GDDR6 Active Blower GPU HPE P11095-001 Tested
-- $425 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card READ
-- $390 TESTED Dell GPU NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card 0CRPRY
-- $408 Nvidia Quadro RTX 5000 16GB GDDR6 PCIe Video Graphics Card Dell 7XK5H 4xDP USB-C
-- $420 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
-- $400 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe Professional Graphics Card
 - $485 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card N02455-001 N02797-001
-- $485 NVIDIA Quadro RTX 5000 16GB GDDR6
-- $850 HP Nvidia Quadro RTX A4000 16GB PCI-E Video Card N49886-001
-- $949 NVIDIA Quadro RTX A4000 - 16GB - 1 Year Warranty!
-- $399.99 Nvidia Quadro RTX 5000 16GB GDDR6 PCIe 3.0 Display Ports Graphics Card 0CRPRY
-- $420 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
 - $900 NVIDIA Quadro RTX A4500 20GB GDDR6 Graphics Card - ships free
-- $399 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
-- $459.99 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
 - $350 NVIDIA Quadro RTX A2000 6GB GDDR6 / full and low profile bracket, miniDP cable
-- $410 NVIDIA Quadro RTX 5000 16GB GDDR6 GPU Graphics Card
 - $435 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card N02455-001 N02797-001
-- $400 NVIDIA Quadro RTX 5000 16GB GDDR6
-- $395 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe 3.0 x16 Workstation Graphics Card
-- $400 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
 - $479.99 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Low Profile GPU Card N02455-001 N02797-001
-- $375 NVIDIA Quadro RTX 5000 (Turing Architecture 16GB GDDR6) Workstation Graphics
-- $434.99 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card DisplayPort USB-C WORKING TESTED
-- $225 NVIDIA® Quadro® RTX5000, 16 GB, GDDR6 Video Card for Dell Precision 7750
 - $999.99 NVIDIA Quadro RTX A4500 20GB GDDR6 Graphics Card
-- $430 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe Video Graphics Card - Tested/Working - FS
-- $425 NVIDIA/Dell Quadro RTX 5000 16GB GDDR6 PCIe 3.0 x16 Graphics Card (0CRPRY)
-- $400 NVIDIA® Quadro RTX™ 5000 16GB GDDR6 PCI-E GPU Graphics Video Card CUDA *TESTED*
-- $419.99 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe, Graphics Card, 4X DisplayPort, USB-C
-- $799 Nvidia Quadro RTX A4000 16GB GDDR6 Video Graphics Card
-- $400 DELL QUADRO RTX 5000 GRAPHICS CARD 16GB GDDR6
-- $390 NVIDIA QUADRO RTX 5000 GRAPHICS CARD / 699-5G180-0500-600 / 16GB GDDR6
-- $365 DELL QUADRO RTX 5000 GRAPHICS CARD / 0CRPRY / 16GB GDDR6
-- $449.99 Dell NVIDIA Quadro RTX 5000, 16GB Graphics Card
 - $435 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card N02455-001 N02797-001
 - $799.99 NVidia Quadro RTX A4000 GPU
-- $799 Nvdia Quadro RTX A4000 16GB GDDR6 Desktop Video Card
 - $365 NVIDIA Quadro RTX A2000 6GB GDDR6 / original box, full and low profile bracket
 - $975 699-5G190-0511-711 NVIDIA QUADRO RTX A4000H GPU GRAPHICS CARD
 - $4,339.99 Lenovo Quadro RTX A6000 48GB RAM - Graphics Card - Excellent Condition
 - $1,219.99 NVIDIA Quadro RTX A4500 20GB GDDR6 Workstation AI GPU (VCNRTXA4500)
-- $399 NVIDIA Quadro RTX 5000 16GB GDDR6 GAMING GPU Graphics Card Workstation CAD 3D
-- $425 Dell NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card READ
 - $499.95 Dell YDNGM NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card High Profile
 - $900 NVIDIA Quadro RTX A4500 20GB GDDR6 Graphics Card NO BOX
-- $449.95 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe Video Graphics Card DPx4 USB-C
 - $445 HP NVIDIA Quadro RTX A2000 12GB GDDR6 Graphics Card N02455-001 N02797-001
-- $450 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card
 - $304.99 NVIDIA Quadro RTX A2000 6GB GDDR6 GPU GRAPHICS CARD
-- $350 NVIDIA Quadro RTX 5000 16GB GDDR6 Graphics Card GPU
 - $1,159.09 Lenovo Quadro RTX A4500 20GB RAM - Graphics Card - Excellent Condition
-- $1,100 NVIDIA Quadro RTX A4000 16GB RAM - Graphics Card - Brand New open box
-- $399 NVIDIA Quadro RTX 5000 16GB GDDR6 PCIe Video Graphics Card–Pre-Owned
 
 </details>

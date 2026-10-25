@@ -160,6 +160,47 @@ describe('Weekly price review pipeline', () => {
       assert.equal(listingRejection({ title: 'PNY NVIDIA RTX A5000 24GB', price: 1200 }, tA5000), null);
     });
 
+    it('rejects dead/impaired cards, bridges, keyword-stuffed wrong models, and wrong VRAM while keeping genuine cards', () => {
+      const t3090 = card('rtx-3090');
+      const t4090 = card('rtx-4090');
+      const tA5000 = card('rtx-a5000');
+
+      // Bridges and accessory hardware
+      assert.equal(listingRejection({ title: 'NVIDIA RTX NVLink Bridge 4-Slot for 3090 / 30 Series P3657 GPU SLI(Small Crack)', price: 749.99 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'NVIDIA GeForce RTX NVLink Bridge 4-Slot RTX 3090 30 Series GPUs Model P3657', price: 880 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'NVIDIA GeForce RTX 30 Series NVLink Bridge 4-Slot (P3657) for Dual RTX 3090', price: 1000 }, t3090), 'excluded-term');
+
+      // Dead, impaired or damaged cards
+      assert.equal(listingRejection({ title: 'New ListingZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB Graphics Card Part/Repair No VIDEO', price: 559 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'NVIDA GeForce RTX3090 founder edition DEAD card', price: 600 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'ZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB Graphics Card DOES NOT BOOT READ', price: 549.99 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'ASUS TUF Gaming OC GeForce RTX 3090 24GB RAM - Graphics Card - Overheating Issue', price: 799.99 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'EVGA RTX 3090 FTW3 24GB GDDR6X (24G-P5-3987-KR) NOTE: Rust', price: 949.99 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'READ DESC, EVGA GeForce RTX 3090 FTW3 ULTRA 24GB GDDR6X Graphics Card, READ DESC', price: 900 }, t3090), 'excluded-term');
+
+      // Non-functional 4090s
+      assert.equal(listingRejection({ title: 'GIGABYTE Windforce V2 GeForce RTX 4090 24GB - Graphics Card - Non-Functional', price: 1479.99 }, t4090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'GIGABYTE Gaming OC GeForce RTX 4090 24GB RAM - Graphics Card - Non-Functional', price: 2149.99 }, t4090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'ASUS TUF Gaming GeForce RTX 4090 24GB FOR PART-With core and VRAM', price: 1499.99 }, t4090), 'excluded-term');
+      assert.equal(listingRejection({ title: '*NON-WORKING* RTX 4090 (24GB) PNY Verto Triple Fan', price: 1600 }, t4090), 'excluded-term');
+      assert.equal(listingRejection({ title: '*NON WORKING* RTX 4090 (24gb) Zotac Amp Extreme Airo', price: 1300 }, t4090), 'excluded-term');
+
+      // Keyword-stuffed wrong card for 4090
+      assert.equal(listingRejection({ title: 'ASUS RTX 3090 Ti 24GB STRIX LC Liquid Cooled as new condition not 4090 5090 5080', price: 1649.94 }, t4090), 'wrong-variant');
+
+      // Wrong VRAM for A5000 (laptop MXM or mislabel)
+      assert.equal(listingRejection({ title: 'NVIDIA RTX A5000 GDDR6 16GB AI Graphics Card Excellent Condition USED from JAPAN', price: 1022 }, tA5000), 'excluded-keyword');
+
+      // Genuine titles from the same lists must still pass
+      assert.equal(listingRejection({ title: 'ZOTAC NVIDIA GeForce RTX 3090 Trinity 24GB GDDR6X Graphics Card ZT-A30900D-10P', price: 750 }, t3090), null);
+      assert.equal(listingRejection({ title: 'EVGA GeForce RTX 3090 FTW3 24GB GDDR6X CUDA PCIe HDMI/DP Multi-Monitor', price: 755 }, t3090), null);
+      assert.equal(listingRejection({ title: 'MSI GeForce RTX 4090 GAMING TRIO 24G 24GB PCIe x16 Triple Fan Silent', price: 1550 }, t4090), null);
+      assert.equal(listingRejection({ title: 'GIGABYTE GeForce RTX 4090 WINDFORCE V2 24GB GDDR6X HDMI/DP PCIe', price: 2000 }, t4090), null);
+      assert.equal(listingRejection({ title: 'Dell NVIDIA RTX A5000 GPU / 24gb VRAM', price: 1505 }, tA5000), null);
+      assert.equal(listingRejection({ title: 'PNY NVIDIA RTX A5000 4x DisplayPort 24GB GDDR6 Graphics Card VCNRTXA5000', price: 1199.99 }, tA5000), null);
+      assert.equal(listingRejection({ title: 'PNY NVIDIA RTX A5000 24GB GDDR6 Graphics Card', price: 1600 }, tA5000), null);
+    });
+
     it('counts a sale once when several query variants or pages return it', () => {
       const t3090 = card('rtx-3090');
       const sale = (itemId, price) => ({ title: `EVGA RTX 3090 24GB #${itemId}`, price, itemId });

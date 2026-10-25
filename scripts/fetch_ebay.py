@@ -33,10 +33,15 @@ def parse_price(text):
 
 GLOBAL_EXCLUDE_TERMS = [
     "not working", "defective", "no post", "failed", "partially works",
-    "for parts", "parts only", "for repair", "read description",
+    "for parts", "for part", "parts only", "for repair", "part/repair", "parts/repair",
+    "read description", "read desc",
     "as is", "as-is", "broken", "water damage", "damaged",
+    "non-working", "non working", "non-functional", "non functional",
+    "dead", "no video", "does not boot", "overheating", "rust",
     "board only", "cooler only", "box only", "heatsink only", "shroud only",
-    "gaming pc", "gaming desktop", "custom pc", "desktop pc"
+    "nvlink", "bridge",
+    "gaming pc", "gaming desktop", "custom pc", "desktop pc",
+    "lot of"
 ]
 
 ITEM_ID_RE = re.compile(r"/itm/(?:[^/?]*/)?(\d{9,})")
