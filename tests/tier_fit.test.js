@@ -110,17 +110,21 @@ describe('Generated build sheets', () => {
 });
 
 describe('New hardware tiers fit outcomes and price-sync', () => {
-  it('Llama 4 Scout offers the PRO 6000 tier and M3 Ultra tier as fits, alongside the M2 128GB Mac', () => {
+  it('Llama 4 Scout offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,052', () => {
     const scout = BUILDS_DATA['llama-4-scout'];
     assert.ok(scout, 'Scout build sheet exists');
+    const strixHalo = scout.tiers.find(t => t.id === 'tier-strix-halo');
     const pro6000 = scout.tiers.find(t => t.id === 'tier-rtx-pro-6000');
     const m3Ultra = scout.tiers.find(t => t.id === 'tier-mac-m3-ultra');
     const m2Ultra = scout.tiers.find(t => t.id === 'tier-best-new');
 
+    assert.ok(strixHalo, 'Strix Halo tier exists on Scout');
     assert.ok(pro6000, 'PRO 6000 tier exists on Scout');
     assert.ok(m3Ultra, 'M3 Ultra tier exists on Scout');
     assert.ok(m2Ultra, 'M2 Ultra tier exists on Scout');
 
+    assert.equal(strixHalo.fit.status, 'fits');
+    assert.equal(strixHalo.fit.quant, 'Q4_K_M');
     assert.equal(pro6000.fit.status, 'fits');
     assert.equal(pro6000.fit.quant, 'Q4_K_M');
     assert.equal(m3Ultra.fit.status, 'fits');
@@ -129,20 +133,25 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     assert.equal(m2Ultra.fit.quant, 'Q4_K_M');
 
     const fittingTiers = scout.tiers.filter(t => t.fit && t.fit.status !== 'none');
-    assert.equal(fittingTiers.length, 3, 'Scout has 3 fitting tiers (M2, M3, PRO 6000)');
+    assert.equal(fittingTiers.length, 4, 'Scout has 4 fitting tiers (M2, Strix Halo, M3, PRO 6000)');
+    assert.equal(cheapestFittingTotal(scout), 3052, 'Cheapest fitting total on Scout is Strix Halo ($3,052)');
   });
 
-  it('gpt-oss-120b offers the PRO 6000 tier and M3 Ultra tier as fits, alongside the M2 128GB Mac', () => {
+  it('gpt-oss-120b offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,052', () => {
     const gpt120 = BUILDS_DATA['gpt-oss-120b'];
     assert.ok(gpt120, 'gpt-oss-120b build sheet exists');
+    const strixHalo = gpt120.tiers.find(t => t.id === 'tier-strix-halo');
     const pro6000 = gpt120.tiers.find(t => t.id === 'tier-rtx-pro-6000');
     const m3Ultra = gpt120.tiers.find(t => t.id === 'tier-mac-m3-ultra');
     const m2Ultra = gpt120.tiers.find(t => t.id === 'tier-best-new');
 
+    assert.ok(strixHalo, 'Strix Halo tier exists on gpt-oss-120b');
     assert.ok(pro6000, 'PRO 6000 tier exists on gpt-oss-120b');
     assert.ok(m3Ultra, 'M3 Ultra tier exists on gpt-oss-120b');
     assert.ok(m2Ultra, 'M2 Ultra tier exists on gpt-oss-120b');
 
+    assert.equal(strixHalo.fit.status, 'fits');
+    assert.equal(strixHalo.fit.quant, 'MXFP4');
     assert.equal(pro6000.fit.status, 'fits');
     assert.equal(pro6000.fit.quant, 'MXFP4');
     assert.equal(m3Ultra.fit.status, 'fits');
@@ -151,7 +160,19 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     assert.equal(m2Ultra.fit.quant, 'MXFP4');
 
     const fittingTiers = gpt120.tiers.filter(t => t.fit && t.fit.status !== 'none');
-    assert.equal(fittingTiers.length, 3, 'gpt-oss-120b has 3 fitting tiers (M2, M3, PRO 6000)');
+    assert.equal(fittingTiers.length, 4, 'gpt-oss-120b has 4 fitting tiers (M2, Strix Halo, M3, PRO 6000)');
+    assert.equal(cheapestFittingTotal(gpt120), 3052, 'Cheapest fitting total on gpt-oss-120b is Strix Halo ($3,052)');
+  });
+
+  it('command-r-35b does not offer the RTX 5090 tier due to high context cost', () => {
+    const cmd35 = BUILDS_DATA['command-r-35b'];
+    assert.ok(cmd35, 'command-r-35b build sheet exists');
+    const rtx5090 = cmd35.tiers.find(t => t.id === 'tier-rtx-5090');
+    assert.equal(rtx5090, undefined, 'RTX 5090 tier must be absent from command-r-35b');
+
+    const fittingTiers = cmd35.tiers.filter(t => t.fit && t.fit.status !== 'none');
+    assert.equal(fittingTiers.length, 3, 'command-r-35b has 3 fitting tiers');
+    assert.deepEqual(fittingTiers.map(t => t.id), ['tier-budget-used', 'tier-balanced-mix', 'tier-best-new']);
   });
 
   it('Qwen3-235B shows the Strix Halo tier fitting at Q2_K', () => {

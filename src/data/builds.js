@@ -1665,6 +1665,8 @@ for (const model of MODELS_DATA) {
     // Large models whose recommended quant needs > 48GB and <= 95GB
     const recQuant = model.quants.find(q => q.recommended) || model.quants[model.quants.length - 1];
     if (recQuant.vram > 48 && recQuant.vram <= 95) {
+      // Strix Halo tier (96GB unified, 75% of 128GB) - cheapest fitting rig for all four
+      tiers.push(JSON.parse(JSON.stringify(TIER_STRIX_HALO)));
       // Mac Studio M3 Ultra tier (72GB usable) alongside M2 template when it fits
       const perK = model.contextCostPer8k / 8;
       if (recQuant.vram + perK * 8 <= 71) {
@@ -1674,9 +1676,9 @@ for (const model of MODELS_DATA) {
       tiers.push(JSON.parse(JSON.stringify(TIER_RTX_PRO_6000)));
     }
 
-    // Mid-size models (roughly 20B-40B class): add single-card 32GB RTX 5090 tier
+    // Mid-size models (roughly 20B-40B class): add single-card 32GB RTX 5090 tier (excluding command-r-35b due to 10.7GB/8K context cost)
     const paramCount = model.totalParamsB || parseFloat(model.parameters);
-    if (paramCount >= 20 && paramCount <= 40) {
+    if (paramCount >= 20 && paramCount <= 40 && model.id !== 'command-r-35b') {
       tiers.push(JSON.parse(JSON.stringify(TIER_RTX_5090)));
     }
   }
