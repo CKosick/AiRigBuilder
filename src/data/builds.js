@@ -1349,6 +1349,287 @@ for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
   for (const tier of sheet.tiers) tier.fit = tierFit(model, tier);
 }
 
+// Hardware tier templates for newly added hardware categories:
+// 1. RTX PRO 6000 Blackwell workstation (96GB discrete)
+export const TIER_RTX_PRO_6000 = {
+  id: 'tier-rtx-pro-6000',
+  name: 'RTX PRO 6000 Blackwell Workstation',
+  badge: '96GB Workstation',
+  type: 'new',
+  accentColor: '#8b5cf6',
+  headline: 'Single-card 96GB GDDR7 workstation with 1,792 GB/s memory bandwidth',
+  rigSummary: 'Single NVIDIA RTX PRO 6000 Blackwell 96GB card in a high-end AM5 workstation. 1,792 GB/s ECC memory bandwidth runs huge models without multi-GPU tensor-parallel complexity.',
+  memoryGb: 96,
+  estimatedTdpWatts: 820,
+  parts: [
+    {
+      category: 'GPU',
+      name: 'NVIDIA RTX PRO 6000 Blackwell (96GB)',
+      spec: '96GB GDDR7 ECC, 1792 GB/s bandwidth, 600W TDP',
+      condition: 'New (Enterprise)',
+      price: 15100,
+      merchant: 'eBay / Enterprise',
+      url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1',
+      notes: '96GB GDDR7 ECC on a single card with 1,792 GB/s bandwidth.'
+    },
+    {
+      category: 'CPU',
+      name: 'AMD Ryzen 7 7700X (8C / 16T, AM5)',
+      spec: '105W TDP, 4.5GHz base / 5.4GHz boost, PCIe 5.0 lanes',
+      condition: 'New (Amazon)',
+      price: 289,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Ryzen+7+7700X',
+      notes: 'Fast prompt ingestion and tensor preparation.'
+    },
+    {
+      category: 'Motherboard',
+      name: 'ASUS ProArt X670E-Creator WiFi',
+      spec: 'PCIe 5.0 x16 slot with robust VRM and workstation connectivity',
+      condition: 'New (Amazon / B&H)',
+      price: 439,
+      merchant: 'B&H / Amazon',
+      url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+      notes: 'Workstation motherboard with 10G LAN and heavy-duty PCIe slots for high-power GPUs.'
+    },
+    {
+      category: 'RAM',
+      name: 'G.Skill Flare X5 64GB (2x32GB) DDR5-6000 CL30',
+      spec: 'DDR5-6000 low latency',
+      condition: 'New (Amazon)',
+      price: 189,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+      notes: 'Fast 64GB DDR5 memory allows loading large models and managing system buffers.'
+    },
+    {
+      category: 'Power Supply (PSU)',
+      name: 'Corsair RM1200x Shift 1200W 80+ Gold (ATX 3.0)',
+      spec: '1200W ATX 3.0 / PCIe 5.0 compliant, side modular ports',
+      condition: 'New (Amazon / B&H)',
+      price: 219,
+      merchant: 'Amazon / B&H',
+      url: 'https://www.amazon.com/s?k=Corsair+RM1200x+Shift+1200W',
+      notes: '1200W ATX 3.0 power supply sized for the 600W card plus system transients.'
+    },
+    {
+      category: 'Storage (SSD)',
+      name: 'Samsung 990 Pro 2TB NVMe PCIe 4.0',
+      spec: 'Up to 7450 MB/s read speed',
+      condition: 'New (Amazon)',
+      price: 169,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      notes: 'Rapid checkpoint swapping and weights load time.'
+    },
+    {
+      category: 'Case',
+      name: 'Lian Li O11 Dynamic EVO XL',
+      spec: 'Massive dual-chamber airflow chassis with multi-GPU clearance',
+      condition: 'New (Amazon)',
+      price: 229,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO+XL',
+      notes: 'Spacious high-airflow chassis accommodates thick 600W workstation cards with direct fan cooling.'
+    },
+    {
+      category: 'Cooling & Fans',
+      name: 'Arctic Liquid Freezer III 360 AIO + 3x P12 PWM Max Fans',
+      spec: '360mm AIO water cooler + high static pressure fans',
+      condition: 'New (Amazon)',
+      price: 119,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Arctic+Liquid+Freezer+III+360',
+      notes: 'Keeps CPU whisper silent while leaving full airflow channel open for the GPU.'
+    }
+  ]
+};
+
+// 2. AMD Ryzen AI Max+ 395 Mini PC / Strix Halo (128GB unified, 96GB usable)
+export const TIER_STRIX_HALO = {
+  id: 'tier-strix-halo',
+  name: 'AMD Ryzen AI Max+ 395 (Strix Halo 128GB)',
+  badge: 'Cheapest 96GB Fit',
+  type: 'new',
+  accentColor: '#10b981',
+  headline: 'Affordable 96GB usable unified memory in an ultra-low-power mini PC',
+  rigSummary: 'Complete Strix Halo mini PC with 128GB shared LPDDR5X-8000 memory (up to 96GB assigned to GPU). The most affordable way to fit 96GB-class models in a whisper-quiet 120W chassis.',
+  memoryGb: 96,
+  estimatedTdpWatts: 120,
+  parts: [
+    {
+      category: 'Compute Unit',
+      name: 'AMD Ryzen AI Max+ 395 Mini PC (128GB)',
+      spec: '16C/32T Zen 5, Radeon 8060S (40 CUs), 128GB unified LPDDR5X-8000 (96GB usable), 256 GB/s',
+      condition: 'New',
+      price: 3052,
+      merchant: 'eBay / Retail',
+      url: 'https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1',
+      notes: 'Complete mini PC. Up to 96GB allocated to GPU. 256 GB/s memory bandwidth.'
+    },
+    {
+      category: 'Internal Storage',
+      name: '1TB NVMe PCIe 4.0 SSD',
+      spec: 'Integrated M.2 NVMe storage',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Included with mini PC configuration.'
+    },
+    {
+      category: 'Power & Cooling',
+      name: 'Integrated Compact Power Supply & Cooling',
+      spec: '120W max system power draw',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Whisper-quiet low-power operation.'
+    }
+  ]
+};
+
+// 3. Apple Mac Studio M3 Ultra (96GB unified, 72GB usable)
+export const TIER_MAC_M3_ULTRA = {
+  id: 'tier-mac-m3-ultra',
+  name: 'Apple Mac Studio M3 Ultra (96GB Unified)',
+  badge: '72GB Unified / Pure Silence',
+  type: 'new',
+  accentColor: '#8b5cf6',
+  headline: 'Modern M3 Ultra turnkey desktop with 72GB usable memory at 819 GB/s',
+  rigSummary: 'Apple Mac Studio M3 Ultra with 96GB unified memory (72GB usable). High 819 GB/s unified memory bandwidth runs large models natively in pure silence.',
+  memoryGb: 72,
+  estimatedTdpWatts: 220,
+  parts: [
+    {
+      category: 'Compute Unit',
+      name: 'Apple Mac Studio M3 Ultra (96GB)',
+      spec: '28-core CPU, 76-core GPU, 96GB unified memory (72GB usable), 819 GB/s',
+      condition: 'Used / Refurbished',
+      price: 4650,
+      merchant: 'eBay / Apple',
+      url: 'https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1',
+      notes: '72GB usable unified memory with 819 GB/s bandwidth. Whisper quiet desktop operation.'
+    },
+    {
+      category: 'Internal Storage',
+      name: '1TB Ultra-Fast Internal SSD',
+      spec: 'Integrated with SOC',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Included in base configuration.'
+    },
+    {
+      category: 'Power & Acoustics',
+      name: 'Internal Silent Power Supply',
+      spec: 'Integrated, whisper-quiet thermal system',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Acoustic subsystem operates near silent under load.'
+    }
+  ]
+};
+
+// 4. RTX 5090 32GB single-card tier
+export const TIER_RTX_5090 = {
+  id: 'tier-rtx-5090',
+  name: 'Single RTX 5090 32GB Flagship Rig',
+  badge: '32GB Blackwell Flagship',
+  type: 'new',
+  accentColor: '#8b5cf6',
+  headline: 'Peak 32GB single-card local AI with 1,792 GB/s memory bandwidth',
+  rigSummary: 'Single NVIDIA RTX 5090 32GB on modern AM5 platform. 1,792 GB/s GDDR7 bandwidth runs mid-size models with higher quant and extended context on one card. (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).',
+  memoryGb: 32,
+  estimatedTdpWatts: 720,
+  parts: [
+    {
+      category: 'GPU',
+      name: 'NVIDIA GeForce RTX 5090 32GB',
+      spec: '32GB GDDR7, 1792 GB/s bandwidth, 575W TDP',
+      condition: 'New',
+      price: 6600,
+      merchant: 'eBay / Retail',
+      url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1',
+      notes: 'Fastest 32GB consumer card for local AI with 1,792 GB/s memory bandwidth. (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).'
+    },
+    {
+      category: 'CPU',
+      name: 'AMD Ryzen 7 7800X3D (8C / 16T)',
+      spec: 'Zen 4 3D V-Cache, 120W TDP',
+      condition: 'New (Amazon)',
+      price: 449,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Ryzen+7+7800X3D',
+      notes: 'Top tier single-core performance.'
+    },
+    {
+      category: 'Motherboard',
+      name: 'MSI MAG B650 Tomahawk WiFi',
+      spec: 'ATX B650 with heavy heatsinks and steel-reinforced PCIe slot',
+      condition: 'New (Amazon)',
+      price: 199,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=MSI+MAG+B650+Tomahawk',
+      notes: 'Heavy-duty steel-armored PCIe slot supports thick, heavy modern flagship GPUs.'
+    },
+    {
+      category: 'RAM',
+      name: 'G.Skill Flare X5 64GB (2x32GB) DDR5-6000 CL30',
+      spec: '64GB DDR5 CL30',
+      condition: 'New (Amazon)',
+      price: 189,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+      notes: 'High speed low latency memory.'
+    },
+    {
+      category: 'Power Supply (PSU)',
+      name: 'Corsair RM1000x 1000W 80+ Gold (ATX 3.0)',
+      spec: '1000W with native 12V-2x6 cable, ATX 3.0',
+      condition: 'New (Amazon / B&H)',
+      price: 169,
+      merchant: 'Amazon / B&H',
+      url: 'https://www.amazon.com/s?k=Corsair+RM1000x+1000W',
+      notes: '1000W ATX 3.0 PSU with native 12V-2x6 power cable sized for 575W card transients.'
+    },
+    {
+      category: 'Storage (SSD)',
+      name: 'Samsung 990 Pro 2TB NVMe SSD',
+      spec: '7450 MB/s read speed',
+      condition: 'New (Amazon)',
+      price: 169,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      notes: 'Top tier NVMe.'
+    },
+    {
+      category: 'Case',
+      name: 'Lian Li LANCOOL 216',
+      spec: 'High-airflow chassis with anti-sag bracket',
+      condition: 'New (Amazon)',
+      price: 99,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Lian+Li+LANCOOL+216',
+      notes: 'Anti-sag bracket supports heavy flagship card.'
+    },
+    {
+      category: 'Cooling',
+      name: 'Thermalright Phantom Spirit 120 SE',
+      spec: 'Dual tower air cooler',
+      condition: 'New (Amazon)',
+      price: 36,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Thermalright+Phantom+Spirit',
+      notes: 'Silent and reliable.'
+    }
+  ]
+};
+
 // Notes copied from a template that describe the template's own model (sizes like "70B" or
 // "42GB model", or model names) are wrong on another model's sheet
 const MODEL_SPECIFIC_NOTE = /\b\d+(\.\d+)?B\b|\d+\s?GB model|model files|Llama|Mistral|NeMo|Qwen|DeepSeek|Gemma|Phi\b/i;
@@ -1375,18 +1656,56 @@ for (const model of MODELS_DATA) {
   const baseTemplateId = templates[templateIdx];
 
   const tiers = JSON.parse(JSON.stringify(BUILDS_DATA[baseTemplateId].tiers));
+
+  // Add new hardware tiers where they change the answer:
+  if (model.id === 'qwen-3-235b-a22b') {
+    // Qwen 3 235B: Offer Strix Halo mini PC where it is the cheapest fit at Q2_K (replaces non-fitting M2 Mac tier)
+    tiers[2] = JSON.parse(JSON.stringify(TIER_STRIX_HALO));
+  } else {
+    // Large models whose recommended quant needs > 48GB and <= 95GB
+    const recQuant = model.quants.find(q => q.recommended) || model.quants[model.quants.length - 1];
+    if (recQuant.vram > 48 && recQuant.vram <= 95) {
+      // Mac Studio M3 Ultra tier (72GB usable) alongside M2 template when it fits
+      const perK = model.contextCostPer8k / 8;
+      if (recQuant.vram + perK * 8 <= 71) {
+        tiers.push(JSON.parse(JSON.stringify(TIER_MAC_M3_ULTRA)));
+      }
+      // RTX PRO 6000 workstation tier (96GB discrete)
+      tiers.push(JSON.parse(JSON.stringify(TIER_RTX_PRO_6000)));
+    }
+
+    // Mid-size models (roughly 20B-40B class): add single-card 32GB RTX 5090 tier
+    const paramCount = model.totalParamsB || parseFloat(model.parameters);
+    if (paramCount >= 20 && paramCount <= 40) {
+      tiers.push(JSON.parse(JSON.stringify(TIER_RTX_5090)));
+    }
+  }
+
   for (const tier of tiers) {
     const fit = tierFit(model, tier);
     tier.fit = fit;
     tier.name = tier.name.replace(/ (Reasoning|Coding) Rig$/, ' Rig');
     tier.headline = fitHeadline(model, fit);
     tier.rigSummary = `${tier.name} with ${tier.memoryGb} GB of usable GPU memory. ${fitDetail(model, fit)}`;
+    if (tier.id === 'tier-rtx-5090') {
+      tier.rigSummary += ' (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).';
+    }
     // Template badges make claims about the template's model ("Unquantized FP16", "100+ Tokens/sec")
-    tier.badge = fit.status === 'none' ? "Won't Fit This Model" : GENERIC_BADGES[tier.type];
+    const newTierBadges = {
+      'tier-rtx-pro-6000': '96GB Workstation',
+      'tier-strix-halo': 'Cheapest 96GB Fit',
+      'tier-mac-m3-ultra': '72GB Unified',
+      'tier-rtx-5090': '32GB Flagship'
+    };
+    tier.badge = fit.status === 'none' ? "Won't Fit This Model" : (newTierBadges[tier.id] || GENERIC_BADGES[tier.type]);
 
     for (const part of tier.parts) {
       if (isGpuPart(part)) {
-        part.notes = fitDetail(model, fit);
+        if (tier.id === 'tier-rtx-5090') {
+          part.notes = `${fitDetail(model, fit)} (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).`;
+        } else {
+          part.notes = fitDetail(model, fit);
+        }
       } else if (isStoragePart(part) && fit.quant) {
         part.notes = `${model.name} at ${fit.quant} is about ${Math.ceil(fit.quantVram)} GB on disk.`;
       } else if (part.notes && MODEL_SPECIFIC_NOTE.test(part.notes)) {

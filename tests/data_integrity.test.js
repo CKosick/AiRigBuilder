@@ -132,12 +132,12 @@ describe('Data Integrity & Consistency Contracts', () => {
   });
 
   describe('BUILDS_DATA Contract', () => {
-    it('maps every model in MODELS_DATA to 3 hardware tiers in BUILDS_DATA', () => {
+    it('maps every model in MODELS_DATA to at least 3 hardware tiers in BUILDS_DATA', () => {
       for (const model of MODELS_DATA) {
         const buildEntry = BUILDS_DATA[model.id];
         assert.ok(buildEntry, `Missing build entry for model ID: ${model.id}`);
         assert.ok(Array.isArray(buildEntry.tiers), `Tiers must be an array for ${model.id}`);
-        assert.equal(buildEntry.tiers.length, 3, `Model ${model.id} must have exactly 3 build tiers (Budget, Balanced, Best)`);
+        assert.ok(buildEntry.tiers.length >= 3, `Model ${model.id} must have at least 3 build tiers`);
 
         const tierTypes = buildEntry.tiers.map(t => t.type);
         assert.ok(tierTypes.includes('used'), `Model ${model.id} must have a used tier`);

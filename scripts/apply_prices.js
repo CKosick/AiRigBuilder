@@ -97,11 +97,15 @@ async function applyPrices() {
   fs.writeFileSync(GPUS_FILE, updatedGpusCode, 'utf-8');
   console.log(`✓ Updated: ${GPUS_FILE}`);
 
-  // 2. Update builds.js if 3090, 4090, or 3060 prices changed
+  // 2. Update builds.js if GPU prices changed
   const rtx3090 = approvedCards.find(c => c.id === 'rtx-3090');
   const rtx4090 = approvedCards.find(c => c.id === 'rtx-4090');
   const rtx3060 = approvedCards.find(c => c.id === 'rtx-3060-12gb');
   const rtx4060ti = approvedCards.find(c => c.id === 'rtx-4060-ti-16gb');
+  const rtx5090 = approvedCards.find(c => c.id === 'rtx-5090');
+  const rtxPro6000 = approvedCards.find(c => c.id === 'rtx-pro-6000-blackwell');
+  const strixHalo = approvedCards.find(c => c.id === 'strix-halo-128gb');
+  const m3Ultra = approvedCards.find(c => c.id === 'mac-studio-m3-ultra');
 
   let buildsContent = fs.readFileSync(BUILDS_FILE, 'utf-8');
   let buildsUpdated = false;
@@ -130,6 +134,38 @@ async function applyPrices() {
     buildsContent = buildsContent.replace(
       /(name:\s*'NVIDIA GeForce RTX 3060 12GB'[\s\S]*?price:\s*)\d+/g,
       `$1${rtx3060.proposedPrice}`
+    );
+    buildsUpdated = true;
+  }
+
+  if (rtx5090) {
+    buildsContent = buildsContent.replace(
+      /(name:\s*'NVIDIA GeForce RTX 5090 32GB'[\s\S]*?price:\s*)\d+/g,
+      `$1${rtx5090.proposedPrice}`
+    );
+    buildsUpdated = true;
+  }
+
+  if (rtxPro6000) {
+    buildsContent = buildsContent.replace(
+      /(name:\s*'NVIDIA RTX PRO 6000 Blackwell \(96GB\)'[\s\S]*?price:\s*)\d+/g,
+      `$1${rtxPro6000.proposedPrice}`
+    );
+    buildsUpdated = true;
+  }
+
+  if (strixHalo) {
+    buildsContent = buildsContent.replace(
+      /(name:\s*'AMD Ryzen AI Max\+ 395 Mini PC \(128GB\)'[\s\S]*?price:\s*)\d+/g,
+      `$1${strixHalo.proposedPrice}`
+    );
+    buildsUpdated = true;
+  }
+
+  if (m3Ultra) {
+    buildsContent = buildsContent.replace(
+      /(name:\s*'Apple Mac Studio M3 Ultra \(96GB\)'[\s\S]*?price:\s*)\d+/g,
+      `$1${m3Ultra.proposedPrice}`
     );
     buildsUpdated = true;
   }

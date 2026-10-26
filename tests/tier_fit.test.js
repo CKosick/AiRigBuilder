@@ -42,9 +42,9 @@ describe('Tier fit math', () => {
   });
 
   it('matches known cases from the data', () => {
-    // A 32B model at Q4_K_M (20 GB) fits a 24 GB card but not a 16 GB one
+    // A 32B model at Q4_K_M (20 GB) fits a 24 GB card and 32 GB card, but not a 16 GB one
     const qwen32 = BUILDS_DATA['qwen-2.5-32b'].tiers;
-    assert.deepEqual(qwen32.map(t => [t.memoryGb, t.fit.status]), [[24, 'fits'], [16, 'none'], [24, 'fits']]);
+    assert.deepEqual(qwen32.map(t => [t.memoryGb, t.fit.status]), [[24, 'fits'], [16, 'none'], [24, 'fits'], [32, 'fits']]);
     // FP16 / Q8 8B does not fit in 10 GB once overhead and context are counted
     assert.equal(tierFit(model('llama-3.1-8b'), { memoryGb: 10 }).status, 'reduced');
   });
@@ -92,9 +92,9 @@ describe('Generated build sheets', () => {
     }
   });
 
-  it('only the 671B DeepSeeks and Qwen 3 235B have no listed rig that fits', () => {
+  it('only the 671B DeepSeeks have no listed rig that fits', () => {
     const noRig = Object.entries(BUILDS_DATA).filter(([, s]) => cheapestFittingTotal(s) === null).map(([id]) => id).sort();
-    assert.deepEqual(noRig, ['deepseek-r1-full', 'deepseek-v3-moe', 'qwen-3-235b-a22b']);
+    assert.deepEqual(noRig, ['deepseek-r1-full', 'deepseek-v3-moe']);
   });
 
   it('every batch-1 model fits a listed tier or is flagged as a unified-memory / offload candidate', () => {
@@ -105,6 +105,124 @@ describe('Generated build sheets', () => {
       assert.ok(m, `${id} is in MODELS_DATA`);
       const fitsSomewhere = BUILDS_DATA[id].tiers.some(t => t.fit.status !== 'none');
       assert.ok(fitsSomewhere || m.largeModelPath === 'unified-memory-or-offload', `${id} fits a tier or is flagged`);
+    }
+  });
+});
+
+describe('New hardware tiers fit outcomes and price-sync', () => {
+  it('Llama 4 Scout offers the PRO 6000 tier and M3 Ultra tier as fits, alongside the M2 128GB Mac', () => {
+    const scout = BUILDS_DATA['llama-4-scout'];
+    assert.ok(scout, 'Scout build sheet exists');
+    const pro6000 = scout.tiers.find(t => t.id === 'tier-rtx-pro-6000');
+    const m3Ultra = scout.tiers.find(t => t.id === 'tier-mac-m3-ultra');
+    const m2Ultra = scout.tiers.find(t => t.id === 'tier-best-new');
+
+    assert.ok(pro6000, 'PRO 6000 tier exists on Scout');
+    assert.ok(m3Ultra, 'M3 Ultra tier exists on Scout');
+    assert.ok(m2Ultra, 'M2 Ultra tier exists on Scout');
+
+    assert.equal(pro6000.fit.status, 'fits');
+    assert.equal(pro6000.fit.quant, 'Q4_K_M');
+    assert.equal(m3Ultra.fit.status, 'fits');
+    assert.equal(m3Ultra.fit.quant, 'Q4_K_M');
+    assert.equal(m2Ultra.fit.status, 'fits');
+    assert.equal(m2Ultra.fit.quant, 'Q4_K_M');
+
+    const fittingTiers = scout.tiers.filter(t => t.fit && t.fit.status !== 'none');
+    assert.equal(fittingTiers.length, 3, 'Scout has 3 fitting tiers (M2, M3, PRO 6000)');
+  });
+
+  it('gpt-oss-120b offers the PRO 6000 tier and M3 Ultra tier as fits, alongside the M2 128GB Mac', () => {
+    const gpt120 = BUILDS_DATA['gpt-oss-120b'];
+    assert.ok(gpt120, 'gpt-oss-120b build sheet exists');
+    const pro6000 = gpt120.tiers.find(t => t.id === 'tier-rtx-pro-6000');
+    const m3Ultra = gpt120.tiers.find(t => t.id === 'tier-mac-m3-ultra');
+    const m2Ultra = gpt120.tiers.find(t => t.id === 'tier-best-new');
+
+    assert.ok(pro6000, 'PRO 6000 tier exists on gpt-oss-120b');
+    assert.ok(m3Ultra, 'M3 Ultra tier exists on gpt-oss-120b');
+    assert.ok(m2Ultra, 'M2 Ultra tier exists on gpt-oss-120b');
+
+    assert.equal(pro6000.fit.status, 'fits');
+    assert.equal(pro6000.fit.quant, 'MXFP4');
+    assert.equal(m3Ultra.fit.status, 'fits');
+    assert.equal(m3Ultra.fit.quant, 'MXFP4');
+    assert.equal(m2Ultra.fit.status, 'fits');
+    assert.equal(m2Ultra.fit.quant, 'MXFP4');
+
+    const fittingTiers = gpt120.tiers.filter(t => t.fit && t.fit.status !== 'none');
+    assert.equal(fittingTiers.length, 3, 'gpt-oss-120b has 3 fitting tiers (M2, M3, PRO 6000)');
+  });
+
+  it('Qwen3-235B shows the Strix Halo tier fitting at Q2_K', () => {
+    const qwen235 = BUILDS_DATA['qwen-3-235b-a22b'];
+    assert.ok(qwen235, 'Qwen3-235B build sheet exists');
+    const strixHalo = qwen235.tiers.find(t => t.id === 'tier-strix-halo');
+    assert.ok(strixHalo, 'Strix Halo tier exists on Qwen3-235B');
+
+    assert.equal(strixHalo.fit.status, 'reduced');
+    assert.equal(strixHalo.fit.quant, 'Q2_K');
+    assert.equal(strixHalo.fit.quantVram, 85.7);
+    assert.equal(strixHalo.memoryGb, 96);
+    // 85.7 + 1.6 = 87.3 <= 95 usable memory
+    assert.ok(strixHalo.fit.contextK >= 8);
+
+    const fittingTiers = qwen235.tiers.filter(t => t.fit && t.fit.status !== 'none');
+    assert.equal(fittingTiers.length, 1, 'Qwen3-235B has 1 fitting tier (Strix Halo)');
+  });
+
+  it('DeepSeek V3 and DeepSeek R1 full still show no fitting tier', () => {
+    for (const id of ['deepseek-v3-moe', 'deepseek-r1-full']) {
+      const sheet = BUILDS_DATA[id];
+      assert.equal(cheapestFittingTotal(sheet), null, `${id} must have no fitting tier`);
+      assert.ok(sheet.tiers.every(t => t.fit.status === 'none'), `${id} all tiers status none`);
+    }
+  });
+
+  it('all new GPU/platform part prices equal tracker prices in gpus.js and match apply_prices.js regex', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const { GPUS_DATA } = await import('../src/data/gpus.js');
+    const applyPricesCode = fs.readFileSync(path.resolve('scripts/apply_prices.js'), 'utf-8');
+
+    const expectedGpus = [
+      { id: 'rtx-pro-6000-blackwell', partName: 'NVIDIA RTX PRO 6000 Blackwell (96GB)' },
+      { id: 'strix-halo-128gb', partName: 'AMD Ryzen AI Max+ 395 Mini PC (128GB)' },
+      { id: 'mac-studio-m3-ultra', partName: 'Apple Mac Studio M3 Ultra (96GB)' },
+      { id: 'rtx-5090', partName: 'NVIDIA GeForce RTX 5090 32GB' }
+    ];
+
+    for (const { id, partName } of expectedGpus) {
+      const gpu = GPUS_DATA.find(g => g.id === id);
+      assert.ok(gpu, `GPU ${id} exists in gpus.js`);
+
+      // Verify apply_prices.js registers this card and matches the part in builds.js
+      assert.ok(applyPricesCode.includes(id), `apply_prices.js checks card ${id}`);
+      const basePartName = partName.split('(')[0].split('+')[0].trim();
+      assert.ok(applyPricesCode.includes(basePartName), `apply_prices.js matches part name ${basePartName}`);
+
+      // Verify every tier containing this part has the tracker price
+      for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+        for (const tier of sheet.tiers) {
+          const part = tier.parts.find(p => p.name === partName);
+          if (part) {
+            assert.equal(part.price, gpu.usedStreetPrice, `${modelId} ${tier.id} part ${partName} price matches tracker`);
+          }
+        }
+      }
+    }
+  });
+
+  it('every build total equals the sum of its parts across all models and tiers', () => {
+    for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+      for (const tier of sheet.tiers) {
+        const sum = tier.parts.reduce((acc, p) => acc + (p.price || 0), 0);
+        assert.ok(sum > 0, `${modelId} ${tier.id} total must be positive`);
+        for (const p of tier.parts) {
+          assert.equal(typeof p.price, 'number', `${modelId} ${tier.id} part ${p.name} price is number`);
+          assert.ok(p.price >= 0, `${modelId} ${tier.id} part ${p.name} price >= 0`);
+        }
+      }
     }
   });
 });

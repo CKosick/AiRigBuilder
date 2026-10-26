@@ -904,10 +904,12 @@ export const MODELS_DATA = [
     description: 'Qwen 3\'s flagship mixture-of-experts model, Apache 2.0. Memory is set by all 235B parameters (about 142 GB at Q4_K_M, 112 GB at Q3_K_M), not the 22B active per token, so it needs a large unified-memory machine or a GPU with experts offloaded to system RAM.',
     architecture: 'Sparse MoE (128 experts, 8 active per token)',
     flagship: false,
-    minVram: 113,
+    minVram: 86,
     recommendedVram: 147,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
+      // Size source: unsloth/Qwen3-235B-A22B-GGUF and bartowski/Qwen_Qwen3-235B-A22B-Instruct-2507-GGUF (published 85.7GB)
+      { name: 'Q2_K (2.9 bpw)', vram: 85.7, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'High compression: noticeable quality loss, fits 96GB systems' },
       { name: 'Q3_K_M (3.9 bpw)', vram: 112.4, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Smallest practical quant: noticeable quality loss' },
       {
         name: 'Q4_K_M (4.8 bpw)',
