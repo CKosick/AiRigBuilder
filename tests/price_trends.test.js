@@ -58,7 +58,7 @@ describe('7d / 30d price trends from the apply log', () => {
   it('n/a resolves as weekly apply runs accumulate: 7d on the next weekly run, 30d on the 4th', () => {
     // Weekly runs starting from the committed log's state (three runs within one day)
     const start = Date.parse('2026-10-07T03:56:24.859Z');
-    const log = AUDIT_LOG.map(r => ({ ...r }));
+    const log = AUDIT_LOG.filter(r => Date.parse(r.appliedAt) <= start).map(r => ({ ...r }));
     const seen = [];
     for (let week = 1; week <= 6; week++) {
       const price = 718 + week * 10;

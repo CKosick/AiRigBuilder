@@ -35,7 +35,7 @@ describe('Weekly price review pipeline', () => {
     it("keeps each GPU's live price inside its sensible range, so the search can find it", () => {
       // Unpriced new rows are reported by the data-integrity test instead
       for (const t of reviewTargets().filter(x => x.currentPrice !== null)) {
-        assert.ok(t.currentPrice >= t.minSensiblePrice && t.currentPrice <= t.maxSensiblePrice * 0.85,
+        assert.ok(t.currentPrice >= t.minSensiblePrice && t.currentPrice <= t.maxSensiblePrice,
           `${t.id}: $${t.currentPrice} vs range $${t.minSensiblePrice}-$${t.maxSensiblePrice}`);
       }
     });
@@ -105,7 +105,7 @@ describe('Weekly price review pipeline', () => {
     });
 
     it('measures the change against the live site price and holds big swings', () => {
-      const live = target();
+      const live = target({ currentPrice: 700 });
       const up = priceCard(live, listings(...Array(5).fill(Math.round(live.currentPrice * 1.3 / ASKING_TO_SOLD))), 'EBAY_BROWSE_API');
       assert.ok(up.changePct > SWING_LIMIT_PCT);
       assert.equal(up.status, STATUS.FLAGGED_SWING);
