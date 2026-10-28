@@ -119,7 +119,7 @@ async function applyPrices() {
       `$1${dual3090Price}$2${rtx3090.proposedPrice}`
     );
     buildsContent = buildsContent.replace(
-      /(name:\s*'2x NVIDIA GeForce RTX 3090 24GB'[\s\S]*?price:\s*)\d+/g,
+      /(name:\s*'2x NVIDIA GeForce RTX 3090 24GB(?:\s*\(or 2x RTX A5000\))?'[\s\S]*?price:\s*)\d+/g,
       `$1${dual3090Price}`
     );
     // Replace single 3090 price

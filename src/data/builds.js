@@ -383,7 +383,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB (or 2x RTX A5000)',
             spec: '48GB Total VRAM, 936 GB/s',
             condition: 'Used (eBay)',
-            price: 1390,
+            price: 1500,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Fits DeepSeek-R1-70B Q4_K_M + 32K context window.'

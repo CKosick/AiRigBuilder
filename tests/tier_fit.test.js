@@ -246,4 +246,28 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       }
     }
   });
+
+  it('every GPU part whose name starts with 2x NVIDIA GeForce RTX 3090 is priced at 2x the rtx-3090 price in gpus.js', async () => {
+    const { GPUS_DATA } = await import('../src/data/gpus.js');
+    const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090');
+    assert.ok(rtx3090, 'rtx-3090 exists in gpus.js');
+    const expectedDualPrice = rtx3090.usedStreetPrice * 2;
+
+    let checkedCount = 0;
+    for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+      for (const tier of sheet.tiers) {
+        for (const part of tier.parts) {
+          if (part.name.startsWith('2x NVIDIA GeForce RTX 3090')) {
+            assert.equal(
+              part.price,
+              expectedDualPrice,
+              `${modelId} ${tier.id} part "${part.name}" must be priced at 2x rtx-3090 ($${expectedDualPrice})`
+            );
+            checkedCount++;
+          }
+        }
+      }
+    }
+    assert.ok(checkedCount > 0, 'Checked at least one 2x RTX 3090 part across build sheets');
+  });
 });
