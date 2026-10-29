@@ -1677,10 +1677,10 @@ export const TIER_RAM_OFFLOAD = {
       name: 'Corsair Vengeance 192GB (4x48GB) DDR5-5200 CL38 (CMK192GX5M4B5200C38)',
       spec: '192GB (4x48GB) DDR5-5200 UDIMM matched 4-DIMM kit',
       condition: 'New (B&H / Amazon)',
-      price: 580,
+      price: 2850,
       merchant: 'B&H / Amazon',
       url: 'https://www.bhphotovideo.com/c/search?Ntt=CMK192GX5M4B5200C38',
-      notes: '192GB system RAM pool holds 140GB-142GB Q2_K weights in memory with room for OS and MLA KV cache.'
+      notes: '192GB system RAM pool holds 140GB-142GB Q2_K weights in memory with room for OS and MLA KV cache. DDR5 prices are highly volatile in late 2026 and this reflects the kit\'s current street price.'
     },
     {
       category: 'Power Supply (PSU)',

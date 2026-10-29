@@ -204,6 +204,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       assert.equal(offload.fit.quantVram, expectedVram);
       assert.equal(offload.fit.contextLabel, '32K+');
       const offloadTotal = offload.parts.reduce((sum, p) => sum + (p.price || 0), 0);
+      assert.equal(offloadTotal, 5314, `${id} tier-ram-offload parts total is $5,314`);
       assert.equal(cheapestFittingTotal(sheet), offloadTotal, `${id} cheapestFittingTotal equals tier-ram-offload parts total ($${offloadTotal})`);
     }
   });
