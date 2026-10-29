@@ -1630,6 +1630,101 @@ export const TIER_RTX_5090 = {
   ]
 };
 
+// 5. 192GB System RAM Offload Rig (AM5 + RTX 3090)
+export const TIER_RAM_OFFLOAD = {
+  id: 'tier-ram-offload',
+  name: '192GB System RAM Offload Rig (AM5 + RTX 3090)',
+  badge: 'RAM Offload',
+  type: 'balanced',
+  accentColor: '#3b82f6',
+  headline: 'Run colossal 671B MoE weights from 192GB DDR5 system RAM with RTX 3090 partial offload',
+  rigSummary: '192GB System RAM Offload Rig (AM5 + RTX 3090) with 192 GB of DDR5 system RAM used for CPU offload, plus an RTX 3090 24 GB as partial-offload acceleration (a speed bonus, not added to model capacity). Most layers are computed from system RAM, so expect single-digit tokens per second, roughly 3 to 8 tok/s on this class of rig (estimate), versus the far higher speeds of a GPU-resident fit.',
+  memoryGb: 192,
+  estimatedTdpWatts: 450,
+  parts: [
+    {
+      category: 'GPU',
+      name: '1x NVIDIA GeForce RTX 3090 24GB',
+      spec: '24GB GDDR6X, 936 GB/s bandwidth (partial layer & KV/prompt offload accelerator)',
+      condition: 'Used (eBay)',
+      price: 750,
+      merchant: 'eBay Sold',
+      url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
+      notes: 'Holds shared attention/shared layers and accelerates prompt processing; the 192GB system RAM pool holds the full MoE weights.'
+    },
+    {
+      category: 'CPU',
+      name: 'AMD Ryzen 9 9950X (16C / 32T, AM5)',
+      spec: '170W TDP, 4.3GHz base / 5.7GHz boost, 16 Zen 5 cores with AVX-512',
+      condition: 'New (B&H / Amazon)',
+      price: 539,
+      merchant: 'B&H / Amazon',
+      url: 'https://www.bhphotovideo.com/c/search?Ntt=AMD+Ryzen+9+9950X',
+      notes: '16 Zen 5 cores and dual-CCD memory bandwidth drive CPU-side MoE expert evaluation during llama.cpp system-RAM offload.'
+    },
+    {
+      category: 'Motherboard',
+      name: 'ASUS ProArt X670E-Creator WiFi',
+      spec: '4x DDR5 DIMM slots supporting up to 192GB (4x48GB), PCIe 5.0 x16',
+      condition: 'New (Amazon / B&H)',
+      price: 439,
+      merchant: 'B&H / Amazon',
+      url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+      notes: 'Workstation motherboard with 4 DDR5 DIMM slots supporting 192GB (4x48GB) non-binary memory configurations.'
+    },
+    {
+      category: 'RAM',
+      name: 'Corsair Vengeance 192GB (4x48GB) DDR5-5200 CL38 (CMK192GX5M4B5200C38)',
+      spec: '192GB (4x48GB) DDR5-5200 UDIMM matched 4-DIMM kit',
+      condition: 'New (B&H / Amazon)',
+      price: 580,
+      merchant: 'B&H / Amazon',
+      url: 'https://www.bhphotovideo.com/c/search?Ntt=CMK192GX5M4B5200C38',
+      notes: '192GB system RAM pool holds 140GB-142GB Q2_K weights in memory with room for OS and MLA KV cache.'
+    },
+    {
+      category: 'Power Supply (PSU)',
+      name: 'Corsair RM1200x Shift 1200W 80+ Gold (ATX 3.0)',
+      spec: '1200W ATX 3.0 / PCIe 5.0 compliant, side modular ports',
+      condition: 'New (Amazon / B&H)',
+      price: 219,
+      merchant: 'Amazon / B&H',
+      url: 'https://www.amazon.com/s?k=Corsair+RM1200x+Shift+1200W',
+      notes: 'Ample headroom for 170W CPU + 350W RTX 3090 and future multi-GPU expansion.'
+    },
+    {
+      category: 'Storage (SSD)',
+      name: 'Samsung 990 Pro 2TB NVMe PCIe 4.0',
+      spec: 'Up to 7450 MB/s read speed',
+      condition: 'New (Amazon)',
+      price: 169,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      notes: 'Fast sequential read speeds for loading 140GB+ GGUF shards into system RAM.'
+    },
+    {
+      category: 'Case',
+      name: 'Lian Li O11 Dynamic EVO XL',
+      spec: 'Massive dual-chamber airflow chassis with multi-GPU clearance',
+      condition: 'New (Amazon)',
+      price: 229,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO+XL',
+      notes: 'Spacious high-airflow workstation chassis.'
+    },
+    {
+      category: 'Cooling & Fans',
+      name: 'Arctic Liquid Freezer III 360 AIO + 3x P12 PWM Max Fans',
+      spec: '360mm AIO water cooler + high static pressure fans',
+      condition: 'New (Amazon)',
+      price: 119,
+      merchant: 'Amazon',
+      url: 'https://www.amazon.com/s?k=Arctic+Liquid+Freezer+III+360',
+      notes: '360mm liquid cooler keeps the 16-core Ryzen 9 under sustained all-core CPU inference loads.'
+    }
+  ]
+};
+
 // Notes copied from a template that describe the template's own model (sizes like "70B" or
 // "42GB model", or model names) are wrong on another model's sheet
 const MODEL_SPECIFIC_NOTE = /\b\d+(\.\d+)?B\b|\d+\s?GB model|model files|Llama|Mistral|NeMo|Qwen|DeepSeek|Gemma|Phi\b/i;
@@ -1683,12 +1778,22 @@ for (const model of MODELS_DATA) {
     }
   }
 
+  // System-RAM offload tier: add only when the model fits NO other tier in this sheet
+  // and its smallest quant plus 8K context fits TIER_RAM_OFFLOAD
+  if (tiers.every(t => tierFit(model, t).status === 'none') && tierFit(model, TIER_RAM_OFFLOAD).status !== 'none') {
+    tiers.push(JSON.parse(JSON.stringify(TIER_RAM_OFFLOAD)));
+  }
+
   for (const tier of tiers) {
     const fit = tierFit(model, tier);
     tier.fit = fit;
     tier.name = tier.name.replace(/ (Reasoning|Coding) Rig$/, ' Rig');
     tier.headline = fitHeadline(model, fit);
-    tier.rigSummary = `${tier.name} with ${tier.memoryGb} GB of usable GPU memory. ${fitDetail(model, fit)}`;
+    if (tier.id === 'tier-ram-offload') {
+      tier.rigSummary = `${tier.name} with ${tier.memoryGb} GB of DDR5 system RAM used for CPU offload, plus an RTX 3090 24 GB for partial-offload acceleration (a speed bonus, not added to model capacity). ${fitDetail(model, fit)} Most layers are computed from system RAM, so expect single-digit tokens per second, roughly 3 to 8 tok/s on this class of rig (estimate), versus the far higher speeds of a GPU-resident fit.`;
+    } else {
+      tier.rigSummary = `${tier.name} with ${tier.memoryGb} GB of usable GPU memory. ${fitDetail(model, fit)}`;
+    }
     if (tier.id === 'tier-rtx-5090') {
       tier.rigSummary += ' (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).';
     }
@@ -1697,7 +1802,8 @@ for (const model of MODELS_DATA) {
       'tier-rtx-pro-6000': '96GB Workstation',
       'tier-strix-halo': 'Cheapest 96GB Fit',
       'tier-mac-m3-ultra': '72GB Unified',
-      'tier-rtx-5090': '32GB Flagship'
+      'tier-rtx-5090': '32GB Flagship',
+      'tier-ram-offload': 'RAM Offload'
     };
     tier.badge = fit.status === 'none' ? "Won't Fit This Model" : (newTierBadges[tier.id] || GENERIC_BADGES[tier.type]);
 
@@ -1705,6 +1811,8 @@ for (const model of MODELS_DATA) {
       if (isGpuPart(part)) {
         if (tier.id === 'tier-rtx-5090') {
           part.notes = `${fitDetail(model, fit)} (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).`;
+        } else if (tier.id === 'tier-ram-offload') {
+          part.notes = `${fitDetail(model, fit)} Weights live in 192 GB system RAM; the RTX 3090 24 GB accelerates prompt processing and offloaded layers (expect ~3 to 8 tok/s estimate).`;
         } else {
           part.notes = fitDetail(model, fit);
         }

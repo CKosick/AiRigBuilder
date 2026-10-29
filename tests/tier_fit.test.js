@@ -92,9 +92,9 @@ describe('Generated build sheets', () => {
     }
   });
 
-  it('only the 671B DeepSeeks have no listed rig that fits', () => {
+  it('every model has at least one listed rig that fits', () => {
     const noRig = Object.entries(BUILDS_DATA).filter(([, s]) => cheapestFittingTotal(s) === null).map(([id]) => id).sort();
-    assert.deepEqual(noRig, ['deepseek-r1-full', 'deepseek-v3-moe']);
+    assert.deepEqual(noRig, []);
   });
 
   it('every batch-1 model fits a listed tier or is flagged as a unified-memory / offload candidate', () => {
@@ -192,12 +192,28 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     assert.equal(fittingTiers.length, 1, 'Qwen3-235B has 1 fitting tier (Strix Halo)');
   });
 
-  it('DeepSeek V3 and DeepSeek R1 full still show no fitting tier', () => {
-    for (const id of ['deepseek-v3-moe', 'deepseek-r1-full']) {
+  it('DeepSeek V3 and DeepSeek R1 full fit the 192GB RAM offload tier at Q2_K with 32K+ context', () => {
+    for (const [id, expectedVram] of [['deepseek-v3-moe', 140], ['deepseek-r1-full', 142]]) {
       const sheet = BUILDS_DATA[id];
-      assert.equal(cheapestFittingTotal(sheet), null, `${id} must have no fitting tier`);
-      assert.ok(sheet.tiers.every(t => t.fit.status === 'none'), `${id} all tiers status none`);
+      const fittingTiers = sheet.tiers.filter(t => t.fit && t.fit.status !== 'none');
+      assert.equal(fittingTiers.length, 1, `${id} has exactly 1 fitting tier`);
+      const offload = fittingTiers[0];
+      assert.equal(offload.id, 'tier-ram-offload', `${id} fitting tier is tier-ram-offload`);
+      assert.equal(offload.fit.status, 'fits');
+      assert.equal(offload.fit.quant, 'Q2_K');
+      assert.equal(offload.fit.quantVram, expectedVram);
+      assert.equal(offload.fit.contextLabel, '32K+');
+      const offloadTotal = offload.parts.reduce((sum, p) => sum + (p.price || 0), 0);
+      assert.equal(cheapestFittingTotal(sheet), offloadTotal, `${id} cheapestFittingTotal equals tier-ram-offload parts total ($${offloadTotal})`);
     }
+  });
+
+  it('tier-ram-offload is inserted only on deepseek-v3-moe and deepseek-r1-full', () => {
+    const offloadModels = Object.entries(BUILDS_DATA)
+      .filter(([, sheet]) => sheet.tiers.some(t => t.id === 'tier-ram-offload'))
+      .map(([id]) => id)
+      .sort();
+    assert.deepEqual(offloadModels, ['deepseek-r1-full', 'deepseek-v3-moe']);
   });
 
   it('all new GPU/platform part prices equal tracker prices in gpus.js and match apply_prices.js regex', async () => {
@@ -210,7 +226,8 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       { id: 'rtx-pro-6000-blackwell', partName: 'NVIDIA RTX PRO 6000 Blackwell (96GB)' },
       { id: 'strix-halo-128gb', partName: 'AMD Ryzen AI Max+ 395 Mini PC (128GB)' },
       { id: 'mac-studio-m3-ultra', partName: 'Apple Mac Studio M3 Ultra (96GB)' },
-      { id: 'rtx-5090', partName: 'NVIDIA GeForce RTX 5090 32GB' }
+      { id: 'rtx-5090', partName: 'NVIDIA GeForce RTX 5090 32GB' },
+      { id: 'rtx-3090', partName: '1x NVIDIA GeForce RTX 3090 24GB' }
     ];
 
     for (const { id, partName } of expectedGpus) {
@@ -231,6 +248,20 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
           }
         }
       }
+    }
+
+    // Mutate-and-restore check: apply_prices.js single-3090 regex updates both mistral-nemo-12b and TIER_RAM_OFFLOAD
+    const buildsFile = path.resolve('src/data/builds.js');
+    const origBuilds = fs.readFileSync(buildsFile, 'utf-8');
+    try {
+      const mutated = origBuilds.replace(
+        /(name:\s*'1x NVIDIA GeForce RTX 3090 24GB'[\s\S]*?price:\s*)\d+/g,
+        '$1799'
+      );
+      const prices = [...mutated.matchAll(/name:\s*'1x NVIDIA GeForce RTX 3090 24GB'[\s\S]*?price:\s*(\d+)/g)].map(m => Number(m[1]));
+      assert.deepEqual(prices, [799, 799], 'Single-3090 sync updates both hand-written and TIER_RAM_OFFLOAD templates');
+    } finally {
+      fs.writeFileSync(buildsFile, origBuilds, 'utf-8');
     }
   });
 
