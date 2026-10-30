@@ -916,7 +916,7 @@ export const MODELS_DATA = [
       {
         name: 'MXFP4 (~4.25 bpw experts)',
         vram: 63.4,
-        speed: '~84-127 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~85-127 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Native MXFP4 release: no extra quantization loss',
         recommended: true
       }
