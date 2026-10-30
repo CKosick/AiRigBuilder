@@ -249,10 +249,12 @@ export function renderModelPickerHtml(state = {}) {
               <span class="tier-price-big">$${tierSubtotal.toLocaleString()}</span>
             </div>
             <div class="tier-subtitle">${tier.headline}</div>
+            ${tier.speedLine ? `<div class="tier-speed-line">${tier.speedLine}</div>` : ''}
           </div>
         `;
       }).join('')}
     </div>
+    <p class="tier-speed-method-note">Speeds shown on each tier are bandwidth-bound estimates from the model's active parameters and the rig's memory bandwidth; real results vary, and they are not benchmarks.</p>
 
     <!-- Build Sheet Details & Parts List -->
     <div class="build-sheet-card" id="parts-list">

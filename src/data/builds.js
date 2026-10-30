@@ -2,6 +2,7 @@
 // Each model has 3 tiers: Budget Used, Balanced Mix, Best New
 import { MODELS_DATA } from './models.js';
 import { tierFit, fitHeadline, fitDetail } from '../utils/tierFit.js';
+import { estimateSpeedToks, formatTierSpeedLine } from '../utils/speedEstimate.js';
 
 // Speed is stored once, on the model (models.js typicalSpeedDual3090); build sheets read it
 const speedOf = (modelId) => MODELS_DATA.find(m => m.id === modelId).typicalSpeedDual3090;
@@ -26,6 +27,7 @@ export const BUILDS_DATA = {
         headline: 'Cheapest way to run full 70B locally at ~20 tokens/sec',
         rigSummary: 'Dual used RTX 3090 24GB cards on a budget AM4/B550 platform. Delivers 48GB VRAM with NVLink support for the lowest total cost of any 70B-capable build.',
         memoryGb: 48,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 820,
         parts: [
@@ -120,6 +122,7 @@ export const BUILDS_DATA = {
         headline: 'Modern AM5 platform with DDR5 + 2x used 3090s & true x8/x8 PCIe lanes',
         rigSummary: 'Pair 2x used RTX 3090s with a modern AMD Ryzen 7000 AM5 motherboard featuring native x8/x8 PCIe lane bifurcation and ATX 3.0 1200W power supply.',
         memoryGb: 48,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 860,
         parts: [
@@ -214,6 +217,7 @@ export const BUILDS_DATA = {
         headline: 'Mac Studio M2 Ultra (64GB/128GB) or New Ada/Blackwell Turnkey',
         rigSummary: 'Apple Mac Studio M2 Ultra with 64GB-128GB unified memory or a single next-gen 32GB+ flagship GPU with CPU offload. Zero multi-GPU cabling, 140W whisper-quiet power draw.',
         memoryGb: 48,
+        bandwidthGbs: 800,
 
         estimatedTdpWatts: 160,
         parts: [
@@ -281,6 +285,7 @@ export const BUILDS_DATA = {
         headline: 'Uncompromising chain-of-thought speed on used hardware',
         rigSummary: 'Dual used RTX 3090s running exllamav2 or vLLM. Retains near 100% of o1-level reasoning performance with 48GB VRAM headroom for extended scratchpads.',
         memoryGb: 48,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 820,
         parts: [
@@ -375,6 +380,7 @@ export const BUILDS_DATA = {
         headline: 'Dual 24GB GPUs with true x8/x8 PCIe lanes and AM5 upgrade path',
         rigSummary: 'Clean dual GPU spacing with Ryzen 7 7700X and 1200W ATX 3.0 power supply. Ready for continuous 24/7 coding agent loops.',
         memoryGb: 48,
+        bandwidthGbs: 768,
 
         estimatedTdpWatts: 860,
         parts: [
@@ -469,6 +475,7 @@ export const BUILDS_DATA = {
         headline: 'Run DeepSeek-R1 at Q8 with 64K+ context without memory limits',
         rigSummary: 'Apple Mac Studio M2 Ultra with 128GB unified memory. Zero multi-GPU tensor-parallel sync latency, runs MLX natively with massive reasoning contexts.',
         memoryGb: 96,
+        bandwidthGbs: 800,
 
         estimatedTdpWatts: 150,
         parts: [
@@ -526,6 +533,7 @@ export const BUILDS_DATA = {
         headline: 'Full 72B coding monster at home on used hardware',
         rigSummary: 'Dual used RTX 3090s providing 48GB VRAM. Handles full repositories and long coding generation in Cursor/Aider with local privacy.',
         memoryGb: 48,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 820,
         parts: [
@@ -620,6 +628,7 @@ export const BUILDS_DATA = {
         headline: '1x RTX 4090 + 1x RTX 3090 (48GB total) or Dual 3090 AM5',
         rigSummary: 'Combines Ada compute speed with Ampere VRAM capacity on a PCIe 5.0 AM5 platform with 64GB DDR5 memory.',
         memoryGb: 48,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 880,
         parts: [
@@ -714,6 +723,7 @@ export const BUILDS_DATA = {
         headline: 'Run Qwen 2.5 72B with 64K+ coding context seamlessly',
         rigSummary: 'Apple Mac Studio M2 Ultra with 96GB or 128GB unified memory. Zero multi-GPU cabling, 140W whisper-quiet power draw.',
         memoryGb: 72,
+        bandwidthGbs: 800,
 
         estimatedTdpWatts: 150,
         parts: [
@@ -771,6 +781,7 @@ export const BUILDS_DATA = {
         headline: 'Full unquantized FP16 weights on a budget build',
         rigSummary: 'Single used RTX 3090 24GB card with a budget AM4 platform. Delivers 24GB VRAM to run 12B-24B models with zero quantization loss at 50+ tokens/sec.',
         memoryGb: 24,
+        bandwidthGbs: 936,
 
         estimatedTdpWatts: 480,
         parts: [
@@ -865,6 +876,7 @@ export const BUILDS_DATA = {
         headline: 'Modern Ada Lovelace 16GB rig with sub-250W power draw',
         rigSummary: 'Brand new RTX 4060 Ti 16GB with 165W TDP. Silent, brand-new components with 3-year warranties throughout.',
         memoryGb: 16,
+        bandwidthGbs: 288,
 
         estimatedTdpWatts: 240,
         parts: [
@@ -959,6 +971,7 @@ export const BUILDS_DATA = {
         headline: 'Maximum tok/s speed: 90+ tok/s on 12B-24B models',
         rigSummary: 'Single RTX 4090 24GB on AM5 platform. Top tier for real-time conversational streaming, coding autocomplete, and local fine-tuning.',
         memoryGb: 24,
+        bandwidthGbs: 1008,
 
         estimatedTdpWatts: 580,
         parts: [
@@ -1066,6 +1079,7 @@ export const BUILDS_DATA = {
         headline: 'Run full Q8 8B models entirely in VRAM on a budget build',
         rigSummary: 'Pair a used RTX 3060 12GB with a refurbished office PC or budget AM4 kit. 12GB VRAM lets you fit Llama 3.1 8B at Q8_0 plus 16K context with zero offload.',
         memoryGb: 12,
+        bandwidthGbs: 360,
 
         estimatedTdpWatts: 280,
         parts: [
@@ -1160,6 +1174,7 @@ export const BUILDS_DATA = {
         headline: '760 GB/s memory bandwidth for ultra-fast responses',
         rigSummary: 'Used RTX 3080 10GB card delivering 760 GB/s bandwidth. Token generation speeds exceed 100 tok/s on 8B models.',
         memoryGb: 10,
+        bandwidthGbs: 760,
 
         estimatedTdpWatts: 420,
         parts: [
@@ -1254,6 +1269,7 @@ export const BUILDS_DATA = {
         headline: 'Modern 16GB VRAM on AM5: run 8B today, 14B tomorrow',
         rigSummary: 'Brand new RTX 4060 Ti 16GB on AM5 platform. Extra VRAM headroom allows running 14B models or 64K context windows without hardware bottlenecks.',
         memoryGb: 16,
+        bandwidthGbs: 288,
 
         estimatedTdpWatts: 260,
         parts: [
@@ -1343,10 +1359,27 @@ export const BUILDS_DATA = {
   }
 };
 
+// Compute per-tier bandwidth-bound speed estimate for the fitted quant (null if tier does not fit or is RAM offload)
+function assignTierSpeed(model, tier) {
+  const fit = tier.fit;
+  if (!fit || fit.status === 'none' || tier.bandwidthGbs === null) {
+    tier.speed = null;
+    tier.speedLine = null;
+    return;
+  }
+  const fittedQuant = model.quants.find(q => q.name.split(' ')[0] === fit.quant);
+  const speed = estimateSpeedToks(model, fittedQuant, tier.bandwidthGbs);
+  tier.speed = speed;
+  tier.speedLine = formatTierSpeedLine(fit.quant, speed);
+}
+
 // Every tier records whether its model fits (status 'fits' | 'reduced' | 'none'); see utils/tierFit.js
 for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
   const model = MODELS_DATA.find(m => m.id === modelId);
-  for (const tier of sheet.tiers) tier.fit = tierFit(model, tier);
+  for (const tier of sheet.tiers) {
+    tier.fit = tierFit(model, tier);
+    assignTierSpeed(model, tier);
+  }
 }
 
 // Hardware tier templates for newly added hardware categories:
@@ -1360,6 +1393,7 @@ export const TIER_RTX_PRO_6000 = {
   headline: 'Single-card 96GB GDDR7 workstation with 1,792 GB/s memory bandwidth',
   rigSummary: 'Single NVIDIA RTX PRO 6000 Blackwell 96GB card in a high-end AM5 workstation. 1,792 GB/s ECC memory bandwidth runs huge models without multi-GPU tensor-parallel complexity.',
   memoryGb: 96,
+  bandwidthGbs: 1792,
   estimatedTdpWatts: 820,
   parts: [
     {
@@ -1455,6 +1489,7 @@ export const TIER_STRIX_HALO = {
   headline: 'Affordable 96GB usable unified memory in an ultra-low-power mini PC',
   rigSummary: 'Complete Strix Halo mini PC with 128GB shared LPDDR5X-8000 memory (up to 96GB assigned to GPU). The most affordable way to fit 96GB-class models in a whisper-quiet 120W chassis.',
   memoryGb: 96,
+  bandwidthGbs: 256,
   estimatedTdpWatts: 120,
   parts: [
     {
@@ -1500,6 +1535,7 @@ export const TIER_MAC_M3_ULTRA = {
   headline: 'Modern M3 Ultra turnkey desktop with 72GB usable memory at 819 GB/s',
   rigSummary: 'Apple Mac Studio M3 Ultra with 96GB unified memory (72GB usable). High 819 GB/s unified memory bandwidth runs large models natively in pure silence.',
   memoryGb: 72,
+  bandwidthGbs: 819,
   estimatedTdpWatts: 220,
   parts: [
     {
@@ -1545,6 +1581,7 @@ export const TIER_RTX_5090 = {
   headline: 'Peak 32GB single-card local AI with 1,792 GB/s memory bandwidth',
   rigSummary: 'Single NVIDIA RTX 5090 32GB on modern AM5 platform. 1,792 GB/s GDDR7 bandwidth runs mid-size models with higher quant and extended context on one card. (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).',
   memoryGb: 32,
+  bandwidthGbs: 1792,
   estimatedTdpWatts: 720,
   parts: [
     {
@@ -1640,6 +1677,7 @@ export const TIER_RAM_OFFLOAD = {
   headline: 'Run colossal 671B MoE weights from 192GB DDR5 system RAM with RTX 3090 partial offload',
   rigSummary: '192GB System RAM Offload Rig (AM5 + RTX 3090) with 192 GB of DDR5 system RAM used for CPU offload, plus an RTX 3090 24 GB as partial-offload acceleration (a speed bonus, not added to model capacity). Most layers are computed from system RAM, so expect single-digit tokens per second, roughly 3 to 8 tok/s on this class of rig (estimate), versus the far higher speeds of a GPU-resident fit.',
   memoryGb: 192,
+  bandwidthGbs: null,
   estimatedTdpWatts: 450,
   parts: [
     {
@@ -1787,6 +1825,7 @@ for (const model of MODELS_DATA) {
   for (const tier of tiers) {
     const fit = tierFit(model, tier);
     tier.fit = fit;
+    assignTierSpeed(model, tier);
     tier.name = tier.name.replace(/ (Reasoning|Coding) Rig$/, ' Rig');
     tier.headline = fitHeadline(model, fit);
     if (tier.id === 'tier-ram-offload') {

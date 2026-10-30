@@ -620,6 +620,18 @@ body {
   color: var(--text-muted);
 }
 
+.tier-speed-line {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-main);
+}
+
+.tier-speed-method-note {
+  margin: -0.75rem 0 1.25rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
 /* Build Detail Sheet */
 .build-sheet-card {
   background: var(--bg-card);
