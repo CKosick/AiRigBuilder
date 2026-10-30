@@ -55,6 +55,27 @@ describe('Cloud rates are stored once', () => {
     assert.throws(() => cloudAlternative({ id: 'x', cloudOffers: ['nope'] }), /unknown cloud offer/);
   });
 
+  it('includes RunPod 1x and 4x A100 80GB offers and removes delisted single-card RunPod and Lambda offers', () => {
+    assert.deepEqual(CLOUD_RATES['runpod-single-a100-80gb'], {
+      label: 'RunPod 1x A100 80GB',
+      hourlyRate: 1.79
+    });
+    assert.deepEqual(CLOUD_RATES['runpod-quad-a100-80gb'], {
+      label: 'RunPod 4x A100 80GB',
+      hourlyRate: 7.16
+    });
+    for (const removedId of [
+      'runpod-single-3080',
+      'runpod-single-3070',
+      'runpod-single-3060',
+      'lambda-a100-80gb',
+      'lambda-quad-a100'
+    ]) {
+      assert.equal(CLOUD_RATES[removedId], undefined, `${removedId} must be removed from CLOUD_RATES`);
+      assert.ok(!CLOUD_PROVIDERS.some(p => p.id === removedId), `${removedId} must be removed from CLOUD_PROVIDERS`);
+    }
+  });
+
   it('exports CLOUD_RATES_AS_OF and renders it in both the model picker and break-even calculator', () => {
     assert.equal(typeof CLOUD_RATES_AS_OF, 'string');
     assert.match(CLOUD_RATES_AS_OF, /^[A-Z][a-z]+ \d{4}$/, 'CLOUD_RATES_AS_OF is Month YYYY');

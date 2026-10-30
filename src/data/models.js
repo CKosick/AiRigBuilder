@@ -414,7 +414,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: '45 - 65 tokens/sec',
-    cloudOffers: ['runpod-single-3080']
+    cloudOffers: ['vast-single-3080']
   },
   {
     id: 'deepseek-r1-distill-14b',
@@ -462,7 +462,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.9,
     typicalSpeedDual3090: '50 - 75 tokens/sec',
-    cloudOffers: ['runpod-single-3070']
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'phi-4-14b',
@@ -510,7 +510,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.3,
     typicalSpeedDual3090: '48 - 70 tokens/sec',
-    cloudOffers: ['runpod-single-3080']
+    cloudOffers: ['vast-single-3080']
   },
   {
     id: 'starcoder2-15b',
@@ -562,7 +562,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
-    cloudOffers: ['runpod-single-3070']
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'qwen-2.5-7b',
@@ -610,7 +610,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '85 - 125 tokens/sec',
-    cloudOffers: ['runpod-single-3070']
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'gemma-2-9b',
@@ -634,7 +634,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 2.1,
     typicalSpeedDual3090: '80 - 120 tokens/sec',
-    cloudOffers: ['runpod-single-3070']
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'mistral-7b-v03',
@@ -682,7 +682,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.2,
     typicalSpeedDual3090: '90 - 130 tokens/sec',
-    cloudOffers: ['runpod-single-3070']
+    cloudOffers: ['vast-single-3070']
   },
   {
     id: 'phi-4-mini',
@@ -730,7 +730,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.9,
     typicalSpeedDual3090: '160 - 220 tokens/sec',
-    cloudOffers: ['runpod-single-3060']
+    cloudOffers: ['vast-single-3060']
   },
 
   // ==========================================
@@ -782,7 +782,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.9,
     typicalSpeedDual3090: 'Needs 4x GPU or Mac Studio 128GB',
-    cloudOffers: ['lambda-quad-a100']
+    cloudOffers: ['runpod-quad-a100-80gb']
   },
   {
     id: 'command-r-plus',
@@ -923,7 +923,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 0.3,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 65 GB+ at MXFP4)',
-    cloudOffers: ['lambda-a100-80gb']
+    cloudOffers: ['runpod-single-a100-80gb']
   },
   // Sizes: unsloth/Qwen3-30B-A3B-GGUF
   {
@@ -988,7 +988,7 @@ export const MODELS_DATA = [
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 145 GB+ at Q4_K_M)',
     largeModelPath: 'unified-memory-or-offload',
-    cloudOffers: ['lambda-quad-a100']
+    cloudOffers: ['runpod-quad-a100-80gb']
   },
   // Sizes: unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF
   {
@@ -1013,7 +1013,7 @@ export const MODELS_DATA = [
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 68 GB+ at Q4_K_M)',
-    cloudOffers: ['lambda-a100-80gb']
+    cloudOffers: ['runpod-single-a100-80gb']
   },
   // Sizes: bartowski/google_gemma-4-31B-it-GGUF
   {

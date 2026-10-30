@@ -7,20 +7,17 @@ export const CLOUD_RATES = {
   'vast-dual-3090': { label: 'Vast.ai 2x RTX 3090', hourlyRate: 0.42 },
   'runpod-dual-4090': { label: 'RunPod 2x RTX 4090', hourlyRate: 1.78 },
   'runpod-dual-a6000': { label: 'RunPod 2x RTX A6000', hourlyRate: 1.18 },
-  'lambda-a100-80gb': { label: 'Lambda 1x A100 80GB', hourlyRate: 1.89 },
+  'runpod-single-a100-80gb': { label: 'RunPod 1x A100 80GB', hourlyRate: 1.79 },
   'runpod-single-3090': { label: 'RunPod 1x RTX 3090', hourlyRate: 0.50 },
   'vast-single-3090': { label: 'Vast.ai 1x RTX 3090', hourlyRate: 0.21 },
   'runpod-single-4090': { label: 'RunPod 1x RTX 4090', hourlyRate: 0.89 },
   'vast-single-4090': { label: 'Vast.ai 1x RTX 4090', hourlyRate: 0.48 },
   'runpod-single-a6000': { label: 'RunPod 1x RTX A6000', hourlyRate: 0.59 },
-  'runpod-single-3080': { label: 'RunPod 1x RTX 3080', hourlyRate: 0.29 },
   'vast-single-3080': { label: 'Vast.ai 1x RTX 3080', hourlyRate: 0.15 },
-  'runpod-single-3070': { label: 'RunPod 1x RTX 3070', hourlyRate: 0.22 },
   'vast-single-3070': { label: 'Vast.ai 1x RTX 3070', hourlyRate: 0.10 },
-  'runpod-single-3060': { label: 'RunPod 1x RTX 3060', hourlyRate: 0.15 },
   'vast-single-3060': { label: 'Vast.ai 1x RTX 3060', hourlyRate: 0.07 },
   'runpod-quad-4090': { label: 'RunPod 4x RTX 4090', hourlyRate: 3.56 },
-  'lambda-quad-a100': { label: 'Lambda 4x A100 80GB', hourlyRate: 6.00 },
+  'runpod-quad-a100-80gb': { label: 'RunPod 4x A100 80GB', hourlyRate: 7.16 },
   'vast-8x-h100': { label: 'Vast.ai 8x H100', hourlyRate: 19.20 },
 };
 
@@ -57,13 +54,13 @@ export const CLOUD_PROVIDERS = [
     notes: 'Blazing token generation speeds.'
   },
   {
-    id: 'lambda-a100-80gb',
-    name: 'Lambda Labs (1x A100 80GB SXM4)',
+    id: 'runpod-single-a100-80gb',
+    name: 'RunPod (1x A100 80GB SXM)',
     category: 'Datacenter 80GB',
-    hourlyRate: CLOUD_RATES['lambda-a100-80gb'].hourlyRate,
+    hourlyRate: CLOUD_RATES['runpod-single-a100-80gb'].hourlyRate,
     storageCostPerMonth: 10.00,
     setupFee: 0,
-    reliability: '99.9%',
+    reliability: '99.5%',
     notes: 'Enterprise datacenter SXM4 with 2000 GB/s bandwidth.'
   },
   {
