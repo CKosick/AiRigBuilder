@@ -48,7 +48,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 155,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+5700X',
+            url: 'https://www.amazon.com/dp/B09VCHQHZ6',
             notes: 'Low power draw leaves maximum PSU headroom for GPU transient power spikes.'
           },
           {
@@ -68,7 +68,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 98,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR4+3200',
+            url: 'https://www.amazon.com/dp/B07Y4ZZ7LQ',
             notes: '64GB system RAM allows full model loading into system memory before GPU allocation without crashing.'
           },
           {
@@ -88,7 +88,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 115,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=2TB+NVMe+M.2+SSD',
+            url: 'https://www.amazon.com/dp/B0B25ML2FH',
             notes: '70B model files are 40GB-45GB each. 2TB holds OS + 20+ quantized models and weights.'
           },
           {
@@ -143,7 +143,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 289,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+7700X',
+            url: 'https://www.amazon.com/dp/B0BBHHT8LY',
             notes: 'Fast prompt ingestion and tensor preparation.'
           },
           {
@@ -153,7 +153,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 439,
             merchant: 'B&H / Amazon',
-            url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+            url: 'https://www.amazon.com/dp/B0BDTM7VP5',
             notes: 'The holy grail dual-GPU motherboard. Has perfect 3-slot spacing so both thick cards click directly into the board without risers.'
           },
           {
@@ -163,7 +163,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 189,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+            url: 'https://www.amazon.com/dp/B0CGQ3KS8X',
             notes: 'Fast memory bandwidth speeds up CPU-offloaded layers if testing 120B+ models.'
           },
           {
@@ -173,7 +173,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 219,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Corsair+RM1200x+Shift+1200W',
+            url: 'https://www.amazon.com/dp/B0BP88MYM4',
             notes: 'Handles 1500W transient spikes effortlessly with ATX 3.0 certified voltage smoothing.'
           },
           {
@@ -183,7 +183,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 169,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+            url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
             notes: 'Lightning-fast weights load time: loads 42GB model into VRAM in ~8 seconds.'
           },
           {
@@ -193,7 +193,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 229,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO+XL',
+            url: 'https://www.amazon.com/dp/B0CHM7L2V7',
             notes: 'Houses two triple-slot cards with bottom intake fans blowing cool room air directly onto GPU intakes.'
           },
           {
@@ -228,7 +228,7 @@ export const BUILDS_DATA = {
             condition: 'Certified Refurbished / New (Apple / B&H)',
             price: 2899,
             merchant: 'B&H / Apple',
-            url: 'https://www.bhphotovideo.com/c/search?Ntt=Mac+Studio+M2+Ultra',
+            url: 'https://www.bhphotovideo.com/c/product/1770945-REG/apple_mqh63ll_a_mac_studio_with_m2.html',
             notes: 'Unified memory allows allocating 56GB+ directly to Metal/MLX. Fits 70B at Q4_K_M or Q5_K_M completely in VRAM.'
           },
           {
@@ -248,7 +248,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 219,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Thunderbolt+SSD+2TB',
+            url: 'https://www.amazon.com/dp/B0B3RMCFTG',
             notes: 'Store your entire HuggingFace / GGUF model library without filling internal storage.'
           },
           {
@@ -306,7 +306,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 155,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+5700X',
+            url: 'https://www.amazon.com/dp/B09VCHQHZ6',
             notes: 'Solid baseline CPU for batch scheduling.'
           },
           {
@@ -316,7 +316,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 129,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=MSI+MPG+B550+Gaming+Plus',
+            url: 'https://www.amazon.com/dp/B089CRF5XV',
             notes: 'Good VRM cooling and plenty of physical clearance between PCIe slots.'
           },
           {
@@ -346,7 +346,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 139,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Crucial+T500+2TB',
+            url: 'https://www.amazon.com/dp/B0CK2TC9XQ',
             notes: 'Loads DeepSeek R1 43GB weights into dual VRAM in under 10 seconds.'
           },
           {
@@ -356,7 +356,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 75,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Montech+Air+903+Max',
+            url: 'https://www.amazon.com/dp/B0CB26ZFKV',
             notes: 'Unbeatable budget airflow case. Plenty of depth for 330mm long RTX 3090s.'
           },
           {
@@ -366,7 +366,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 36,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Phantom+Spirit+120+SE',
+            url: 'https://www.amazon.com/dp/B0H714G7QL',
             notes: 'Cools 100W+ CPUs completely silently.'
           }
         ]
@@ -401,7 +401,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 289,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+7700X',
+            url: 'https://www.amazon.com/dp/B0BBHHT8LY',
             notes: 'Fast prompt evaluation and tool-calling execution.'
           },
           {
@@ -411,7 +411,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 439,
             merchant: 'B&H / Amazon',
-            url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+            url: 'https://www.amazon.com/dp/B0BDTM7VP5',
             notes: 'No risers required; cards mount directly with ample breathing gap.'
           },
           {
@@ -421,7 +421,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 185,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR5+6000',
+            url: 'https://www.amazon.com/dp/B0C5M7J967',
             notes: 'High speed DDR5.'
           },
           {
@@ -431,7 +431,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 239,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=be+quiet+Dark+Power+13+1000W',
+            url: 'https://www.amazon.com/dp/B0BV6CWS2Z',
             notes: 'Titanium efficiency saves ~5% power on long inference runs.'
           },
           {
@@ -441,7 +441,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 169,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+            url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
             notes: 'Rapid checkpoint swapping.'
           },
           {
@@ -451,7 +451,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 189,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Fractal+Torrent',
+            url: 'https://www.amazon.com/dp/B09BQLD8ZK',
             notes: 'The highest air-velocity case on the market for multi-GPU setups.'
           },
           {
@@ -461,7 +461,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 36,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Peerless+Assassin',
+            url: 'https://www.amazon.com/dp/B09LGY38L4',
             notes: 'Leaves upper motherboard space open.'
           }
         ]
@@ -486,7 +486,7 @@ export const BUILDS_DATA = {
             condition: 'Refurbished / New (Apple / B&H)',
             price: 3599,
             merchant: 'B&H / Apple',
-            url: 'https://www.bhphotovideo.com/c/search?Ntt=Mac+Studio+M2+Ultra+128GB',
+            url: 'https://www.bhphotovideo.com/c/product/1771044-REG/apple_msm2max_24_mac_studio_128gb_1tb.html',
             notes: 'Allocates ~100GB to GPU. Runs DeepSeek-R1 at Q8 (bit-exact math) with huge context.'
           },
           {
@@ -554,7 +554,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 155,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+5700X',
+            url: 'https://www.amazon.com/dp/B09VCHQHZ6',
             notes: 'Efficient host processor.'
           },
           {
@@ -564,7 +564,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 149,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=ASUS+TUF+Gaming+B550-PLUS',
+            url: 'https://www.amazon.com/dp/B09K4QMPL9',
             notes: 'Generous slot layout for multi-GPU airflow.'
           },
           {
@@ -574,7 +574,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 98,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR4+3200',
+            url: 'https://www.amazon.com/dp/B07Y4ZZ7LQ',
             notes: 'Ample system memory for KV cache swapping.'
           },
           {
@@ -584,7 +584,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 159,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Corsair+RM1000e+1000W',
+            url: 'https://www.amazon.com/dp/B0DPR5RZ1T',
             notes: 'Compact length (140mm) leaves plenty of room for case cable routing.'
           },
           {
@@ -594,7 +594,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 119,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=WD+Black+SN770+2TB',
+            url: 'https://www.amazon.com/dp/B09QV5KJHV',
             notes: 'DRAM-less HMB tech offers fantastic price-to-performance for sequential weights.'
           },
           {
@@ -604,7 +604,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 109,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Fractal+Meshify+2+Lite',
+            url: 'https://www.amazon.com/dp/B093HKFXDV',
             notes: 'Accommodates two full-length 3090s with front intake clearance.'
           },
           {
@@ -614,7 +614,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 36,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Peerless+Assassin',
+            url: 'https://www.amazon.com/dp/B09LGY38L4',
             notes: 'Keeps CPU frosty.'
           }
         ]
@@ -649,7 +649,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 369,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+9+7900X',
+            url: 'https://www.amazon.com/dp/B0BBJ59WJ4',
             notes: 'Extra CPU cores accelerate parallel compilation alongside local AI inference.'
           },
           {
@@ -659,7 +659,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 439,
             merchant: 'B&H / Amazon',
-            url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+            url: 'https://www.amazon.com/dp/B0BDTM7VP5',
             notes: 'Direct 3-slot dual-GPU placement.'
           },
           {
@@ -669,7 +669,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 179,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR5+6000',
+            url: 'https://www.amazon.com/dp/B0B2X1QBYW',
             notes: 'Low profile heatspreaders ensure CPU cooler compatibility.'
           },
           {
@@ -679,7 +679,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 179,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Seasonic+FOCUS+GX-1000+ATX+3.0',
+            url: 'https://www.amazon.com/dp/B0DLFKRJDC',
             notes: '10-year warranty, industrial grade Japanese capacitors.'
           },
           {
@@ -689,7 +689,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 169,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+            url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
             notes: 'Fast NVMe storage.'
           },
           {
@@ -699,7 +699,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 149,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Lian+Li+LANCOOL+III',
+            url: 'https://www.amazon.com/dp/B0B469JRGC',
             notes: 'Side mesh shrouds vent GPU heat away immediately.'
           },
           {
@@ -709,7 +709,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 36,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Phantom+Spirit',
+            url: 'https://www.amazon.com/dp/B0H714G7QL',
             notes: 'Zero pump failure risk.'
           }
         ]
@@ -734,7 +734,7 @@ export const BUILDS_DATA = {
             condition: 'Certified Refurbished / New (Apple / B&H)',
             price: 3399,
             merchant: 'B&H / Apple',
-            url: 'https://www.bhphotovideo.com/c/search?Ntt=Mac+Studio+M2+Ultra',
+            url: 'https://www.bhphotovideo.com/c/product/1771044-REG/apple_msm2max_24_mac_studio_128gb_1tb.html',
             notes: 'Fits Qwen 72B Q5_K_M or Q8 with gigantic context buffers.'
           },
           {
@@ -802,7 +802,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 125,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+5+5600',
+            url: 'https://www.amazon.com/dp/B09VCHR1VH',
             notes: 'Plenty of performance for single-GPU inference.'
           },
           {
@@ -812,7 +812,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 89,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Gigabyte+B550M+DS3H',
+            url: 'https://www.amazon.com/dp/B08R5736B3',
             notes: 'Budget board with solid PCIe 4.0 slot support.'
           },
           {
@@ -822,7 +822,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 49,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=32GB+DDR4+3200',
+            url: 'https://www.amazon.com/dp/B092ZCVHS8',
             notes: '32GB system memory easily handles 12B-24B models.'
           },
           {
@@ -832,7 +832,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 99,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Corsair+RM750e+750W',
+            url: 'https://www.amazon.com/dp/B0DPR6X7JX',
             notes: 'Provides ample headroom for a single 3090 (350W TDP).'
           },
           {
@@ -842,7 +842,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 59,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Teamgroup+MP44L+1TB',
+            url: 'https://www.amazon.com/dp/B0B9Y3DB2K',
             notes: '1TB holds OS + dozens of 12B-24B model checkpoints.'
           },
           {
@@ -862,7 +862,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 18,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Assassin+X+120',
+            url: 'https://www.amazon.com/dp/B09LHBFPJ6',
             notes: 'Silent budget cooler for 65W CPU.'
           }
         ]
@@ -897,7 +897,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 189,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+5+7600',
+            url: 'https://www.amazon.com/dp/B0BMQJWBDM',
             notes: 'Modern AM5 platform with long upgrade path.'
           },
           {
@@ -907,7 +907,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 109,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=ASRock+B650M-HDV',
+            url: 'https://www.amazon.com/dp/B0BY6YRT41',
             notes: 'Award-winning budget AM5 motherboard with strong VRMs.'
           },
           {
@@ -917,7 +917,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 79,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=32GB+DDR5+5600',
+            url: 'https://www.amazon.com/dp/B0C2B7W1W4',
             notes: 'Fast DDR5 system memory.'
           },
           {
@@ -927,7 +927,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 69,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Corsair+CX650M+650W',
+            url: 'https://www.amazon.com/dp/B01B72W1VA',
             notes: 'Massive safety margin for 240W total system load.'
           },
           {
@@ -937,7 +937,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 65,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Crucial+P3+Plus+1TB',
+            url: 'https://www.amazon.com/dp/B0B25NXWC7',
             notes: 'Fast boot and model storage.'
           },
           {
@@ -947,7 +947,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 59,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Montech+AIR+100',
+            url: 'https://www.amazon.com/dp/B093S1H4G2',
             notes: 'Compact desk footprint.'
           },
           {
@@ -992,7 +992,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 449,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+7+7800X3D',
+            url: 'https://www.amazon.com/dp/B0BTZB7F88',
             notes: 'Top tier single-core performance.'
           },
           {
@@ -1002,7 +1002,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 199,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=MSI+MAG+B650+Tomahawk',
+            url: 'https://www.amazon.com/dp/B0BHCCNSRH',
             notes: 'Sturdy PCIe x16 slot with steel armor to support heavy 4090.'
           },
           {
@@ -1012,7 +1012,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 189,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+            url: 'https://www.amazon.com/dp/B0CGQ3KS8X',
             notes: 'High speed low latency memory.'
           },
           {
@@ -1022,7 +1022,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon / B&H)',
             price: 169,
             merchant: 'Amazon / B&H',
-            url: 'https://www.amazon.com/s?k=Corsair+RM1000x+1000W',
+            url: 'https://www.amazon.com/dp/B0DJ1M9C62',
             notes: 'Direct 16-pin 12VHPWR cable prevents adapter melting issues.'
           },
           {
@@ -1032,7 +1032,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 169,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+            url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
             notes: 'Top tier NVMe.'
           },
           {
@@ -1042,7 +1042,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 99,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Lian+Li+LANCOOL+216',
+            url: 'https://www.amazon.com/dp/B0BRP58KHT',
             notes: 'Anti-sag bracket supports 2.2kg RTX 4090.'
           },
           {
@@ -1052,7 +1052,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 36,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Phantom+Spirit',
+            url: 'https://www.amazon.com/dp/B0H714G7QL',
             notes: 'Silent and reliable.'
           }
         ]
@@ -1120,7 +1120,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 29,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=16GB+DDR4+3200',
+            url: 'https://www.amazon.com/dp/B08QV1V17R',
             notes: 'Sufficient for 8B models.'
           },
           {
@@ -1140,7 +1140,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 56,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Kingston+NV2+1TB',
+            url: 'https://www.amazon.com/dp/B0BBWH1R8H',
             notes: 'Holds OS and several 8B models.'
           },
           {
@@ -1195,7 +1195,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 135,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+5+5600X',
+            url: 'https://www.amazon.com/dp/B08166SLDF',
             notes: 'Solid gaming & AI CPU.'
           },
           {
@@ -1205,7 +1205,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 99,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=MSI+B550M+PRO-VDH+WiFi',
+            url: 'https://www.amazon.com/dp/B089D1YG11',
             notes: 'Durable motherboard.'
           },
           {
@@ -1215,7 +1215,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 54,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=32GB+DDR4+3200',
+            url: 'https://www.amazon.com/dp/B07RW6Z692',
             notes: '32GB system memory.'
           },
           {
@@ -1235,7 +1235,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 65,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Crucial+P3+Plus+1TB',
+            url: 'https://www.amazon.com/dp/B0B25NXWC7',
             notes: 'Fast storage.'
           },
           {
@@ -1255,7 +1255,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 18,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Assassin+X',
+            url: 'https://www.amazon.com/dp/B09S38FD1J',
             notes: 'Keeps CPU quiet.'
           }
         ]
@@ -1290,7 +1290,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 189,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Ryzen+5+7600',
+            url: 'https://www.amazon.com/dp/B0BMQJWBDM',
             notes: 'AM5 platform supported through 2027+.'
           },
           {
@@ -1300,7 +1300,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 139,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=MSI+PRO+B650M-A+WiFi',
+            url: 'https://www.amazon.com/dp/B0BHBZRW66',
             notes: 'High quality power delivery.'
           },
           {
@@ -1310,7 +1310,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 99,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=32GB+DDR5+6000',
+            url: 'https://www.amazon.com/dp/B0C3RYHZJQ',
             notes: 'Fast DDR5 memory.'
           },
           {
@@ -1320,7 +1320,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 89,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Corsair+RM650',
+            url: 'https://www.amazon.com/dp/B07RFZPN8G',
             notes: 'Silent zero-RPM fan mode under low loads.'
           },
           {
@@ -1330,7 +1330,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 89,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Crucial+T500+1TB',
+            url: 'https://www.amazon.com/dp/B0CK39YR9V',
             notes: 'Lightning fast model loading.'
           },
           {
@@ -1340,7 +1340,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 69,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Lian+Li+LANCOOL+205M+Mesh',
+            url: 'https://www.amazon.com/dp/B0B5TG9BP1',
             notes: 'Premium build quality and clean cable management.'
           },
           {
@@ -1350,7 +1350,7 @@ export const BUILDS_DATA = {
             condition: 'New (Amazon)',
             price: 21,
             merchant: 'Amazon',
-            url: 'https://www.amazon.com/s?k=Thermalright+Assassin+King+120',
+            url: 'https://www.amazon.com/dp/B09YY5LQV9',
             notes: 'Near silent operation.'
           }
         ]
@@ -1413,7 +1413,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon)',
       price: 289,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Ryzen+7+7700X',
+      url: 'https://www.amazon.com/dp/B0BBHHT8LY',
       notes: 'Fast prompt ingestion and tensor preparation.'
     },
     {
@@ -1423,7 +1423,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon / B&H)',
       price: 439,
       merchant: 'B&H / Amazon',
-      url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+      url: 'https://www.amazon.com/dp/B0BDTM7VP5',
       notes: 'Workstation motherboard with 10G LAN and heavy-duty PCIe slots for high-power GPUs.'
     },
     {
@@ -1433,7 +1433,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon)',
       price: 189,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+      url: 'https://www.amazon.com/dp/B0CGQ3KS8X',
       notes: 'Fast 64GB DDR5 memory allows loading large models and managing system buffers.'
     },
     {
@@ -1443,7 +1443,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon / B&H)',
       price: 219,
       merchant: 'Amazon / B&H',
-      url: 'https://www.amazon.com/s?k=Corsair+RM1200x+Shift+1200W',
+      url: 'https://www.amazon.com/dp/B0BP88MYM4',
       notes: '1200W ATX 3.0 power supply sized for the 600W card plus system transients.'
     },
     {
@@ -1453,7 +1453,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon)',
       price: 169,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
       notes: 'Rapid checkpoint swapping and weights load time.'
     },
     {
@@ -1463,7 +1463,7 @@ export const TIER_RTX_PRO_6000 = {
       condition: 'New (Amazon)',
       price: 229,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO+XL',
+      url: 'https://www.amazon.com/dp/B0CHM7L2V7',
       notes: 'Spacious high-airflow chassis accommodates thick 600W workstation cards with direct fan cooling.'
     },
     {
@@ -1601,7 +1601,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 449,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Ryzen+7+7800X3D',
+      url: 'https://www.amazon.com/dp/B0BTZB7F88',
       notes: 'Top tier single-core performance.'
     },
     {
@@ -1611,7 +1611,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 199,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=MSI+MAG+B650+Tomahawk',
+      url: 'https://www.amazon.com/dp/B0BHCCNSRH',
       notes: 'Heavy-duty steel-armored PCIe slot supports thick, heavy modern flagship GPUs.'
     },
     {
@@ -1621,7 +1621,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 189,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=64GB+DDR5+6000+CL30',
+      url: 'https://www.amazon.com/dp/B0CGQ3KS8X',
       notes: 'High speed low latency memory.'
     },
     {
@@ -1631,7 +1631,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon / B&H)',
       price: 169,
       merchant: 'Amazon / B&H',
-      url: 'https://www.amazon.com/s?k=Corsair+RM1000x+1000W',
+      url: 'https://www.amazon.com/dp/B0DJ1M9C62',
       notes: '1000W ATX 3.0 PSU with native 12V-2x6 power cable sized for 575W card transients.'
     },
     {
@@ -1641,7 +1641,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 169,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
       notes: 'Top tier NVMe.'
     },
     {
@@ -1651,7 +1651,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 99,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Lian+Li+LANCOOL+216',
+      url: 'https://www.amazon.com/dp/B0BRP58KHT',
       notes: 'Anti-sag bracket supports heavy flagship card.'
     },
     {
@@ -1661,7 +1661,7 @@ export const TIER_RTX_5090 = {
       condition: 'New (Amazon)',
       price: 36,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Thermalright+Phantom+Spirit',
+      url: 'https://www.amazon.com/dp/B0H714G7QL',
       notes: 'Silent and reliable.'
     }
   ]
@@ -1697,7 +1697,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (B&H / Amazon)',
       price: 539,
       merchant: 'B&H / Amazon',
-      url: 'https://www.bhphotovideo.com/c/search?Ntt=AMD+Ryzen+9+9950X',
+      url: 'https://www.bhphotovideo.com/c/product/1834127-REG/amd_100_100001277wof_ryzen_9_9950x.html',
       notes: '16 Zen 5 cores and dual-CCD memory bandwidth drive CPU-side MoE expert evaluation during llama.cpp system-RAM offload.'
     },
     {
@@ -1707,7 +1707,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (Amazon / B&H)',
       price: 439,
       merchant: 'B&H / Amazon',
-      url: 'https://www.amazon.com/s?k=ASUS+ProArt+X670E-Creator+WiFi',
+      url: 'https://www.amazon.com/dp/B0BDTM7VP5',
       notes: 'Workstation motherboard with 4 DDR5 DIMM slots supporting 192GB (4x48GB) non-binary memory configurations.'
     },
     {
@@ -1717,7 +1717,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (B&H / Amazon)',
       price: 2850,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=CMK192GX5M4B5200C38',
+      url: 'https://www.amazon.com/dp/B0BY6ZF5KF',
       notes: '192GB system RAM pool holds 140GB-142GB Q2_K weights in memory with room for OS and MLA KV cache. DDR5 prices are highly volatile in late 2026 and this reflects the kit\'s current street price.'
     },
     {
@@ -1727,7 +1727,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (Amazon / B&H)',
       price: 219,
       merchant: 'Amazon / B&H',
-      url: 'https://www.amazon.com/s?k=Corsair+RM1200x+Shift+1200W',
+      url: 'https://www.amazon.com/dp/B0BP88MYM4',
       notes: 'Ample headroom for 170W CPU + 350W RTX 3090 and future multi-GPU expansion.'
     },
     {
@@ -1737,7 +1737,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (Amazon)',
       price: 169,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Samsung+990+Pro+2TB',
+      url: 'https://www.amazon.com/dp/B0BHJJ9Y77',
       notes: 'Fast sequential read speeds for loading 140GB+ GGUF shards into system RAM.'
     },
     {
@@ -1747,7 +1747,7 @@ export const TIER_RAM_OFFLOAD = {
       condition: 'New (Amazon)',
       price: 229,
       merchant: 'Amazon',
-      url: 'https://www.amazon.com/s?k=Lian+Li+O11+Dynamic+EVO+XL',
+      url: 'https://www.amazon.com/dp/B0CHM7L2V7',
       notes: 'Spacious high-airflow workstation chassis.'
     },
     {

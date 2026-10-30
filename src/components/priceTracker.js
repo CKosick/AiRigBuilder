@@ -207,7 +207,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
             </div>
 
             <div class="modal-footer-actions">
-              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm">
+              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm" data-click-merchant="eBay Sold" data-link-kind="modal-ebay-sold">
                 ${icon('search')}Check eBay Sold Listings →
               </a>
             </div>
@@ -428,7 +428,9 @@ export function createPriceTracker(container) {
 
     // eBay Link
     const ebayLink = container.querySelector('#modal-ebay-link');
-    ebayLink.href = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold');
+    ebayLink.href = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold', `gpu-${gpu.id}`);
+    ebayLink.setAttribute('data-click-id', `gpu:${gpu.id}:modal-ebay-sold`);
+    ebayLink.setAttribute('data-gpu-id', gpu.id);
 
     // Remember what opened the dialog so focus can return there on close
     modalReturnFocus = document.activeElement;

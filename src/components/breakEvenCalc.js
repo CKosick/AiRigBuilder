@@ -1,6 +1,6 @@
 // Cloud Break-Even Calculator Component (airigbuilder.com)
 // The backlink and traffic engine comparing used local AI rigs vs RunPod/Vast.ai
-import { CLOUD_PROVIDERS } from '../data/providers.js';
+import { CLOUD_PROVIDERS, CLOUD_RATES, CLOUD_RATES_AS_OF } from '../data/providers.js';
 import { icon } from './icons.js';
 import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
 import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
@@ -12,7 +12,7 @@ export const BREAK_EVEN_DEFAULTS = {
   rigUpfrontCost: BASELINE_RIG.cost, // $ (Dual used 3090 rig build sheet)
   dailyUsageHours: 4, // hrs/day
   selectedProviderId: 'runpod-dual-3090',
-  hourlyCloudRate: 0.88, // $/hr
+  hourlyCloudRate: CLOUD_RATES['runpod-dual-3090'].hourlyRate, // $/hr
   monthlyDiskFee: 7.00, // $/mo
   systemWatts: BASELINE_RIG.watts, // Watts
   kwhRate: 0.14, // $/kWh
@@ -142,6 +142,9 @@ export function renderBreakEvenHtml(state = {}) {
             `).join('')}
             <option value="custom">Custom Hourly Rate...</option>
           </select>
+          <div class="sub-note">
+            Cloud rates checked ${CLOUD_RATES_AS_OF}
+          </div>
         </div>
 
         <!-- Hourly Rate & Disk Fee -->

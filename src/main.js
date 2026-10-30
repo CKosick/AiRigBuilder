@@ -9,8 +9,10 @@ import { createBuildsIndex } from './components/buildsIndex.js';
 import { renderHomeFaqHtml } from './components/homeFaq.js';
 import { renderHomeHeroHtml } from './components/homeHero.js';
 import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
+import { initOutboundClickTracking } from './utils/clickTracker.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  initOutboundClickTracking(document);
   const app = document.getElementById('app');
 
   // Old single-page links (/#tracker) move to their real path; unknown paths show the home view

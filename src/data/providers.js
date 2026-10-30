@@ -1,25 +1,27 @@
 // Cloud GPU hourly rates, one entry per offer. The break-even calculator's providers below and
 // every model's cloud alternative (models.js cloudOffers) read their rate from here.
+export const CLOUD_RATES_AS_OF = 'October 2026';
+
 export const CLOUD_RATES = {
-  'runpod-dual-3090': { label: 'RunPod 2x RTX 3090', hourlyRate: 0.88 },
-  'vast-dual-3090': { label: 'Vast.ai 2x RTX 3090', hourlyRate: 0.72 },
-  'runpod-dual-4090': { label: 'RunPod 2x RTX 4090', hourlyRate: 1.48 },
-  'runpod-dual-a6000': { label: 'RunPod 2x RTX A6000', hourlyRate: 1.60 },
+  'runpod-dual-3090': { label: 'RunPod 2x RTX 3090', hourlyRate: 1.00 },
+  'vast-dual-3090': { label: 'Vast.ai 2x RTX 3090', hourlyRate: 0.42 },
+  'runpod-dual-4090': { label: 'RunPod 2x RTX 4090', hourlyRate: 1.78 },
+  'runpod-dual-a6000': { label: 'RunPod 2x RTX A6000', hourlyRate: 1.18 },
   'lambda-a100-80gb': { label: 'Lambda 1x A100 80GB', hourlyRate: 1.89 },
-  'runpod-single-3090': { label: 'RunPod 1x RTX 3090', hourlyRate: 0.44 },
-  'vast-single-3090': { label: 'Vast.ai 1x RTX 3090', hourlyRate: 0.36 },
-  'runpod-single-4090': { label: 'RunPod 1x RTX 4090', hourlyRate: 0.74 },
-  'vast-single-4090': { label: 'Vast.ai 1x RTX 4090', hourlyRate: 0.45 },
-  'runpod-single-a6000': { label: 'RunPod 1x RTX A6000', hourlyRate: 0.79 },
+  'runpod-single-3090': { label: 'RunPod 1x RTX 3090', hourlyRate: 0.50 },
+  'vast-single-3090': { label: 'Vast.ai 1x RTX 3090', hourlyRate: 0.21 },
+  'runpod-single-4090': { label: 'RunPod 1x RTX 4090', hourlyRate: 0.89 },
+  'vast-single-4090': { label: 'Vast.ai 1x RTX 4090', hourlyRate: 0.48 },
+  'runpod-single-a6000': { label: 'RunPod 1x RTX A6000', hourlyRate: 0.59 },
   'runpod-single-3080': { label: 'RunPod 1x RTX 3080', hourlyRate: 0.29 },
-  'vast-single-3080': { label: 'Vast.ai 1x RTX 3080', hourlyRate: 0.25 },
+  'vast-single-3080': { label: 'Vast.ai 1x RTX 3080', hourlyRate: 0.15 },
   'runpod-single-3070': { label: 'RunPod 1x RTX 3070', hourlyRate: 0.22 },
-  'vast-single-3070': { label: 'Vast.ai 1x RTX 3070', hourlyRate: 0.18 },
+  'vast-single-3070': { label: 'Vast.ai 1x RTX 3070', hourlyRate: 0.10 },
   'runpod-single-3060': { label: 'RunPod 1x RTX 3060', hourlyRate: 0.15 },
-  'vast-single-3060': { label: 'Vast.ai 1x RTX 3060', hourlyRate: 0.12 },
-  'runpod-quad-4090': { label: 'RunPod 4x RTX 4090', hourlyRate: 2.96 },
+  'vast-single-3060': { label: 'Vast.ai 1x RTX 3060', hourlyRate: 0.07 },
+  'runpod-quad-4090': { label: 'RunPod 4x RTX 4090', hourlyRate: 3.56 },
   'lambda-quad-a100': { label: 'Lambda 4x A100 80GB', hourlyRate: 6.00 },
-  'vast-8x-h100': { label: 'Vast.ai 8x H100', hourlyRate: 16.00 },
+  'vast-8x-h100': { label: 'Vast.ai 8x H100', hourlyRate: 19.20 },
 };
 
 // Providers offered in the break-even calculator

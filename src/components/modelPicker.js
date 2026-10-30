@@ -1,6 +1,7 @@
 // Model Picker & Build Sheet Component
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
+import { CLOUD_RATES_AS_OF } from '../data/providers.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
@@ -195,7 +196,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="spec-badge-box">
         <div class="spec-badge-label">Cloud Alternative</div>
         <div class="spec-badge-value spec-badge-cost">${cloud.rate}</div>
-        <div class="sub-note">${cloud.label}</div>
+        <div class="sub-note">${cloud.label} · Cloud rates checked ${CLOUD_RATES_AS_OF}</div>
       </div>
     </div>
 
@@ -320,7 +321,7 @@ export function renderModelPickerHtml(state = {}) {
                         btnLabel = `${icon('cart')}Apple`;
                       }
                       return `
-                        <a href="${formatAffiliateUrl(part.url, part.merchant)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-merchant">
+                        <a href="${formatAffiliateUrl(part.url, part.merchant, `build-${activeModelId}-${currentTier.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-merchant" data-click-merchant="${escapeAttr(part.merchant)}" data-click-id="${escapeAttr(`build:${activeModelId}:${currentTier.id}:${part.name}`)}" data-model-id="${escapeAttr(activeModelId)}" data-tier-id="${escapeAttr(currentTier.id)}" data-part-name="${escapeAttr(part.name)}">
                           ${btnLabel}
                         </a>
                       `;

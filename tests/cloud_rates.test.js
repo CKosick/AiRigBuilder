@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { CLOUD_RATES, CLOUD_PROVIDERS } from '../src/data/providers.js';
+import { CLOUD_RATES, CLOUD_PROVIDERS, CLOUD_RATES_AS_OF } from '../src/data/providers.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { cloudAlternative } from '../src/utils/siteFacts.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
+import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -40,17 +41,34 @@ describe('Cloud rates are stored once', () => {
 
   it('shows a range when a model lists several offers, and follows a rate change', () => {
     const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
-    assert.deepEqual(cloudAlternative(llama), { rate: '$0.88 - $1.60/hr', label: 'RunPod 2x RTX 3090 / RunPod 2x RTX A6000' });
+    assert.deepEqual(cloudAlternative(llama), { rate: '$1.00 - $1.18/hr', label: 'RunPod 2x RTX 3090 / RunPod 2x RTX A6000' });
     const saved = CLOUD_RATES['runpod-dual-3090'].hourlyRate;
     CLOUD_RATES['runpod-dual-3090'].hourlyRate = 0.79;
     try {
-      assert.equal(cloudAlternative(llama).rate, '$0.79 - $1.60/hr');
-      assert.match(renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' }), /spec-badge-cost">\$0\.79 - \$1\.60\/hr</);
+      assert.equal(cloudAlternative(llama).rate, '$0.79 - $1.18/hr');
+      assert.match(renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' }), /spec-badge-cost">\$0\.79 - \$1\.18\/hr</);
     } finally {
       CLOUD_RATES['runpod-dual-3090'].hourlyRate = saved;
     }
     const r1 = MODELS_DATA.find(m => m.id === 'deepseek-r1-full');
     assert.equal(cloudAlternative(r1).label, 'Vast.ai 8x H100, or the DeepSeek API');
     assert.throws(() => cloudAlternative({ id: 'x', cloudOffers: ['nope'] }), /unknown cloud offer/);
+  });
+
+  it('exports CLOUD_RATES_AS_OF and renders it in both the model picker and break-even calculator', () => {
+    assert.equal(typeof CLOUD_RATES_AS_OF, 'string');
+    assert.match(CLOUD_RATES_AS_OF, /^[A-Z][a-z]+ \d{4}$/, 'CLOUD_RATES_AS_OF is Month YYYY');
+
+    const pickerHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
+    assert.ok(pickerHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`), 'modelPicker renders CLOUD_RATES_AS_OF');
+
+    const calcHtml = renderBreakEvenHtml();
+    assert.ok(calcHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`), 'breakEvenCalc renders CLOUD_RATES_AS_OF');
+
+    // Verify neither component hardcodes the date string
+    const pickerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src', 'components', 'modelPicker.js'), 'utf-8');
+    const calcSrc = fs.readFileSync(path.join(ROOT_DIR, 'src', 'components', 'breakEvenCalc.js'), 'utf-8');
+    assert.ok(!pickerSrc.includes(CLOUD_RATES_AS_OF), 'modelPicker.js reads CLOUD_RATES_AS_OF from providers.js');
+    assert.ok(!calcSrc.includes(CLOUD_RATES_AS_OF), 'breakEvenCalc.js reads CLOUD_RATES_AS_OF from providers.js');
   });
 });

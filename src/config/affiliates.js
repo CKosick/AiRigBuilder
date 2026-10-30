@@ -74,6 +74,19 @@ export const ebayParams = AFFILIATE_CONFIG.ebayParams;
  */
 export const AFFILIATE_LINK_REL = 'sponsored noopener noreferrer';
 
+// EPN allows customid values up to 256 alphanumeric/hyphen/underscore characters.
+export const EPN_CUSTOMID_MAX_LEN = 256;
+
+export function sanitizeEpnCustomId(value) {
+  if (!value || typeof value !== 'string') return '';
+  return value
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, EPN_CUSTOMID_MAX_LEN);
+}
+
 /**
  * Attaches the Amazon Associates tracking tag to an Amazon URL.
  * Preserves existing search params and updates or adds the 'tag' parameter.
@@ -107,10 +120,16 @@ export function attachAmazonAffiliateTag(url, tag = AFFILIATE_CONFIG.amazonTag) 
  *
  * @param {string} url - Target eBay URL
  * @param {string} [campaignId] - Optional campaign ID override (defaults to AFFILIATE_CONFIG.ebayCampaignId)
+ * @param {string} [customId] - Optional EPN customid (defaults to AFFILIATE_CONFIG.ebayCustomId)
  * @returns {string} Fully tracked eBay affiliate link
  */
-export function attachEbayAffiliateParams(url, campaignId = AFFILIATE_CONFIG.ebayCampaignId) {
+export function attachEbayAffiliateParams(
+  url,
+  campaignId = AFFILIATE_CONFIG.ebayCampaignId,
+  customId = AFFILIATE_CONFIG.ebayCustomId
+) {
   if (!url || url === '#' || !campaignId) return url;
+  const resolvedCustomId = sanitizeEpnCustomId(customId || AFFILIATE_CONFIG.ebayCustomId);
   try {
     const parsed = new URL(url);
     if (parsed.hostname.includes('ebay.')) {
@@ -120,8 +139,8 @@ export function attachEbayAffiliateParams(url, campaignId = AFFILIATE_CONFIG.eba
       parsed.searchParams.set('campid', campaignId);
       parsed.searchParams.set('toolid', AFFILIATE_CONFIG.ebayParams.toolid);
       parsed.searchParams.set('mkevt', AFFILIATE_CONFIG.ebayParams.mkevt);
-      if (AFFILIATE_CONFIG.ebayCustomId) {
-        parsed.searchParams.set('customid', AFFILIATE_CONFIG.ebayCustomId);
+      if (resolvedCustomId) {
+        parsed.searchParams.set('customid', resolvedCustomId);
       }
       return parsed.toString();
     }
@@ -129,7 +148,8 @@ export function attachEbayAffiliateParams(url, campaignId = AFFILIATE_CONFIG.eba
   } catch {
     if (url.includes('ebay.')) {
       const sep = url.includes('?') ? '&' : '?';
-      return `${url}${sep}mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=${encodeURIComponent(campaignId)}&toolid=10001&mkevt=1`;
+      const customParam = resolvedCustomId ? `&customid=${encodeURIComponent(resolvedCustomId)}` : '';
+      return `${url}${sep}mkcid=1&mkrid=711-53200-19255-0&siteid=0&campid=${encodeURIComponent(campaignId)}&toolid=10001&mkevt=1${customParam}`;
     }
     return url;
   }
@@ -140,14 +160,15 @@ export function attachEbayAffiliateParams(url, campaignId = AFFILIATE_CONFIG.eba
  *
  * @param {string} url - Target product or search URL
  * @param {string} [merchant] - Merchant name (e.g. 'Amazon', 'eBay Sold', 'B&H')
+ * @param {string} [context] - Optional attribution context for EPN customid (e.g. 'build-llama-3.3-70b-tier-budget-used' or 'gpu-rtx-3090')
  * @returns {string} Fully attributed affiliate link
  */
-export function formatAffiliateUrl(url, merchant = '') {
+export function formatAffiliateUrl(url, merchant = '', context = '') {
   if (!url || url === '#') return url;
 
   // Domain-based check takes precedence to prevent mixed merchant mismatches
   if (url.includes('ebay.')) {
-    return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId);
+    return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId, context);
   }
   if (url.includes('amazon.')) {
     return attachAmazonAffiliateTag(url, AFFILIATE_CONFIG.amazonTag);
@@ -155,7 +176,7 @@ export function formatAffiliateUrl(url, merchant = '') {
 
   // Fallback to merchant string if URL does not specify a known domain
   if (merchant && merchant.toLowerCase().includes('ebay')) {
-    return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId);
+    return attachEbayAffiliateParams(url, AFFILIATE_CONFIG.ebayCampaignId, context);
   }
   if (merchant && merchant.toLowerCase().includes('amazon')) {
     return attachAmazonAffiliateTag(url, AFFILIATE_CONFIG.amazonTag);
