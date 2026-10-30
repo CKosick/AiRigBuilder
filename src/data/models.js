@@ -916,7 +916,7 @@ export const MODELS_DATA = [
       {
         name: 'MXFP4 (~4.25 bpw experts)',
         vram: 63.4,
-        speed: 'Needs more than 48 GB (no dual-3090 figure)',
+        speed: '~84-127 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Native MXFP4 release: no extra quantization loss',
         recommended: true
       }
@@ -973,17 +973,17 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M',
     quants: [
       // Size source: unsloth/Qwen3-235B-A22B-GGUF and bartowski/Qwen_Qwen3-235B-A22B-Instruct-2507-GGUF (published 85.7GB)
-      { name: 'Q2_K (2.9 bpw)', vram: 85.7, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'High compression: noticeable quality loss, fits 96GB systems' },
-      { name: 'Q3_K_M (3.9 bpw)', vram: 112.4, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Smallest practical quant: noticeable quality loss' },
+      { name: 'Q2_K (2.9 bpw)', vram: 85.7, speed: '~29-44 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 96GB systems' },
+      { name: 'Q3_K_M (3.9 bpw)', vram: 112.4, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest practical quant: noticeable quality loss' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 142.2,
-        speed: 'Needs more than 48 GB (no dual-3090 figure)',
+        speed: '~18-26 tok/s on 2x 3090 (bandwidth-bound est.)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 166.8, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 249.9, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 166.8, speed: '~15-22 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 249.9, speed: '~10-15 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 145 GB+ at Q4_K_M)',
@@ -1006,10 +1006,10 @@ export const MODELS_DATA = [
     recommendedVram: 70,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'Q3_K_M (3.9 bpw)', vram: 51.8, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Smallest practical quant: noticeable quality loss' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 65.4, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Sweet spot: small quality loss for the size', recommended: true },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 76.5, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 114.5, speed: 'Needs more than 48 GB (no dual-3090 figure)', quality: 'Effectively identical to BF16' }
+      { name: 'Q3_K_M (3.9 bpw)', vram: 51.8, speed: '~29-43 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest practical quant: noticeable quality loss' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 65.4, speed: '~23-34 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: small quality loss for the size', recommended: true },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 76.5, speed: '~20-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 114.5, speed: '~13-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 68 GB+ at Q4_K_M)',

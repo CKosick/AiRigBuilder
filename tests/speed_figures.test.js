@@ -94,23 +94,13 @@ describe('Method-based speed estimation (speedEstimate.js)', () => {
   });
 
   it('consistency: every model and quant stored speed string equals the util output on the 936 GB/s basis', () => {
-    // Batch 1 models whose quants exceed 48 GB currently store the >48GB batch-1 placeholder
-    // ('Needs more than 48 GB (no dual-3090 figure)'); batch 1 stored strings are not rewritten in Item 4.
-    const BATCH1_OVER_48GB_IDS = new Set(['gpt-oss-120b', 'qwen-3-235b-a22b', 'llama-4-scout']);
-
     for (const m of MODELS_DATA) {
       for (const q of m.quants) {
         const est = estimateSpeedToks(m, q, DUAL_3090_BANDWIDTH_GBS);
         assert.ok(est && est.low > 0 && est.high >= est.low, `${m.id} ${q.name} produces valid speed estimate`);
         const expected = formatSpeedRange(est);
-        if (BATCH1_OVER_48GB_IDS.has(m.id)) {
-          assert.ok(
-            q.speed === expected || q.speed === 'Needs more than 48 GB (no dual-3090 figure)',
-            `${m.id} ${q.name}: unexpected batch-1 speed "${q.speed}" (computed: "${expected}")`
-          );
-        } else {
-          assert.equal(q.speed, expected, `${m.id} ${q.name} stored speed must equal util output`);
-        }
+        assert.equal(q.speed, expected, `${m.id} ${q.name} stored speed must equal util output`);
+        assert.ok(!q.speed.includes('Needs more than 48 GB'), `${m.id} ${q.name} must not contain sentinel text`);
       }
     }
   });
