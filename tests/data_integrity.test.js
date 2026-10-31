@@ -121,8 +121,10 @@ describe('Data Integrity & Consistency Contracts', () => {
       for (const m of MODELS_DATA.filter(x => x.totalParamsB !== undefined)) {
         assert.ok(m.activeParamsB > 0 && m.activeParamsB <= m.totalParamsB, `${m.id} active <= total`);
         if (m.activeParamsB < m.totalParamsB) {
-          // the page must say which is which: "235.1B MoE (22B active)", never just the active size
-          assert.equal(m.parameters, `${m.totalParamsB}B MoE (${m.activeParamsB}B active)`, `${m.id} parameters label`);
+          // the page must say which is which: "235.1B MoE (22B active)" or model-card headline total (e.g. "671B MoE (37B active)"), never just the active size
+          assert.match(m.parameters, new RegExp(`^(\\d+(\\.\\d+)?)B MoE \\(${m.activeParamsB}B active\\)$`), `${m.id} parameters label`);
+          const labelTotal = parseFloat(m.parameters);
+          assert.ok(Math.abs(labelTotal - m.totalParamsB) / m.totalParamsB < 0.03, `${m.id} parameters total (${labelTotal}B) matches totalParamsB (${m.totalParamsB}B) within 3%`);
           // memory needs come from the total, so the recommended quant is far larger than the active weights
           const rec = m.quants.find(q => q.recommended);
           assert.ok(rec.vram > m.activeParamsB * 0.5, `${m.id} recommended quant size reflects total parameters`);

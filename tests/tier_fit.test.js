@@ -209,12 +209,19 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     }
   });
 
-  it('tier-ram-offload is inserted only on deepseek-v3-moe and deepseek-r1-full', () => {
+  it('tier-ram-offload is inserted only on colossal models that fit no GPU/unified tier', () => {
     const offloadModels = Object.entries(BUILDS_DATA)
       .filter(([, sheet]) => sheet.tiers.some(t => t.id === 'tier-ram-offload'))
       .map(([id]) => id)
       .sort();
-    assert.deepEqual(offloadModels, ['deepseek-r1-full', 'deepseek-v3-moe']);
+    assert.deepEqual(offloadModels, [
+      'deepseek-r1-full',
+      'deepseek-v3-moe',
+      'deepseek-v3.2',
+      'llama-4-maverick',
+      'qwen-3-coder-480b-a35b',
+      'qwen-3.5-397b-a17b'
+    ]);
   });
 
   it('all new GPU/platform part prices equal tracker prices in gpus.js and match apply_prices.js regex', async () => {

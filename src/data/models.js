@@ -25,6 +25,14 @@
 //   Llama 4 Scout's chunked attention (chunk 8192) equals full attention at 8K tokens.
 //   gpt-oss alternates 128-token sliding-window and full-attention layers.
 //   Vision encoders / projectors are not counted.
+// Batch 2 (verified 2026-10-30 against each model's HuggingFace config.json):
+//   Llama 4 Maverick uses chunked attention (chunk 8192) across 48 layers (kvHeads 8, headDim 128).
+//   Qwen3-Coder-480B-A35B uses full GQA across 62 layers (kvHeads 8, headDim 128).
+//   DeepSeek V3.2 keeps V3's 61-layer MLA latent cache (kvLoraRank 512, qkRopeHeadDim 64 -> 0.576 GB/8K)
+//     plus DSA's 1-head FP8 Lightning Indexer k_cache (index_head_dim 128 + FP32 scale = 132 B/tok/layer
+//     -> +0.066 GB/8K, total 0.642 GB/8K, still rounding to 0.6 GB/8K).
+//   Qwen 3.5 397B-A17B (60 layers: 45 linear + 15 full) and 122B-A10B (48 layers: 36 linear + 12 full)
+//     use Gated DeltaNet linear attention in 3 of every 4 layers (kvHeads 2, headDim 256 on full layers).
 export const KV_SPECS = {
   'llama-3.3-70b': { layers: 80, kvHeads: 8, headDim: 128 },
   'deepseek-r1-70b': { layers: 80, kvHeads: 8, headDim: 128 },
@@ -67,6 +75,11 @@ export const KV_SPECS = {
   'gemma-4-26b-moe': { layers: 30, kvHeads: 8, headDim: 256, swa: { window: 1024, localLayers: 25, globalLayers: 5 }, globalAttn: { kvHeads: 2, headDim: 512 } },
   'qwen-3.5-27b': { layers: 64, kvHeads: 4, headDim: 256, linearAttn: { linearLayers: 48, fullLayers: 16 } },
   'qwen-3.6-35b-a3b': { layers: 40, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 30, fullLayers: 10 } },
+  'llama-4-maverick': { layers: 48, kvHeads: 8, headDim: 128 },
+  'qwen-3-coder-480b-a35b': { layers: 62, kvHeads: 8, headDim: 128 },
+  'deepseek-v3.2': { layers: 61, mla: { kvLoraRank: 512, qkRopeHeadDim: 64 } },
+  'qwen-3.5-397b-a17b': { layers: 60, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 45, fullLayers: 15 } },
+  'qwen-3.5-122b-a10b': { layers: 48, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 36, fullLayers: 12 } },
 };
 export const MODELS_DATA = [
   // ==========================================
@@ -1138,5 +1151,175 @@ export const MODELS_DATA = [
     contextCostPer8k: 0.2,
     typicalSpeedDual3090: '126 - 189 tokens/sec (bandwidth-bound estimate: 936 GB/s over 1.9 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
     cloudOffers: ['runpod-single-4090', 'vast-single-4090']
+  },
+  // ==========================================
+  // 2025-2026 RELEASES (catalog refresh batch 2, data verified 2026-10-30)
+  // ==========================================
+  // Sizes: unsloth/Llama-4-Maverick-17B-128E-Instruct-GGUF
+  {
+    id: 'llama-4-maverick',
+    name: 'Llama 4 Maverick 17B-128E Instruct',
+    creator: 'Meta',
+    parameters: '400B MoE (17B active)',
+    totalParamsB: 401.6,
+    activeParamsB: 17,
+    releaseDate: 'Apr 2025',
+    description: 'Meta\'s 128-expert natively multimodal (text and image in) mixture-of-experts model with a 1M-token context, licensed under the Llama 4 Community License. The checkpoint holds 401.6B parameters in total (400B language model plus vision encoder, ~243 GB at Q4_K_M and ~146 GB at Q2_K) while only 17B are active per token.',
+    architecture: 'Multimodal Sparse MoE (128 experts, 1 routed + 1 shared, interleaved)',
+    flagship: false,
+    minVram: 146,
+    recommendedVram: 247,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q2_K (2.9 bpw)', vram: 145.6, speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 191.1, speed: '~29-43 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 242.8,
+        speed: '~23-34 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: small quality loss for the size',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 284.5, speed: '~19-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 425.8, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 1.6,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 246 GB+ at Q4_K_M)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF
+  {
+    id: 'qwen-3-coder-480b-a35b',
+    name: 'Qwen3-Coder 480B-A35B Instruct',
+    creator: 'Alibaba Cloud',
+    parameters: '480B MoE (35B active)',
+    totalParamsB: 480.2,
+    activeParamsB: 35,
+    releaseDate: 'Jul 2025',
+    description: 'Qwen 3\'s flagship agentic coding mixture-of-experts model, Apache 2.0, with a 262K native context (1M with YaRN). All 480B parameters must fit in memory (about 290 GB at Q4_K_M, 175 GB at Q2_K for 192 GB system-RAM offload), while 35B are active per token.',
+    architecture: 'Sparse MoE (160 experts, 8 active per token)',
+    flagship: false,
+    minVram: 175,
+    recommendedVram: 296,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q2_K (2.9 bpw)', vram: 174.7, speed: '~18-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 229.2, speed: '~14-21 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 290.1,
+        speed: '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: small quality loss for the size',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 340.5, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 510.4, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 2.1,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 294 GB+ at Q4_K_M)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: unsloth/DeepSeek-V3.2-GGUF
+  {
+    id: 'deepseek-v3.2',
+    name: 'DeepSeek V3.2 671B MoE',
+    creator: 'DeepSeek',
+    parameters: '671B MoE (37B active)',
+    totalParamsB: 685.4,
+    activeParamsB: 37,
+    releaseDate: 'Dec 2025',
+    description: 'DeepSeek\'s MIT-licensed 671B reasoning and agentic flagship (685.4B in the checkpoint including its MTP module, 37B active per token) with 160K context and DeepSeek Sparse Attention (DSA) on top of Multi-Head Latent Attention. Real GGUF weights start at 161 GB (TQ1_0) and 184 GB (IQ1_S) to fit 192 GB RAM offload; Q2_K is 245 GB.',
+    architecture: 'Colossal Sparse MoE (MLA + DeepSeek Sparse Attention)',
+    flagship: false,
+    minVram: 162,
+    recommendedVram: 187,
+    sweetSpotQuant: 'IQ1_S on 192GB RAM Offload (or Q4_K_M on multi-node / cloud)',
+    quants: [
+      { name: 'TQ1_0 (1.9 bpw)', vram: 161.3, speed: '~27-40 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme 1-bit ternary compression: heavy quality loss, emergency 192GB fit' },
+      {
+        name: 'IQ1_S (2.2 bpw)',
+        vram: 184.1,
+        speed: '~24-35 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Extreme sub-2-bit compression: significant quality loss, best quant that fits 192GB RAM',
+        recommended: true
+      },
+      { name: 'Q2_K (2.9 bpw)', vram: 245.4, speed: '~18-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 320.2, speed: '~14-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Good reasoning retention on 384GB+ systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 405.4, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 476.2, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.6,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 186 GB+ at IQ1_S)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['vast-8x-h100'],
+    cloudNote: 'or the DeepSeek API'
+  },
+  // Sizes: bartowski/Qwen_Qwen3.5-397B-A17B-GGUF
+  {
+    id: 'qwen-3.5-397b-a17b',
+    name: 'Qwen 3.5 397B-A17B',
+    creator: 'Alibaba Cloud',
+    parameters: '397B MoE (17B active)',
+    totalParamsB: 403.4,
+    activeParamsB: 17,
+    releaseDate: 'Feb 2026',
+    description: 'Qwen 3.5\'s largest open-weights multimodal mixture-of-experts flagship, Apache 2.0, with a 262K native context (1M extensible). The checkpoint holds 403.4B parameters (397B language model plus vision encoder and MTP layer; ~248 GB at Q4_K_M, ~188 GB at Q3_K_M) with only 17B active per token and hybrid Gated DeltaNet linear attention in 3 of every 4 layers.',
+    architecture: 'Hybrid-attention Sparse MoE (512 experts, 10 routed + 1 shared), multimodal',
+    flagship: false,
+    minVram: 147,
+    recommendedVram: 250,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q2_K (2.9 bpw)', vram: 146.3, speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 188.2, speed: '~30-44 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 192GB RAM offload' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 248.3,
+        speed: '~22-34 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: small quality loss for the size',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 290, speed: '~19-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 428.6, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.3,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 250 GB+ at Q4_K_M)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: bartowski/Qwen_Qwen3.5-122B-A10B-GGUF
+  {
+    id: 'qwen-3.5-122b-a10b',
+    name: 'Qwen 3.5 122B-A10B',
+    creator: 'Alibaba Cloud',
+    parameters: '122B MoE (10B active)',
+    totalParamsB: 125.1,
+    activeParamsB: 10,
+    releaseDate: 'Feb 2026',
+    description: 'Qwen 3.5\'s mid-colossal multimodal mixture-of-experts model, Apache 2.0, with a 262K native context. All 122B language parameters (125.1B in the checkpoint with vision and MTP; ~78 GB at Q4_K_M, ~46 GB at Q2_K) must fit in memory, while only 10B are active per token and 3 in 4 layers use Gated DeltaNet linear attention.',
+    architecture: 'Hybrid-attention Sparse MoE (256 experts, 8 routed + 1 shared), multimodal',
+    flagship: false,
+    minVram: 47,
+    recommendedVram: 79,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q2_K (2.9 bpw)', vram: 46.4, speed: '~63-95 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 48GB dual-3090 rigs with reduced quality' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 59.2, speed: '~49-74 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 72GB+ unified memory' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 77.6,
+        speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits 96GB unified or workstation rigs',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 90.4, speed: '~32-49 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 132.6, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.2,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 79 GB+ at Q4_K_M)',
+    cloudOffers: ['runpod-single-a100-80gb']
   }
 ];
