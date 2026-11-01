@@ -37,7 +37,7 @@ npm run build
    - Interactive 24-month cumulative cost projection chart with Chart.js showing exact payoff month and 2-year net savings.
 
 3. **Used GPU Price Tracker (`src/components/priceTracker.js`)**
-   - The SEO moat tracking street prices for the 10 GPUs that matter for local AI.
+   - The SEO moat tracking street prices for the 19 GPUs that matter for local AI.
    - Sorted by **Price per GB of VRAM ($/GB)**.
    - Interactive 6-month historical price charts and email alert capture for price drops.
 
@@ -48,7 +48,7 @@ npm run build
 
 ## 📈 Weekly Used GPU Price Update Workflow (Phase 2)
 
-We maintain street prices for the 10 GPUs that matter for local AI via a **semi-automated workflow with a human-in-the-loop review step**:
+We maintain street prices for the 19 GPUs that matter for local AI via a **semi-automated workflow with a human-in-the-loop review step**:
 
 ### Automated weekly run
 `.github/workflows/weekly-prices.yml` runs Tuesdays at 23:00 UTC (and on demand from the Actions tab). It fetches listings from the eBay Browse API, applies the approved prices on a new `prices/<date>-run<N>` branch, runs the tests and opens a pull request with the review table. Nothing reaches `main` until someone checks the numbers and merges; Vercel deploys on merge. An older unmerged price PR is closed as superseded.

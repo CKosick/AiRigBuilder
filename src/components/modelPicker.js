@@ -126,6 +126,7 @@ export function renderModelPickerHtml(state = {}) {
   const titleTag = isHome ? 'h2' : 'h1';
   const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
   const cloud = cloudAlternative(currentModel);
+  const smallestQuantName = currentModel.quants.reduce((a, b) => (b.vram < a.vram ? b : a), currentModel.quants[0]).name.split(' (')[0];
   const { buildSheet, currentTier } = findBuild(activeModelId, activeTierId);
   const filteredModels = filterModels({ vramBudget, codingOnly, searchQuery });
   const shownModels = visibleModels(filteredModels, activeModelId, showAllModels);
@@ -184,7 +185,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="spec-badge-box">
         <div class="spec-badge-label">Minimum VRAM</div>
         <div class="spec-badge-value">${currentModel.minVram} GB</div>
-        <div class="sub-note">Strict minimum for Q3/Q4</div>
+        <div class="sub-note">Strict minimum at ${smallestQuantName}</div>
       </div>
 
       <div class="spec-badge-box">
