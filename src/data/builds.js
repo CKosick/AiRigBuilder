@@ -1718,7 +1718,7 @@ export const TIER_RAM_OFFLOAD = {
       price: 2850,
       merchant: 'Amazon',
       url: 'https://www.amazon.com/dp/B0BY6ZF5KF',
-      notes: '192GB system RAM pool holds 140GB-142GB Q2_K weights in memory with room for OS and MLA KV cache. DDR5 prices are highly volatile in late 2026 and this reflects the kit\'s current street price.'
+      notes: '192GB system RAM pool holds colossal MoE weights in memory (such as IQ1_S at ~184GB-186GB on 671B models, or Q2_K/Q3_K on 400B models) with room for OS and KV cache. DDR5 prices are highly volatile in late 2026 and this reflects the kit\'s current street price.'
     },
     {
       category: 'Power Supply (PSU)',

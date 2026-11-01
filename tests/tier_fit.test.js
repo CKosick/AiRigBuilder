@@ -192,15 +192,15 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     assert.equal(fittingTiers.length, 1, 'Qwen3-235B has 1 fitting tier (Strix Halo)');
   });
 
-  it('DeepSeek V3 and DeepSeek R1 full fit the 192GB RAM offload tier at Q2_K with 32K+ context', () => {
-    for (const [id, expectedVram] of [['deepseek-v3-moe', 140], ['deepseek-r1-full', 142]]) {
+  it('DeepSeek V3 and DeepSeek R1 full fit the 192GB RAM offload tier at IQ1_S with 32K+ context', () => {
+    for (const [id, expectedVram] of [['deepseek-v3-moe', 186.2], ['deepseek-r1-full', 185.5]]) {
       const sheet = BUILDS_DATA[id];
       const fittingTiers = sheet.tiers.filter(t => t.fit && t.fit.status !== 'none');
       assert.equal(fittingTiers.length, 1, `${id} has exactly 1 fitting tier`);
       const offload = fittingTiers[0];
       assert.equal(offload.id, 'tier-ram-offload', `${id} fitting tier is tier-ram-offload`);
       assert.equal(offload.fit.status, 'fits');
-      assert.equal(offload.fit.quant, 'Q2_K');
+      assert.equal(offload.fit.quant, 'IQ1_S');
       assert.equal(offload.fit.quantVram, expectedVram);
       assert.equal(offload.fit.contextLabel, '32K+');
       const offloadTotal = offload.parts.reduce((sum, p) => sum + (p.price || 0), 0);
