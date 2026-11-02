@@ -20,6 +20,7 @@ const REDIS_HASH_KEY = 'airigbuilder:clicks';
 
 export const KNOWN_MERCHANTS = new Set([
   'Amazon',
+  'Apple',
   'Amazon / B&H',
   'B&H',
   'B&H / Amazon',

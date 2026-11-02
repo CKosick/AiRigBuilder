@@ -1571,6 +1571,98 @@ export const TIER_MAC_M3_ULTRA = {
   ]
 };
 
+// 3b. Apple Mac Studio M5 Ultra (256GB unified, 192GB usable)
+export const TIER_MAC_M5_ULTRA_256 = {
+  id: 'tier-mac-m5-ultra-256',
+  name: 'Apple Mac Studio M5 Ultra (256GB Unified)',
+  badge: '192GB Unified',
+  type: 'new',
+  accentColor: '#8b5cf6',
+  headline: 'Modern M5 Ultra turnkey desktop with 192GB usable memory at 1.2 TB/s',
+  rigSummary: 'Apple Mac Studio M5 Ultra with 256GB unified memory (192GB usable). High 1,200 GB/s unified memory bandwidth runs large models natively in pure silence.',
+  memoryGb: 192,
+  bandwidthGbs: 1200,
+  estimatedTdpWatts: 220,
+  parts: [
+    {
+      category: 'Compute Unit',
+      name: 'Apple Mac Studio M5 Ultra (256GB)',
+      spec: '30-core CPU, 64-core GPU, 256GB unified memory (192GB usable), 1200 GB/s',
+      condition: 'New',
+      price: 9499,
+      merchant: 'Apple',
+      url: 'https://www.apple.com/shop/buy-mac/mac-studio',
+      notes: '192GB usable unified memory with 1,200 GB/s bandwidth. Whisper quiet desktop operation.'
+    },
+    {
+      category: 'Internal Storage',
+      name: '1TB Ultra-Fast Internal SSD',
+      spec: 'Integrated with SOC',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Included in base configuration.'
+    },
+    {
+      category: 'Power & Acoustics',
+      name: 'Internal Silent Power Supply',
+      spec: 'Integrated, whisper-quiet thermal system',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Acoustic subsystem operates near silent under load.'
+    }
+  ]
+};
+
+// 3c. Apple Mac Studio M5 Ultra (512GB unified, 384GB usable)
+export const TIER_MAC_M5_ULTRA_512 = {
+  id: 'tier-mac-m5-ultra-512',
+  name: 'Apple Mac Studio M5 Ultra (512GB Unified)',
+  badge: '384GB Unified',
+  type: 'new',
+  accentColor: '#8b5cf6',
+  headline: 'Flagship M5 Ultra turnkey desktop with 384GB usable memory at 1.2 TB/s',
+  rigSummary: 'Apple Mac Studio M5 Ultra with 512GB unified memory (384GB usable). High 1,200 GB/s unified memory bandwidth runs 671B models at Q3_K_M natively in pure silence.',
+  memoryGb: 384,
+  bandwidthGbs: 1200,
+  estimatedTdpWatts: 220,
+  parts: [
+    {
+      category: 'Compute Unit',
+      name: 'Apple Mac Studio M5 Ultra (512GB)',
+      spec: '36-core CPU, 80-core GPU, 512GB unified memory (384GB usable), 1200 GB/s',
+      condition: 'New',
+      price: 22299,
+      merchant: 'Apple',
+      url: 'https://www.apple.com/shop/buy-mac/mac-studio',
+      notes: '384GB usable unified memory with 1,200 GB/s bandwidth. Whisper quiet desktop operation.'
+    },
+    {
+      category: 'Internal Storage',
+      name: '1TB Ultra-Fast Internal SSD',
+      spec: 'Integrated with SOC',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Included in base configuration.'
+    },
+    {
+      category: 'Power & Acoustics',
+      name: 'Internal Silent Power Supply',
+      spec: 'Integrated, whisper-quiet thermal system',
+      condition: 'Included',
+      price: 0,
+      merchant: 'Included',
+      url: '#',
+      notes: 'Acoustic subsystem operates near silent under load.'
+    }
+  ]
+};
+
 // 4. RTX 5090 32GB single-card tier
 export const TIER_RTX_5090 = {
   id: 'tier-rtx-5090',
@@ -1822,6 +1914,14 @@ for (const model of MODELS_DATA) {
     tiers.push(JSON.parse(JSON.stringify(TIER_RAM_OFFLOAD)));
   }
 
+  // Apple Mac Studio M5 Ultra tiers (256GB and 512GB): add both tiers to sheets of models
+  // whose smallest listed quant is over 95GB (offload tier eligibility was evaluated above so it remains).
+  const smallestQuantVram = Math.min(...model.quants.map(q => q.vram));
+  if (smallestQuantVram > 95) {
+    tiers.push(JSON.parse(JSON.stringify(TIER_MAC_M5_ULTRA_256)));
+    tiers.push(JSON.parse(JSON.stringify(TIER_MAC_M5_ULTRA_512)));
+  }
+
   for (const tier of tiers) {
     const fit = tierFit(model, tier);
     tier.fit = fit;
@@ -1841,6 +1941,8 @@ for (const model of MODELS_DATA) {
       'tier-rtx-pro-6000': '96GB Workstation',
       'tier-strix-halo': 'Cheapest 96GB Fit',
       'tier-mac-m3-ultra': '72GB Unified',
+      'tier-mac-m5-ultra-256': '192GB Unified',
+      'tier-mac-m5-ultra-512': '384GB Unified',
       'tier-rtx-5090': '32GB Flagship',
       'tier-ram-offload': 'RAM Offload'
     };
