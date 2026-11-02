@@ -222,6 +222,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       'deepseek-r1-full',
       'deepseek-v3-moe',
       'deepseek-v3.2',
+      'glm-5.3',
       'llama-4-maverick',
       'qwen-3-coder-480b-a35b',
       'qwen-3.5-397b-a17b'
@@ -250,12 +251,18 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       const sum512 = t512.parts.reduce((sum, p) => sum + (p.price || 0), 0);
       assert.equal(sum512, 22299, `${id} M5 Ultra 512GB tier price is $22,299`);
 
-      // All 6 models have a valid fit on both tiers
-      assert.notEqual(t256.fit.status, 'none', `${id} M5 Ultra 256GB fits or reduced`);
-      assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
+      if (id === 'glm-5.3') {
+        assert.equal(t256.fit.status, 'none', `${id} M5 Ultra 256GB cannot hold 216.7GB smallest quant`);
+        assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
+        assert.equal(cheapestFittingTotal(sheet), 22299, `${id} cheapest fitting tier is M5 Ultra 512GB at $22,299`);
+      } else {
+        // The other 6 models have a valid fit on both tiers
+        assert.notEqual(t256.fit.status, 'none', `${id} M5 Ultra 256GB fits or reduced`);
+        assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
 
-      // RAM offload remains the cheapest fitting rig
-      assert.equal(cheapestFittingTotal(sheet), 5424, `${id} cheapest fitting tier is RAM offload at $5,424`);
+        // RAM offload remains the cheapest fitting rig
+        assert.equal(cheapestFittingTotal(sheet), 5424, `${id} cheapest fitting tier is RAM offload at $5,424`);
+      }
     }
 
     // Specific fit statuses on 256GB tier
@@ -265,6 +272,8 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
     assert.equal(BUILDS_DATA['llama-4-maverick'].tiers.find(t => t.id === 'tier-mac-m5-ultra-256').fit.status, 'reduced');
     assert.equal(BUILDS_DATA['qwen-3-coder-480b-a35b'].tiers.find(t => t.id === 'tier-mac-m5-ultra-256').fit.status, 'reduced');
     assert.equal(BUILDS_DATA['qwen-3.5-397b-a17b'].tiers.find(t => t.id === 'tier-mac-m5-ultra-256').fit.status, 'reduced');
+    assert.equal(BUILDS_DATA['glm-5.3'].tiers.find(t => t.id === 'tier-mac-m5-ultra-256').fit.status, 'none');
+    assert.equal(BUILDS_DATA['glm-5.3'].tiers.find(t => t.id === 'tier-mac-m5-ultra-512').fit.status, 'fits');
   });
 
   it('tier-ram-offload is inserted only on colossal models that fit no GPU/unified tier', () => {

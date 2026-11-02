@@ -33,6 +33,17 @@
 //     -> +0.066 GB/8K, total 0.642 GB/8K, still rounding to 0.6 GB/8K).
 //   Qwen 3.5 397B-A17B (60 layers: 45 linear + 15 full) and 122B-A10B (48 layers: 36 linear + 12 full)
 //     use Gated DeltaNet linear attention in 3 of every 4 layers (kvHeads 2, headDim 256 on full layers).
+// Batch 3 (verified 2026-11-02 against each model's HuggingFace config.json):
+//   qwen-3.8-27b: 64 layers (48 Gated DeltaNet linear + 16 full GQA, kvHeads 4, headDim 256 -> 0.54 GB/8K -> 0.5 GB/8K).
+//   muse-glimmer-30b: 52 layers (39 local SWA-2048 + 13 global, kvHeads 2, headDim 128 -> 0.19 GB/8K -> 0.2 GB/8K). mmproj-kquant.gguf ships alongside text quants.
+//   north-mini-code-1.0: 49 layers (36 sliding SWA-4096 + 13 global, kvHeads 4, headDim 128 -> 0.52 GB/8K -> 0.5 GB/8K).
+//   granite-4.2-30b: 64 layers full GQA (kvHeads 8, headDim 128 -> 2.15 GB/8K -> 2.1 GB/8K).
+//   diffusiongemma-26b-a4b: 30 layers (25 local SWA-1024 kvHeads 8 headDim 256 + 5 global kvHeads 2 headDim 512 -> 0.38 GB/8K -> 0.4 GB/8K). Text-only GGUF; non-autoregressive block diffusion.
+//   nemotron-3.5-lightning-30b-a3b: 52 layers (46 Mamba-SSM/MoE linear + 6 full-attention GQA kvHeads 2 headDim 128 -> 0.05 GB/8K -> 0.1 GB/8K).
+//   qwen-3.8-flash-next: 48 layers (36 Gated DeltaNet linear + 12 full GQA, kvHeads 2, headDim 256 -> 0.20 GB/8K -> 0.2 GB/8K). Sourced from unsloth subdirs; ~51B n-gram embedding table.
+//   deepseek-v4-flash: 43 layers MLA (kvLoraRank 448, qkRopeHeadDim 64 -> 0.36 GB/8K -> 0.4 GB/8K). Checkpoint 0731 + DSpark speculative module.
+//   glm-5.3-flash: 45 layers (34 linear + 11 full GQA/MLA, kvHeads 1, headDim 256 -> 0.09 GB/8K -> 0.1 GB/8K).
+//   glm-5.3: 78 layers MLA (kvLoraRank 512, qkRopeHeadDim 64 -> 0.74 GB/8K -> 0.7 GB/8K).
 export const KV_SPECS = {
   'llama-3.3-70b': { layers: 80, kvHeads: 8, headDim: 128 },
   'deepseek-r1-70b': { layers: 80, kvHeads: 8, headDim: 128 },
@@ -80,6 +91,16 @@ export const KV_SPECS = {
   'deepseek-v3.2': { layers: 61, mla: { kvLoraRank: 512, qkRopeHeadDim: 64 } },
   'qwen-3.5-397b-a17b': { layers: 60, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 45, fullLayers: 15 } },
   'qwen-3.5-122b-a10b': { layers: 48, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 36, fullLayers: 12 } },
+  'qwen-3.8-27b': { layers: 64, kvHeads: 4, headDim: 256, linearAttn: { linearLayers: 48, fullLayers: 16 } },
+  'muse-glimmer-30b': { layers: 52, kvHeads: 2, headDim: 128, swa: { window: 2048, localLayers: 39, globalLayers: 13 } },
+  'north-mini-code-1.0': { layers: 49, kvHeads: 4, headDim: 128, swa: { window: 4096, localLayers: 36, globalLayers: 13 } },
+  'granite-4.2-30b': { layers: 64, kvHeads: 8, headDim: 128 },
+  'diffusiongemma-26b-a4b': { layers: 30, kvHeads: 8, headDim: 256, swa: { window: 1024, localLayers: 25, globalLayers: 5 }, globalAttn: { kvHeads: 2, headDim: 512 } },
+  'nemotron-3.5-lightning-30b-a3b': { layers: 52, kvHeads: 2, headDim: 128, linearAttn: { linearLayers: 46, fullLayers: 6 } },
+  'qwen-3.8-flash-next': { layers: 48, kvHeads: 2, headDim: 256, linearAttn: { linearLayers: 36, fullLayers: 12 } },
+  'deepseek-v4-flash': { layers: 43, mla: { kvLoraRank: 448, qkRopeHeadDim: 64 } },
+  'glm-5.3-flash': { layers: 45, kvHeads: 1, headDim: 256, linearAttn: { linearLayers: 34, fullLayers: 11 } },
+  'glm-5.3': { layers: 78, mla: { kvLoraRank: 512, qkRopeHeadDim: 64 } },
 };
 export const MODELS_DATA = [
   // ==========================================
@@ -1342,5 +1363,346 @@ export const MODELS_DATA = [
     contextCostPer8k: 0.2,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 79 GB+ at Q4_K_M)',
     cloudOffers: ['runpod-single-a100-80gb']
+  },
+  // ==========================================
+  // 2025-2026 RELEASES (catalog refresh batch 3, data verified 2026-11-02)
+  // ==========================================
+  // Parameters, context and licence: each model's HuggingFace card. Quant sizes are GGUF file
+  // sizes (GB) from the repo named on each entry. MoE memory needs use all parameters; speed
+  // uses only the active ones. Speeds are bandwidth-bound estimates on 2x RTX 3090:
+  // [0.5, 0.75] x 936 GB/s / (active params x bytes per param of the quant), halved again for
+  // MoE models (routing / per-token overhead). Shown only when the
+  // quant fits 48 GB with 1 GB overhead and 8K context. minVram = smallest listed quant;
+  // recommendedVram = recommended quant + 1 GB overhead + 16K context.
+  // Sizes: unsloth/Qwen3.8-27B-GGUF
+  {
+    id: 'qwen-3.8-27b',
+    name: 'Qwen 3.8 27B',
+    creator: 'Alibaba Cloud',
+    parameters: '27.8 Billion',
+    totalParamsB: 27.8,
+    activeParamsB: 27.8,
+    releaseDate: 'Aug 2026',
+    description: 'Dense Qwen 3.8 model with native multimodal vision, Apache 2.0, with a 262K native context (1M extended). Three in four layers use Gated DeltaNet linear attention, dramatically reducing KV-cache growth; about 16.5 GB at Q4_K_M fits comfortably on a single 24 GB card.',
+    architecture: 'Dense Hybrid (linear + full attention), multimodal',
+    flagship: false,
+    minVram: 17,
+    recommendedVram: 19,
+    sweetSpotQuant: 'UD-Q4_K_M',
+    quants: [
+      {
+        name: 'UD-Q4_K_M (4.8 bpw)',
+        vram: 16.5,
+        speed: '~28-43 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: small quality loss for the size',
+        recommended: true
+      },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 19.8, speed: '~24-35 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'UD-Q6_K (6.6 bpw)', vram: 22, speed: '~21-32 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 29, speed: '~16-24 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.5,
+    typicalSpeedDual3090: '28 - 43 tokens/sec (bandwidth-bound estimate: 936 GB/s over 16.5 GB of weights at UD-Q4_K_M; real speeds often lower)',
+    cloudOffers: ['runpod-single-3090', 'vast-single-3090']
+  },
+  // Sizes: unsloth/Muse-Glimmer-30B-GGUF
+  {
+    id: 'muse-glimmer-30b',
+    name: 'Muse Glimmer 30B',
+    creator: 'Meta',
+    parameters: '29.8 Billion',
+    totalParamsB: 29.8,
+    activeParamsB: 29.8,
+    releaseDate: 'Aug 2026',
+    description: 'Meta\'s 30B dense causal language model with an integrated perception encoder, Apache 2.0, built for autonomous agentic workflows with 131K context. Uses a repeating [Local, Local, Local, Global] sliding-window attention pattern. The Unsloth GGUF build ships the vision projector (mmproj), enabling full multimodal (text plus vision) execution locally with llama.cpp.',
+    architecture: 'Dense Causal Transformer with Perception Encoder, multimodal',
+    flagship: false,
+    minVram: 14,
+    recommendedVram: 18,
+    sweetSpotQuant: 'UD-Q4_K_XL',
+    quants: [
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 13.4, speed: '~35-52 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 16GB cards with tight context' },
+      {
+        name: 'UD-Q4_K_XL (4.8 bpw)',
+        vram: 15.9,
+        speed: '~29-44 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: small quality loss, fits 24GB cards with full context',
+        recommended: true
+      },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 19.2, speed: '~24-37 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'UD-Q6_K_XL (6.6 bpw)', vram: 26.3, speed: '~18-27 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 31.7, speed: '~15-22 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.2,
+    typicalSpeedDual3090: '29 - 44 tokens/sec (bandwidth-bound estimate: 936 GB/s over 15.9 GB of weights at UD-Q4_K_XL; real speeds often lower)',
+    cloudOffers: ['runpod-single-3090', 'vast-single-3090']
+  },
+  // Sizes: bartowski/North-Mini-Code-1.0-GGUF
+  {
+    id: 'north-mini-code-1.0',
+    name: 'North Mini Code 1.0',
+    creator: 'Cohere',
+    parameters: '30.5B MoE (3B active)',
+    totalParamsB: 30.5,
+    activeParamsB: 3,
+    releaseDate: 'Jun 2026',
+    description: 'Cohere\'s 30B total / 3B active mixture-of-experts coding model, Apache 2.0, optimized for agentic software engineering and terminal tasks. The model card specifies a 256K context (the config.json defines a 500K max position embedding). Alternates 1 full-attention layer with 3 sliding-window layers (window 4096). All 30.5B parameters fit in ~18.7 GB at Q4_K_M on a single 24 GB GPU.',
+    architecture: 'Sparse MoE (128 experts, 8 active per token)',
+    flagship: false,
+    minVram: 15,
+    recommendedVram: 21,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q3_K_M (3.8 bpw)', vram: 14.2, speed: '~168-251 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 16GB cards' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 18.7,
+        speed: '~127-191 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits single 24GB GPU with ample context',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 21.8, speed: '~109-164 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 26.4, speed: '~90-135 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 32.4, speed: '~73-110 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.5,
+    typicalSpeedDual3090: '127 - 191 tokens/sec (bandwidth-bound estimate: 936 GB/s over 1.8 GB of active weights at Q4_K_M; real speeds often lower, especially for MoE)',
+    cloudOffers: ['runpod-single-3090', 'vast-single-3090']
+  },
+  // Sizes: ibm-granite/granite-4.2-30b-GGUF
+  {
+    id: 'granite-4.2-30b',
+    name: 'Granite 4.2 30B',
+    creator: 'IBM',
+    parameters: '29.3 Billion',
+    totalParamsB: 29.3,
+    activeParamsB: 29.3,
+    releaseDate: 'Aug 2026',
+    description: 'IBM\'s flagship 30B dense model, Apache 2.0, with 128K native context (512K extended). Built for enterprise code synthesis, reasoning, and instruction following. Fits within 18 GB at Q4_K_M on a single 24 GB card, leaving sufficient headroom for context.',
+    architecture: 'Dense Transformer',
+    flagship: false,
+    minVram: 15,
+    recommendedVram: 23,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      { name: 'Q3_K_M (3.8 bpw)', vram: 14.1, speed: '~33-50 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 16GB cards' },
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 17.7,
+        speed: '~26-40 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits single 24GB GPU with 16K+ context',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 20.8, speed: '~23-34 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 24, speed: '~20-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 31.1, speed: '~15-23 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 2.1,
+    typicalSpeedDual3090: '26 - 40 tokens/sec (bandwidth-bound estimate: 936 GB/s over 17.7 GB of weights at Q4_K_M; real speeds often lower)',
+    cloudOffers: ['runpod-single-3090', 'vast-single-3090']
+  },
+  // Sizes: unsloth/diffusiongemma-26B-A4B-it-GGUF
+  {
+    id: 'diffusiongemma-26b-a4b',
+    name: 'DiffusionGemma 26B-A4B Instruct',
+    creator: 'Google',
+    parameters: '25.8B MoE (3.8B active)',
+    totalParamsB: 25.8,
+    activeParamsB: 3.8,
+    releaseDate: 'Jun 2026',
+    description: 'Google DeepMind\'s 25.8B total / 3.8B active text-diffusion model, Apache 2.0, with a 262K context. Disclosures: (1) The Unsloth GGUF release is text-only (the vision tower was not converted); (2) Because this model uses a non-autoregressive block diffusion architecture rather than next-token autoregression, the speed figures shown are standard theoretical memory-bandwidth bound estimates and are not directly comparable to autoregressive tok/s.',
+    architecture: 'Text Diffusion Sparse MoE (128 experts, 8 active per block)',
+    flagship: false,
+    minVram: 17,
+    recommendedVram: 19,
+    sweetSpotQuant: 'Q4_K_M',
+    quants: [
+      {
+        name: 'Q4_K_M (4.8 bpw)',
+        vram: 16.8,
+        speed: '~95-142 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: smallest published quant, fits 24GB cards',
+        recommended: true
+      },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 19.1, speed: '~83-125 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.6 bpw)', vram: 22.7, speed: '~70-105 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Very close to full precision' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 26.9, speed: '~59-89 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.4,
+    typicalSpeedDual3090: '95 - 142 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.5 GB of active weights at Q4_K_M; non-autoregressive diffusion architecture)',
+    cloudOffers: ['runpod-single-3090', 'vast-single-3090']
+  },
+  // Sizes: unsloth/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF
+  {
+    id: 'nemotron-3.5-lightning-30b-a3b',
+    name: 'Nemotron 3.5 Lightning 30B-A3B',
+    creator: 'NVIDIA',
+    parameters: '31.6B MoE (3B active)',
+    totalParamsB: 31.6,
+    activeParamsB: 3,
+    releaseDate: 'Aug 2026',
+    description: 'NVIDIA\'s 30B-class hybrid Mamba-SSM and Sparse MoE model licensed under OpenMDW-1.1 with 1M context. Uses 46 Mamba-SSM/MoE layers and 6 full-attention layers, keeping KV cache expansion minimal. Fits within 26 GB at Q4_K_M, making it an ideal candidate for dual-GPU 48 GB workstations.',
+    architecture: 'Hybrid Mamba-SSM / Attention Sparse MoE (128 experts, 6 active per token)',
+    flagship: false,
+    minVram: 20,
+    recommendedVram: 27,
+    sweetSpotQuant: 'UD-Q4_K_M',
+    quants: [
+      { name: 'UD-IQ1_M (1.8 bpw)', vram: 19.4, speed: '~127-191 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit quant: fits 24GB cards with reduced quality' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 21.2, speed: '~116-174 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 24GB cards' },
+      {
+        name: 'UD-Q4_K_M (4.8 bpw)',
+        vram: 25.3,
+        speed: '~97-146 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits 32GB+ or dual-3090 rigs with 32K+ context',
+        recommended: true
+      },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 30.2, speed: '~82-122 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 35, speed: '~70-106 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.1,
+    typicalSpeedDual3090: '97 - 146 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.4 GB of active weights at UD-Q4_K_M; real speeds often lower, especially for MoE)',
+    cloudOffers: ['runpod-dual-3090', 'vast-dual-3090']
+  },
+  // Sizes: unsloth/Qwen3.8-Flash-Next-GGUF
+  {
+    id: 'qwen-3.8-flash-next',
+    name: 'Qwen 3.8 Flash Next',
+    creator: 'Alibaba Cloud',
+    parameters: '180B MoE (6B active)',
+    totalParamsB: 180,
+    activeParamsB: 6,
+    releaseDate: 'Aug 2026',
+    description: 'Qwen\'s experimental architecture preview released under the Qwen Community License, with 262K native context (1M extended). The 180B total checkpoint parameters include a ~51B n-gram embedding table alongside the 125B language model (6B active per token) and 4B MTP module. GGUF weights start at 72.5 GB (UD-IQ1_S) and 111.3 GB (UD-Q4_K_XL).',
+    architecture: 'Hybrid Linear-Attention / Sparse MoE with N-gram Embedding Table',
+    flagship: false,
+    minVram: 73,
+    recommendedVram: 113,
+    sweetSpotQuant: 'UD-Q4_K_XL',
+    quants: [
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 72.5, speed: '~97-145 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation / unified memory rigs' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 78.9, speed: '~89-133 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 90, speed: '~78-117 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 96GB workstation rigs' },
+      {
+        name: 'UD-Q4_K_XL (4.8 bpw)',
+        vram: 111.3,
+        speed: '~63-95 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits 128GB unified memory or multi-GPU systems',
+        recommended: true
+      },
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 158.3, speed: '~44-67 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 188.2, speed: '~37-56 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.2,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 113 GB+ at UD-Q4_K_XL)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: unsloth/DeepSeek-V4-Flash-0731-GGUF
+  {
+    id: 'deepseek-v4-flash',
+    name: 'DeepSeek V4 Flash 284B MoE',
+    creator: 'DeepSeek',
+    parameters: '284B MoE (13B active)',
+    totalParamsB: 284,
+    activeParamsB: 13,
+    releaseDate: 'Jul 2026',
+    description: 'DeepSeek\'s MIT-licensed 284B mixture-of-experts model (304.2B total in the 0731 production checkpoint including its attached DSpark speculative decoding module, 13B active per token) with 1M context. Uses Multi-Head Latent Attention with block compression. Real GGUF weights start at 82.5 GB (UD-IQ1_S), fitting 96GB workstation rigs, and 155.1 GB at UD-Q4_K_XL.',
+    architecture: 'Sparse MoE (MLA with Compressed KV Cache)',
+    flagship: false,
+    minVram: 83,
+    recommendedVram: 157,
+    sweetSpotQuant: 'UD-Q4_K_XL',
+    quants: [
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 82.5, speed: '~62-93 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 96.8, speed: '~53-79 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: tight fit on 96GB rigs' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 104.2, speed: '~49-74 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
+      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 128.1, speed: '~40-60 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 192GB unified or RAM offload' },
+      {
+        name: 'UD-Q4_K_XL (4.8 bpw)',
+        vram: 155.1,
+        speed: '~33-49 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems',
+        recommended: true
+      },
+      { name: 'UD-Q8_K_XL (8.5 bpw)', vram: 161.9, speed: '~32-47 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.4,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 157 GB+ at UD-Q4_K_XL)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: unsloth/GLM-5.3-Flash-GGUF
+  {
+    id: 'glm-5.3-flash',
+    name: 'GLM-5.3-Flash',
+    creator: 'Z.ai',
+    parameters: '320B MoE (18B active)',
+    totalParamsB: 321.3,
+    activeParamsB: 18,
+    releaseDate: 'Aug 2026',
+    description: 'Z.ai\'s MIT-licensed 320B multimodal mixture-of-experts model (321.3B in the checkpoint, 18B active per token) with 1M context. Uses hybrid linear attention with full MLA on sparse attention layers. Real GGUF weights start at 93.1 GB (UD-IQ1_S), sitting just under the 95 GB threshold and fitting the 192GB system-RAM offload tier; UD-Q4_K_XL is 199.7 GB.',
+    architecture: 'Hybrid Linear-Attention / Sparse MoE (MLA on full-attention layers)',
+    flagship: false,
+    minVram: 94,
+    recommendedVram: 201,
+    sweetSpotQuant: 'UD-Q4_K_XL',
+    quants: [
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 93.1, speed: '~45-67 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload rig' },
+      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 101.8, speed: '~41-62 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 108.7, speed: '~38-58 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 120.4, speed: '~35-52 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 147.5, speed: '~28-42 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 192GB RAM offload' },
+      {
+        name: 'UD-Q4_K_XL (4.8 bpw)',
+        vram: 199.7,
+        speed: '~21-31 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Sweet spot: exceeds 192GB rigs, fits 256GB unified or multi-node',
+        recommended: true
+      },
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 240.3, speed: '~17-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 341, speed: '~12-18 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.1,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 201 GB+ at UD-Q4_K_XL)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['runpod-quad-a100-80gb']
+  },
+  // Sizes: unsloth/GLM-5.3-GGUF
+  {
+    id: 'glm-5.3',
+    name: 'GLM-5.3 753B MoE',
+    creator: 'Z.ai',
+    parameters: '753B MoE (40B active)',
+    totalParamsB: 753.3,
+    activeParamsB: 40,
+    releaseDate: 'Aug 2026',
+    description: 'Z.ai\'s flagship 753B colossal mixture-of-experts model (753.3B in the checkpoint, 40B active per token), licensed under the GLM-5.3 License with 1M context. Uses 78 layers of Multi-Head Latent Attention and DeepSeek Sparse Attention. Real GGUF weights start at 216.7 GB (UD-IQ1_S), exceeding 192GB RAM offload and 256GB Mac Studio tiers, and fitting exclusively on the 512GB Mac Studio tier (~384GB usable memory).',
+    architecture: 'Colossal Sparse MoE (Multi-Head Latent Attention + DeepSeek Sparse Attention)',
+    flagship: false,
+    minVram: 217,
+    recommendedVram: 220,
+    sweetSpotQuant: 'UD-IQ1_S on 512GB Mac Studio',
+    quants: [
+      {
+        name: 'UD-IQ1_S (2.2 bpw)',
+        vram: 216.7,
+        speed: '~20-31 tok/s on 2x 3090 (bandwidth-bound est.)',
+        quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)',
+        recommended: true
+      },
+      { name: 'UD-IQ2_M (2.6 bpw)', vram: 238.6, speed: '~18-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 253.9, speed: '~17-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 281.7, speed: '~16-23 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 343, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 512GB Mac Studio tier' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 467.3, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 562.5, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 801.4, speed: '~5-8 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+    ],
+    contextCostPer8k: 0.7,
+    typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 220 GB+ at UD-IQ1_S)',
+    largeModelPath: 'unified-memory-or-offload',
+    cloudOffers: ['vast-8x-h100'],
+    cloudNote: 'or the Z.ai API'
   }
 ];
