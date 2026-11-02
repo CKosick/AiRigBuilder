@@ -110,7 +110,7 @@ describe('Generated build sheets', () => {
 });
 
 describe('New hardware tiers fit outcomes and price-sync', () => {
-  it('Llama 4 Scout offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,049', () => {
+  it('Llama 4 Scout offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,100', () => {
     const scout = BUILDS_DATA['llama-4-scout'];
     assert.ok(scout, 'Scout build sheet exists');
     const strixHalo = scout.tiers.find(t => t.id === 'tier-strix-halo');
@@ -134,10 +134,10 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
 
     const fittingTiers = scout.tiers.filter(t => t.fit && t.fit.status !== 'none');
     assert.equal(fittingTiers.length, 4, 'Scout has 4 fitting tiers (M2, Strix Halo, M3, PRO 6000)');
-    assert.equal(cheapestFittingTotal(scout), 3049, 'Cheapest fitting total on Scout is Strix Halo ($3,049)');
+    assert.equal(cheapestFittingTotal(scout), 3100, 'Cheapest fitting total on Scout is Strix Halo ($3,100)');
   });
 
-  it('gpt-oss-120b offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,049', () => {
+  it('gpt-oss-120b offers Strix Halo, PRO 6000, and M3 Ultra as fits alongside M2 128GB Mac, with Strix cheapest at $3,100', () => {
     const gpt120 = BUILDS_DATA['gpt-oss-120b'];
     assert.ok(gpt120, 'gpt-oss-120b build sheet exists');
     const strixHalo = gpt120.tiers.find(t => t.id === 'tier-strix-halo');
@@ -161,7 +161,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
 
     const fittingTiers = gpt120.tiers.filter(t => t.fit && t.fit.status !== 'none');
     assert.equal(fittingTiers.length, 4, 'gpt-oss-120b has 4 fitting tiers (M2, Strix Halo, M3, PRO 6000)');
-    assert.equal(cheapestFittingTotal(gpt120), 3049, 'Cheapest fitting total on gpt-oss-120b is Strix Halo ($3,049)');
+    assert.equal(cheapestFittingTotal(gpt120), 3100, 'Cheapest fitting total on gpt-oss-120b is Strix Halo ($3,100)');
   });
 
   it('command-r-35b does not offer the RTX 5090 tier due to high context cost', () => {
@@ -204,7 +204,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       assert.equal(offload.fit.quantVram, expectedVram);
       assert.equal(offload.fit.contextLabel, '32K+');
       const offloadTotal = offload.parts.reduce((sum, p) => sum + (p.price || 0), 0);
-      assert.equal(offloadTotal, 5314, `${id} tier-ram-offload parts total is $5,314`);
+      assert.equal(offloadTotal, 5424, `${id} tier-ram-offload parts total is $5,424`);
       assert.equal(cheapestFittingTotal(sheet), offloadTotal, `${id} cheapestFittingTotal equals tier-ram-offload parts total ($${offloadTotal})`);
     }
   });
