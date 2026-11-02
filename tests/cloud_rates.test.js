@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { CLOUD_RATES, CLOUD_PROVIDERS, CLOUD_RATES_AS_OF } from '../src/data/providers.js';
+import { CLOUD_RATES, CLOUD_PROVIDERS, CLOUD_RATES_AS_OF, CLOUD_RATES_AS_OF_DATE } from '../src/data/providers.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { cloudAlternative } from '../src/utils/siteFacts.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
@@ -91,5 +91,22 @@ describe('Cloud rates are stored once', () => {
     const calcSrc = fs.readFileSync(path.join(ROOT_DIR, 'src', 'components', 'breakEvenCalc.js'), 'utf-8');
     assert.ok(!pickerSrc.includes(CLOUD_RATES_AS_OF), 'modelPicker.js reads CLOUD_RATES_AS_OF from providers.js');
     assert.ok(!calcSrc.includes(CLOUD_RATES_AS_OF), 'breakEvenCalc.js reads CLOUD_RATES_AS_OF from providers.js');
+  });
+
+  it('cloud rates are not stale (verified within the last 45 days)', () => {
+    assert.equal(typeof CLOUD_RATES_AS_OF_DATE, 'string');
+    assert.match(CLOUD_RATES_AS_OF_DATE, /^\d{4}-\d{2}-\d{2}$/, 'CLOUD_RATES_AS_OF_DATE is YYYY-MM-DD');
+
+    const asOfTime = new Date(`${CLOUD_RATES_AS_OF_DATE}T00:00:00Z`).getTime();
+    assert.ok(!Number.isNaN(asOfTime), 'CLOUD_RATES_AS_OF_DATE is a valid ISO date');
+
+    const now = Date.now();
+    const ageDays = (now - asOfTime) / (1000 * 60 * 60 * 24);
+    const MAX_AGE_DAYS = 45;
+
+    assert.ok(
+      ageDays <= MAX_AGE_DAYS,
+      `Cloud rates as-of date (${CLOUD_RATES_AS_OF_DATE}) is ${Math.floor(ageDays)} days old (exceeds ${MAX_AGE_DAYS} days). The cloud rates need their monthly re-check.`
+    );
   });
 });
