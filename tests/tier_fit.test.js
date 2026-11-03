@@ -2,7 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { MODELS_DATA } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
-import { tierFit, defaultTierId, cheapestFittingTotal, RUNTIME_OVERHEAD_GB } from '../src/utils/tierFit.js';
+import { tierFit, fitHeadline, fitDetail, defaultTierId, cheapestFittingTotal, RUNTIME_OVERHEAD_GB } from '../src/utils/tierFit.js';
+import { estimateSpeedToks, formatTierSpeedLine } from '../src/utils/speedEstimate.js';
 
 const HAND_WRITTEN = ['llama-3.3-70b', 'deepseek-r1-70b', 'qwen-2.5-72b', 'mistral-nemo-12b', 'llama-3.1-8b'];
 const model = (id) => MODELS_DATA.find(m => m.id === id);
@@ -375,5 +376,135 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       }
     }
     assert.ok(checkedCount > 0, 'Checked at least one 2x RTX 3090 part across build sheets');
+  });
+});
+
+
+describe('Extended fit math and context/KV precision controls', () => {
+  it('default-state equivalence: tierFit at defaults matches stored tier.fit across all 56 models and tiers', () => {
+    let checkedTiers = 0;
+    const modelIds = Object.keys(BUILDS_DATA);
+    assert.equal(modelIds.length, 56, 'All 56 models present in BUILDS_DATA');
+
+    for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+      const m = MODELS_DATA.find(x => x.id === modelId);
+      assert.ok(m, `Model ${modelId} exists in MODELS_DATA`);
+      for (const tier of sheet.tiers) {
+        const computed = tierFit(m, tier);
+        const stored = tier.fit;
+        assert.equal(computed.status, stored.status, `${modelId} ${tier.id} status`);
+        assert.equal(computed.quant, stored.quant, `${modelId} ${tier.id} quant`);
+        assert.equal(computed.quantVram, stored.quantVram, `${modelId} ${tier.id} quantVram`);
+        assert.equal(computed.contextK, stored.contextK, `${modelId} ${tier.id} contextK`);
+        assert.equal(computed.contextLabel, stored.contextLabel, `${modelId} ${tier.id} contextLabel`);
+        assert.equal(computed.isDefault, true, `${modelId} ${tier.id} isDefault`);
+
+        // Check headline equivalence for synthesized models
+        if (synthesized.some(s => s.id === modelId)) {
+          const headline = fitHeadline(m, computed);
+          assert.equal(headline, tier.headline, `${modelId} ${tier.id} headline`);
+        }
+
+        // Check speed line equivalence
+        if (computed.status === 'none' || tier.bandwidthGbs === null) {
+          assert.equal(tier.speedLine, null, `${modelId} ${tier.id} speedLine is null`);
+        } else {
+          const fittedQuant = m.quants.find(q => q.name.split(' ')[0] === computed.quant);
+          const speed = estimateSpeedToks(m, fittedQuant, tier.bandwidthGbs);
+          const speedLine = formatTierSpeedLine(computed.quant, speed);
+          assert.equal(speedLine, tier.speedLine, `${modelId} ${tier.id} speedLine`);
+        }
+        checkedTiers++;
+      }
+    }
+    assert.ok(checkedTiers >= 168, `Verified at least 168 tiers across 56 models (actual: ${checkedTiers})`);
+  });
+
+  it('dense model fit math: llama-3.3-70b (GQA dense, 2.7 GB/8K) on 48 GB tier', () => {
+    const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+    const tier48 = { memoryGb: 48 }; // usable = 47 GB; Q4_K_M weights = 42 GB
+
+    // 8K / FP16: 42 + 2.7 = 44.7 <= 47 -> fits
+    const fit8kFp16 = tierFit(llama, tier48, { contextK: 8, kvScale: 1 });
+    assert.equal(fit8kFp16.status, 'fits');
+    assert.equal(fit8kFp16.quant, 'Q4_K_M');
+    assert.equal(fit8kFp16.contextLabel, '~8K');
+
+    // 32K / FP16: 42 + 10.8 = 52.8 > 47 -> none (no smaller quant listed)
+    const fit32kFp16 = tierFit(llama, tier48, { contextK: 32, kvScale: 1 });
+    assert.equal(fit32kFp16.status, 'none');
+    assert.equal(fit32kFp16.quant, null);
+
+    // 32K / Q4 (kvScale 0.25): 42 + 2.7 = 44.7 <= 47 -> fits
+    const fit32kQ4 = tierFit(llama, tier48, { contextK: 32, kvScale: 0.25 });
+    assert.equal(fit32kQ4.status, 'fits');
+    assert.equal(fit32kQ4.quant, 'Q4_K_M');
+    assert.equal(fit32kQ4.contextLabel, '32K+');
+
+    // 64K / FP8 (kvScale 0.5): 42 + 10.8 = 52.8 > 47 -> none
+    const fit64kFp8 = tierFit(llama, tier48, { contextK: 64, kvScale: 0.5 });
+    assert.equal(fit64kFp8.status, 'none');
+  });
+
+  it('MLA model fit math: deepseek-v3-moe (MLA, 0.6 GB/8K) on 192 GB M5 Ultra tier', () => {
+    const dsv3 = MODELS_DATA.find(m => m.id === 'deepseek-v3-moe');
+    const tier192 = { memoryGb: 192 }; // usable = 191 GB; IQ1_S = 186.2 GB
+
+    // 8K / FP16: 186.2 + 0.6 = 186.8 <= 191 -> fits
+    const fit8kFp16 = tierFit(dsv3, tier192, { contextK: 8, kvScale: 1 });
+    assert.equal(fit8kFp16.status, 'fits');
+    assert.equal(fit8kFp16.quant, 'IQ1_S');
+
+    // 128K / FP16: 186.2 + (128/8)*0.6 = 186.2 + 9.6 = 195.8 > 191 -> none
+    const fit128kFp16 = tierFit(dsv3, tier192, { contextK: 128, kvScale: 1 });
+    assert.equal(fit128kFp16.status, 'none');
+
+    // 128K / FP8 (kvScale 0.5): 186.2 + (128/8)*0.3 = 186.2 + 4.8 = 191.0 <= 191 -> fits
+    const fit128kFp8 = tierFit(dsv3, tier192, { contextK: 128, kvScale: 0.5 });
+    assert.equal(fit128kFp8.status, 'fits');
+    assert.equal(fit128kFp8.quant, 'IQ1_S');
+
+    // 128K / Q4 (kvScale 0.25): 186.2 + (128/8)*0.15 = 186.2 + 2.4 = 188.6 <= 191 -> fits
+    const fit128kQ4 = tierFit(dsv3, tier192, { contextK: 128, kvScale: 0.25 });
+    assert.equal(fit128kQ4.status, 'fits');
+    assert.equal(fit128kQ4.quant, 'IQ1_S');
+  });
+
+  it('hybrid linear-attention model fit math: qwen-3.8-27b (0.5 GB/8K) on 24 GB tier', () => {
+    const qwen = MODELS_DATA.find(m => m.id === 'qwen-3.8-27b');
+    const tier24 = { memoryGb: 24 }; // usable = 23 GB; UD-Q4_K_M = 16.5 GB
+
+    // 8K / FP16: 16.5 + 0.5 = 17.0 <= 23 -> fits
+    const fit8kFp16 = tierFit(qwen, tier24, { contextK: 8, kvScale: 1 });
+    assert.equal(fit8kFp16.status, 'fits');
+    assert.equal(fit8kFp16.quant, 'UD-Q4_K_M');
+
+    // 128K / FP16: 16.5 + (128/8)*0.5 = 16.5 + 8.0 = 24.5 > 23 -> none
+    const fit128kFp16 = tierFit(qwen, tier24, { contextK: 128, kvScale: 1 });
+    assert.equal(fit128kFp16.status, 'none');
+
+    // 128K / FP8 (kvScale 0.5): 16.5 + (128/8)*0.25 = 16.5 + 4.0 = 20.5 <= 23 -> fits
+    const fit128kFp8 = tierFit(qwen, tier24, { contextK: 128, kvScale: 0.5 });
+    assert.equal(fit128kFp8.status, 'fits');
+    assert.equal(fit128kFp8.quant, 'UD-Q4_K_M');
+
+    // 128K / Q4 (kvScale 0.25): 16.5 + (128/8)*0.125 = 16.5 + 2.0 = 18.5 <= 23 -> fits
+    const fit128kQ4 = tierFit(qwen, tier24, { contextK: 128, kvScale: 0.25 });
+    assert.equal(fit128kQ4.status, 'fits');
+    assert.equal(fit128kQ4.quant, 'UD-Q4_K_M');
+  });
+
+  it('fitHeadline reflects selected context at non-default settings and matches original at defaults', () => {
+    const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+    const tier48 = { memoryGb: 48 };
+
+    const defFit = tierFit(llama, tier48, { contextK: 8, kvScale: 1 });
+    assert.equal(fitHeadline(llama, defFit), 'Runs Llama 3.3 70B Instruct at Q4_K_M with ~8K context');
+
+    const customFit = tierFit(llama, tier48, { contextK: 32, kvScale: 0.25 });
+    assert.equal(fitHeadline(llama, customFit), 'Runs Llama 3.3 70B Instruct at Q4_K_M with 32K context');
+
+    const noneFit = tierFit(llama, tier48, { contextK: 128, kvScale: 1 });
+    assert.equal(fitHeadline(llama, noneFit), "Won't fit Llama 3.3 70B Instruct: needs 42+ GB, this rig has 48 GB");
   });
 });

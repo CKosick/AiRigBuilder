@@ -7,11 +7,38 @@ import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID } from '../routes.js';
 import { icon } from './icons.js';
-import { defaultTierId } from '../utils/tierFit.js';
+import { tierFit, fitHeadline, fitDetail, defaultTierId } from '../utils/tierFit.js';
+import { estimateSpeedToks, formatTierSpeedLine } from '../utils/speedEstimate.js';
+
+export const CONTEXT_STEPS = [8, 16, 32, 64, 128];
+export const KV_PRECISION_OPTIONS = ['FP16', 'FP8', 'Q4'];
+export const KV_PRECISION_SCALES = {
+  FP16: 1.0,
+  FP8: 0.5,
+  Q4: 0.25
+};
+
+const NEW_TIER_BADGES = {
+  'tier-rtx-pro-6000': '96GB Workstation',
+  'tier-strix-halo': 'Cheapest 96GB Fit',
+  'tier-mac-m3-ultra': '72GB Unified',
+  'tier-mac-m5-ultra-256': '192GB Unified',
+  'tier-mac-m5-ultra-512': '384GB Unified',
+  'tier-rtx-5090': '32GB Flagship',
+  'tier-ram-offload': 'RAM Offload'
+};
+
+const GENERIC_BADGES = {
+  used: 'Best Value',
+  balanced: 'Balanced Pick',
+  new: 'Premium Pick'
+};
 
 export const MODEL_PICKER_DEFAULTS = {
   activeModelId: DEFAULT_MODEL_ID,
   activeTierId: null, // null = the model's default tier (first one it fits)
+  contextK: 8,
+  kvPrecision: 'FP16',
   vramBudget: null, // GB; null = any. Shows models whose recommended VRAM fits
   codingOnly: false,
   searchQuery: '',
@@ -121,10 +148,15 @@ const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;
  */
 export function renderModelPickerHtml(state = {}) {
   const {
-    activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
+    activeModelId, activeTierId, contextK, kvPrecision, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
   } = { ...MODEL_PICKER_DEFAULTS, ...state };
+  const isDefaultSettings = contextK === 8 && kvPrecision === 'FP16';
+  const kvScale = KV_PRECISION_SCALES[kvPrecision] ?? 1.0;
   const titleTag = isHome ? 'h2' : 'h1';
   const currentModel = MODELS_DATA.find(m => m.id === activeModelId) || MODELS_DATA[0];
+  const effectiveCostPer8k = currentModel.contextCostPer8k
+    ? (isDefaultSettings ? currentModel.contextCostPer8k : Math.round(currentModel.contextCostPer8k * kvScale * 100) / 100)
+    : null;
   const cloud = cloudAlternative(currentModel);
   const smallestQuantName = currentModel.quants.reduce((a, b) => (b.vram < a.vram ? b : a), currentModel.quants[0]).name.split(' (')[0];
   const { buildSheet, currentTier } = findBuild(activeModelId, activeTierId);
@@ -206,7 +238,7 @@ export function renderModelPickerHtml(state = {}) {
     <div class="quant-options">
       <div class="selector-label">
         <span>${currentModel.name}: Quantization Options</span>
-        ${currentModel.contextCostPer8k ? `<span class="context-cost-note">Context adds ~${currentModel.contextCostPer8k} GB VRAM per 8K tokens</span>` : ''}
+        ${effectiveCostPer8k ? `<span class="context-cost-note">Context adds ~${effectiveCostPer8k} GB VRAM per 8K tokens</span>` : ''}
       </div>
       <div class="parts-table-wrap">
         <table class="parts-table stack-table">
@@ -238,20 +270,53 @@ export function renderModelPickerHtml(state = {}) {
       <span>2. Choose Hardware Architecture Tier</span>
       <span class="selector-note">All tiers verified for physical GPU clearance & power transients</span>
     </div>
+
+    <div class="context-kv-controls" role="group" aria-label="Fit-check context and KV precision">
+      <div class="context-filter" role="group" aria-label="Fit-check context length">
+        <span class="model-filter-label">Fit-check context</span>
+        ${CONTEXT_STEPS.map(c => `<button class="filter-btn context-btn ${contextK === c ? 'active' : ''}" data-context="${c}" aria-pressed="${contextK === c}">${c}K</button>`).join('')}
+      </div>
+      <div class="kv-precision-filter" role="group" aria-label="KV cache precision">
+        <span class="model-filter-label">KV cache precision</span>
+        ${KV_PRECISION_OPTIONS.map(opt => `<button class="filter-btn kv-btn ${kvPrecision === opt ? 'active' : ''}" data-kv="${opt}" aria-pressed="${kvPrecision === opt}">${opt}</button>`).join('')}
+      </div>
+    </div>
+    <p class="context-kv-helper">KV precision scales context memory (llama.cpp <code>--cache-type-k/v</code> f16, fp8, or q4_0).</p>
+
     <div class="tier-tabs-container">
-      ${buildSheet.tiers.map((tier, idx) => {
+      ${buildSheet.tiers.map((tier) => {
         const tierSubtotal = tier.parts.reduce((s, p) => s + (p.price || 0), 0);
-        const noFit = tier.fit && tier.fit.status === 'none';
+        const fit = isDefaultSettings ? tier.fit : tierFit(currentModel, tier, { contextK, kvScale });
+        const noFit = fit && fit.status === 'none';
+        let badge = tier.badge;
+        if (!isDefaultSettings) {
+          if (noFit) {
+            badge = "Won't Fit This Model";
+          } else {
+            badge = tier.badge !== "Won't Fit This Model" ? tier.badge : (NEW_TIER_BADGES[tier.id] || GENERIC_BADGES[tier.type] || 'Best Value');
+          }
+        }
         const badgeClass = noFit ? 'tier-badge-nofit' : tier.type === 'used' ? 'tier-badge-budget' : (tier.type === 'balanced' ? 'tier-badge-balanced' : 'tier-badge-new');
+        const headline = isDefaultSettings ? tier.headline : fitHeadline(currentModel, fit);
+        let speedLine = tier.speedLine;
+        if (!isDefaultSettings) {
+          if (noFit || tier.bandwidthGbs === null) {
+            speedLine = null;
+          } else {
+            const fittedQuant = currentModel.quants.find(q => q.name.split(' ')[0] === fit.quant);
+            const speed = estimateSpeedToks(currentModel, fittedQuant, tier.bandwidthGbs);
+            speedLine = formatTierSpeedLine(fit.quant, speed);
+          }
+        }
         return `
           <div class="tier-tab-card ${tier.id === currentTier.id ? 'active' : ''}${noFit ? ' tier-no-fit' : ''}" data-tier-id="${tier.id}" role="button" tabindex="0" aria-pressed="${tier.id === currentTier.id}">
-            <span class="tier-badge-label ${badgeClass}">${tier.badge}</span>
+            <span class="tier-badge-label ${badgeClass}">${badge}</span>
             <div class="tier-title-row">
               <span class="tier-name">${tier.name}</span>
-              <span class="tier-price-big">$${tierSubtotal.toLocaleString()}</span>
+              <span class="tier-price-big">${tierSubtotal.toLocaleString()}</span>
             </div>
-            <div class="tier-subtitle">${tier.headline}</div>
-            ${tier.speedLine ? `<div class="tier-speed-line">${tier.speedLine}</div>` : ''}
+            <div class="tier-subtitle">${headline}</div>
+            ${speedLine ? `<div class="tier-speed-line">${speedLine}</div>` : ''}
           </div>
         `;
       }).join('')}
@@ -263,7 +328,18 @@ export function renderModelPickerHtml(state = {}) {
       <div class="build-sheet-header">
         <div class="build-sheet-title">
           <h3>${currentTier.name} — Parts Manifest</h3>
-          <p>${currentTier.rigSummary}</p>
+          <p>${(() => {
+            if (isDefaultSettings) return currentTier.rigSummary;
+            const currentTierFit = tierFit(currentModel, currentTier, { contextK, kvScale });
+            if (currentTier.id === 'tier-ram-offload') {
+              return `${currentTier.name} with ${currentTier.memoryGb} GB of DDR5 system RAM used for CPU offload, plus an RTX 3090 24 GB for partial-offload acceleration (a speed bonus, not added to model capacity). ${fitDetail(currentModel, currentTierFit)} Most layers are computed from system RAM, so expect single-digit tokens per second, roughly 3 to 8 tok/s on this class of rig (estimate), versus the far higher speeds of a GPU-resident fit.`;
+            }
+            let summary = `${currentTier.name} with ${currentTier.memoryGb} GB of usable GPU memory. ${fitDetail(currentModel, currentTierFit)}`;
+            if (currentTier.id === 'tier-rtx-5090') {
+              summary += ' (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).';
+            }
+            return summary;
+          })()}</p>
         </div>
         <div class="build-quick-actions">
           <button class="btn-secondary" id="btn-copy-build-reddit">
@@ -378,6 +454,8 @@ export function renderModelPickerHtml(state = {}) {
 export function createModelPicker(container, onNavigateToCalc, { initialModelId, isHome: initialIsHome = false, onModelChange } = {}) {
   let activeModelId = BUILDS_DATA[initialModelId] ? initialModelId : MODEL_PICKER_DEFAULTS.activeModelId;
   let activeTierId = MODEL_PICKER_DEFAULTS.activeTierId;
+  let contextK = MODEL_PICKER_DEFAULTS.contextK;
+  let kvPrecision = MODEL_PICKER_DEFAULTS.kvPrecision;
   let vramBudget = MODEL_PICKER_DEFAULTS.vramBudget;
   let codingOnly = MODEL_PICKER_DEFAULTS.codingOnly;
   let searchQuery = MODEL_PICKER_DEFAULTS.searchQuery;
@@ -403,7 +481,7 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
   function render() {
     const restoreFocus = preserveFocus(container);
     container.innerHTML = renderModelPickerHtml({
-      activeModelId, activeTierId, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
+      activeModelId, activeTierId, contextK, kvPrecision, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
     });
 
     attachEvents();
@@ -411,6 +489,28 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
   }
 
   function attachEvents() {
+    // Context length filter buttons
+    container.querySelectorAll('.context-filter .context-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = parseInt(btn.getAttribute('data-context'), 10);
+        if (c && c !== contextK) {
+          contextK = c;
+          render();
+        }
+      });
+    });
+
+    // KV cache precision filter buttons
+    container.querySelectorAll('.kv-precision-filter .kv-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const kv = btn.getAttribute('data-kv');
+        if (kv && kv !== kvPrecision) {
+          kvPrecision = kv;
+          render();
+        }
+      });
+    });
+
     // "Runs well in" VRAM buttons
     container.querySelectorAll('.vram-filter .filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
