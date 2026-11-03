@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonical, DEFAULT_MODEL_ID, SITE_URL } from '../src/routes.js';
+import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonical, DEFAULT_MODEL_ID, SITE_URL, SITE_NAME } from '../src/routes.js';
 import { renderAllPages, renderPage, renderNotFound, renderSitemap, outputFileFor } from '../scripts/prerender.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
@@ -110,6 +110,85 @@ describe('Generated page <head> SEO', () => {
       }
     });
   }
+
+  it('every GPU page has Product entity markup with AggregateOffer matching GPUS_DATA', () => {
+    for (const g of GPUS_DATA) {
+      const html = byPath[`/gpu/${g.id}`];
+      const json = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+      const products = json['@graph'].filter(n => n['@type'] === 'Product');
+      assert.equal(products.length, 1, `${g.id} has exactly one Product node`);
+      const p = products[0];
+      assert.equal(p.name, g.name);
+      assert.equal(p.url, `${SITE_URL}/gpu/${g.id}`);
+      assert.ok(p.description && p.description.length > 20, `${g.id} has description`);
+
+      // Offers: AggregateOffer
+      assert.ok(p.offers && p.offers['@type'] === 'AggregateOffer', `${g.id} has AggregateOffer`);
+      assert.equal(p.offers.priceCurrency, 'USD');
+      assert.equal(p.offers.lowPrice, g.usedPriceLow);
+      assert.equal(p.offers.highPrice, g.usedPriceHigh);
+      assert.equal(p.offers.url, g.ebaySoldUrl);
+      assert.equal(p.offers.availability, undefined);
+      assert.equal(p.offers.offerCount, undefined);
+
+      // Additional properties: VRAM, Memory Bandwidth, TDP
+      assert.ok(Array.isArray(p.additionalProperty), `${g.id} has additionalProperty`);
+      const vramProp = p.additionalProperty.find(prop => prop.name === 'VRAM');
+      const bwProp = p.additionalProperty.find(prop => prop.name === 'Memory Bandwidth');
+      const tdpProp = p.additionalProperty.find(prop => prop.name === 'TDP');
+      assert.ok(vramProp && vramProp.value === `${g.vram} GB`, `${g.id} VRAM prop`);
+      assert.ok(bwProp && bwProp.value === `${g.bandwidth} GB/s`, `${g.id} Bandwidth prop`);
+      assert.ok(tdpProp && tdpProp.value === `${g.tdp} W`, `${g.id} TDP prop`);
+    }
+  });
+
+  it('every build sheet has TechArticle entity markup matching model and title', () => {
+    for (const m of MODELS_DATA) {
+      const html = byPath[`/builds/${m.id}`];
+      const json = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+      const articles = json['@graph'].filter(n => n['@type'] === 'TechArticle');
+      assert.equal(articles.length, 1, `${m.id} has exactly one TechArticle node`);
+      const a = articles[0];
+      const meta = pageMeta(parseRoute(`/builds/${m.id}`));
+      assert.equal(a.headline, meta.title);
+      assert.equal(a.description, meta.description);
+      assert.deepEqual(a.about, { '@type': 'Thing', name: m.name });
+      assert.deepEqual(a.author, { '@type': 'Organization', name: SITE_NAME });
+      assert.equal(a.datePublished, undefined);
+      assert.equal(a.dateModified, undefined);
+      assert.equal(a.image, undefined);
+    }
+  });
+
+  it('no page anywhere emits aggregateRating or review markup', () => {
+    for (const page of pages) {
+      const json = JSON.parse(page.html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+      const graph = json['@graph'] || [json];
+      for (const node of graph) {
+        assert.equal(node['@type'] === 'AggregateRating', false, `${page.route.path} has AggregateRating`);
+        assert.equal(node['@type'] === 'Review', false, `${page.route.path} has Review`);
+        assert.equal(node.aggregateRating, undefined, `${page.route.path} has aggregateRating property`);
+        assert.equal(node.review, undefined, `${page.route.path} has review property`);
+        assert.equal(node.reviews, undefined, `${page.route.path} has reviews property`);
+      }
+    }
+  });
+
+  it('sample GPU and build sheet WebPage and BreadcrumbList nodes remain unchanged', () => {
+    const gpuHtml = byPath['/gpu/rtx-3090'];
+    const gpuJson = JSON.parse(gpuHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const gpuWebPage = gpuJson['@graph'].find(n => n['@type'] === 'WebPage');
+    const gpuBreadcrumbs = gpuJson['@graph'].find(n => n['@type'] === 'BreadcrumbList');
+    assert.equal(gpuWebPage.url, 'https://airigbuilder.com/gpu/rtx-3090');
+    assert.equal(gpuBreadcrumbs.itemListElement.length, 3);
+
+    const buildHtml = byPath['/builds/llama-3.3-70b'];
+    const buildJson = JSON.parse(buildHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const buildWebPage = buildJson['@graph'].find(n => n['@type'] === 'WebPage');
+    const buildBreadcrumbs = buildJson['@graph'].find(n => n['@type'] === 'BreadcrumbList');
+    assert.equal(buildWebPage.url, 'https://airigbuilder.com/');
+    assert.equal(buildBreadcrumbs.itemListElement.length, 3);
+  });
 
   it('only the default model build page points its canonical elsewhere (to the home page)', () => {
     assert.deepEqual(pages.filter(p => !isCanonical(p.route)).map(p => p.route.path), [`/builds/${DEFAULT_MODEL_ID}`]);

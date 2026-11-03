@@ -12,7 +12,8 @@ import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderRigPlaygroundHtml } from '../src/components/rigPlayground.js';
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../src/data/gpus.js';
-import { homeFaq } from '../src/utils/siteFacts.js';
+import { MODELS_DATA } from '../src/data/models.js';
+import { homeFaq, gpuSummary } from '../src/utils/siteFacts.js';
 
 const escapeHtml = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // JSON inside <script> must not be able to close the tag
@@ -42,28 +43,71 @@ function replaceRequired(html, pattern, replacement, label) {
 }
 
 function structuredData(route, meta) {
+  const graph = [
+    {
+      '@type': 'WebPage',
+      '@id': `${meta.canonical}#webpage`,
+      url: meta.canonical,
+      name: meta.title,
+      description: meta.description,
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
+      dateModified: GPUS_UPDATED_AT
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: meta.breadcrumbs.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: `${SITE_URL}${c.path}`
+      }))
+    }
+  ];
+
+  if (route.view === 'gpu' && route.gpuId) {
+    const gpu = GPUS_DATA.find(g => g.id === route.gpuId);
+    if (gpu) {
+      graph.push({
+        '@type': 'Product',
+        name: gpu.name,
+        description: gpuSummary(gpu),
+        url: meta.canonical,
+        additionalProperty: [
+          { '@type': 'PropertyValue', name: 'VRAM', value: `${gpu.vram} GB`, unitText: 'GB' },
+          { '@type': 'PropertyValue', name: 'Memory Bandwidth', value: `${gpu.bandwidth} GB/s`, unitText: 'GB/s' },
+          { '@type': 'PropertyValue', name: 'TDP', value: `${gpu.tdp} W`, unitText: 'W' }
+        ],
+        offers: {
+          '@type': 'AggregateOffer',
+          priceCurrency: 'USD',
+          lowPrice: gpu.usedPriceLow,
+          highPrice: gpu.usedPriceHigh,
+          url: gpu.ebaySoldUrl
+        }
+      });
+    }
+  } else if (route.view === 'builds' && route.modelId) {
+    const model = MODELS_DATA.find(m => m.id === route.modelId);
+    if (model) {
+      graph.push({
+        '@type': 'TechArticle',
+        headline: meta.title,
+        description: meta.description,
+        about: {
+          '@type': 'Thing',
+          name: model.name
+        },
+        author: {
+          '@type': 'Organization',
+          name: SITE_NAME
+        }
+      });
+    }
+  }
+
   return {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'WebPage',
-        '@id': `${meta.canonical}#webpage`,
-        url: meta.canonical,
-        name: meta.title,
-        description: meta.description,
-        isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${SITE_URL}/` },
-        dateModified: GPUS_UPDATED_AT
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: meta.breadcrumbs.map((c, i) => ({
-          '@type': 'ListItem',
-          position: i + 1,
-          name: c.name,
-          item: `${SITE_URL}${c.path}`
-        }))
-      }
-    ]
+    '@graph': graph
   };
 }
 
