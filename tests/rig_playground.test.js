@@ -116,26 +116,54 @@ describe('Rig Playground: Known Answers from Brief', () => {
     const upgrades = computeUpgradeCandidates(rtx3060, 1, { contextK: 8, kvPrecision: 'FP16' });
     assert.ok(upgrades.length > 0, 'generates upgrade candidates');
 
-    // Top upgrade by models unlocked is tied between strix-halo-128gb, dgx-spark, m3 ultra, and rtx-pro-6000
-    // Tie-break: highest unlocksPerDollar, then lowest price.
-    // strix-halo-128gb has 37 unlocks at $3,100 (0.01193 unlocks/$), beating dgx-spark ($6,900) and m3 ultra ($4,575) and pro 6000 ($15,750).
+    // Best upgrade for discrete cards pool is RTX PRO 6000 (37 unlocks, 5 improved)
     const topUpgrade = upgrades[0];
-    assert.equal(topUpgrade.candidate.id, 'strix-halo-128gb');
+    assert.equal(topUpgrade.candidate.id, 'rtx-pro-6000-blackwell');
     assert.equal(topUpgrade.unlocked, 37);
     assert.equal(topUpgrade.improved, 5);
 
-    // Check PCIe discrete add-in card rankings
-    const discreteUpgrades = upgrades.filter(u => !isIntegratedSystem(u.candidate.id));
-    assert.ok(discreteUpgrades.length > 0);
-    // Highest unlocks on PCIe discrete is RTX PRO 6000 (37 unlocks)
-    const pro6000 = discreteUpgrades.find(u => u.candidate.id === 'rtx-pro-6000-blackwell');
-    assert.ok(pro6000);
-    assert.equal(pro6000.unlocked, 37);
-
-    // Best budget/value discrete add-in card is Tesla P40 ($290, 24 unlocks)
-    const p40 = discreteUpgrades.find(u => u.candidate.id === 'tesla-p40');
+    // Tesla P40 unlocks 24 at $290
+    const p40 = upgrades.find(u => u.candidate.id === 'tesla-p40');
     assert.ok(p40);
     assert.equal(p40.unlocked, 24);
+    assert.equal(p40.cost, 290);
+
+    // A second RTX 3060 unlocks 22 (12 run today, 34 total)
+    const second3060 = upgrades.find(u => u.candidate.id === 'rtx-3060-12gb');
+    assert.ok(second3060);
+    assert.equal(second3060.unlocked, 22);
+  });
+
+  it('excludes all integrated system IDs from upgrade candidate pool for discrete owned GPUs', () => {
+    const discreteIds = ['rtx-3060-12gb', 'rtx-3080-10gb', 'rtx-4090', 'rx-7800-xt'];
+    for (const id of discreteIds) {
+      const gpu = ALL_PLAYGROUND_GPUS.find(g => g.id === id);
+      const candidates = computeUpgradeCandidates(gpu, 1, { contextK: 8, kvPrecision: 'FP16' });
+      for (const u of candidates) {
+        assert.equal(
+          isIntegratedSystem(u.candidate.id),
+          false,
+          `Integrated system ${u.candidate.id} must not appear in upgrade candidates for ${id}`
+        );
+      }
+    }
+
+    // Verify rendered HTML for RTX 3060 has RTX PRO 6000 in callout and no system in upgrade section
+    const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1 });
+    assert.ok(
+      html.includes('Add 1x NVIDIA RTX PRO 6000 Blackwell'),
+      'Rendered best-upgrade callout names RTX PRO 6000'
+    );
+    const upgradeSection = html.slice(
+      html.indexOf('playground-upgrade-section'),
+      html.indexOf('playground-results-grid')
+    );
+    for (const sysId of ['mac-studio-m2-ultra', 'mac-studio-m3-ultra', 'strix-halo-128gb', 'dgx-spark']) {
+      assert.ok(
+        !upgradeSection.includes(sysId),
+        `Upgrade section must not mention integrated system ${sysId}`
+      );
+    }
   });
 });
 

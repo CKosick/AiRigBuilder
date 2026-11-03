@@ -43,8 +43,7 @@ export function recommendedPsuWatts(totalTdpWatts, systemAllowanceWatts = 150) {
 
 /**
  * Evaluates all 56 models in MODELS_DATA against a synthetic rig configuration.
- * Accepts either (config, options) or (gpu, count, options).
- * Returns partitioned lists: { runsInVram, doesNotFit, config }.
+ * Returns partitioned lists: { runsInVram, doesNotFit }.
  */
 export function evaluatePlaygroundModels(gpuOrConfig, countOrOptions = {}, options = {}) {
   let config;
@@ -89,8 +88,8 @@ export function evaluatePlaygroundModels(gpuOrConfig, countOrOptions = {}, optio
 }
 
 /**
- * Upgrade engine: Evaluates adding one card from the 19 tracked GPUS_DATA rows
- * to the currently owned configuration.
+ * Upgrade engine: Evaluates adding one card from the tracked discrete GPUs
+ * (excluding integrated systems) to the currently owned configuration.
  * Mixed add sums VRAM and uses the slower card's bandwidth.
  * Ranked by: most models unlocked desc, ties broken by unlocks per dollar desc, then lower price asc.
  */
@@ -111,6 +110,7 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
 
   const results = [];
   for (const candidate of GPUS_DATA) {
+    if (isIntegratedSystem(candidate.id)) continue;
     const newMemory = currentMemory + candidate.vram;
     const newBandwidth = Math.min(currentBandwidth, candidate.bandwidth);
     const newConfig = { memoryGb: newMemory, bandwidthGbs: newBandwidth };
@@ -272,7 +272,7 @@ export function renderRigPlaygroundHtml(state = {}) {
         <div class="playground-upgrade-section">
           <div class="selector-label">
             <span>Upgrade Engine: Best Single-Card Additions</span>
-            <span class="selector-note">Adding one card from the 19 tracked rows. A mixed add sums VRAM and uses the slower card's bandwidth (conservative assumption).</span>
+            <span class="selector-note">Adding one discrete card from the tracker. A mixed add sums VRAM and uses the slower card's bandwidth (conservative assumption).</span>
           </div>
 
           <!-- Best Upgrade Callout Card -->
@@ -514,3 +514,4 @@ export function createRigPlayground(container) {
     getState: () => ({ gpuId, count, contextK, kvPrecision })
   };
 }
+
