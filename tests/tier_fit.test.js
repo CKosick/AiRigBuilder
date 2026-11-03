@@ -2,7 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { MODELS_DATA } from '../src/data/models.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
-import { tierFit, fitHeadline, fitDetail, defaultTierId, cheapestFittingTotal, RUNTIME_OVERHEAD_GB } from '../src/utils/tierFit.js';
+import { tierFit, fitHeadline, fitDetail, defaultTierId, cheapestFittingTotal, RUNTIME_OVERHEAD_GB, renderVramBreakdownBarHtml } from '../src/utils/tierFit.js';
+import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { estimateSpeedToks, formatTierSpeedLine } from '../src/utils/speedEstimate.js';
 
 const HAND_WRITTEN = ['llama-3.3-70b', 'deepseek-r1-70b', 'qwen-2.5-72b', 'mistral-nemo-12b', 'llama-3.1-8b'];
@@ -506,5 +507,169 @@ describe('Extended fit math and context/KV precision controls', () => {
 
     const noneFit = tierFit(llama, tier48, { contextK: 128, kvScale: 1 });
     assert.equal(fitHeadline(llama, noneFit), "Won't fit Llama 3.3 70B Instruct: needs 42+ GB, this rig has 48 GB");
+  });
+});
+
+
+describe('VRAM breakdown bar and figure equivalence', () => {
+  it('catalog-wide figure equivalence: weightsGb + contextGb + overheadGb = needsGb and headroom/shortfall across all 56 models and non-offload tiers', () => {
+    assert.equal(Object.keys(BUILDS_DATA).length, 56, 'All 56 models in catalog');
+
+    for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
+      const m = MODELS_DATA.find(x => x.id === modelId);
+      assert.ok(m, `Model ${modelId} exists`);
+
+      // Recommended tier check
+      const recTier = sheet.tiers.find(t => t.fit && t.fit.status !== 'none') || sheet.tiers[0];
+      if (recTier.id !== 'tier-ram-offload') {
+        const fit = tierFit(m, recTier);
+        assert.equal(
+          Number((fit.weightsGb + fit.contextGb + fit.overheadGb).toFixed(1)),
+          fit.needsGb,
+          `${modelId} ${recTier.id} recommended tier needsGb equivalence`
+        );
+        if (fit.status !== 'none') {
+          assert.equal(
+            Number((fit.capacityGb - fit.needsGb).toFixed(1)),
+            fit.headroomGb,
+            `${modelId} ${recTier.id} recommended tier headroomGb`
+          );
+          assert.equal(fit.shortfallGb, 0, `${modelId} ${recTier.id} shortfallGb is 0`);
+        } else {
+          assert.equal(
+            Number((fit.needsGb - fit.capacityGb).toFixed(1)),
+            fit.shortfallGb,
+            `${modelId} ${recTier.id} recommended tier shortfallGb`
+          );
+          assert.equal(fit.headroomGb, 0, `${modelId} ${recTier.id} headroomGb is 0`);
+        }
+      }
+
+      // Check all non-offload tiers
+      for (const tier of sheet.tiers) {
+        if (tier.id === 'tier-ram-offload') continue;
+        const fit = tierFit(m, tier);
+        assert.equal(fit.overheadGb, 1, `${modelId} ${tier.id} overheadGb is 1`);
+        assert.equal(fit.capacityGb, tier.memoryGb, `${modelId} ${tier.id} capacityGb matches memoryGb`);
+        assert.equal(
+          Number((fit.weightsGb + fit.contextGb + fit.overheadGb).toFixed(1)),
+          fit.needsGb,
+          `${modelId} ${tier.id} sum equals needsGb`
+        );
+        if (fit.status !== 'none') {
+          assert.equal(
+            Number((fit.capacityGb - fit.needsGb).toFixed(1)),
+            fit.headroomGb,
+            `${modelId} ${tier.id} headroomGb`
+          );
+          assert.equal(fit.shortfallGb, 0, `${modelId} ${tier.id} shortfallGb is 0`);
+        } else {
+          assert.equal(
+            Number((fit.needsGb - fit.capacityGb).toFixed(1)),
+            fit.shortfallGb,
+            `${modelId} ${tier.id} shortfallGb`
+          );
+          assert.equal(fit.headroomGb, 0, `${modelId} ${tier.id} headroomGb is 0`);
+        }
+      }
+    }
+  });
+
+  it('known-answer assertions: Llama 3.3 70B on dual-3090 (48 GB)', () => {
+    const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+    const dual3090 = { id: 'tier-dual-3090', memoryGb: 48 };
+
+    // At 8K FP16: weights 42 GB, KV 2.7 GB, overhead 1 GB, capacity 48 GB, headroom 2.3 GB
+    const fit8k = tierFit(llama, dual3090, { contextK: 8, kvScale: 1 });
+    assert.equal(fit8k.weightsGb, 42.0);
+    assert.equal(fit8k.contextGb, 2.7);
+    assert.equal(fit8k.overheadGb, 1.0);
+    assert.equal(fit8k.capacityGb, 48.0);
+    assert.equal(fit8k.needsGb, 45.7);
+    assert.equal(fit8k.headroomGb, 2.3);
+    assert.equal(fit8k.shortfallGb, 0.0);
+    assert.equal(fit8k.status, 'fits');
+
+    // At 128K FP16: weights 42 GB, KV 43.2 GB (16 x 2.7), overhead 1 GB, capacity 48 GB, shortfall 38.2 GB (needs 86.2 GB vs 48 GB)
+    const fit128k = tierFit(llama, dual3090, { contextK: 128, kvScale: 1 });
+    assert.equal(fit128k.weightsGb, 42.0);
+    assert.equal(fit128k.contextGb, 43.2);
+    assert.equal(fit128k.overheadGb, 1.0);
+    assert.equal(fit128k.capacityGb, 48.0);
+    assert.equal(fit128k.needsGb, 86.2);
+    assert.equal(fit128k.shortfallGb, 38.2);
+    assert.equal(fit128k.headroomGb, 0.0);
+    assert.equal(fit128k.status, 'none');
+  });
+
+  it('interactive spot-check: 8K to 32K context grows KV segment by 3x base cost; Q4 shrinks to 1/4', () => {
+    const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+    const dual3090 = { id: 'tier-dual-3090', memoryGb: 48 };
+
+    const fit8kFp16 = tierFit(llama, dual3090, { contextK: 8, kvScale: 1 });
+    const fit32kFp16 = tierFit(llama, dual3090, { contextK: 32, kvScale: 1 });
+    const fit32kQ4 = tierFit(llama, dual3090, { contextK: 32, kvScale: 0.25 });
+
+    // Base cost is 2.7 GB. Moving from 8K to 32K context increases context by 8.1 GB (3x base cost)
+    assert.equal(fit8kFp16.contextGb, 2.7);
+    assert.equal(fit32kFp16.contextGb, 10.8);
+    const growth = Number((fit32kFp16.contextGb - fit8kFp16.contextGb).toFixed(1));
+    assert.equal(growth, 8.1);
+    assert.equal(growth, Number((3 * fit8kFp16.contextGb).toFixed(1)));
+
+    // Selecting Q4 at 32K context shrinks KV segment to 1/4 (2.7 GB vs 10.8 GB)
+    assert.equal(fit32kQ4.contextGb, 2.7);
+    assert.equal(fit32kQ4.contextGb, fit32kFp16.contextGb * 0.25);
+  });
+
+  it('RAM offload tier (tier-ram-offload) produces no breakdown bar', () => {
+    const dsv3 = MODELS_DATA.find(m => m.id === 'deepseek-v3-moe');
+    const offloadTier = { id: 'tier-ram-offload', memoryGb: 192 };
+    const fit = tierFit(dsv3, offloadTier);
+
+    // renderVramBreakdownBarHtml returns empty string for tier-ram-offload
+    assert.equal(renderVramBreakdownBarHtml(fit, offloadTier), '');
+    assert.equal(renderVramBreakdownBarHtml(fit, 'tier-ram-offload'), '');
+
+    // renderModelPickerHtml on deepseek-v3-moe with tier-ram-offload contains no vram-breakdown markup
+    const html = renderModelPickerHtml({ activeModelId: 'deepseek-v3-moe', activeTierId: 'tier-ram-offload' });
+    assert.ok(!html.includes('class="vram-breakdown"'), 'RAM offload build sheet does not render vram-breakdown');
+    assert.ok(!html.includes('class="vram-bar"'), 'RAM offload build sheet does not render vram-bar');
+  });
+
+  it('breakdown bar rendered HTML: labels, 1-decimal figures, capacity marker on overflow, and zero-context handling', () => {
+    const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+    const dual3090 = { id: 'tier-dual-3090', memoryGb: 48 };
+
+    // Fitting tier
+    const fitFitting = tierFit(llama, dual3090, { contextK: 8, kvScale: 1 });
+    const fittingHtml = renderVramBreakdownBarHtml(fitFitting, dual3090);
+    assert.ok(fittingHtml.includes('Weights 42.0 GB'));
+    assert.ok(fittingHtml.includes('KV cache 2.7 GB'));
+    assert.ok(fittingHtml.includes('Runtime overhead 1.0 GB'));
+    assert.ok(fittingHtml.includes('Free 2.3 GB'));
+    assert.ok(fittingHtml.includes('Runtime overhead'), 'Labels as Runtime overhead, not CUDA overhead');
+    assert.ok(!fittingHtml.includes('CUDA overhead'));
+    assert.ok(fittingHtml.includes('45.7 GB') && fittingHtml.includes('48.0 GB') && fittingHtml.includes('2.3 GB'));
+
+    // Overflow tier
+    const fitOverflow = tierFit(llama, dual3090, { contextK: 128, kvScale: 1 });
+    const overflowHtml = renderVramBreakdownBarHtml(fitOverflow, dual3090);
+    assert.ok(overflowHtml.includes('is-overflow'));
+    assert.ok(overflowHtml.includes('Capacity: 48.0 GB'));
+    assert.ok(overflowHtml.includes('Shortfall +38.2 GB'));
+    assert.ok(overflowHtml.includes('Needs <span class="vram-num">86.2 GB</span> vs <span class="vram-num">48.0 GB</span> capacity'));
+
+    // Zero context cost model
+    const zeroContextModel = {
+      id: 'zero-ctx',
+      name: 'Zero Context Test',
+      contextCostPer8k: 0,
+      quants: [{ name: 'Q4_K_M', vram: 10, recommended: true }]
+    };
+    const fitZero = tierFit(zeroContextModel, { id: 'tier-16', memoryGb: 16 });
+    const zeroHtml = renderVramBreakdownBarHtml(fitZero, { id: 'tier-16', memoryGb: 16 });
+    assert.ok(!zeroHtml.includes('NaN'), 'No NaN for zero context cost model');
+    assert.equal(fitZero.contextGb, 0.0);
   });
 });

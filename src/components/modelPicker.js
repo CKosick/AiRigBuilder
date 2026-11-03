@@ -7,7 +7,8 @@ import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID } from '../routes.js';
 import { icon } from './icons.js';
-import { tierFit, fitHeadline, fitDetail, defaultTierId } from '../utils/tierFit.js';
+import { tierFit, fitHeadline, fitDetail, defaultTierId, renderVramBreakdownBarHtml } from '../utils/tierFit.js';
+export { renderVramBreakdownBarHtml } from '../utils/tierFit.js';
 import { estimateSpeedToks, formatTierSpeedLine } from '../utils/speedEstimate.js';
 
 export const CONTEXT_STEPS = [8, 16, 32, 64, 128];
@@ -350,6 +351,8 @@ export function renderModelPickerHtml(state = {}) {
           </button>
         </div>
       </div>
+
+      ${renderVramBreakdownBarHtml(tierFit(currentModel, currentTier, { contextK, kvScale }), currentTier)}
 
       <div class="parts-table-wrap">
         <table class="parts-table stack-table">

@@ -665,6 +665,228 @@ body {
   color: var(--text-muted);
 }
 
+/* VRAM Allocation Breakdown Bar on Build Sheets */
+.vram-breakdown {
+  padding: 1.25rem 2rem;
+  background: rgba(18, 24, 36, 0.4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vram-breakdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vram-breakdown-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.vram-breakdown-summary {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.vram-breakdown-summary.is-shortfall {
+  color: var(--warn-text);
+  font-weight: 600;
+}
+
+.vram-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-highlight);
+}
+
+.vram-bar {
+  position: relative;
+  height: 34px;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  width: 100%;
+  border: 1px solid var(--border-medium);
+}
+
+.vram-bar.vram-bar-overflow {
+  border-color: var(--warn-border);
+}
+
+.vram-bar-segment {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0 6px;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  transition: width 0.2s ease;
+}
+
+.vram-segment-weights {
+  background: rgba(148, 163, 184, 0.22);
+  color: #f1f5f9;
+}
+
+.vram-segment-kv {
+  background: rgba(245, 158, 11, 0.25);
+  color: var(--warn-text);
+  border-left: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.vram-segment-overhead {
+  background: rgba(100, 116, 139, 0.35);
+  color: #cbd5e1;
+  border-left: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.vram-segment-headroom {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-text);
+  border-left: 1px dashed rgba(16, 185, 129, 0.4);
+}
+
+.vram-segment-label {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.vram-capacity-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.vram-capacity-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--warn-text);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+}
+
+.vram-capacity-badge {
+  position: absolute;
+  bottom: 100%;
+  transform: translateY(-3px);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--bg-card);
+  color: var(--warn-text);
+  border: 1px solid var(--warn-border);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.vram-shortfall-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(45deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.12) 8px, rgba(245, 158, 11, 0.25) 8px, rgba(245, 158, 11, 0.25) 16px);
+  border-left: 2px solid var(--warn-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.vram-shortfall-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--warn-text);
+  background: rgba(18, 24, 36, 0.85);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--warn-border);
+  white-space: nowrap;
+}
+
+.vram-breakdown-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  align-items: center;
+}
+
+.vram-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.vram-legend-item.is-shortfall {
+  color: var(--warn-text);
+  font-weight: 600;
+}
+
+.vram-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.vram-swatch-weights {
+  background: rgba(148, 163, 184, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.8);
+}
+
+.vram-swatch-kv {
+  background: var(--amber);
+  border: 1px solid var(--warn-text);
+}
+
+.vram-swatch-overhead {
+  background: rgba(100, 116, 139, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+.vram-swatch-headroom {
+  background: var(--emerald);
+  border: 1px solid var(--accent-text);
+}
+
+.vram-swatch-shortfall {
+  background: var(--warn-text);
+  border: 1px solid var(--amber);
+}
+
+.vram-legend-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+
 .build-quick-actions {
   display: flex;
   gap: 0.75rem;
@@ -2401,6 +2623,18 @@ input[type="range"] {
   .gpu-table tr.is-best-value td:first-child {
     box-shadow: none;
   }
+
+  .vram-breakdown {
+    padding: 1rem 1rem;
+  }
+  .vram-bar {
+    height: 28px;
+  }
+  .vram-breakdown-legend {
+    gap: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
 }
 
 @media (max-width: 360px) {

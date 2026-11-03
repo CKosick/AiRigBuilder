@@ -46,6 +46,27 @@ export function tierFit(model, tier, { contextK: reqContextK = MIN_CONTEXT_K, kv
   const remainingK = quant ? (perK > 0 ? Math.floor((usable - quant.vram) / perK / 8) * 8 : displayCap) : 0;
   const contextLabel = remainingK >= displayCap ? `${displayCap}K+` : `~${remainingK}K`;
 
+  const evalQuant = quant || smallest;
+  const weightsGb = evalQuant.vram;
+  const contextGb = Number((perK * reqContextK).toFixed(1));
+  const overheadGb = RUNTIME_OVERHEAD_GB;
+  const capacityGb = tier.memoryGb;
+  const needsGb = Number((weightsGb + contextGb + overheadGb).toFixed(1));
+  const headroomGb = Math.max(0, Number((capacityGb - needsGb).toFixed(1)));
+  const shortfallGb = Math.max(0, Number((needsGb - capacityGb).toFixed(1)));
+  const evalQuantName = shortQuant(evalQuant);
+
+  const breakdown = {
+    weightsGb,
+    contextGb,
+    overheadGb,
+    capacityGb,
+    needsGb,
+    headroomGb,
+    shortfallGb,
+    quantName: evalQuantName
+  };
+
   return {
     status,
     memoryGb: tier.memoryGb,
@@ -59,7 +80,17 @@ export function tierFit(model, tier, { contextK: reqContextK = MIN_CONTEXT_K, kv
     smallestVram: smallest.vram,
     selectedContextK: reqContextK,
     kvScale,
-    isDefault
+    isDefault,
+    tierId: tier.id,
+    weightsGb,
+    contextGb,
+    overheadGb,
+    capacityGb,
+    needsGb,
+    headroomGb,
+    shortfallGb,
+    evalQuantName,
+    breakdown
   };
 }
 
@@ -95,4 +126,143 @@ export function cheapestFittingTotal(sheet) {
     .filter(t => !t.fit || t.fit.status !== 'none')
     .map(t => t.parts.reduce((sum, p) => sum + (p.price || 0), 0));
   return totals.length ? Math.min(...totals) : null;
+}
+
+/**
+ * Pure HTML for the VRAM allocation breakdown bar.
+ * Renders demand segments against capacity or shortfall when overflowing.
+ * Returns empty string for the system RAM offload tier (tier-ram-offload).
+ *
+ * @param {object} fit - result from tierFit
+ * @param {object|string} [tier] - tier object or tierId
+ */
+export function renderVramBreakdownBarHtml(fit, tier) {
+  if (!fit) return '';
+  const tierId = (typeof tier === 'string' ? tier : tier?.id) || fit.tierId;
+  if (tierId === 'tier-ram-offload') return '';
+
+  const {
+    weightsGb = 0,
+    contextGb = 0,
+    overheadGb = RUNTIME_OVERHEAD_GB,
+    capacityGb = fit.memoryGb || 0,
+    needsGb = 0,
+    headroomGb = 0,
+    shortfallGb = 0,
+    quantName = fit.quant || fit.smallestQuant || ''
+  } = fit.breakdown || fit;
+
+  const isOverflow = fit.status === 'none';
+
+  if (!isOverflow) {
+    const weightsPct = capacityGb > 0 ? (weightsGb / capacityGb) * 100 : 0;
+    const contextPct = capacityGb > 0 ? (contextGb / capacityGb) * 100 : 0;
+    const overheadPct = capacityGb > 0 ? (overheadGb / capacityGb) * 100 : 0;
+    const headroomPct = capacityGb > 0 ? (headroomGb / capacityGb) * 100 : 0;
+
+    return `
+      <div class="vram-breakdown" role="region" aria-label="VRAM Allocation Breakdown">
+        <div class="vram-breakdown-header">
+          <span class="vram-breakdown-title">VRAM Allocation</span>
+          <span class="vram-breakdown-summary"><span class="vram-num">${needsGb.toFixed(1)} GB</span> of <span class="vram-num">${capacityGb.toFixed(1)} GB</span> used (<span class="vram-num">${headroomGb.toFixed(1)} GB</span> free)</span>
+        </div>
+        <div class="vram-bar" role="progressbar" aria-valuenow="${needsGb.toFixed(1)}" aria-valuemin="0" aria-valuemax="${capacityGb.toFixed(1)}" aria-label="VRAM usage: ${needsGb.toFixed(1)} GB of ${capacityGb.toFixed(1)} GB">
+          <div class="vram-bar-segment vram-segment-weights" style="width: ${weightsPct.toFixed(2)}%;" title="Model weights (${quantName}): ${weightsGb.toFixed(1)} GB">
+            <span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>
+          </div>
+          ${contextGb > 0 ? `
+          <div class="vram-bar-segment vram-segment-kv" style="width: ${contextPct.toFixed(2)}%;" title="KV cache: ${contextGb.toFixed(1)} GB">
+            <span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>
+          </div>` : ''}
+          <div class="vram-bar-segment vram-segment-overhead" style="width: ${overheadPct.toFixed(2)}%;" title="Runtime overhead: ${overheadGb.toFixed(1)} GB">
+            <span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>
+          </div>
+          <div class="vram-bar-segment vram-segment-headroom" style="width: ${headroomPct.toFixed(2)}%;" title="Free memory: ${headroomGb.toFixed(1)} GB">
+            <span class="vram-segment-label">Free ${headroomGb.toFixed(1)} GB</span>
+          </div>
+        </div>
+        <div class="vram-breakdown-legend">
+          <div class="vram-legend-item">
+            <span class="vram-legend-swatch vram-swatch-weights" aria-hidden="true"></span>
+            <span class="vram-legend-label">Model weights (${quantName}):</span>
+            <span class="vram-legend-val">${weightsGb.toFixed(1)} GB</span>
+          </div>
+          ${contextGb > 0 ? `
+          <div class="vram-legend-item">
+            <span class="vram-legend-swatch vram-swatch-kv" aria-hidden="true"></span>
+            <span class="vram-legend-label">KV cache:</span>
+            <span class="vram-legend-val">${contextGb.toFixed(1)} GB</span>
+          </div>` : ''}
+          <div class="vram-legend-item">
+            <span class="vram-legend-swatch vram-swatch-overhead" aria-hidden="true"></span>
+            <span class="vram-legend-label">Runtime overhead:</span>
+            <span class="vram-legend-val">${overheadGb.toFixed(1)} GB</span>
+          </div>
+          <div class="vram-legend-item">
+            <span class="vram-legend-swatch vram-swatch-headroom" aria-hidden="true"></span>
+            <span class="vram-legend-label">Free memory:</span>
+            <span class="vram-legend-val">${headroomGb.toFixed(1)} GB</span>
+          </div>
+        </div>
+      </div>
+    `.trim();
+  }
+
+  // When overflowing (status === 'none')
+  const weightsPct = needsGb > 0 ? (weightsGb / needsGb) * 100 : 0;
+  const contextPct = needsGb > 0 ? (contextGb / needsGb) * 100 : 0;
+  const overheadPct = needsGb > 0 ? (overheadGb / needsGb) * 100 : 0;
+  const capacityPct = needsGb > 0 ? (capacityGb / needsGb) * 100 : 0;
+  const shortfallPct = needsGb > 0 ? (shortfallGb / needsGb) * 100 : 0;
+
+  return `
+    <div class="vram-breakdown is-overflow" role="region" aria-label="VRAM Allocation Breakdown">
+      <div class="vram-breakdown-header">
+        <span class="vram-breakdown-title">VRAM Allocation</span>
+        <span class="vram-breakdown-summary is-shortfall">Needs <span class="vram-num">${needsGb.toFixed(1)} GB</span> vs <span class="vram-num">${capacityGb.toFixed(1)} GB</span> capacity (<span class="vram-num">${shortfallGb.toFixed(1)} GB</span> shortfall)</span>
+      </div>
+      <div class="vram-bar vram-bar-overflow" role="progressbar" aria-valuenow="${capacityGb.toFixed(1)}" aria-valuemin="0" aria-valuemax="${needsGb.toFixed(1)}" aria-label="VRAM required: ${needsGb.toFixed(1)} GB exceeds ${capacityGb.toFixed(1)} GB capacity by ${shortfallGb.toFixed(1)} GB">
+        <div class="vram-bar-segment vram-segment-weights" style="width: ${weightsPct.toFixed(2)}%;" title="Model weights (${quantName}): ${weightsGb.toFixed(1)} GB">
+          <span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>
+        </div>
+        ${contextGb > 0 ? `
+        <div class="vram-bar-segment vram-segment-kv" style="width: ${contextPct.toFixed(2)}%;" title="KV cache: ${contextGb.toFixed(1)} GB">
+          <span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>
+        </div>` : ''}
+        <div class="vram-bar-segment vram-segment-overhead" style="width: ${overheadPct.toFixed(2)}%;" title="Runtime overhead: ${overheadGb.toFixed(1)} GB">
+          <span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>
+        </div>
+        <div class="vram-capacity-marker" style="left: ${capacityPct.toFixed(2)}%;" aria-hidden="true">
+          <div class="vram-capacity-line"></div>
+          <div class="vram-capacity-badge">Capacity: ${capacityGb.toFixed(1)} GB</div>
+        </div>
+        <div class="vram-shortfall-zone" style="left: ${capacityPct.toFixed(2)}%; width: ${shortfallPct.toFixed(2)}%;" title="Shortfall: ${shortfallGb.toFixed(1)} GB over capacity">
+          <span class="vram-shortfall-tag">Shortfall +${shortfallGb.toFixed(1)} GB</span>
+        </div>
+      </div>
+      <div class="vram-breakdown-legend">
+        <div class="vram-legend-item">
+          <span class="vram-legend-swatch vram-swatch-weights" aria-hidden="true"></span>
+          <span class="vram-legend-label">Model weights (${quantName}):</span>
+          <span class="vram-legend-val">${weightsGb.toFixed(1)} GB</span>
+        </div>
+        ${contextGb > 0 ? `
+        <div class="vram-legend-item">
+          <span class="vram-legend-swatch vram-swatch-kv" aria-hidden="true"></span>
+          <span class="vram-legend-label">KV cache:</span>
+          <span class="vram-legend-val">${contextGb.toFixed(1)} GB</span>
+        </div>` : ''}
+        <div class="vram-legend-item">
+          <span class="vram-legend-swatch vram-swatch-overhead" aria-hidden="true"></span>
+          <span class="vram-legend-label">Runtime overhead:</span>
+          <span class="vram-legend-val">${overheadGb.toFixed(1)} GB</span>
+        </div>
+        <div class="vram-legend-item is-shortfall">
+          <span class="vram-legend-swatch vram-swatch-shortfall" aria-hidden="true"></span>
+          <span class="vram-legend-label">Shortfall:</span>
+          <span class="vram-legend-val">+${shortfallGb.toFixed(1)} GB</span>
+        </div>
+      </div>
+    </div>
+  `.trim();
 }
