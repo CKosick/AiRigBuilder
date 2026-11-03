@@ -133,6 +133,7 @@ export function renderGpuDetailHtml(gpu) {
 export function createGpuDetail(container) {
   let chart = null;
   let shownId = null;
+  let loadToken = 0;
 
   return {
     show(gpuId) {
@@ -142,8 +143,21 @@ export function createGpuDetail(container) {
         container.innerHTML = renderGpuDetailHtml(gpu);
         shownId = gpuId;
       }
-      if (chart) chart.destroy();
-      chart = drawPriceHistoryChart(container.querySelector('#gpu-detail-chart'), gpu).chart;
+      if (chart) {
+        chart.destroy();
+        chart = null;
+      }
+      const currentToken = ++loadToken;
+      const canvas = container.querySelector('#gpu-detail-chart');
+      const { chartPromise } = drawPriceHistoryChart(canvas, gpu);
+      chartPromise.then(instance => {
+        if (!instance) return;
+        if (currentToken !== loadToken || !document.contains(canvas)) {
+          instance.destroy();
+          return;
+        }
+        chart = instance;
+      });
     }
   };
 }

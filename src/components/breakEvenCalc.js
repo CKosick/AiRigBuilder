@@ -3,10 +3,7 @@
 import { CLOUD_PROVIDERS, CLOUD_RATES, CLOUD_RATES_AS_OF } from '../data/providers.js';
 import { icon } from './icons.js';
 import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
-import { Chart, LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
-
-// Register Chart.js components
-Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
+import { loadChartJs } from '../utils/chartLoader.js';
 
 export const BREAK_EVEN_DEFAULTS = {
   rigUpfrontCost: BASELINE_RIG.cost, // $ (Dual used 3090 rig build sheet)
@@ -244,6 +241,8 @@ export function createBreakEvenCalc(container) {
   let resaleRetentionPct = BREAK_EVEN_DEFAULTS.resaleRetentionPct;
 
   let chartInstance = null;
+  let chartLoading = false;
+  let pendingStats = null;
 
   const currentState = () => ({
     rigUpfrontCost, dailyUsageHours, selectedProviderId, hourlyCloudRate, monthlyDiskFee, systemWatts, kwhRate, resaleRetentionPct
@@ -274,104 +273,136 @@ export function createBreakEvenCalc(container) {
     renderChart(calculate());
   }
 
+  function buildChartData(s) {
+    const months = Array.from({ length: 25 }, (_, i) => `M${i}`);
+    const cloudData = months.map((_, i) => Math.round(s.monthlyCloudTotal * i));
+    const localData = months.map((_, i) => Math.round(rigUpfrontCost + (s.monthlyLocalPower * i)));
+    const equityData = months.map((_, i) => {
+      const depreciationFactor = Math.max(0.3, 1 - (i / 24) * (1 - resaleRetentionPct / 100));
+      const currentAssetValue = rigUpfrontCost * depreciationFactor;
+      return Math.round(rigUpfrontCost + (s.monthlyLocalPower * i) - currentAssetValue);
+    });
+    return { months, cloudData, localData, equityData };
+  }
+
   function renderChart(stats) {
     const canvas = container.querySelector('#break-even-chart');
     if (!canvas) return;
 
-    const months = Array.from({ length: 25 }, (_, i) => `M${i}`);
-    
-    // Cloud cumulative data: monthlyCloudTotal * month
-    const cloudData = months.map((_, i) => Math.round(stats.monthlyCloudTotal * i));
-
-    // Local cumulative data: upfront + (monthlyLocalPower * month)
-    const localData = months.map((_, i) => Math.round(rigUpfrontCost + (stats.monthlyLocalPower * i)));
-
-    // Net Equity data: local cumulative - (resale value amortized)
-    const equityData = months.map((_, i) => {
-      const depreciationFactor = Math.max(0.3, 1 - (i / 24) * (1 - resaleRetentionPct / 100));
-      const currentAssetValue = rigUpfrontCost * depreciationFactor;
-      return Math.round(rigUpfrontCost + (stats.monthlyLocalPower * i) - currentAssetValue);
-    });
-
     if (chartInstance && chartInstance.canvas === canvas) {
+      const { cloudData, localData, equityData } = buildChartData(stats);
       chartInstance.data.datasets[0].data = cloudData;
       chartInstance.data.datasets[1].data = localData;
       chartInstance.data.datasets[2].data = equityData;
       chartInstance.update('none');
       return;
     }
-    if (chartInstance) chartInstance.destroy();
 
-    chartInstance = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels: months,
-        datasets: [
-          {
-            label: 'Cloud Rental Cumulative',
-            data: cloudData,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            borderWidth: 2.5,
-            pointRadius: 2,
-            tension: 0.1
-          },
-          {
-            label: 'Local Rig Cumulative Spend',
-            data: localData,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            borderWidth: 2.5,
-            pointRadius: 2,
-            tension: 0.1
-          },
-          {
-            label: 'Net Outlay (After Hardware Equity)',
-            data: equityData,
-            borderColor: '#94a3b8', // neutral: the third series is context, not a verdict
-            borderDash: [5, 5],
-            borderWidth: 2,
-            pointRadius: 0,
-            tension: 0.1
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#121824',
-            titleColor: '#f1f5f9',
-            bodyColor: '#94a3b8',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            padding: 10,
-            callbacks: {
-              label: (context) => ` ${context.dataset.label}: $${context.parsed.y.toLocaleString()}`
+    if (chartInstance && chartInstance.canvas !== canvas) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+
+    pendingStats = stats;
+    if (chartLoading) return;
+    chartLoading = true;
+
+    loadChartJs().then(Chart => {
+      if (!Chart) return;
+      const currentCanvas = container.querySelector('#break-even-chart');
+      if (!currentCanvas || !document.contains(currentCanvas)) return;
+
+      const activeStats = pendingStats || stats;
+      const { months, cloudData, localData, equityData } = buildChartData(activeStats);
+
+      if (chartInstance && chartInstance.canvas === currentCanvas) {
+        chartInstance.data.datasets[0].data = cloudData;
+        chartInstance.data.datasets[1].data = localData;
+        chartInstance.data.datasets[2].data = equityData;
+        chartInstance.update('none');
+        return;
+      }
+
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+
+      chartInstance = new Chart(currentCanvas, {
+        type: 'line',
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: 'Cloud Rental Cumulative',
+              data: cloudData,
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              borderWidth: 2.5,
+              pointRadius: 2,
+              tension: 0.1
+            },
+            {
+              label: 'Local Rig Cumulative Spend',
+              data: localData,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderWidth: 2.5,
+              pointRadius: 2,
+              tension: 0.1
+            },
+            {
+              label: 'Net Outlay (After Hardware Equity)',
+              data: equityData,
+              borderColor: '#94a3b8', // neutral: the third series is context, not a verdict
+              borderDash: [5, 5],
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.1
             }
-          }
+          ]
         },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
           },
-          y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: {
-              color: '#64748b',
-              font: { family: 'JetBrains Mono', size: 10 },
-              callback: (val) => `$${val}`
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#121824',
+              titleColor: '#f1f5f9',
+              bodyColor: '#94a3b8',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1,
+              padding: 10,
+              callbacks: {
+                label: (context) => ` ${context.dataset.label}: $${context.parsed.y.toLocaleString()}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: (val) => `$${val}`
+              }
             }
           }
         }
-      }
+      });
+    }).catch(err => {
+      console.error('Failed to load chart for break-even calculator:', err);
+    }).finally(() => {
+      chartLoading = false;
     });
   }
 

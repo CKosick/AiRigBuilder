@@ -223,6 +223,7 @@ export function createPriceTracker(container) {
   let activeModalGpu = null;
   let modalChartInstance = null;
   let modalReturnFocus = null;
+  let modalChartLoadToken = 0;
 
   function render() {
     const restoreFocus = preserveFocus(container);
@@ -376,6 +377,12 @@ export function createPriceTracker(container) {
   }
 
   function closeHistoryModal() {
+    activeModalGpu = null;
+    modalChartLoadToken++;
+    if (modalChartInstance) {
+      modalChartInstance.destroy();
+      modalChartInstance = null;
+    }
     const backdrop = container.querySelector('#gpu-modal-backdrop');
     if (!backdrop || backdrop.hidden) return;
     backdrop.classList.remove('open');
@@ -451,10 +458,11 @@ export function createPriceTracker(container) {
 
     if (modalChartInstance) {
       modalChartInstance.destroy();
+      modalChartInstance = null;
     }
 
-    const { chart, missingMonths } = drawPriceHistoryChart(canvas, gpu);
-    modalChartInstance = chart;
+    const currentToken = ++modalChartLoadToken;
+    const { chartPromise, missingMonths } = drawPriceHistoryChart(canvas, gpu);
 
     const summaryEl = container.querySelector('#modal-gpu-summary');
     if (summaryEl) {
@@ -462,6 +470,16 @@ export function createPriceTracker(container) {
         ? `${gpuSummary(gpu)} Gaps in the chart are months with no recorded price data (${missingMonths} months).`
         : gpuSummary(gpu);
     }
+
+    chartPromise.then(instance => {
+      if (!instance) return;
+      const backdrop = container.querySelector('#gpu-modal-backdrop');
+      if (currentToken !== modalChartLoadToken || !activeModalGpu || activeModalGpu.id !== gpu.id || !backdrop || backdrop.hidden || !document.contains(canvas)) {
+        instance.destroy();
+        return;
+      }
+      modalChartInstance = instance;
+    });
   }
 
   function showToast(msg) {
