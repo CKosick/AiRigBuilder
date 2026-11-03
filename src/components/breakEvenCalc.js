@@ -243,6 +243,8 @@ export function createBreakEvenCalc(container) {
   let chartInstance = null;
   let chartLoading = false;
   let pendingStats = null;
+  let hasBeenShown = false;
+  let pendingPreload = null;
 
   const currentState = () => ({
     rigUpfrontCost, dailyUsageHours, selectedProviderId, hourlyCloudRate, monthlyDiskFee, systemWatts, kwhRate, resaleRetentionPct
@@ -286,6 +288,11 @@ export function createBreakEvenCalc(container) {
   }
 
   function renderChart(stats) {
+    if (!hasBeenShown) {
+      pendingStats = stats;
+      return;
+    }
+
     const canvas = container.querySelector('#break-even-chart');
     if (!canvas) return;
 
@@ -527,7 +534,27 @@ export function createBreakEvenCalc(container) {
   render();
 
   return {
+    show() {
+      if (!hasBeenShown) {
+        hasBeenShown = true;
+        if (pendingPreload) {
+          const params = pendingPreload;
+          pendingPreload = null;
+          if (params.upfrontCost) rigUpfrontCost = params.upfrontCost;
+          if (params.systemWatts) systemWatts = params.systemWatts;
+          if (params.dailyHours) dailyUsageHours = params.dailyHours;
+          if (params.kwhRate) kwhRate = params.kwhRate;
+          render();
+        } else {
+          renderChart(pendingStats || calculate());
+        }
+      }
+    },
     preloadRig: (params) => {
+      if (!params) return;
+      if (!hasBeenShown) {
+        pendingPreload = params;
+      }
       if (params.upfrontCost) rigUpfrontCost = params.upfrontCost;
       if (params.systemWatts) systemWatts = params.systemWatts;
       if (params.dailyHours) dailyUsageHours = params.dailyHours;

@@ -102,6 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
       v.el.hidden = !isActive;
     });
 
+    if (tabViewFor(next) === 'calculator' && breakEvenController) {
+      breakEvenController.show();
+    }
+
     const isGpu = next.view === 'gpu';
     trackerRoot.hidden = isGpu;
     gpuDetailRoot.hidden = !isGpu;
