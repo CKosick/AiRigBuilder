@@ -11,9 +11,10 @@ export const SITE_NAME = 'AI Rig Builder';
 // The model the home page shows. Its /builds page would duplicate the home page, so it points there.
 export const DEFAULT_MODEL_ID = 'llama-3.3-70b';
 
-// The four tabbed sections. GPU detail pages live under the tracker tab.
+// The five tabbed sections. GPU detail pages live under the tracker tab.
 export const SECTIONS = [
   { view: 'builds', path: '/builds', label: 'Build Sheets' },
+  { view: 'playground', path: '/playground', label: 'Rig Playground' },
   { view: 'calculator', path: '/calculator', label: 'Break-Even Calculator' },
   { view: 'tracker', path: '/tracker', label: 'GPU Price Tracker' },
   { view: 'guide', path: '/guide', label: 'Hardware Guide' }
@@ -115,6 +116,12 @@ export function pageMeta(route) {
       description: `Every local LLM build sheet in one table: VRAM needed, best quant, speed and the cheapest rig for ${MODELS_DATA.length} models from Llama 3.3 70B to Phi-4 Mini.`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' });
+  } else if (route.view === 'playground') {
+    meta = {
+      title: `Local AI Rig Playground: What Can My GPU Run? | ${SITE_NAME}`,
+      description: `Enter the GPU you already own to see which of our ${MODELS_DATA.length} local LLMs run in VRAM, your generation speeds, and the highest-impact upgrade for your budget.`
+    };
+    crumbs.push({ name: 'Rig Playground', path: '/playground' });
   } else if (route.view === 'calculator') {
     meta = {
       title: `Local AI vs Cloud GPU Break-Even Calculator | ${SITE_NAME}`,

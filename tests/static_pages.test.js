@@ -34,10 +34,10 @@ const canonicalPages = pages.filter(p => isCanonical(p.route));
 describe('URL structure', () => {
   it('has a page for home, each section, each GPU and each model build sheet', () => {
     const paths = allRoutes().map(r => r.path);
-    for (const p of ['/', '/builds', '/calculator', '/tracker', '/guide']) assert.ok(paths.includes(p), p);
+    for (const p of ['/', '/builds', '/playground', '/calculator', '/tracker', '/guide']) assert.ok(paths.includes(p), p);
     for (const g of GPUS_DATA) assert.ok(paths.includes(`/gpu/${g.id}`), g.id);
     for (const m of MODELS_DATA) assert.ok(paths.includes(`/builds/${m.id}`), m.id);
-    assert.equal(paths.length, 5 + GPUS_DATA.length + MODELS_DATA.length);
+    assert.equal(paths.length, 6 + GPUS_DATA.length + MODELS_DATA.length);
     assert.equal(new Set(paths).size, paths.length, 'paths are unique');
   });
 
@@ -57,6 +57,7 @@ describe('URL structure', () => {
   it('maps the old #hash sections to their new paths', () => {
     assert.equal(legacyHashRoute('#builds').path, '/builds');
     assert.equal(legacyHashRoute('#calculator').path, '/calculator');
+    assert.equal(legacyHashRoute('#playground').path, '/playground');
     assert.equal(legacyHashRoute('#tracker').path, '/tracker');
     assert.equal(legacyHashRoute('#guide').path, '/guide');
     assert.equal(legacyHashRoute('#main-content'), null);
@@ -66,6 +67,7 @@ describe('URL structure', () => {
   it('writes each page to the file Vercel cleanUrls serves at that path', () => {
     assert.equal(outputFileFor(parseRoute('/')), 'index.html');
     assert.equal(outputFileFor(parseRoute('/tracker')), 'tracker.html');
+    assert.equal(outputFileFor(parseRoute('/playground')), 'playground.html');
     assert.equal(outputFileFor(parseRoute('/gpu/rtx-3090')), 'gpu/rtx-3090.html');
     assert.equal(outputFileFor(parseRoute('/builds/qwen-2.5-72b')), 'builds/qwen-2.5-72b.html');
   });
@@ -124,13 +126,13 @@ describe('Generated page <head> SEO', () => {
 
 describe('Generated page content without JavaScript', () => {
   it('each section page shows only its own section, already rendered', () => {
-    const sections = { '/builds': 'view-builds', '/calculator': 'view-calculator', '/tracker': 'view-tracker', '/guide': 'view-guide' };
+    const sections = { '/builds': 'view-builds', '/playground': 'view-playground', '/calculator': 'view-calculator', '/tracker': 'view-tracker', '/guide': 'view-guide' };
     for (const [p, id] of Object.entries(sections)) {
       const html = byPath[p];
       assert.ok(new RegExp(`id="${id}" class="view-section active"[^>]*>`).test(html), `${p} active panel`);
       assert.ok(new RegExp(`id="tab-${id.slice(5)}" role="tab" aria-selected="true"`).test(html), `${p} selected tab`);
       const hiddenPanels = (html.match(/role="tabpanel"[^>]* hidden>/g) || []).length;
-      assert.equal(hiddenPanels, 3, `${p}: other panels hidden`);
+      assert.equal(hiddenPanels, 4, `${p}: other panels hidden`);
     }
   });
 
@@ -220,13 +222,13 @@ describe('Generated page content without JavaScript', () => {
     const html = byPath['/guide'];
     for (const m of MODELS_DATA) assert.ok(html.includes(`href="${buildPath(m.id)}"`), m.id);
     for (const g of GPUS_DATA) assert.ok(html.includes(`href="/gpu/${g.id}"`), g.id);
-    assert.ok(!/href="#(builds|calculator|tracker|guide)"/.test(html), 'no #hash navigation links left');
+    assert.ok(!/href="#(builds|playground|calculator|tracker|guide)"/.test(html), 'no #hash navigation links left');
   });
 
   it('keeps the accessible tabs markup', () => {
     const html = byPath['/'];
     assert.ok(html.includes('role="tablist" aria-label="Site sections"'));
-    assert.equal((html.match(/role="tab" /g) || []).length, 4);
+    assert.equal((html.match(/role="tab" /g) || []).length, 5);
     assert.ok(html.includes('href="#main-content" class="skip-link"'));
   });
 });
@@ -245,7 +247,7 @@ describe('404, sitemap and hosting config', () => {
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
     assert.deepEqual(locs, allRoutes().filter(isCanonical).map(r => `${SITE_URL}${r.path}`));
     assert.ok(!locs.includes(`${SITE_URL}/builds/${DEFAULT_MODEL_ID}`));
-    assert.equal(locs.length, 4 + GPUS_DATA.length + MODELS_DATA.length);
+    assert.equal(locs.length, 5 + GPUS_DATA.length + MODELS_DATA.length);
     assert.ok(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(sitemap));
   });
 

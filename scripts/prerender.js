@@ -10,6 +10,7 @@ import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
+import { renderRigPlaygroundHtml } from '../src/components/rigPlayground.js';
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../src/data/gpus.js';
 import { homeFaq } from '../src/utils/siteFacts.js';
 
@@ -28,6 +29,7 @@ function panelsFor(route) {
     case 'calculator': return { calculator: renderBreakEvenHtml() };
     case 'tracker': return { tracker: renderPriceTrackerHtml() };
     case 'guide': return { guide: renderHardwareGuideHtml() };
+    case 'playground': return { playground: renderRigPlaygroundHtml() };
     case 'gpu': return { gpu: renderGpuDetailHtml(GPUS_DATA.find(g => g.id === route.gpuId)) };
     default: return {};
   }
@@ -152,7 +154,7 @@ export function renderNotFound(template) {
   </div>`, '<div id="app"></div>');
 }
 
-const SITEMAP_HINTS = { home: ['daily', '1.0'], tracker: ['daily', '0.9'], gpu: ['weekly', '0.8'], builds: ['weekly', '0.9'], calculator: ['weekly', '0.9'], guide: ['monthly', '0.8'], buildSheet: ['weekly', '0.7'] };
+const SITEMAP_HINTS = { home: ['daily', '1.0'], tracker: ['daily', '0.9'], gpu: ['weekly', '0.8'], builds: ['weekly', '0.9'], playground: ['weekly', '0.9'], calculator: ['weekly', '0.9'], guide: ['monthly', '0.8'], buildSheet: ['weekly', '0.7'] };
 
 /** sitemap.xml listing every canonical URL; lastmod is the last weekly price update. */
 export function renderSitemap(routes = allRoutes().filter(isCanonical)) {

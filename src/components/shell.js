@@ -10,6 +10,7 @@ import { icon } from './icons.js';
 
 const TAB_LABELS = {
   builds: { icon: 'monitor', text: 'Build Sheets' },
+  playground: { icon: 'sliders', text: 'Rig Playground' },
   calculator: { icon: 'calculator', text: 'Break-Even ROI' },
   tracker: { icon: 'chart', text: 'GPU Price Tracker' },
   guide: { icon: 'book', text: 'Hardware Guide' }
@@ -113,6 +114,7 @@ export function renderShell(route, panels = {}) {
     <main class="main-wrapper" id="main-content" tabindex="-1">
       <div id="home-hero-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeHeroHtml() : ''}</div>
       ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div><div id="home-faq-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeFaqHtml() : ''}</div>`)}
+      ${panel('playground', panels.playground || '')}
       ${panel('calculator', panels.calculator || '')}
       ${panel('tracker', `<div id="tracker-root"${isGpu ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div>`)}
       ${panel('guide', panels.guide || '')}
@@ -129,6 +131,7 @@ export function renderShell(route, panels = {}) {
         </div>
         <nav aria-label="Footer" class="footer-nav">
           <a href="/builds" class="footer-link">Build Sheets</a>
+          <a href="/playground" class="footer-link">Rig Playground</a>
           <a href="/calculator" class="footer-link">Break-Even Calc</a>
           <a href="/tracker" class="footer-link">GPU Tracker</a>
           <a href="/guide" class="footer-link">Hardware Gotchas</a>

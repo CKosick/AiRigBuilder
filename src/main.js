@@ -6,6 +6,7 @@ import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
 import { createBuildsIndex } from './components/buildsIndex.js';
+import { createRigPlayground } from './components/rigPlayground.js';
 import { renderHomeFaqHtml } from './components/homeFaq.js';
 import { renderHomeHeroHtml } from './components/homeHero.js';
 import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Views & Navigation Controller
   const viewBuilds = document.getElementById('view-builds');
+  const viewPlayground = document.getElementById('view-playground');
   const viewCalculator = document.getElementById('view-calculator');
   const viewTracker = document.getElementById('view-tracker');
   const viewGuide = document.getElementById('view-guide');
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   breakEvenController = createBreakEvenCalc(viewCalculator);
   createPriceTracker(trackerRoot);
   createHardwareGuide(viewGuide);
+  createRigPlayground(viewPlayground);
   createBuildsIndex(buildsIndexRoot);
   const gpuDetailController = createGpuDetail(gpuDetailRoot);
 
@@ -65,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
   const views = [
     { id: 'view-builds', view: 'builds', el: viewBuilds },
+    { id: 'view-playground', view: 'playground', el: viewPlayground },
     { id: 'view-calculator', view: 'calculator', el: viewCalculator },
     { id: 'view-tracker', view: 'tracker', el: viewTracker },
     { id: 'view-guide', view: 'guide', el: viewGuide }
