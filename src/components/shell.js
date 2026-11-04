@@ -31,6 +31,8 @@ export function renderShell(route, panels = {}) {
   const { rtx3090, teslaP40, dual3090RigEst, runpodDual3090, payoffMonths4h: payoffMonths } = siteFacts();
   const activeTab = tabViewFor(route);
   const isGpu = route.view === 'gpu';
+  const isCompare = route.view === 'compare';
+  const isBestGpu = route.view === 'best-gpu';
   const isBuildsIndex = Boolean(route.index);
 
   const tabs = SECTIONS.map(s => {
@@ -113,10 +115,10 @@ export function renderShell(route, panels = {}) {
     <!-- Main Workspace Container -->
     <main class="main-wrapper" id="main-content" tabindex="-1">
       <div id="home-hero-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeHeroHtml() : ''}</div>
-      ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="model-picker-root"${isBuildsIndex ? ' hidden' : ''}>${panels.builds || ''}</div><div id="home-faq-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeFaqHtml() : ''}</div>`)}
+      ${panel('builds', `<div id="builds-index-root"${isBuildsIndex ? '' : ' hidden'}>${panels.buildsIndex || ''}</div><div id="best-gpu-root"${isBestGpu ? '' : ' hidden'}>${panels.bestGpu || ''}</div><div id="model-picker-root"${isBuildsIndex || isBestGpu ? ' hidden' : ''}>${panels.builds || ''}</div><div id="home-faq-root"${route.home ? '' : ' hidden'}>${route.home ? renderHomeFaqHtml() : ''}</div>`)}
       ${panel('playground', panels.playground || '')}
       ${panel('calculator', panels.calculator || '')}
-      ${panel('tracker', `<div id="tracker-root"${isGpu ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div>`)}
+      ${panel('tracker', `<div id="tracker-root"${isGpu || isCompare ? ' hidden' : ''}>${panels.tracker || ''}</div><div id="gpu-detail-root"${isGpu ? '' : ' hidden'}>${panels.gpu || ''}</div><div id="compare-root"${isCompare ? '' : ' hidden'}>${panels.compare || ''}</div>`)}
       ${panel('guide', panels.guide || '')}
     </main>
 

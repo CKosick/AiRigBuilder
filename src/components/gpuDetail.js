@@ -6,12 +6,33 @@ import { fillMonthGaps } from '../utils/priceHistory.js';
 import { trendBadgeHtml } from '../utils/priceTrends.js';
 import { gpuSummary } from '../utils/siteFacts.js';
 import { gpuPath, shortGpuName } from '../routes.js';
+import { getComparisonsForGpu, comparePath } from '../data/comparisons.js';
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
 import { icon } from './icons.js';
 
 const formatDate = (iso) => new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 
 /** Pure HTML for one GPU's page, shared by the browser and scripts/prerender.js. */
+
+function renderGpuComparisonsSection(gpu) {
+  const pairs = getComparisonsForGpu(gpu.id);
+  if (!pairs || pairs.length === 0) return '';
+  const links = pairs.map(([a, b]) => {
+    const otherId = a === gpu.id ? b : a;
+    const other = GPUS_DATA.find(g => g.id === otherId);
+    const otherName = other ? other.name : otherId;
+    return `<li><a href="${comparePath(a, b)}">${gpu.name} vs ${otherName}</a></li>`;
+  }).join('');
+  return `
+      <section class="gpu-detail-card" aria-labelledby="gpu-comparisons-title">
+        <h3 id="gpu-comparisons-title">Head-to-Head Comparisons</h3>
+        <ul class="gpu-detail-others">
+          ${links}
+        </ul>
+      </section>
+  `;
+}
+
 export function renderGpuDetailHtml(gpu) {
   const { missingMonths } = fillMonthGaps(gpu.history);
   const historyRows = [...gpu.history].reverse().map((h, i, rows) => {
@@ -118,6 +139,8 @@ export function renderGpuDetailHtml(gpu) {
           </table>
         </div>
       </section>
+
+      ${renderGpuComparisonsSection(gpu)}
 
       <section class="gpu-detail-card" aria-labelledby="gpu-others-title">
         <h3 id="gpu-others-title">Other Tracked GPUs</h3>

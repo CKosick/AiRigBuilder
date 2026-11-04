@@ -11,6 +11,7 @@ import { MODELS_DATA } from '../src/data/models.js';
 import { defaultTierId } from '../src/utils/tierFit.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { fillGpuPrices } from '../src/utils/siteFacts.js';
+import { COMPARISON_PAIRS, BEST_GPU_MODELS, comparePath, bestGpuPath } from '../src/data/comparisons.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const template = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf-8');
@@ -28,7 +29,7 @@ function visibleAppText(html) {
 const pages = renderAllPages(template);
 const byPath = Object.fromEntries(pages.map(p => [p.route.path, p.html]));
 // The default model's /builds page duplicates the home page, so its canonical is /
-const canonicalFor = (route) => `${SITE_URL}${route.modelId ? buildPath(route.modelId) : route.path}`;
+const canonicalFor = (route) => `${SITE_URL}${route.view === 'builds' && route.modelId ? buildPath(route.modelId) : route.path}`;
 const canonicalPages = pages.filter(p => isCanonical(p.route));
 
 describe('URL structure', () => {
@@ -37,7 +38,9 @@ describe('URL structure', () => {
     for (const p of ['/', '/builds', '/playground', '/calculator', '/tracker', '/guide']) assert.ok(paths.includes(p), p);
     for (const g of GPUS_DATA) assert.ok(paths.includes(`/gpu/${g.id}`), g.id);
     for (const m of MODELS_DATA) assert.ok(paths.includes(`/builds/${m.id}`), m.id);
-    assert.equal(paths.length, 6 + GPUS_DATA.length + MODELS_DATA.length);
+    for (const [a, b] of COMPARISON_PAIRS) assert.ok(paths.includes(comparePath(a, b)), `${a}-vs-${b}`);
+    for (const m of BEST_GPU_MODELS) assert.ok(paths.includes(bestGpuPath(m)), m);
+    assert.equal(paths.length, 6 + GPUS_DATA.length + MODELS_DATA.length + COMPARISON_PAIRS.length + BEST_GPU_MODELS.length);
     assert.equal(new Set(paths).size, paths.length, 'paths are unique');
   });
 
@@ -326,7 +329,7 @@ describe('404, sitemap and hosting config', () => {
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
     assert.deepEqual(locs, allRoutes().filter(isCanonical).map(r => `${SITE_URL}${r.path}`));
     assert.ok(!locs.includes(`${SITE_URL}/builds/${DEFAULT_MODEL_ID}`));
-    assert.equal(locs.length, 5 + GPUS_DATA.length + MODELS_DATA.length);
+    assert.equal(locs.length, 5 + GPUS_DATA.length + MODELS_DATA.length + COMPARISON_PAIRS.length + BEST_GPU_MODELS.length);
     assert.ok(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(sitemap));
   });
 

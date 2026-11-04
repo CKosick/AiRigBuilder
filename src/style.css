@@ -2908,3 +2908,205 @@ input[type="range"] {
   text-decoration: underline;
   color: var(--emerald);
 }
+
+/* ==========================================================================
+   GPU Comparison & Best-GPU Pages
+   ========================================================================== */
+
+.compare-detail,
+.best-gpu-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.compare-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.compare-header-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.compare-kpi-row {
+  margin: 1.25rem 0 1rem 0;
+}
+
+.compare-diff-callout {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.row-different {
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.badge-fits {
+  background: var(--accent-bg);
+  color: var(--accent-text);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.status-badge.badge-reduced {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  border: 1px solid var(--warn-border);
+}
+
+.status-badge.badge-nofit {
+  background: var(--neutral-bg);
+  color: var(--text-dim);
+  border: 1px solid var(--neutral-border);
+}
+
+.best-gpu-picks-section {
+  margin-bottom: 0.5rem;
+}
+
+.best-gpu-picks-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 860px) {
+  .best-gpu-picks-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.best-gpu-pick-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.best-gpu-pick-card.pick-value {
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+.pick-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.pick-badge.pick-badge-green {
+  color: var(--accent-text);
+}
+
+.pick-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-highlight);
+  margin: 0 0 0.35rem 0;
+}
+
+.pick-price {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+}
+
+.pick-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.pick-meta span strong {
+  color: var(--text-main);
+}
+
+.pick-action {
+  margin-top: auto;
+}
+
+.pick-action .btn-secondary {
+  width: 100%;
+  justify-content: center;
+  font-size: 0.84rem;
+}
+
+.pick-none {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  margin: 1rem 0;
+}
+
+.integrated-system-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+
+.integrated-system-note svg {
+  color: var(--warn-text);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.integrated-system-note strong {
+  color: var(--warn-text);
+}
+
+.integrated-system-note a {
+  color: var(--text-highlight);
+  text-decoration: underline;
+}
+
+.model-best-gpu-link {
+  margin-top: 0.75rem;
+}
+
+.best-gpu-cta-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.best-gpu-cta-link:hover {
+  text-decoration: underline;
+}

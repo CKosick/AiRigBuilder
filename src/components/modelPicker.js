@@ -1,6 +1,7 @@
 // Model Picker & Build Sheet Component
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
+import { isBestGpuModel, bestGpuPath } from '../data/comparisons.js';
 import { CLOUD_RATES_AS_OF } from '../data/providers.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
@@ -213,6 +214,10 @@ export function renderModelPickerHtml(state = {}) {
         <div class="model-speed-line">
           ${icon('zap')}Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
         </div>
+        ${isBestGpuModel(currentModel.id) ? `
+        <div class="model-best-gpu-link">
+          <a href="${bestGpuPath(currentModel.id)}" class="best-gpu-cta-link">Best GPU for ${currentModel.name}: Compare 15 GPUs &amp; Multi-GPU Rigs →</a>
+        </div>` : ''}
       </div>
 
       <div class="spec-badge-box">

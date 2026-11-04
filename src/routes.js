@@ -4,6 +4,7 @@ import { GPUS_DATA } from './data/gpus.js';
 import { MODELS_DATA } from './data/models.js';
 import { BUILDS_DATA } from './data/builds.js';
 import { cheapestFittingTotal } from './utils/tierFit.js';
+import { COMPARISON_PAIRS, BEST_GPU_MODELS, comparePath, bestGpuPath } from './data/comparisons.js';
 
 export const SITE_URL = 'https://airigbuilder.com';
 export const SITE_NAME = 'AI Rig Builder';
@@ -23,9 +24,14 @@ export const SECTIONS = [
 /** Canonical URL path of a model's build sheet (the default model's is the home page). */
 export const buildPath = (modelId) => (modelId === DEFAULT_MODEL_ID ? '/' : `/builds/${modelId}`);
 export const gpuPath = (gpuId) => `/gpu/${gpuId}`;
+export { comparePath, bestGpuPath } from './data/comparisons.js';
 
 /** The tab a route belongs to ('gpu' pages sit under the tracker tab). */
-export const tabViewFor = (route) => (route.view === 'gpu' ? 'tracker' : route.view);
+export const tabViewFor = (route) => {
+  if (route.view === 'gpu' || route.view === 'compare') return 'tracker';
+  if (route.view === 'best-gpu') return 'builds';
+  return route.view;
+};
 
 /**
  * Maps a pathname to a route, or null when no page exists at that path.
@@ -53,6 +59,18 @@ export function parseRoute(pathname) {
   m = p.match(/^\/gpu\/([^/]+)$/);
   if (m && GPUS_DATA.some(g => g.id === m[1])) return { view: 'gpu', path: p, gpuId: m[1] };
 
+  m = p.match(/^\/compare\/([^/]+)-vs-([^/]+)$/);
+  if (m) {
+    const pair = COMPARISON_PAIRS.find(([a, b]) => a === m[1] && b === m[2]);
+    if (pair) return { view: 'compare', path: p, gpuIdA: pair[0], gpuIdB: pair[1] };
+    return null;
+  }
+
+  m = p.match(/^\/best-gpu\/([^/]+)$/);
+  if (m && BEST_GPU_MODELS.includes(m[1]) && MODELS_DATA.some(x => x.id === m[1])) {
+    return { view: 'best-gpu', path: p, modelId: m[1] };
+  }
+
   return null;
 }
 
@@ -68,7 +86,9 @@ export function allRoutes() {
     parseRoute('/'),
     ...SECTIONS.map(s => parseRoute(s.path)),
     ...GPUS_DATA.map(g => parseRoute(gpuPath(g.id))),
-    ...MODELS_DATA.filter(m => BUILDS_DATA[m.id]).map(m => parseRoute(`/builds/${m.id}`))
+    ...MODELS_DATA.filter(m => BUILDS_DATA[m.id]).map(m => parseRoute(`/builds/${m.id}`)),
+    ...COMPARISON_PAIRS.map(([a, b]) => parseRoute(comparePath(a, b))),
+    ...BEST_GPU_MODELS.map(id => parseRoute(bestGpuPath(id)))
   ];
 }
 
@@ -144,16 +164,33 @@ export function pageMeta(route) {
   } else if (route.view === 'gpu') {
     const gpu = GPUS_DATA.find(g => g.id === route.gpuId);
     meta = {
-      title: `${shortGpuName(gpu)} Used Price & History ($${gpu.usedStreetPrice}) | ${SITE_NAME}`,
-      description: `${gpu.name} used price: about $${gpu.usedStreetPrice} on eBay (range $${gpu.usedPriceLow}–$${gpu.usedPriceHigh}, $${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
+      title: `${shortGpuName(gpu)} Used Price & History (${gpu.usedStreetPrice}) | ${SITE_NAME}`,
+      description: `${gpu.name} used price: about ${gpu.usedStreetPrice} on eBay (range ${gpu.usedPriceLow}–${gpu.usedPriceHigh}, ${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: gpu.name, path: route.path });
+  } else if (route.view === 'compare') {
+    const gpuA = GPUS_DATA.find(g => g.id === route.gpuIdA);
+    const gpuB = GPUS_DATA.find(g => g.id === route.gpuIdB);
+    const nameA = shortGpuName(gpuA);
+    const nameB = shortGpuName(gpuB);
+    meta = {
+      title: `${nameA} vs ${nameB}: Local LLM Specs | ${SITE_NAME}`,
+      description: `Compare ${nameA} vs ${nameB} for local LLMs: VRAM, bandwidth, power draw, used prices, and model fit speeds across 56 models.`
+    };
+    crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: `${nameA} vs ${nameB}`, path: route.path });
+  } else if (route.view === 'best-gpu') {
+    const model = MODELS_DATA.find(m => m.id === route.modelId);
+    meta = {
+      title: `Best GPU for ${model.name}: VRAM & Speed | ${SITE_NAME}`,
+      description: `Ranked GPU configurations for running ${model.name} locally. Compare single and dual GPU fits, VRAM headroom, speeds, and used market prices.`
+    };
+    crumbs.push({ name: 'Build Sheets', path: '/builds' }, { name: `Best GPU for ${model.name}`, path: route.path });
   }
 
   return {
     ...meta,
     description: clampDescription(meta.description),
-    canonical: `${SITE_URL}${route.modelId ? buildPath(route.modelId) : route.path}`,
+    canonical: `${SITE_URL}${route.view === 'builds' && route.modelId ? buildPath(route.modelId) : route.path}`,
     breadcrumbs: crumbs
   };
 }

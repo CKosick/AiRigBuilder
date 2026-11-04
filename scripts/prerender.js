@@ -11,6 +11,8 @@ import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderHardwareGuideHtml } from '../src/components/hardwareGuide.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderRigPlaygroundHtml } from '../src/components/rigPlayground.js';
+import { renderGpuComparisonHtml } from '../src/components/gpuComparison.js';
+import { renderBestGpuHtml } from '../src/components/bestGpu.js';
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { homeFaq, gpuSummary } from '../src/utils/siteFacts.js';
@@ -32,6 +34,8 @@ function panelsFor(route) {
     case 'guide': return { guide: renderHardwareGuideHtml() };
     case 'playground': return { playground: renderRigPlaygroundHtml() };
     case 'gpu': return { gpu: renderGpuDetailHtml(GPUS_DATA.find(g => g.id === route.gpuId)) };
+    case 'compare': return { compare: renderGpuComparisonHtml(route.gpuIdA, route.gpuIdB) };
+    case 'best-gpu': return { bestGpu: renderBestGpuHtml(route.modelId) };
     default: return {};
   }
 }
@@ -198,13 +202,13 @@ export function renderNotFound(template) {
   </div>`, '<div id="app"></div>');
 }
 
-const SITEMAP_HINTS = { home: ['daily', '1.0'], tracker: ['daily', '0.9'], gpu: ['weekly', '0.8'], builds: ['weekly', '0.9'], playground: ['weekly', '0.9'], calculator: ['weekly', '0.9'], guide: ['monthly', '0.8'], buildSheet: ['weekly', '0.7'] };
+const SITEMAP_HINTS = { home: ['daily', '1.0'], tracker: ['daily', '0.9'], gpu: ['weekly', '0.8'], builds: ['weekly', '0.9'], playground: ['weekly', '0.9'], calculator: ['weekly', '0.9'], guide: ['monthly', '0.8'], buildSheet: ['weekly', '0.7'], compare: ['weekly', '0.8'], 'best-gpu': ['weekly', '0.8'] };
 
 /** sitemap.xml listing every canonical URL; lastmod is the last weekly price update. */
 export function renderSitemap(routes = allRoutes().filter(isCanonical)) {
   const lastmod = GPUS_UPDATED_AT.slice(0, 10);
   const urls = routes.map(route => {
-    const key = route.home ? 'home' : (route.modelId ? 'buildSheet' : route.view);
+    const key = route.home ? 'home' : (route.view === 'builds' && route.modelId ? 'buildSheet' : route.view);
     const [changefreq, priority] = SITEMAP_HINTS[key];
     return `  <url>
     <loc>${SITE_URL}${route.path}</loc>

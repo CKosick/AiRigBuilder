@@ -7,6 +7,8 @@ import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
 import { createBuildsIndex } from './components/buildsIndex.js';
 import { createRigPlayground } from './components/rigPlayground.js';
+import { createGpuComparison } from './components/gpuComparison.js';
+import { createBestGpu } from './components/bestGpu.js';
 import { renderHomeFaqHtml } from './components/homeFaq.js';
 import { renderHomeHeroHtml } from './components/homeHero.js';
 import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
@@ -38,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const modelPickerRoot = document.getElementById('model-picker-root');
   const homeFaqRoot = document.getElementById('home-faq-root');
   const homeHeroRoot = document.getElementById('home-hero-root');
+  const compareRoot = document.getElementById('compare-root');
+  const bestGpuRoot = document.getElementById('best-gpu-root');
 
   // Initialize Subcomponents
   let breakEvenController = null;
@@ -63,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
   createRigPlayground(viewPlayground);
   createBuildsIndex(buildsIndexRoot);
   const gpuDetailController = createGpuDetail(gpuDetailRoot);
+  const compareController = createGpuComparison(compareRoot);
+  const bestGpuController = createBestGpu(bestGpuRoot);
 
   // Tab switching logic
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
