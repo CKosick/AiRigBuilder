@@ -7,6 +7,7 @@ import { renderHomeFaqHtml } from './homeFaq.js';
 import { renderHomeHeroHtml } from './homeHero.js';
 import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
 import { icon } from './icons.js';
+import { renderCommandPaletteHtml } from './commandPalette.js';
 
 const TAB_LABELS = {
   builds: { icon: 'monitor', text: 'Build Sheets' },
@@ -105,6 +106,10 @@ export function renderShell(route, panels = {}) {
         </div>
 
         <div class="header-actions">
+          <button class="btn-secondary nav-search-btn" id="btn-search" aria-label="Search models, GPUs, and comparisons" aria-keyshortcuts="Control+K Meta+K">
+            ${icon('search')}<span class="search-btn-text">Search</span>
+            <kbd class="search-kbd-hint">Ctrl K</kbd>
+          </button>
           <button class="btn-secondary" id="btn-why-used">
             ${icon('bulb')}Why Used 3090?
           </button>
@@ -153,5 +158,6 @@ export function renderShell(route, panels = {}) {
         </div>
       </details>
     </footer>
+    ${renderCommandPaletteHtml()}
   `;
 }

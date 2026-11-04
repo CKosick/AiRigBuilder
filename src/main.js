@@ -9,6 +9,7 @@ import { createBuildsIndex } from './components/buildsIndex.js';
 import { createRigPlayground } from './components/rigPlayground.js';
 import { createGpuComparison } from './components/gpuComparison.js';
 import { createBestGpu } from './components/bestGpu.js';
+import { createCommandPalette } from './components/commandPalette.js';
 import { renderHomeFaqHtml } from './components/homeFaq.js';
 import { renderHomeHeroHtml } from './components/homeHero.js';
 import { parseRoute, legacyHashRoute, pageMeta, tabViewFor, buildPath, SECTIONS, DEFAULT_MODEL_ID } from './routes.js';
@@ -69,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const gpuDetailController = createGpuDetail(gpuDetailRoot);
   const compareController = createGpuComparison(compareRoot);
   const bestGpuController = createBestGpu(bestGpuRoot);
+  const cmdkDialog = document.getElementById('cmdk-dialog');
+  createCommandPalette(cmdkDialog);
 
   // Tab switching logic
   const tabButtons = document.querySelectorAll('.nav-tab-btn');
