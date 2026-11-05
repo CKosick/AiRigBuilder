@@ -6,11 +6,13 @@ import { CLOUD_RATES_AS_OF } from '../data/providers.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
-import { DEFAULT_MODEL_ID } from '../routes.js';
+import { DEFAULT_MODEL_ID, SITE_URL, buildPath } from '../routes.js';
 import { icon } from './icons.js';
 import { tierFit, fitHeadline, fitDetail, defaultTierId, renderVramBreakdownBarHtml } from '../utils/tierFit.js';
 export { renderVramBreakdownBarHtml } from '../utils/tierFit.js';
 import { estimateSpeedToks, formatTierSpeedLine } from '../utils/speedEstimate.js';
+import { buildPartsListMarkdown } from '../utils/markdownExport.js';
+export { buildPartsListMarkdown } from '../utils/markdownExport.js';
 
 export const CONTEXT_STEPS = [8, 16, 32, 64, 128];
 export const KV_PRECISION_OPTIONS = ['FP16', 'FP8', 'Q4'];
@@ -348,8 +350,8 @@ export function renderModelPickerHtml(state = {}) {
           })()}</p>
         </div>
         <div class="build-quick-actions">
-          <button class="btn-secondary" id="btn-copy-build-reddit">
-            ${icon('copy')}Copy for Reddit / Discord
+          <button class="btn-secondary" id="btn-copy-parts-list">
+            ${icon('copy')}<span>Copy parts list</span>
           </button>
           <button class="btn-primary" id="btn-send-to-calc">
             ${icon('calculator')}Calculate Break-Even ROI →
@@ -636,26 +638,57 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
       });
     }
 
-    // Copy Reddit Markdown
-    const btnCopyReddit = container.querySelector('#btn-copy-build-reddit');
-    if (btnCopyReddit) {
-      btnCopyReddit.addEventListener('click', () => {
-        const { buildSheet, currentTier } = currentBuild();
-        const { partsSubtotal, systemWatts } = computeCosts(currentTier);
+    // Copy Parts List Markdown
+    const btnCopyPartsList = container.querySelector('#btn-copy-parts-list');
+    if (btnCopyPartsList) {
+      btnCopyPartsList.addEventListener('click', () => {
+        const { currentTier } = currentBuild();
+        const currentModel = MODELS_DATA.find(m => m.id === activeModelId);
+        const isDefaultSettings = contextK === 8 && kvPrecision === 'FP16';
+        const kvScale = KV_PRECISION_SCALES[kvPrecision] || 1.0;
+        const fit = isDefaultSettings ? currentTier.fit : tierFit(currentModel, currentTier, { contextK, kvScale });
+        let speedLine = currentTier.speedLine;
+        if (!isDefaultSettings) {
+          if (fit.status === 'none' || currentTier.bandwidthGbs === null) {
+            speedLine = null;
+          } else {
+            const fittedQuant = currentModel.quants.find(q => q.name.split(' ')[0] === fit.quant);
+            const speed = estimateSpeedToks(currentModel, fittedQuant, currentTier.bandwidthGbs);
+            speedLine = formatTierSpeedLine(fit.quant, speed);
+          }
+        }
+        const tierToExport = { ...currentTier, fit, speedLine };
+        const canonicalUrl = `${SITE_URL}${buildPath(activeModelId)}`;
+        const md = buildPartsListMarkdown(currentModel, tierToExport, canonicalUrl);
 
-        let md = `### [airigbuilder.com] ${buildSheet.title} - ${currentTier.name}\n\n`;
-        md += `**Target Model:** ${MODELS_DATA.find(m => m.id === activeModelId)?.name}\n`;
-        md += `**Upfront Parts Total:** $${partsSubtotal.toLocaleString()}\n`;
-        md += `**Estimated System Draw:** ${systemWatts}W\n\n`;
-        md += `| Component | Part | Condition | Price |\n`;
-        md += `| :--- | :--- | :--- | :--- |\n`;
-        currentTier.parts.forEach(p => {
-          md += `| ${p.category} | ${p.name} | ${p.condition} | $${p.price} |\n`;
-        });
-        md += `\n*Calculated via airigbuilder.com — The used-hardware price layer for local AI.*`;
+        const doFallbackCopy = () => {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = md;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          } catch {
+            // ignore
+          }
+          return Promise.resolve();
+        };
 
-        navigator.clipboard.writeText(md).then(() => {
-          showToast('Copied build sheet to clipboard in Reddit Markdown format!');
+        const copyPromise = (navigator.clipboard && navigator.clipboard.writeText)
+          ? navigator.clipboard.writeText(md).catch(doFallbackCopy)
+          : doFallbackCopy();
+
+        Promise.resolve(copyPromise).finally(() => {
+          btnCopyPartsList.innerHTML = `${icon('check')}<span>Copied</span>`;
+          setTimeout(() => {
+            if (btnCopyPartsList) {
+              btnCopyPartsList.innerHTML = `${icon('copy')}<span>Copy parts list</span>`;
+            }
+          }, 2000);
         });
       });
     }
