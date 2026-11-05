@@ -4,7 +4,7 @@ import { defineConfig, loadEnv } from 'vite';
 
 /**
  * After Vite builds index.html, writes a static page per route (sections, GPUs, build sheets),
- * plus sitemap.xml and 404.html, all from the current data files (see scripts/prerender.js).
+ * plus dynamic Open Graph images, sitemap.xml and 404.html, all from the current data files (see scripts/prerender.js).
  */
 function prerenderPages() {
   return {
@@ -22,6 +22,9 @@ function prerenderPages() {
       for (const page of prerender.renderAllPages(template)) {
         if (page.fileName === 'index.html') index.source = page.html;
         else this.emitFile({ type: 'asset', fileName: page.fileName, source: page.html });
+      }
+      for (const og of prerender.renderAllOgImages()) {
+        this.emitFile({ type: 'asset', fileName: og.fileName, source: og.buffer });
       }
       this.emitFile({ type: 'asset', fileName: '404.html', source: prerender.renderNotFound(template) });
       this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: prerender.renderSitemap() });

@@ -12,6 +12,7 @@ import { defaultTierId } from '../src/utils/tierFit.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { fillGpuPrices } from '../src/utils/siteFacts.js';
 import { COMPARISON_PAIRS, BEST_GPU_MODELS, comparePath, bestGpuPath } from '../src/data/comparisons.js';
+import { isEntityRoute, ogSlugForRoute } from '../scripts/generateOgImages.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const template = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf-8');
@@ -95,7 +96,12 @@ describe('Generated page <head> SEO', () => {
       assert.equal(attr(html, /<meta\s+property="og:url"\s+content="([^"]+)"/), canonical);
       assert.equal((html.match(/rel="canonical"/g) || []).length, 1, 'exactly one canonical');
       assert.ok(html.includes('name="robots" content="index, follow'), 'indexable');
-      assert.ok(html.includes('property="og:image" content="https://airigbuilder.com/og-image.jpg"'), 'og:image kept');
+      if (isEntityRoute(route)) {
+        const slug = ogSlugForRoute(route);
+        assert.ok(html.includes(`property="og:image" content="${SITE_URL}/og/${slug}.png"`), 'dynamic og:image emitted');
+      } else {
+        assert.ok(html.includes(`property="og:image" content="${SITE_URL}/og-image.jpg"`), 'static og:image kept');
+      }
       assert.ok(html.includes("<meta name='impact-site-verification' value='890fb0c7-e571-423e-9f49-8a376e267bd0'>"), 'impact.com verification tag kept');
       assert.ok(/<script type="module"[^>]*src="\/src\/main\.js"/.test(html), 'app script kept so the page stays interactive');
     });

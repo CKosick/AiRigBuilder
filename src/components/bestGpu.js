@@ -27,10 +27,15 @@ function statusBadge(fit) {
   return `<span class="status-badge badge-fits">Fits (${fit.quant})</span>`;
 }
 
-/** Pure HTML for one model's best GPU rankings page. */
-export function renderBestGpuHtml(modelId) {
+/**
+ * Evaluates discrete GPU configurations for a model and returns key picks.
+ * Reused by renderBestGpuHtml and Open Graph image generator.
+ *
+ * @param {string} modelId
+ */
+export function evaluateBestGpu(modelId) {
   const model = MODELS_DATA.find(m => m.id === modelId);
-  if (!model) return '';
+  if (!model) return null;
 
   const discreteGpus = GPUS_DATA.filter(g => !INTEGRATED_SYSTEM_IDS.includes(g.id));
 
@@ -100,6 +105,26 @@ export function renderBestGpuHtml(modelId) {
     if (!aRuns && bRuns) return 1;
     return a.totalPrice - b.totalPrice;
   });
+
+  return {
+    model,
+    discreteGpus,
+    allConfigs,
+    runningConfigs,
+    fullFitConfigs,
+    cheapestThatRuns,
+    bestValueFullFit,
+    fastest,
+    runningSystems,
+    gpuRows
+  };
+}
+
+/** Pure HTML for one model's best GPU rankings page. */
+export function renderBestGpuHtml(modelId) {
+  const evalResult = evaluateBestGpu(modelId);
+  if (!evalResult) return '';
+  const { model, cheapestThatRuns, bestValueFullFit, fastest, runningSystems, gpuRows } = evalResult;
 
   return `
     <article class="best-gpu-detail" aria-labelledby="best-gpu-title">

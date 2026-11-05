@@ -16,6 +16,7 @@ import { renderBestGpuHtml } from '../src/components/bestGpu.js';
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import { homeFaq, gpuSummary } from '../src/utils/siteFacts.js';
+import { isEntityRoute, ogSlugForRoute, ogAltForRoute, generateAllOgImages } from './generateOgImages.js';
 
 const escapeHtml = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 // JSON inside <script> must not be able to close the tag
@@ -149,6 +150,18 @@ export function renderPage(template, route) {
   html = replaceRequired(html, /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/, `<link rel="canonical" href="${meta.canonical}" />`, 'canonical link');
   html = replaceRequired(html, /<meta\s+property="og:url"\s+content="[^"]*"\s*\/?>/, `<meta property="og:url" content="${meta.canonical}" />`, 'og:url');
 
+  if (isEntityRoute(route)) {
+    const slug = ogSlugForRoute(route);
+    const alt = ogAltForRoute(route);
+    const ogImageUrl = `${SITE_URL}/og/${slug}.png`;
+    const escapedAlt = escapeHtml(alt);
+    html = replaceRequired(html, /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/, `<meta property="og:image" content="${ogImageUrl}" />`, 'og:image');
+    html = replaceRequired(html, /<meta\s+property="og:image:type"\s+content="[^"]*"\s*\/?>/, '<meta property="og:image:type" content="image/png" />', 'og:image:type');
+    html = replaceRequired(html, /<meta\s+property="og:image:alt"\s+content="[^"]*"\s*\/?>/, `<meta property="og:image:alt" content="${escapedAlt}" />`, 'og:image:alt');
+    html = replaceRequired(html, /<meta\s+name="twitter:image"\s+content="[^"]*"\s*\/?>/, `<meta name="twitter:image" content="${ogImageUrl}" />`, 'twitter:image');
+    html = replaceRequired(html, /<meta\s+name="twitter:image:alt"\s+content="[^"]*"\s*\/?>/, `<meta name="twitter:image:alt" content="${escapedAlt}" />`, 'twitter:image:alt');
+  }
+
   // The home page keeps its hand-written social copy and WebApplication node; its FAQ is generated
   // from the current prices. Other pages get WebPage + BreadcrumbList.
   if (route.home) {
@@ -222,4 +235,8 @@ export function renderSitemap(routes = allRoutes().filter(isCanonical)) {
 ${urls.join('\n')}
 </urlset>
 `;
+}
+
+export function renderAllOgImages() {
+  return generateAllOgImages();
 }
