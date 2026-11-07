@@ -5,6 +5,10 @@ import { MODELS_DATA } from '../src/data/models.js';
 import { OWNED_GPUS_SUPPLEMENT } from '../src/data/ownedGpus.js';
 import {
   ALL_PLAYGROUND_GPUS,
+  CUSTOM_UNIFIED_ID,
+  CUSTOM_UNIFIED_DEFAULTS,
+  CUSTOM_BANDWIDTH_PRESETS,
+  clampCustomUnifiedConfig,
   isIntegratedSystem,
   evaluatePlaygroundModels,
   computeUpgradeCandidates,
@@ -219,15 +223,92 @@ describe('Rig Playground: Context Length & KV Cache Precision Sensitivity', () =
 });
 
 describe('Rig Playground: Prerendered HTML Output', () => {
-  it('renders complete playground HTML with all 26 GPU options', () => {
+  it('renders complete playground HTML with all 26 GPU options and the custom unified option', () => {
     const html = renderRigPlaygroundHtml();
     assert.ok(html.includes('class="playground-container"'));
     assert.ok(html.includes('id="playground-gpu-select"'));
     for (const g of ALL_PLAYGROUND_GPUS) {
       assert.ok(html.includes(`value="${g.id}"`), `${g.id} option present`);
     }
+    assert.ok(html.includes(`value="${CUSTOM_UNIFIED_ID}">Custom unified memory (enter your own)</option>`));
     assert.ok(html.includes('Runs in VRAM'));
     assert.ok(html.includes('Does Not Fit'));
     assert.ok(html.includes('Upgrade Engine: Best Single-Card Additions'));
+  });
+});
+
+describe('Rig Playground: Custom Unified-Memory Configuration', () => {
+  it('clamps custom memory (4..1024 GB) and bandwidth (10..2000 GB/s) and falls back to defaults on empty/non-numeric', () => {
+    assert.deepEqual(clampCustomUnifiedConfig(96, 256), { memoryGb: 96, bandwidthGbs: 256 });
+    // Below lower bounds
+    assert.deepEqual(clampCustomUnifiedConfig(1, 5), { memoryGb: 4, bandwidthGbs: 10 });
+    assert.deepEqual(clampCustomUnifiedConfig(0, 0), { memoryGb: 4, bandwidthGbs: 10 });
+    assert.deepEqual(clampCustomUnifiedConfig(-50, -100), { memoryGb: 4, bandwidthGbs: 10 });
+    // Above upper bounds
+    assert.deepEqual(clampCustomUnifiedConfig(2048, 5000), { memoryGb: 1024, bandwidthGbs: 2000 });
+    // Empty or non-numeric falls back to defaults (96 GB, 256 GB/s)
+    assert.deepEqual(clampCustomUnifiedConfig('', ''), CUSTOM_UNIFIED_DEFAULTS);
+    assert.deepEqual(clampCustomUnifiedConfig('   ', 'abc'), CUSTOM_UNIFIED_DEFAULTS);
+    assert.deepEqual(clampCustomUnifiedConfig(undefined, null), CUSTOM_UNIFIED_DEFAULTS);
+    assert.deepEqual(clampCustomUnifiedConfig(NaN, Infinity), CUSTOM_UNIFIED_DEFAULTS);
+  });
+
+  it('equivalence test: custom selection at 96 GB / 256 GB/s matches evaluatePlaygroundModels({ memoryGb: 96, bandwidthGbs: 256 }) and hand-checked models', () => {
+    const direct = evaluatePlaygroundModels({ memoryGb: 96, bandwidthGbs: 256 }, { contextK: 8, kvPrecision: 'FP16' });
+
+    // Hand-check at defaults (96 GB, 256 GB/s)
+    assert.ok(direct.runsInVram.some(r => r.model.id === 'llama-3.3-70b'), 'llama-3.3-70b is in runs list');
+    assert.ok(direct.doesNotFit.some(r => r.model.id === 'deepseek-v3-moe'), 'deepseek-v3-moe is in does-not-fit list');
+
+    const customHtml = renderRigPlaygroundHtml({
+      gpuId: CUSTOM_UNIFIED_ID,
+      customMemoryGb: 96,
+      customBandwidthGbs: 256,
+      contextK: 8,
+      kvPrecision: 'FP16'
+    });
+
+    // Verify inputs, preset chips, and 75% guidance note render
+    assert.ok(customHtml.includes('id="playground-custom-memory"'));
+    assert.ok(customHtml.includes('id="playground-custom-bandwidth"'));
+    for (const preset of CUSTOM_BANDWIDTH_PRESETS) {
+      assert.ok(customHtml.includes(preset.label), `bandwidth chip ${preset.label} present`);
+    }
+    assert.ok(customHtml.includes('75%'));
+    assert.ok(customHtml.includes('128 GB system is about 96 GB usable'));
+
+    // Verify treated as integrated system: locked count, no upgrade engine/PSU/checklist, unified note present
+    assert.ok(customHtml.includes('1 (Locked Integrated System)'));
+    assert.ok(!customHtml.includes('Upgrade Engine: Best Single-Card Additions'));
+    assert.ok(!customHtml.includes('Recommended power supply'));
+    assert.ok(!customHtml.includes('Multi-Card Upgrade Checklist'));
+    assert.ok(customHtml.includes('Integrated Architecture:'));
+
+    // Extract rendered model links in Runs in VRAM and Does Not Fit sections and compare to direct evaluation
+    const runsSection = customHtml.slice(
+      customHtml.indexOf('Runs in VRAM ('),
+      customHtml.indexOf('Does Not Fit (')
+    );
+    const noFitSection = customHtml.slice(customHtml.indexOf('Does Not Fit ('));
+
+    const renderedRunsIds = [...runsSection.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+    const renderedNoFitIds = [...noFitSection.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+
+    assert.deepEqual(renderedRunsIds, direct.runsInVram.map(r => r.model.id));
+    assert.deepEqual(renderedNoFitIds, direct.doesNotFit.map(r => r.model.id));
+    assert.ok(renderedRunsIds.includes('llama-3.3-70b'));
+    assert.ok(renderedNoFitIds.includes('deepseek-v3-moe'));
+  });
+
+  it('restores normal sections (count control and upgrades) when switching from custom entry back to a catalog GPU', () => {
+    const customHtml = renderRigPlaygroundHtml({ gpuId: CUSTOM_UNIFIED_ID });
+    assert.ok(customHtml.includes('id="playground-custom-unified-panel"'));
+    assert.ok(!customHtml.includes('Upgrade Engine: Best Single-Card Additions'));
+
+    const discreteHtml = renderRigPlaygroundHtml({ gpuId: 'rtx-3090', count: 1 });
+    assert.ok(!discreteHtml.includes('id="playground-custom-unified-panel"'));
+    assert.ok(discreteHtml.includes('aria-label="GPU card count"'));
+    assert.ok(discreteHtml.includes('Upgrade Engine: Best Single-Card Additions'));
+    assert.ok(discreteHtml.includes('Recommended power supply'));
   });
 });
