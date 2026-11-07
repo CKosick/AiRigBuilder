@@ -19,7 +19,39 @@ export const INTEGRATED_SYSTEM_IDS = [
   'dgx-spark'
 ];
 
-export const isIntegratedSystem = (gpuId) => INTEGRATED_SYSTEM_IDS.includes(gpuId);
+export const CUSTOM_UNIFIED_ID = 'custom-unified';
+
+export const CUSTOM_UNIFIED_DEFAULTS = {
+  memoryGb: 96,
+  bandwidthGbs: 256
+};
+
+export const CUSTOM_BANDWIDTH_PRESETS = [
+  { bandwidthGbs: 256, label: '256 (Strix Halo)' },
+  { bandwidthGbs: 273, label: '273 (DGX Spark)' },
+  { bandwidthGbs: 800, label: '800 (M2 Ultra)' },
+  { bandwidthGbs: 819, label: '819 (M3 Ultra)' },
+  { bandwidthGbs: 1200, label: '1200 (M5 Ultra)' }
+];
+
+function parseAndClamp(raw, fallback, min, max) {
+  if (raw === null || raw === undefined) return fallback;
+  if (typeof raw === 'string' && raw.trim() === '') return fallback;
+  if (typeof raw === 'boolean') return fallback;
+  const num = Number(raw);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.min(max, Math.max(min, num));
+}
+
+export function clampCustomUnifiedConfig(rawMemory, rawBandwidth) {
+  return {
+    memoryGb: parseAndClamp(rawMemory, CUSTOM_UNIFIED_DEFAULTS.memoryGb, 4, 1024),
+    bandwidthGbs: parseAndClamp(rawBandwidth, CUSTOM_UNIFIED_DEFAULTS.bandwidthGbs, 10, 2000)
+  };
+}
+
+export const isIntegratedSystem = (gpuId) =>
+  INTEGRATED_SYSTEM_IDS.includes(gpuId) || gpuId === CUSTOM_UNIFIED_ID;
 
 export function findPlaygroundGpu(id) {
   return PLAYGROUND_GPUS.find(g => g.id === id) || GPUS_DATA.find(g => g.id === 'rtx-3080-10gb') || GPUS_DATA[0];
@@ -29,7 +61,9 @@ export const PLAYGROUND_DEFAULTS = {
   gpuId: 'rtx-3080-10gb',
   count: 1,
   contextK: 8,
-  kvPrecision: 'FP16'
+  kvPrecision: 'FP16',
+  customMemoryGb: CUSTOM_UNIFIED_DEFAULTS.memoryGb,
+  customBandwidthGbs: CUSTOM_UNIFIED_DEFAULTS.bandwidthGbs
 };
 
 /**
@@ -160,13 +194,18 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
  */
 export function renderRigPlaygroundHtml(state = {}) {
   const { gpuId, count, contextK, kvPrecision } = { ...PLAYGROUND_DEFAULTS, ...state };
+  const isCustomUnified = gpuId === CUSTOM_UNIFIED_ID;
+  const rawMem = state.customMemoryGb !== undefined ? state.customMemoryGb : state.memoryGb;
+  const rawBw = state.customBandwidthGbs !== undefined ? state.customBandwidthGbs : state.bandwidthGbs;
+  const clampedCustom = clampCustomUnifiedConfig(rawMem, rawBw);
+
   const gpu = findPlaygroundGpu(gpuId);
-  const isIntegrated = isIntegratedSystem(gpu.id);
+  const isIntegrated = isCustomUnified || isIntegratedSystem(gpu.id);
   const actualCount = isIntegrated ? 1 : count;
 
-  const totalMemoryGb = gpu.vram * actualCount;
-  const bandwidthGbs = gpu.bandwidth; // per-card bandwidth for pair
-  const totalTdp = gpu.tdp * actualCount;
+  const totalMemoryGb = isCustomUnified ? clampedCustom.memoryGb : gpu.vram * actualCount;
+  const bandwidthGbs = isCustomUnified ? clampedCustom.bandwidthGbs : gpu.bandwidth; // per-card bandwidth for pair
+  const totalTdp = isCustomUnified ? null : gpu.tdp * actualCount;
   const usableGb = totalMemoryGb - 1;
 
   const config = { memoryGb: totalMemoryGb, bandwidthGbs: bandwidthGbs };
@@ -182,6 +221,9 @@ export function renderRigPlaygroundHtml(state = {}) {
       recommendedPsu = recommendedPsuWatts(bestUpgrade.totalTdp);
     }
   }
+
+  const memInputValue = state.customMemoryRaw !== undefined ? state.customMemoryRaw : clampedCustom.memoryGb;
+  const bwInputValue = state.customBandwidthRaw !== undefined ? state.customBandwidthRaw : clampedCustom.bandwidthGbs;
 
   return `
     <div class="playground-container">
@@ -199,10 +241,11 @@ export function renderRigPlaygroundHtml(state = {}) {
             <label for="playground-gpu-select" class="model-filter-label">Owned Hardware</label>
             <select id="playground-gpu-select" class="playground-select" aria-label="Select owned GPU or system">
               <optgroup label="Tracked GPUs & Systems (${GPUS_DATA.length})">
-                ${GPUS_DATA.map(g => `<option value="${g.id}" ${g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+                ${GPUS_DATA.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+                <option value="${CUSTOM_UNIFIED_ID}"${isCustomUnified ? ' selected' : ''}>Custom unified memory (enter your own)</option>
               </optgroup>
               <optgroup label="Popular Gaming GPUs — Spec Only (${OWNED_GPUS_SUPPLEMENT.length})">
-                ${OWNED_GPUS_SUPPLEMENT.map(g => `<option value="${g.id}" ${g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+                ${OWNED_GPUS_SUPPLEMENT.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
               </optgroup>
             </select>
           </div>
@@ -219,6 +262,41 @@ export function renderRigPlaygroundHtml(state = {}) {
             `}
           </div>
         </div>
+
+        ${isCustomUnified ? `
+          <div class="playground-custom-unified" id="playground-custom-unified-panel">
+            <div class="playground-custom-fields">
+              <div class="playground-control-group">
+                <label for="playground-custom-memory" class="model-filter-label">Usable memory (GB)</label>
+                <input
+                  type="number"
+                  id="playground-custom-memory"
+                  class="playground-custom-input"
+                  min="4"
+                  max="1024"
+                  step="1"
+                  value="${memInputValue}"
+                />
+              </div>
+              <div class="playground-control-group playground-custom-bw-group">
+                <label for="playground-custom-bandwidth" class="model-filter-label">Memory bandwidth (GB/s)</label>
+                <input
+                  type="number"
+                  id="playground-custom-bandwidth"
+                  class="playground-custom-input"
+                  min="10"
+                  max="2000"
+                  step="1"
+                  value="${bwInputValue}"
+                />
+                <div class="custom-bandwidth-presets" role="group" aria-label="Memory bandwidth presets">
+                  ${CUSTOM_BANDWIDTH_PRESETS.map(p => `<button type="button" class="vram-pill custom-bw-chip ${clampedCustom.bandwidthGbs === p.bandwidthGbs ? 'active' : ''}" data-bandwidth="${p.bandwidthGbs}" aria-pressed="${clampedCustom.bandwidthGbs === p.bandwidthGbs}">${p.label}</button>`).join('')}
+                </div>
+              </div>
+            </div>
+            <p class="custom-unified-guidance">Build sheets on this site count about 75% of a unified system's total memory as usable by models, so enter the usable figure (a 128 GB system is about 96 GB usable).</p>
+          </div>
+        ` : ''}
 
         <!-- Context Length & KV Cache Precision Controls -->
         <div class="context-kv-controls" role="group" aria-label="Fit-check context and KV precision">
@@ -244,13 +322,15 @@ export function renderRigPlaygroundHtml(state = {}) {
         <div class="rig-status-item">
           <span class="rig-status-label">Memory Bandwidth</span>
           <strong class="rig-status-val">${bandwidthGbs} GB/s</strong>
-          <span class="rig-status-sub">${actualCount > 1 ? 'Per-card bandwidth for pair' : 'Vendor spec peak'}</span>
+          <span class="rig-status-sub">${isCustomUnified ? 'Custom unified memory' : (actualCount > 1 ? 'Per-card bandwidth for pair' : 'Vendor spec peak')}</span>
         </div>
+        ${!isCustomUnified ? `
         <div class="rig-status-item">
           <span class="rig-status-label">Total GPU TDP</span>
           <strong class="rig-status-val">${totalTdp}W</strong>
           <span class="rig-status-sub">${actualCount > 1 ? `${actualCount}x ${gpu.tdp}W cards` : 'Single card peak'}</span>
         </div>
+        ` : ''}
         <div class="rig-status-item">
           <span class="rig-status-label">Catalog Fit</span>
           <strong class="rig-status-val status-runs">${runsInVram.length} / 56</strong>
@@ -264,7 +344,7 @@ export function renderRigPlaygroundHtml(state = {}) {
           <div class="integrated-system-note">
             ${icon('bulb')}
             <div>
-              <strong>Integrated Architecture:</strong> ${gpu.name} uses unified system memory shared between CPU and GPU. It does not accept add-in PCIe GPU upgrades.
+              <strong>Integrated Architecture:</strong> ${isCustomUnified ? 'This custom unified-memory system' : gpu.name} uses unified system memory shared between CPU and GPU. It does not accept add-in PCIe GPU upgrades.
             </div>
           </div>
         </div>
@@ -376,7 +456,7 @@ export function renderRigPlaygroundHtml(state = {}) {
                 ${runsInVram.length === 0 ? `
                   <tr><td colspan="4" class="text-dim">No models in the catalog fit this configuration with ${contextK}K context.</td></tr>
                 ` : runsInVram.map(({ model: m, fit, speed }) => `
-                  <tr>
+                  <tr data-model-id="${m.id}">
                     <td class="stack-head">
                       <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
                       <div class="part-spec-sub">${m.parameters}</div>
@@ -414,7 +494,7 @@ export function renderRigPlaygroundHtml(state = {}) {
                 ${doesNotFit.length === 0 ? `
                   <tr><td colspan="3" class="text-dim">All 56 models fit in this configuration!</td></tr>
                 ` : doesNotFit.map(({ model: m, fit, shortfall, needed }) => `
-                  <tr>
+                  <tr data-model-id="${m.id}">
                     <td class="stack-head">
                       <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
                       <div class="part-spec-sub">${m.parameters}</div>
@@ -445,10 +525,23 @@ export function createRigPlayground(container) {
   let count = PLAYGROUND_DEFAULTS.count;
   let contextK = PLAYGROUND_DEFAULTS.contextK;
   let kvPrecision = PLAYGROUND_DEFAULTS.kvPrecision;
+  let customMemoryGb = PLAYGROUND_DEFAULTS.customMemoryGb;
+  let customBandwidthGbs = PLAYGROUND_DEFAULTS.customBandwidthGbs;
+  let customMemoryRaw = String(customMemoryGb);
+  let customBandwidthRaw = String(customBandwidthGbs);
 
   function render() {
     const restoreFocus = preserveFocus(container);
-    container.innerHTML = renderRigPlaygroundHtml({ gpuId, count, contextK, kvPrecision });
+    container.innerHTML = renderRigPlaygroundHtml({
+      gpuId,
+      count,
+      contextK,
+      kvPrecision,
+      customMemoryGb,
+      customBandwidthGbs,
+      customMemoryRaw,
+      customBandwidthRaw
+    });
     attachEvents();
     restoreFocus();
   }
@@ -465,6 +558,52 @@ export function createRigPlayground(container) {
         render();
       });
     }
+
+    // Custom unified memory input
+    const memInput = container.querySelector('#playground-custom-memory');
+    if (memInput) {
+      memInput.addEventListener('input', (e) => {
+        customMemoryRaw = e.target.value;
+        const clamped = clampCustomUnifiedConfig(customMemoryRaw, customBandwidthRaw);
+        customMemoryGb = clamped.memoryGb;
+        render();
+      });
+      memInput.addEventListener('change', (e) => {
+        const clamped = clampCustomUnifiedConfig(e.target.value, customBandwidthRaw);
+        customMemoryGb = clamped.memoryGb;
+        customMemoryRaw = String(clamped.memoryGb);
+        render();
+      });
+    }
+
+    // Custom unified bandwidth input
+    const bwInput = container.querySelector('#playground-custom-bandwidth');
+    if (bwInput) {
+      bwInput.addEventListener('input', (e) => {
+        customBandwidthRaw = e.target.value;
+        const clamped = clampCustomUnifiedConfig(customMemoryRaw, customBandwidthRaw);
+        customBandwidthGbs = clamped.bandwidthGbs;
+        render();
+      });
+      bwInput.addEventListener('change', (e) => {
+        const clamped = clampCustomUnifiedConfig(customMemoryRaw, e.target.value);
+        customBandwidthGbs = clamped.bandwidthGbs;
+        customBandwidthRaw = String(clamped.bandwidthGbs);
+        render();
+      });
+    }
+
+    // Custom bandwidth preset chips
+    container.querySelectorAll('.custom-bw-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const bw = Number(btn.getAttribute('data-bandwidth'));
+        if (bw) {
+          customBandwidthGbs = bw;
+          customBandwidthRaw = String(bw);
+          render();
+        }
+      });
+    });
 
     // Count buttons
     container.querySelectorAll('.count-filter .count-btn').forEach(btn => {
@@ -504,14 +643,24 @@ export function createRigPlayground(container) {
 
   return {
     setConfig: (newConfig = {}) => {
-      if (newConfig.gpuId) gpuId = newConfig.gpuId;
-      if (newConfig.count) count = newConfig.count;
-      if (newConfig.contextK) contextK = newConfig.contextK;
-      if (newConfig.kvPrecision) kvPrecision = newConfig.kvPrecision;
+      if (newConfig.gpuId !== undefined) gpuId = newConfig.gpuId;
+      if (newConfig.count !== undefined) count = newConfig.count;
+      if (newConfig.contextK !== undefined) contextK = newConfig.contextK;
+      if (newConfig.kvPrecision !== undefined) kvPrecision = newConfig.kvPrecision;
+      if (newConfig.customMemoryGb !== undefined || newConfig.memoryGb !== undefined) {
+        const rawM = newConfig.customMemoryGb !== undefined ? newConfig.customMemoryGb : newConfig.memoryGb;
+        customMemoryGb = clampCustomUnifiedConfig(rawM, customBandwidthGbs).memoryGb;
+        customMemoryRaw = String(customMemoryGb);
+      }
+      if (newConfig.customBandwidthGbs !== undefined || newConfig.bandwidthGbs !== undefined) {
+        const rawB = newConfig.customBandwidthGbs !== undefined ? newConfig.customBandwidthGbs : newConfig.bandwidthGbs;
+        customBandwidthGbs = clampCustomUnifiedConfig(customMemoryGb, rawB).bandwidthGbs;
+        customBandwidthRaw = String(customBandwidthGbs);
+      }
       if (isIntegratedSystem(gpuId)) count = 1;
       render();
     },
-    getState: () => ({ gpuId, count, contextK, kvPrecision })
+    getState: () => ({ gpuId, count, contextK, kvPrecision, customMemoryGb, customBandwidthGbs })
   };
 }
 
