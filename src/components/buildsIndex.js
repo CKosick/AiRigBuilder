@@ -18,6 +18,57 @@ const partsTotal = (tier) => tier.parts.reduce((sum, p) => sum + (p.price || 0),
 // Models in a group often share the same three rigs; say so instead of hiding it
 const rigSignature = (sheet) => sheet.tiers.map(t => `${t.name}:${partsTotal(t)}`).join('|');
 
+export const BUILDS_INDEX_PRESETS = [
+  {
+    id: 'vram-16',
+    label: 'Runs well in 16 GB',
+    match: (m) => m.recommendedVram <= 16
+  },
+  {
+    id: 'vram-24',
+    label: 'Runs well in 24 GB',
+    match: (m) => m.recommendedVram <= 24
+  },
+  {
+    id: 'under-1500',
+    label: 'Builds under $1,500',
+    match: (m) => {
+      const sheet = BUILDS_DATA[m.id];
+      if (!sheet) return false;
+      const cheapest = cheapestFittingTotal(sheet);
+      return cheapest !== null && cheapest <= 1500;
+    }
+  },
+  {
+    id: 'moe',
+    label: 'MoE models',
+    match: (m) => m.activeParamsB < m.totalParamsB
+  },
+  {
+    id: 'coding',
+    label: 'Coding',
+    match: (m) => Array.isArray(m.useCases) && m.useCases.includes('coding')
+  },
+  {
+    id: 'reasoning',
+    label: 'Reasoning',
+    match: (m) => Array.isArray(m.useCases) && m.useCases.includes('reasoning')
+  },
+  {
+    id: 'vision',
+    label: 'Vision',
+    match: (m) => Array.isArray(m.useCases) && m.useCases.includes('vision')
+  }
+];
+
+const PRESET_BY_ID = new Map(BUILDS_INDEX_PRESETS.map(p => [p.id, p]));
+
+export function filterBuildsIndexModels(activePresetIds = [], models = MODELS_DATA.filter(m => BUILDS_DATA[m.id])) {
+  const active = [...activePresetIds].map(id => PRESET_BY_ID.get(id)).filter(Boolean);
+  if (!active.length) return models;
+  return models.filter(m => active.every(preset => preset.match(m)));
+}
+
 export function renderBuildsIndexHtml() {
   const models = MODELS_DATA.filter(m => BUILDS_DATA[m.id]);
   const groups = VRAM_GROUPS.map((g, i) => ({
@@ -25,13 +76,20 @@ export function renderBuildsIndexHtml() {
     models: models.filter(m => m.recommendedVram >= g.min && (i === 0 || m.recommendedVram < VRAM_GROUPS[i - 1].min))
   })).filter(g => g.models.length);
 
+  const presetChipsHtml = [
+    `<button type="button" class="vram-pill builds-preset-btn active" data-preset="all" aria-pressed="true">All models</button>`,
+    ...BUILDS_INDEX_PRESETS.map(p =>
+      `<button type="button" class="vram-pill builds-preset-btn" data-preset="${p.id}" aria-pressed="false">${p.label}</button>`
+    )
+  ].join('\n          ');
+
   const groupHtml = groups.map((g, gi) => {
     const sharedRig = g.models.length > 1 && new Set(g.models.map(m => rigSignature(BUILDS_DATA[m.id]))).size === 1;
     const rows = g.models.map(m => {
       const sheet = BUILDS_DATA[m.id];
       const cheapest = cheapestFittingTotal(sheet);
       return `
-              <tr>
+              <tr data-model-id="${m.id}">
                 <td class="part-name-cell stack-head">
                   <strong><a href="${buildPath(m.id)}">${m.name}</a></strong>
                   <div class="part-spec-sub">${m.creator} · ${m.parameters}</div>
@@ -80,11 +138,86 @@ export function renderBuildsIndexHtml() {
         </div>
         <a href="/calculator" class="btn-secondary">${icon('calculator')}Compare against cloud rental →</a>
       </div>
+      <div class="builds-index-filters">
+        <div class="vram-filter" role="group" aria-label="Preset model filters">
+          ${presetChipsHtml}
+        </div>
+        <div class="builds-index-status">
+          <p class="model-results-count" id="builds-index-count" aria-live="polite">${models.length} of ${models.length} models</p>
+          <button type="button" class="btn-secondary builds-filter-reset" id="btn-reset-builds-filter" hidden>Reset</button>
+        </div>
+      </div>
       ${groupHtml}
     </div>
   `;
 }
 
 export function createBuildsIndex(container) {
-  container.innerHTML = renderBuildsIndexHtml();
+  if (!container.querySelector('.builds-index')) {
+    container.innerHTML = renderBuildsIndexHtml();
+  }
+
+  const root = container.querySelector('.builds-index');
+  if (!root) return;
+
+  const allModels = MODELS_DATA.filter(m => BUILDS_DATA[m.id]);
+  const totalCount = allModels.length;
+  const activePresets = new Set();
+
+  const countEl = root.querySelector('#builds-index-count');
+  const resetBtn = root.querySelector('#btn-reset-builds-filter');
+  const presetBtns = Array.from(root.querySelectorAll('.builds-preset-btn'));
+  const groupSections = Array.from(root.querySelectorAll('.builds-index-group'));
+
+  const applyFilters = () => {
+    const matchedIds = new Set(filterBuildsIndexModels(activePresets, allModels).map(m => m.id));
+    const hasActive = activePresets.size > 0;
+
+    presetBtns.forEach(btn => {
+      const id = btn.dataset.preset;
+      const isPressed = id === 'all' ? !hasActive : activePresets.has(id);
+      btn.classList.toggle('active', isPressed);
+      btn.setAttribute('aria-pressed', String(isPressed));
+    });
+
+    groupSections.forEach(section => {
+      const rows = Array.from(section.querySelectorAll('tbody tr[data-model-id]'));
+      let visibleInGroup = 0;
+      rows.forEach(row => {
+        const show = matchedIds.has(row.dataset.modelId);
+        row.hidden = !show;
+        if (show) visibleInGroup += 1;
+      });
+      section.hidden = visibleInGroup === 0;
+    });
+
+    if (countEl) {
+      countEl.textContent = `${matchedIds.size} of ${totalCount} models`;
+    }
+    if (resetBtn) {
+      resetBtn.hidden = !hasActive;
+    }
+  };
+
+  root.addEventListener('click', (e) => {
+    const presetBtn = e.target.closest('.builds-preset-btn');
+    if (presetBtn) {
+      const id = presetBtn.dataset.preset;
+      if (id === 'all') {
+        activePresets.clear();
+      } else if (activePresets.has(id)) {
+        activePresets.delete(id);
+      } else {
+        activePresets.add(id);
+      }
+      applyFilters();
+      return;
+    }
+
+    const reset = e.target.closest('#btn-reset-builds-filter');
+    if (reset) {
+      activePresets.clear();
+      applyFilters();
+    }
+  });
 }

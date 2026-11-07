@@ -2358,6 +2358,33 @@ input[type="range"] {
 }
 
 /* Build sheet index (/builds) and per-model quant table */
+.builds-index-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.builds-index-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.builds-filter-reset {
+  padding: 5px 10px;
+  font-size: 0.75rem;
+}
+
+.builds-filter-reset[hidden],
+.builds-index-group[hidden],
+.stack-table tr[hidden] {
+  display: none;
+}
+
 .builds-index-group {
   margin-bottom: 2rem;
 }
@@ -2588,6 +2615,9 @@ input[type="range"] {
     gap: 0.6rem 1rem;
     padding: 1rem;
     border-bottom: 1px solid var(--border-subtle);
+  }
+  .stack-table tr[hidden] {
+    display: none;
   }
   .stack-table td {
     display: block;

@@ -132,6 +132,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'deepseek-r1-70b',
+    useCases: ['reasoning'],
     name: 'DeepSeek-R1-Distill-Llama-70B',
     creator: 'DeepSeek / Meta',
     parameters: '70 Billion',
@@ -204,6 +205,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'qwen-2.5-coder-32b',
+    useCases: ['coding'],
     name: 'Qwen 2.5 Coder 32B Instruct',
     creator: 'Alibaba Cloud',
     parameters: '32.5 Billion',
@@ -256,6 +258,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'deepseek-r1-distill-32b',
+    useCases: ['reasoning'],
     name: 'DeepSeek-R1-Distill-Qwen-32B',
     creator: 'DeepSeek / Alibaba',
     parameters: '32.5 Billion',
@@ -304,6 +307,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'gemma-3-27b',
+    useCases: ['vision'],
     name: 'Gemma 3 27B Instruct',
     creator: 'Google DeepMind',
     parameters: '27.4 Billion',
@@ -376,6 +380,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'codestral-22b',
+    useCases: ['coding'],
     name: 'Codestral 22B v0.1',
     creator: 'Mistral AI',
     parameters: '22.2 Billion',
@@ -452,6 +457,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'deepseek-r1-distill-14b',
+    useCases: ['reasoning'],
     name: 'DeepSeek-R1-Distill-Qwen-14B',
     creator: 'DeepSeek / Alibaba',
     parameters: '14.7 Billion',
@@ -524,6 +530,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'llama-3.2-11b-vision',
+    useCases: ['vision'],
     name: 'Llama 3.2 11B Vision Instruct',
     creator: 'Meta',
     parameters: '11.0 Billion',
@@ -548,6 +555,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'starcoder2-15b',
+    useCases: ['coding'],
     name: 'StarCoder2 15B',
     creator: 'BigCode / ServiceNow',
     parameters: '15.3 Billion',
@@ -624,6 +632,7 @@ export const MODELS_DATA = [
   },
   {
     id: 'deepseek-r1-distill-8b',
+    useCases: ['reasoning'],
     name: 'DeepSeek-R1-Distill-Qwen-8B',
     creator: 'DeepSeek / Alibaba',
     parameters: '8.2 Billion',
@@ -880,6 +889,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/DeepSeek-R1-0528-GGUF
   {
     id: 'deepseek-r1-full',
+    useCases: ['reasoning'],
     name: 'DeepSeek R1 671B Full Reasoning',
     creator: 'DeepSeek',
     parameters: '671B MoE (37B active)',
@@ -927,6 +937,7 @@ export const MODELS_DATA = [
   // Sizes: ggml-org/gpt-oss-20b-GGUF
   {
     id: 'gpt-oss-20b',
+    useCases: ['reasoning'],
     name: 'gpt-oss-20b',
     creator: 'OpenAI',
     parameters: '20.9B MoE (3.6B active)',
@@ -955,6 +966,7 @@ export const MODELS_DATA = [
   // Sizes: ggml-org/gpt-oss-120b-GGUF
   {
     id: 'gpt-oss-120b',
+    useCases: ['reasoning'],
     name: 'gpt-oss-120b',
     creator: 'OpenAI',
     parameters: '116.8B MoE (5.1B active)',
@@ -1048,6 +1060,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF
   {
     id: 'llama-4-scout',
+    useCases: ['vision'],
     name: 'Llama 4 Scout 17B-16E Instruct',
     creator: 'Meta',
     parameters: '108.6B MoE (17B active)',
@@ -1073,6 +1086,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/google_gemma-4-31B-it-GGUF
   {
     id: 'gemma-4-31b',
+    useCases: ['vision'],
     name: 'Gemma 4 31B Instruct',
     creator: 'Google',
     parameters: '30.7 Billion',
@@ -1104,6 +1118,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/google_gemma-4-26B-A4B-it-GGUF
   {
     id: 'gemma-4-26b-moe',
+    useCases: ['vision'],
     name: 'Gemma 4 26B MoE Instruct',
     creator: 'Google',
     parameters: '25.2B MoE (3.8B active)',
@@ -1135,6 +1150,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/Qwen_Qwen3.5-27B-GGUF
   {
     id: 'qwen-3.5-27b',
+    useCases: ['vision'],
     name: 'Qwen 3.5 27B',
     creator: 'Alibaba Cloud',
     parameters: '27.8 Billion',
@@ -1166,6 +1182,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/Qwen_Qwen3.6-35B-A3B-GGUF
   {
     id: 'qwen-3.6-35b-a3b',
+    useCases: ['vision'],
     name: 'Qwen 3.6 35B-A3B',
     creator: 'Alibaba Cloud',
     parameters: '36B MoE (3B active)',
@@ -1200,6 +1217,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/Llama-4-Maverick-17B-128E-Instruct-GGUF
   {
     id: 'llama-4-maverick',
+    useCases: ['vision'],
     name: 'Llama 4 Maverick 17B-128E Instruct',
     creator: 'Meta',
     parameters: '400B MoE (17B active)',
@@ -1233,6 +1251,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/Qwen3-Coder-480B-A35B-Instruct-GGUF
   {
     id: 'qwen-3-coder-480b-a35b',
+    useCases: ['coding'],
     name: 'Qwen3-Coder 480B-A35B Instruct',
     creator: 'Alibaba Cloud',
     parameters: '480B MoE (35B active)',
@@ -1266,6 +1285,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/DeepSeek-V3.2-GGUF
   {
     id: 'deepseek-v3.2',
+    useCases: ['reasoning'],
     name: 'DeepSeek V3.2 671B MoE',
     creator: 'DeepSeek',
     parameters: '671B MoE (37B active)',
@@ -1302,6 +1322,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/Qwen_Qwen3.5-397B-A17B-GGUF
   {
     id: 'qwen-3.5-397b-a17b',
+    useCases: ['vision'],
     name: 'Qwen 3.5 397B-A17B',
     creator: 'Alibaba Cloud',
     parameters: '397B MoE (17B active)',
@@ -1335,6 +1356,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/Qwen_Qwen3.5-122B-A10B-GGUF
   {
     id: 'qwen-3.5-122b-a10b',
+    useCases: ['vision'],
     name: 'Qwen 3.5 122B-A10B',
     creator: 'Alibaba Cloud',
     parameters: '122B MoE (10B active)',
@@ -1377,6 +1399,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/Qwen3.8-27B-GGUF
   {
     id: 'qwen-3.8-27b',
+    useCases: ['vision'],
     name: 'Qwen 3.8 27B',
     creator: 'Alibaba Cloud',
     parameters: '27.8 Billion',
@@ -1408,6 +1431,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/Muse-Glimmer-30B-GGUF
   {
     id: 'muse-glimmer-30b',
+    useCases: ['vision'],
     name: 'Muse Glimmer 30B',
     creator: 'Meta',
     parameters: '29.8 Billion',
@@ -1440,6 +1464,7 @@ export const MODELS_DATA = [
   // Sizes: bartowski/North-Mini-Code-1.0-GGUF
   {
     id: 'north-mini-code-1.0',
+    useCases: ['coding'],
     name: 'North Mini Code 1.0',
     creator: 'Cohere',
     parameters: '30.5B MoE (3B active)',
@@ -1472,6 +1497,7 @@ export const MODELS_DATA = [
   // Sizes: ibm-granite/granite-4.2-30b-GGUF
   {
     id: 'granite-4.2-30b',
+    useCases: ['coding'],
     name: 'Granite 4.2 30B',
     creator: 'IBM',
     parameters: '29.3 Billion',
@@ -1635,6 +1661,7 @@ export const MODELS_DATA = [
   // Sizes: unsloth/GLM-5.3-Flash-GGUF
   {
     id: 'glm-5.3-flash',
+    useCases: ['vision'],
     name: 'GLM-5.3-Flash',
     creator: 'Z.ai',
     parameters: '320B MoE (18B active)',

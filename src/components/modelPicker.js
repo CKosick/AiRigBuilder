@@ -58,7 +58,7 @@ export const VRAM_BUDGETS = [12, 16, 24, 48, 96];
 // The chooser lists this many models until "Show all" is pressed
 export const VISIBLE_MODELS = 10;
 
-const isCodingOrVision = (m) => m.id.includes('coder') || m.id.includes('code') || m.id.includes('vision');
+const isCodingOrVision = (m) => Boolean(m.useCases && (m.useCases.includes('coding') || m.useCases.includes('vision')));
 
 /** '70 Billion' -> '70B', '46.7B MoE (12.9B active)' -> '46.7B MoE' */
 export const paramsShort = (m) => /Billion/.test(m.parameters) ? `${parseFloat(m.parameters)}B` : m.parameters.split(' (')[0];
