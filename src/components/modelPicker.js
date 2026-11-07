@@ -13,6 +13,8 @@ export { renderVramBreakdownBarHtml } from '../utils/tierFit.js';
 import { estimateSpeedToks, formatTierSpeedLine } from '../utils/speedEstimate.js';
 import { buildPartsListMarkdown } from '../utils/markdownExport.js';
 export { buildPartsListMarkdown } from '../utils/markdownExport.js';
+import { renderTierCloudCalloutHtml } from '../utils/cloudCallout.js';
+export { renderTierCloudCalloutHtml } from '../utils/cloudCallout.js';
 
 export const CONTEXT_STEPS = [8, 16, 32, 64, 128];
 export const KV_PRECISION_OPTIONS = ['FP16', 'FP8', 'Q4'];
@@ -455,7 +457,7 @@ export function renderModelPickerHtml(state = {}) {
 
         <div class="cost-breakdown-col" id="cost-breakdown">${costBreakdownHtml(costs, salesTaxRate)}</div>
 
-        <div class="total-equity-box" id="cost-total">${totalHtml(costs)}</div>
+        <div class="total-equity-box" id="cost-total">${totalHtml(costs)}</div>${renderTierCloudCalloutHtml(currentTier)}
       </div>
     </div>
   `;

@@ -1128,6 +1128,27 @@ input[type="range"] {
   color: var(--text-dim);
 }
 
+.tier-cloud-callout {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 1rem;
+  margin-top: -0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.tier-cloud-callout-line {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.tier-cloud-callout-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
 /* ==========================================================================
    VIEW 2: CLOUD BREAK-EVEN CALCULATOR
    ========================================================================== */
