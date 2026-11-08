@@ -120,16 +120,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const isGpu = next.view === 'gpu';
-    trackerRoot.hidden = isGpu;
+    const isCompare = next.view === 'compare';
+    const isBestGpu = next.view === 'best-gpu';
+    trackerRoot.hidden = isGpu || isCompare;
     gpuDetailRoot.hidden = !isGpu;
+    compareRoot.hidden = !isCompare;
     if (isGpu) gpuDetailController.show(next.gpuId);
+    if (isCompare) compareController.show(next.gpuIdA, next.gpuIdB);
     buildsIndexRoot.hidden = !next.index;
+    bestGpuRoot.hidden = !isBestGpu;
+    if (isBestGpu) bestGpuController.show(next.modelId);
     // The FAQ belongs to the home page only; pages entered elsewhere fill it on first visit home
     if (next.home && !homeFaqRoot.firstElementChild) homeFaqRoot.innerHTML = renderHomeFaqHtml();
     homeFaqRoot.hidden = !next.home;
     if (next.home && !homeHeroRoot.firstElementChild) homeHeroRoot.innerHTML = renderHomeHeroHtml();
     homeHeroRoot.hidden = !next.home;
-    modelPickerRoot.hidden = Boolean(next.index);
+    modelPickerRoot.hidden = Boolean(next.index) || isBestGpu;
     // The home page always shows the default model's build sheet
     if (next.view === 'builds' && !next.index) modelPickerController.selectModel(next.modelId || DEFAULT_MODEL_ID, { home: Boolean(next.home) });
 

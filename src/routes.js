@@ -164,8 +164,8 @@ export function pageMeta(route) {
   } else if (route.view === 'gpu') {
     const gpu = GPUS_DATA.find(g => g.id === route.gpuId);
     meta = {
-      title: `${shortGpuName(gpu)} Used Price & History (${gpu.usedStreetPrice}) | ${SITE_NAME}`,
-      description: `${gpu.name} used price: about ${gpu.usedStreetPrice} on eBay (range ${gpu.usedPriceLow}–${gpu.usedPriceHigh}, ${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
+      title: `${shortGpuName(gpu)} Used Price & History ($${gpu.usedStreetPrice.toLocaleString('en-US')}) | ${SITE_NAME}`,
+      description: `${gpu.name} used price: about $${gpu.usedStreetPrice.toLocaleString('en-US')} on eBay (range $${gpu.usedPriceLow.toLocaleString('en-US')}–$${gpu.usedPriceHigh.toLocaleString('en-US')}, $${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: gpu.name, path: route.path });
   } else if (route.view === 'compare') {
