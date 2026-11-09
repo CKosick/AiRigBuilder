@@ -10,11 +10,11 @@ import { icon } from './icons.js';
 import { renderCommandPaletteHtml } from './commandPalette.js';
 
 const TAB_LABELS = {
-  builds: { icon: 'monitor', text: 'Build Sheets' },
-  playground: { icon: 'sliders', text: 'Rig Playground' },
-  calculator: { icon: 'calculator', text: 'Break-Even ROI' },
-  tracker: { icon: 'chart', text: 'GPU Price Tracker' },
-  guide: { icon: 'book', text: 'Hardware Guide' }
+  builds: { icon: 'monitor', text: 'Builds' },
+  playground: { icon: 'sliders', text: 'Playground' },
+  calculator: { icon: 'calculator', text: 'Break-Even' },
+  tracker: { icon: 'chart', text: 'Prices' },
+  guide: { icon: 'book', text: 'Guide' }
 };
 
 // The 7d trend is null until the price log has a price from about a week earlier

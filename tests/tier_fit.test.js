@@ -641,13 +641,16 @@ describe('VRAM breakdown bar and figure equivalence', () => {
     const llama = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
     const dual3090 = { id: 'tier-dual-3090', memoryGb: 48 };
 
-    // Fitting tier
+    // Fitting tier (at 8K: weights 87.5% shows in-bar label; KV 5.63%, overhead 2.08%, free 4.79% are < 12% so their in-bar labels hide while tooltips and legend remain)
     const fitFitting = tierFit(llama, dual3090, { contextK: 8, kvScale: 1 });
     const fittingHtml = renderVramBreakdownBarHtml(fitFitting, dual3090);
     assert.ok(fittingHtml.includes('Weights 42.0 GB'));
-    assert.ok(fittingHtml.includes('KV cache 2.7 GB'));
-    assert.ok(fittingHtml.includes('Runtime overhead 1.0 GB'));
-    assert.ok(fittingHtml.includes('Free 2.3 GB'));
+    assert.ok(!fittingHtml.includes('<span class="vram-segment-label">KV cache 2.7 GB</span>'), 'narrow KV segment hides in-bar label');
+    assert.ok(!fittingHtml.includes('<span class="vram-segment-label">Runtime overhead 1.0 GB</span>'), 'narrow overhead segment hides in-bar label');
+    assert.ok(!fittingHtml.includes('<span class="vram-segment-label">Free 2.3 GB</span>'), 'narrow free segment hides in-bar label');
+    assert.ok(fittingHtml.includes('title="KV cache: 2.7 GB"'));
+    assert.ok(fittingHtml.includes('title="Runtime overhead: 1.0 GB"'));
+    assert.ok(fittingHtml.includes('title="Free memory: 2.3 GB"'));
     assert.ok(fittingHtml.includes('Runtime overhead'), 'Labels as Runtime overhead, not CUDA overhead');
     assert.ok(!fittingHtml.includes('CUDA overhead'));
     assert.ok(fittingHtml.includes('45.7 GB') && fittingHtml.includes('48.0 GB') && fittingHtml.includes('2.3 GB'));

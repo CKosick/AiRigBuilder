@@ -120,11 +120,100 @@ export function evaluateBestGpu(modelId) {
   };
 }
 
+/**
+ * Groups the three best-GPU picks by configuration (GPU ID + card count)
+ * so duplicate configurations render once in the position of their first pick
+ * with combined labels.
+ */
+export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest }) {
+  const rawSlots = [
+    {
+      role: 'cheapest',
+      cardClass: 'pick-cheapest',
+      label: 'Cheapest That Runs It',
+      isGreen: false,
+      config: cheapestThatRuns,
+      emptyText: 'No discrete GPU configuration runs this model at default settings.',
+      fitMetaHtml: cheapestThatRuns
+        ? `<span>Fit: <strong>${cheapestThatRuns.fit.status === 'fits' ? 'Full Fit' : 'Reduced Fit'} (${cheapestThatRuns.fit.quant})</strong></span>`
+        : ''
+    },
+    {
+      role: 'value',
+      cardClass: 'pick-value',
+      label: 'Best Value Full Fit',
+      isGreen: true,
+      config: bestValueFullFit,
+      emptyText: 'No discrete GPU configuration achieves a full recommended quant fit.',
+      fitMetaHtml: bestValueFullFit
+        ? `<span>Recommended Quant: <strong>${bestValueFullFit.fit.quant}</strong></span>`
+        : ''
+    },
+    {
+      role: 'fastest',
+      cardClass: 'pick-fastest',
+      label: 'Fastest Discrete Rig',
+      isGreen: false,
+      config: fastest,
+      emptyText: 'No discrete GPU configuration runs this model.',
+      fitMetaHtml: fastest
+        ? `<span>Fit: <strong>${fastest.fit.quant} (${fastest.fit.status})</strong></span>`
+        : ''
+    }
+  ];
+
+  const grouped = [];
+  const byConfigKey = new Map();
+
+  for (const slot of rawSlots) {
+    if (!slot.config) {
+      grouped.push({
+        roles: [slot.role],
+        cardClasses: [slot.cardClass],
+        labels: [slot.label],
+        combinedLabel: slot.label,
+        isGreen: slot.isGreen,
+        config: null,
+        emptyText: slot.emptyText,
+        fitMetaHtml: ''
+      });
+      continue;
+    }
+
+    const key = `${slot.config.gpu.id}:${slot.config.count}`;
+    const existing = byConfigKey.get(key);
+    if (existing) {
+      existing.roles.push(slot.role);
+      existing.cardClasses.push(slot.cardClass);
+      existing.labels.push(slot.label);
+      existing.combinedLabel = existing.labels.join(' · ');
+      if (slot.isGreen) existing.isGreen = true;
+    } else {
+      const card = {
+        key,
+        roles: [slot.role],
+        cardClasses: [slot.cardClass],
+        labels: [slot.label],
+        combinedLabel: slot.label,
+        isGreen: slot.isGreen,
+        config: slot.config,
+        emptyText: slot.emptyText,
+        fitMetaHtml: slot.fitMetaHtml
+      };
+      byConfigKey.set(key, card);
+      grouped.push(card);
+    }
+  }
+
+  return grouped;
+}
+
 /** Pure HTML for one model's best GPU rankings page. */
 export function renderBestGpuHtml(modelId) {
   const evalResult = evaluateBestGpu(modelId);
   if (!evalResult) return '';
   const { model, cheapestThatRuns, bestValueFullFit, fastest, runningSystems, gpuRows } = evalResult;
+  const pickCards = groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest });
 
   return `
     <article class="best-gpu-detail" aria-labelledby="best-gpu-title">
@@ -148,63 +237,28 @@ export function renderBestGpuHtml(modelId) {
         </div>
       </div>
 
-      <!-- Three Labeled Picks -->
+      <!-- Labeled Picks (grouped when one configuration holds multiple picks) -->
       <section class="best-gpu-picks-section" aria-labelledby="picks-title">
         <h2 id="picks-title" class="section-title">Top Recommended Configurations</h2>
         <div class="best-gpu-picks-grid">
-          <div class="best-gpu-pick-card pick-cheapest">
-            <div class="pick-badge">Cheapest That Runs It</div>
-            ${cheapestThatRuns ? `
-              <h3 class="pick-name">${cheapestThatRuns.fullName}</h3>
-              <div class="pick-price">$${cheapestThatRuns.totalPrice.toLocaleString('en-US')}</div>
+          ${pickCards.map(card => `
+          <div class="best-gpu-pick-card ${card.cardClasses.join(' ')}"${card.key ? ` data-config-key="${card.key}"` : ''}>
+            <div class="pick-badge${card.isGreen ? ' pick-badge-green' : ''}">${card.combinedLabel}</div>
+            ${card.config ? `
+              <h3 class="pick-name">${card.config.fullName}</h3>
+              <div class="pick-price">$${card.config.totalPrice.toLocaleString('en-US')}</div>
               <div class="pick-meta">
-                <span>Memory: <strong>${cheapestThatRuns.memoryGb} GB</strong></span>
-                <span>Fit: <strong>${cheapestThatRuns.fit.status === 'fits' ? 'Full Fit' : 'Reduced Fit'} (${cheapestThatRuns.fit.quant})</strong></span>
-                <span>Speed: <strong>${cheapestThatRuns.speedStr}</strong></span>
+                <span>Memory: <strong>${card.config.memoryGb} GB</strong></span>
+                ${card.fitMetaHtml}
+                <span>Speed: <strong>${card.config.speedStr}</strong></span>
               </div>
               <div class="pick-action">
-                <a href="${gpuPath(cheapestThatRuns.gpu.id)}" class="btn-secondary">View ${shortGpuName(cheapestThatRuns.gpu)} Details →</a>
+                <a href="${gpuPath(card.config.gpu.id)}" class="btn-secondary">View ${shortGpuName(card.config.gpu)} Details →</a>
               </div>
             ` : `
-              <p class="pick-none">No discrete GPU configuration runs this model at default settings.</p>
+              <p class="pick-none">${card.emptyText}</p>
             `}
-          </div>
-
-          <div class="best-gpu-pick-card pick-value">
-            <div class="pick-badge pick-badge-green">Best Value Full Fit</div>
-            ${bestValueFullFit ? `
-              <h3 class="pick-name">${bestValueFullFit.fullName}</h3>
-              <div class="pick-price">$${bestValueFullFit.totalPrice.toLocaleString('en-US')}</div>
-              <div class="pick-meta">
-                <span>Memory: <strong>${bestValueFullFit.memoryGb} GB</strong></span>
-                <span>Recommended Quant: <strong>${bestValueFullFit.fit.quant}</strong></span>
-                <span>Speed: <strong>${bestValueFullFit.speedStr}</strong></span>
-              </div>
-              <div class="pick-action">
-                <a href="${gpuPath(bestValueFullFit.gpu.id)}" class="btn-secondary">View ${shortGpuName(bestValueFullFit.gpu)} Details →</a>
-              </div>
-            ` : `
-              <p class="pick-none">No discrete GPU configuration achieves a full recommended quant fit.</p>
-            `}
-          </div>
-
-          <div class="best-gpu-pick-card pick-fastest">
-            <div class="pick-badge">Fastest Discrete Rig</div>
-            ${fastest ? `
-              <h3 class="pick-name">${fastest.fullName}</h3>
-              <div class="pick-price">$${fastest.totalPrice.toLocaleString('en-US')}</div>
-              <div class="pick-meta">
-                <span>Memory: <strong>${fastest.memoryGb} GB</strong></span>
-                <span>Fit: <strong>${fastest.fit.quant} (${fastest.fit.status})</strong></span>
-                <span>Speed: <strong>${fastest.speedStr}</strong></span>
-              </div>
-              <div class="pick-action">
-                <a href="${gpuPath(fastest.gpu.id)}" class="btn-secondary">View ${shortGpuName(fastest.gpu)} Details →</a>
-              </div>
-            ` : `
-              <p class="pick-none">No discrete GPU configuration runs this model.</p>
-            `}
-          </div>
+          </div>`).join('')}
         </div>
       </section>
 

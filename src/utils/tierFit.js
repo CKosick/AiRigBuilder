@@ -7,8 +7,21 @@ export const RUNTIME_OVERHEAD_GB = 1;
 export const MIN_CONTEXT_K = 8;
 // Context room above this is shown as "32K+" (models' max context isn't in the data)
 const CONTEXT_DISPLAY_CAP_K = 32;
+// Minimum percentage of the VRAM bar width required for a segment to render its in-bar text label
+export const VRAM_LABEL_MIN_PCT = 12;
 
 const shortQuant = (q) => q.name.split(' ')[0];
+
+/**
+ * Returns true when a VRAM bar segment is wide enough (as a percentage of the bar)
+ * to render its in-bar text label without clipping.
+ *
+ * @param {number} widthPct
+ * @param {number} [threshold=VRAM_LABEL_MIN_PCT]
+ */
+export function shouldShowVramSegmentLabel(widthPct, threshold = VRAM_LABEL_MIN_PCT) {
+  return typeof widthPct === 'number' && widthPct >= threshold;
+}
 
 /**
  * Returns how a model fits a tier:
@@ -168,17 +181,17 @@ export function renderVramBreakdownBarHtml(fit, tier) {
         </div>
         <div class="vram-bar" role="progressbar" aria-valuenow="${needsGb.toFixed(1)}" aria-valuemin="0" aria-valuemax="${capacityGb.toFixed(1)}" aria-label="VRAM usage: ${needsGb.toFixed(1)} GB of ${capacityGb.toFixed(1)} GB">
           <div class="vram-bar-segment vram-segment-weights" style="width: ${weightsPct.toFixed(2)}%;" title="Model weights (${quantName}): ${weightsGb.toFixed(1)} GB">
-            <span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>
+            ${shouldShowVramSegmentLabel(weightsPct) ? `<span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>` : ''}
           </div>
           ${contextGb > 0 ? `
           <div class="vram-bar-segment vram-segment-kv" style="width: ${contextPct.toFixed(2)}%;" title="KV cache: ${contextGb.toFixed(1)} GB">
-            <span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>
+            ${shouldShowVramSegmentLabel(contextPct) ? `<span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>` : ''}
           </div>` : ''}
           <div class="vram-bar-segment vram-segment-overhead" style="width: ${overheadPct.toFixed(2)}%;" title="Runtime overhead: ${overheadGb.toFixed(1)} GB">
-            <span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>
+            ${shouldShowVramSegmentLabel(overheadPct) ? `<span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>` : ''}
           </div>
           <div class="vram-bar-segment vram-segment-headroom" style="width: ${headroomPct.toFixed(2)}%;" title="Free memory: ${headroomGb.toFixed(1)} GB">
-            <span class="vram-segment-label">Free ${headroomGb.toFixed(1)} GB</span>
+            ${shouldShowVramSegmentLabel(headroomPct) ? `<span class="vram-segment-label">Free ${headroomGb.toFixed(1)} GB</span>` : ''}
           </div>
         </div>
         <div class="vram-breakdown-legend">
@@ -223,14 +236,14 @@ export function renderVramBreakdownBarHtml(fit, tier) {
       </div>
       <div class="vram-bar vram-bar-overflow" role="progressbar" aria-valuenow="${capacityGb.toFixed(1)}" aria-valuemin="0" aria-valuemax="${needsGb.toFixed(1)}" aria-label="VRAM required: ${needsGb.toFixed(1)} GB exceeds ${capacityGb.toFixed(1)} GB capacity by ${shortfallGb.toFixed(1)} GB">
         <div class="vram-bar-segment vram-segment-weights" style="width: ${weightsPct.toFixed(2)}%;" title="Model weights (${quantName}): ${weightsGb.toFixed(1)} GB">
-          <span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>
+          ${shouldShowVramSegmentLabel(weightsPct) ? `<span class="vram-segment-label">Weights ${weightsGb.toFixed(1)} GB</span>` : ''}
         </div>
         ${contextGb > 0 ? `
         <div class="vram-bar-segment vram-segment-kv" style="width: ${contextPct.toFixed(2)}%;" title="KV cache: ${contextGb.toFixed(1)} GB">
-          <span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>
+          ${shouldShowVramSegmentLabel(contextPct) ? `<span class="vram-segment-label">KV cache ${contextGb.toFixed(1)} GB</span>` : ''}
         </div>` : ''}
         <div class="vram-bar-segment vram-segment-overhead" style="width: ${overheadPct.toFixed(2)}%;" title="Runtime overhead: ${overheadGb.toFixed(1)} GB">
-          <span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>
+          ${shouldShowVramSegmentLabel(overheadPct) ? `<span class="vram-segment-label">Runtime overhead ${overheadGb.toFixed(1)} GB</span>` : ''}
         </div>
         <div class="vram-capacity-marker" style="left: ${capacityPct.toFixed(2)}%;" aria-hidden="true">
           <div class="vram-capacity-line"></div>
