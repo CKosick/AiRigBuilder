@@ -126,11 +126,11 @@ describe('Rig Playground: Known Answers from Brief', () => {
     assert.equal(topUpgrade.unlocked, 37);
     assert.equal(topUpgrade.improved, 5);
 
-    // Tesla P40 unlocks 24 at $290
+    // Tesla P40 unlocks 24 at $299
     const p40 = upgrades.find(u => u.candidate.id === 'tesla-p40');
     assert.ok(p40);
     assert.equal(p40.unlocked, 24);
-    assert.equal(p40.cost, 290);
+    assert.equal(p40.cost, 299);
 
     // A second RTX 3060 unlocks 22 (12 run today, 34 total)
     const second3060 = upgrades.find(u => u.candidate.id === 'rtx-3060-12gb');

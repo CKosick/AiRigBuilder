@@ -101,6 +101,7 @@ async function applyPrices() {
   const rtx3090 = approvedCards.find(c => c.id === 'rtx-3090');
   const rtx4090 = approvedCards.find(c => c.id === 'rtx-4090');
   const rtx3060 = approvedCards.find(c => c.id === 'rtx-3060-12gb');
+  const rtx3080 = approvedCards.find(c => c.id === 'rtx-3080-10gb');
   const rtx4060ti = approvedCards.find(c => c.id === 'rtx-4060-ti-16gb');
   const rtx5090 = approvedCards.find(c => c.id === 'rtx-5090');
   const rtxPro6000 = approvedCards.find(c => c.id === 'rtx-pro-6000-blackwell');
@@ -134,6 +135,14 @@ async function applyPrices() {
     buildsContent = buildsContent.replace(
       /(name:\s*'NVIDIA GeForce RTX 3060 12GB'[\s\S]*?price:\s*)\d+/g,
       `$1${rtx3060.proposedPrice}`
+    );
+    buildsUpdated = true;
+  }
+
+  if (rtx3080) {
+    buildsContent = buildsContent.replace(
+      /(name:\s*'NVIDIA GeForce RTX 3080 10GB'[\s\S]*?price:\s*)\d+/g,
+      `$1${rtx3080.proposedPrice}`
     );
     buildsUpdated = true;
   }

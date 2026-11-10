@@ -1183,7 +1183,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3080 10GB',
             spec: '10GB GDDR6X, 760 GB/s bandwidth, 320W TDP',
             condition: 'Used (eBay)',
-            price: 370,
+            price: 409,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1',
             notes: 'Incredible memory bandwidth for the price. 10GB runs 8B at Q6_K (7.8 GB) with ~8K context; Q8_0 (9.2 GB) does not fit once runtime overhead is counted.'

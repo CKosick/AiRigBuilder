@@ -30,7 +30,7 @@ describe('Copyable Markdown Parts List Export', () => {
       '',
       '| Part | Spec | Price | Buy |',
       '| :--- | :--- | :--- | :--- |',
-      '| GPU (Primary + Secondary): 2x NVIDIA GeForce RTX 3090 24GB | 48GB Total GDDR6X, 936 GB/s, NVLink compatible | $1,720 | [eBay Sold](https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1) |',
+      '| GPU (Primary + Secondary): 2x NVIDIA GeForce RTX 3090 24GB | 48GB Total GDDR6X, 936 GB/s, NVLink compatible | $1,758 | [eBay Sold](https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1) |',
       '| CPU: AMD Ryzen 7 5700X (8C / 16T) | 65W TDP, 3.4GHz base / 4.6GHz boost, PCIe 4.0 | $155 | [Amazon](https://www.amazon.com/dp/B09VCHQHZ6) |',
       '| Motherboard: ASUS ROG Strix B550-F Gaming (WiFi) | Supports dual full-length PCIe slots with 3-slot spacing | $110 | [eBay Sold](https://www.ebay.com/sch/i.html?_nkw=ASUS+ROG+Strix+B550-F+Gaming) |',
       '| RAM: Corsair Vengeance LPX 64GB (2x32GB) DDR4-3200 | 64GB DDR4 dual channel | $98 | [Amazon](https://www.amazon.com/dp/B07Y4ZZ7LQ) |',
@@ -39,20 +39,20 @@ describe('Copyable Markdown Parts List Export', () => {
       '| Case & Spacing: Fractal Design Meshify 2 or Phanteks Enthoo Pro 2 | Spacious full tower, support for multi-GPU & 3-slot cards | $139 | [Amazon](https://www.amazon.com/s?k=Fractal+Design+Meshify+2) |',
       '| Cooling & Accessories: Thermalright Peerless Assassin 120 SE + PCIe 4.0 Riser cable | Dual-tower CPU cooler + 20cm x16 shielded riser | $58 | [Amazon](https://www.amazon.com/s?k=Thermalright+Peerless+Assassin+120) |',
       '',
-      '**Total:** $2,554',
+      '**Total:** $2,592',
       '',
       `Prices as of ${dataDate}. Full build: https://airigbuilder.com/`
     ].join('\n');
 
     assert.equal(actual, expected, 'markdown export matches golden fixture exactly');
 
-    // Dual-GPU part is a single $1,720 row
-    assert.match(actual, /\| GPU \(Primary \+ Secondary\): 2x NVIDIA GeForce RTX 3090 24GB \| 48GB Total GDDR6X, 936 GB\/s, NVLink compatible \| \$1,720 \|/);
+    // Dual-GPU part is a single $1,758 row
+    assert.match(actual, /\| GPU \(Primary \+ Secondary\): 2x NVIDIA GeForce RTX 3090 24GB \| 48GB Total GDDR6X, 936 GB\/s, NVLink compatible \| \$1,758 \|/);
 
     // Total equals sheet displayed total
     const displayedTotal = tier.parts.reduce((s, p) => s + p.price, 0);
-    assert.equal(displayedTotal, 2554);
-    assert.match(actual, /\*\*Total:\*\* \$2,554/);
+    assert.equal(displayedTotal, 2592);
+    assert.match(actual, /\*\*Total:\*\* \$2,592/);
   });
 
   it('catalog consistency: total equals parts sum, all URLs carry over, and no extraneous figures across all 56 models', () => {

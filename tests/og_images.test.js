@@ -82,20 +82,20 @@ describe('Dynamic Open Graph Images', () => {
   });
 
   describe('Pre-raster SVG figure assertions across page families', () => {
-    it('RTX 3090 GPU card carries $860 and range $512 - $1,000', () => {
+    it('RTX 3090 GPU card carries $879 and range $511 - $1,000', () => {
       const route = { view: 'gpu', path: '/gpu/rtx-3090', gpuId: 'rtx-3090' };
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('GeForce RTX 3090'));
-      assert.ok(svg.includes('$860'), 'Should contain tracked used price $860');
-      assert.ok(svg.includes('$512') && svg.includes('$1,000'), 'Should contain low and high price range');
+      assert.ok(svg.includes('$879'), 'Should contain tracked used price $879');
+      assert.ok(svg.includes('$511') && svg.includes('$1,000'), 'Should contain low and high price range');
       assert.ok(svg.includes('24 GB') && svg.includes('936 GB/s'), 'Should contain specs');
     });
 
-    it('Llama 3.3 70B build card carries cheapest tier total $2,554 and min VRAM', () => {
+    it('Llama 3.3 70B build card carries cheapest tier total $2,592 and min VRAM', () => {
       const route = { view: 'builds', path: '/builds/llama-3.3-70b', modelId: 'llama-3.3-70b' };
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('Llama 3.3 70B'));
-      assert.ok(svg.includes('$2,554'), 'Should display cheapest fitting build total $2,554');
+      assert.ok(svg.includes('$2,592'), 'Should display cheapest fitting build total $2,592');
       assert.ok(svg.includes('40 GB'), 'Should display minimum required VRAM (40 GB)');
     });
 
@@ -104,7 +104,7 @@ describe('Dynamic Open Graph Images', () => {
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('Llama 3.3 70B'));
       assert.ok(svg.includes('2x Tesla P40'), 'Should pick 2x Tesla P40 as cheapest that runs it');
-      assert.ok(svg.includes('$580'), 'Should display price $580 for 2x Tesla P40');
+      assert.ok(svg.includes('$598'), 'Should display price $598 for 2x Tesla P40');
     });
 
     it('RTX 3090 vs RTX 4090 comparison card carries both cards and their used prices', () => {
@@ -112,8 +112,8 @@ describe('Dynamic Open Graph Images', () => {
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('RTX 3090') && svg.includes('RTX 4090'));
       assert.ok(svg.includes('vs'));
-      assert.ok(svg.includes('$860'), 'Should include RTX 3090 price');
-      assert.ok(svg.includes('$1,550'), 'Should include RTX 4090 price');
+      assert.ok(svg.includes('$879'), 'Should include RTX 3090 price');
+      assert.ok(svg.includes('$1,750'), 'Should include RTX 4090 price');
     });
   });
 
