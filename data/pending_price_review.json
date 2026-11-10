@@ -1,5 +1,5 @@
 {
-  "scrapedAt": "2026-11-02T01:25:39.722Z",
+  "scrapedAt": "2026-11-10T01:24:18.770Z",
   "reviewStatus": "APPLIED",
   "fetchedWith": "headless-chrome",
   "note": "Check this file before applying. Change a held card to APPROVED (or edit proposedPrice) to apply it. Then run: npm run prices:apply",
@@ -8,45 +8,45 @@
       "id": "rtx-3090",
       "name": "NVIDIA GeForce RTX 3090",
       "vram": 24,
-      "currentPrice": 750,
-      "sampleCount": 19,
-      "proposedPrice": 860,
-      "priceLow": 512,
+      "currentPrice": 860,
+      "sampleCount": 18,
+      "proposedPrice": 879,
+      "priceLow": 511,
       "priceHigh": 1000,
-      "changePct": 14.7,
+      "changePct": 2.2,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "19 sold listings (median $860).",
+      "notes": "18 sold listings (median $878.55).",
       "recentSamples": [
         {
-          "title": "EVGA GeForce RTX 3090 Kingpin Hydro Copper Gaming 24GB GDDR6X Graphics CardOpens in a new window or tab",
-          "price": 938,
-          "itemId": "117481737551",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingGeoForce RTX 3090 SUPRIM 24GOpens in a new window or tab",
+          "price": 555,
+          "itemId": "227605792867",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "***See Pics and Desc*** TUF Gaming RTX 3090 24GB GDDR6X Video Graphics CardOpens in a new window or tab",
-          "price": 899.99,
-          "itemId": "127840790743",
-          "soldDate": "Sold  May 1, 2026"
+          "title": "ZOTAC GAMING GeForce RTX 3090 Trinity OC 24GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 999.99,
+          "itemId": "227604689442",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "***See Pics and Desc*** TUF Gaming RTX 3090 24GB GDDR6X Video Graphics CardOpens in a new window or tab",
-          "price": 899.99,
-          "itemId": "127840790464",
-          "soldDate": "Sold  May 1, 2026"
+          "title": "ZOTAC GAMING GeForce RTX 3090 24GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 500,
+          "itemId": "168846518667",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "New ListingEVGA NVIDIA GeForce RTX 3090 FTW 3 ULTRA 24GBOpens in a new window or tab",
-          "price": 1000,
-          "itemId": "137893206551",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "Inno3D RTX3090 iChill 24GB GDDR6X GamingOpens in a new window or tab",
+          "price": 900,
+          "itemId": "128181442531",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "PNY NVIDIA 3090 GeForce RTX Triple Fan GPU PCIe x16 DP/HDMI Multi-Monitor 24gbOpens in a new window or tab",
-          "price": 569,
-          "itemId": "257827275915",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "DELL OEM NVIDIA RTX 3090 24GB GDDR6X GPU -Opens in a new window or tab",
+          "price": 900,
+          "itemId": "407338287930",
+          "soldDate": "Sold  Nov 4, 2026"
         }
       ]
     },
@@ -55,44 +55,44 @@
       "name": "NVIDIA GeForce RTX 4090",
       "vram": 24,
       "currentPrice": 1550,
-      "sampleCount": 18,
-      "proposedPrice": 1550,
+      "sampleCount": 22,
+      "proposedPrice": 1750,
       "priceLow": 1200,
-      "priceHigh": 2160,
-      "changePct": 0,
+      "priceHigh": 2100,
+      "changePct": 12.9,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "18 sold listings (median $1550).",
+      "notes": "22 sold listings (median $1750).",
       "recentSamples": [
+        {
+          "title": "ASUS TUF Gaming GeForce RTX 4090 24 GB GDDR6X Triple Fan HDMI DisplayPortOpens in a new window or tab",
+          "price": 1825,
+          "itemId": "407333605114",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "ZOTAC GAMING GeForce RTX 4090 Trinity 24GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 2000,
+          "itemId": "128181738243",
+          "soldDate": "Sold  Nov 7, 2026"
+        },
+        {
+          "title": "GIGABYTE GeForce RTX 4090 GAMING OC 24GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 2000,
+          "itemId": "128175778501",
+          "soldDate": "Sold  Nov 4, 2026"
+        },
+        {
+          "title": "MSI RTX 4090 Gaming X Trio 24GB Graphics Card - ALL VRAM WORKING, ONE BAD COREOpens in a new window or tab",
+          "price": 2100,
+          "itemId": "880080651871",
+          "soldDate": "Sold  Nov 4, 2026"
+        },
         {
           "title": "MSI GeForce RTX 4090 GAMING TRIO 24GB GDDR6X RGB PCIe x16 GPUOpens in a new window or tab",
           "price": 1200,
           "itemId": "128165642865",
           "soldDate": "Sold  Oct 30, 2026"
-        },
-        {
-          "title": "GIGABYTE GeForce RTX 4090 GAMING OC 24GB GDDR6X Graphics CardOpens in a new window or tab",
-          "price": 1750,
-          "itemId": "366769249633",
-          "soldDate": "Sold  Oct 29, 2026"
-        },
-        {
-          "title": "MSI GeForce RTX 4090 GAMING X TRIO 24GB GDDR6X Graphics CardOpens in a new window or tab",
-          "price": 1500,
-          "itemId": "206656871919",
-          "soldDate": "Sold  Oct 26, 2026"
-        },
-        {
-          "title": "MSI GeForce RTX 4090 GAMING TRIO 24G 24GB PCIe x16 Triple Fan SilentOpens in a new window or tab",
-          "price": 1550,
-          "itemId": "198734326642",
-          "soldDate": "Sold  Oct 21, 2026"
-        },
-        {
-          "title": "GIGABYTE GeForce RTX 4090 WINDFORCE V2 24GB GDDR6X HDMI/DP PCIeOpens in a new window or tab",
-          "price": 2000,
-          "itemId": "800792645585",
-          "soldDate": "Sold  Oct 13, 2026"
         }
       ]
     },
@@ -100,45 +100,45 @@
       "id": "rx-7900-xtx",
       "name": "AMD Radeon RX 7900 XTX",
       "vram": 24,
-      "currentPrice": 975,
-      "sampleCount": 51,
-      "proposedPrice": 1100,
-      "priceLow": 935,
-      "priceHigh": 1280,
-      "changePct": 12.8,
+      "currentPrice": 1100,
+      "sampleCount": 55,
+      "proposedPrice": 1200,
+      "priceLow": 1000,
+      "priceHigh": 1300,
+      "changePct": 9.1,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "51 sold listings (median $1100).",
+      "notes": "55 sold listings (median $1200).",
       "recentSamples": [
         {
-          "title": "New ListingSAPPHIRE AMD Nitro+ Radeon RX 7900 XTX 24GB (RMA Replacement)Opens in a new window or tab",
-          "price": 850,
-          "itemId": "840083065456",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
-          "title": "Sapphire Pulse AMD Radeon RX 7900 XTX 24GB Graphics Card - Barely UsedOpens in a new window or tab",
-          "price": 1091.31,
-          "itemId": "307252172086",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
-          "title": "SAPPHIRE AMD Radeon RX 7900 XTX 24GB GDDR6 Graphics CardOpens in a new window or tab",
+          "title": "New ListingASRock AMD Radeon RX 7900 XTX Phantom Gaming OC 24GB Good Graphics CardOpens in a new window or tab",
           "price": 1200,
-          "itemId": "267395993401",
-          "soldDate": "Sold  Nov 1, 2026"
+          "itemId": "860126576580",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "New ListingXFX Speedster MERC310 AMD Radeon RX 7900 XTX 24GBOpens in a new window or tab",
-          "price": 1200,
-          "itemId": "880070724947",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "SAPPHIRE PULSE AMD Radeon RX 7900 XTX 24GB GDDR6 Graphics CardOpens in a new window or tab",
+          "price": 1299.99,
+          "itemId": "880090351402",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ASRock AMD Radeon RX 7900 XTX Phantom Gaming OC 24GB Graphics CardOpens in a new window or tab",
-          "price": 1300,
-          "itemId": "137890875460",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingSAPPHIRE AMD Radeon NITRO+ RX 7900 XTX 24GB GDDR6 GPUOpens in a new window or tab",
+          "price": 1250,
+          "itemId": "128185444016",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "New ListingSapphire NITRO+ AMD Radeon RX 7900 XTX Vapor-X Gaming Graphics Card 24GB GDDR6Opens in a new window or tab",
+          "price": 1150,
+          "itemId": "257843746643",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "New ListingSAPPHIRE NITRO+ Radeon RX 7900 XTX 24GB GDDR6 OC RDNA 3 HDMI DPOpens in a new window or tab",
+          "price": 1325,
+          "itemId": "327447306882",
+          "soldDate": "Sold  Nov 9, 2026"
         }
       ]
     },
@@ -146,45 +146,45 @@
       "id": "rtx-4060-ti-16gb",
       "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
       "vram": 16,
-      "currentPrice": 480,
-      "sampleCount": 13,
+      "currentPrice": 470,
+      "sampleCount": 15,
       "proposedPrice": 470,
       "priceLow": 400,
       "priceHigh": 500,
-      "changePct": -2.1,
+      "changePct": 0,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "13 sold listings (median $470).",
+      "notes": "15 sold listings (median $470).",
       "recentSamples": [
         {
-          "title": "New ListingASUS Dual GeForce RTX 4060 Ti EVO 16GB GDDR6Opens in a new window or tab",
+          "title": "ASUS ProArt GeForce RTX 4060 Ti 16GB OC Edition GDDR6 PROART-RTX4060TI-O16GOpens in a new window or tab",
+          "price": 500,
+          "itemId": "880083633263",
+          "soldDate": "Sold  Nov 4, 2026"
+        },
+        {
+          "title": "PNY GeForce RTX 4060 Ti 16GB Verto Dual Fan Graphics Card (VCG4060T16DFXPB1)Opens in a new window or tab",
+          "price": 439.99,
+          "itemId": "117178113610",
+          "soldDate": "Sold  May 5, 2026"
+        },
+        {
+          "title": "ASUS ProArt GeForce RTX 4060 Ti 16GB GDDR6 OC Edition Graphics CardOpens in a new window or tab",
+          "price": 490,
+          "itemId": "820305137476",
+          "soldDate": "Sold  Nov 1, 2026"
+        },
+        {
+          "title": "ASUS Dual GeForce RTX 4060 Ti EVO 16GB GDDR6Opens in a new window or tab",
           "price": 450,
           "itemId": "366776970579",
           "soldDate": "Sold  Nov 1, 2026"
         },
         {
-          "title": "PNY XLR8 NVIDIA GeForce RTX 4060ti 16GBOpens in a new window or tab",
-          "price": 500,
-          "itemId": "407326160184",
-          "soldDate": "Sold  Oct 30, 2026"
-        },
-        {
-          "title": "MSI GEFORCE RTX 4060 TI 16 GBOpens in a new window or tab",
-          "price": 500,
-          "itemId": "287692314181",
-          "soldDate": "Sold  Oct 30, 2026"
-        },
-        {
-          "title": "PNY XLR8 GeForce RTX 4060ti 16GB Graphics CardOpens in a new window or tab",
-          "price": 435,
-          "itemId": "407326089946",
-          "soldDate": "Sold  Oct 29, 2026"
-        },
-        {
-          "title": "Gigabyte GeForce RTX 4060 Ti 16GB Windforce 2X OC GPUOpens in a new window or tab",
-          "price": 470,
-          "itemId": "407322159577",
-          "soldDate": "Sold  Oct 28, 2026"
+          "title": "MSI GeForce RTX 4060 Ti VENTUS 3X OC 16GB 16G 128-bit GDDR6 PCI-E 4.0 NVIDIAOpens in a new window or tab",
+          "price": 502.39,
+          "itemId": "277852833686",
+          "soldDate": "Sold  Apr 27, 2026"
         }
       ]
     },
@@ -193,44 +193,44 @@
       "name": "NVIDIA GeForce RTX 3060 12GB",
       "vram": 12,
       "currentPrice": 330,
-      "sampleCount": 59,
-      "proposedPrice": 330,
-      "priceLow": 295,
-      "priceHigh": 350,
-      "changePct": 0,
+      "sampleCount": 56,
+      "proposedPrice": 335,
+      "priceLow": 286,
+      "priceHigh": 361,
+      "changePct": 1.5,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "59 sold listings (median $329.95).",
+      "notes": "56 sold listings (median $335).",
       "recentSamples": [
         {
-          "title": "New ListingEVGA GeForce RTX 3060 XC 12GB GDDR6 HDMI PCIe x16 DirectX 12 8-PinOpens in a new window or tab",
-          "price": 330,
-          "itemId": "198761272731",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
-          "title": "New ListingEVGA GeForce RTX 3060 XC Gaming, 12G-P5-3657-KR, 12GB GDDR6, Dual-Fan, Metal BacOpens in a new window or tab",
-          "price": 275,
-          "itemId": "227593308082",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
-          "title": "MSI NVIDIA GeForce RTX 3060 12GB GDDR6 Graphics Card - G3060GX12Opens in a new window or tab",
-          "price": 315,
-          "itemId": "117487210690",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
           "title": "New ListingZOTAC GAMING GeForce RTX 3060 Twin Edge OC 12GB GDDR6 Graphics CardOpens in a new window or tab",
-          "price": 325,
-          "itemId": "920095005548",
-          "soldDate": "Sold  Nov 1, 2026"
+          "price": 298,
+          "itemId": "960176092565",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ASUS Dual GeForce RTX 3060 OC V2 12GB GDDR6 Graphics CardOpens in a new window or tab",
-          "price": 350,
-          "itemId": "287682172638",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingGigabyte Nvidia GeForce RTX 3060 12GB GDDR6 Graphics Card (GVN3060WF2OC12GD)Opens in a new window or tab",
+          "price": 275,
+          "itemId": "137917224007",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "MSI NVIDIA GeForce RTX 3060 VENTUS 2X OC 12 GB GDDR6 Graphics CardOpens in a new window or tab",
+          "price": 356.75,
+          "itemId": "307262744606",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "New ListingZOTAC Twin Edge GeForce RTX 3060 12GB GDDR6 PCI Express 4.0 ATX Graphics CardOpens in a new window or tab",
+          "price": 245,
+          "itemId": "287717098849",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "INNO3D GeForce RTX 3060 Twin X2 OC 12GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 349.99,
+          "itemId": "820329687061",
+          "soldDate": "Sold  Nov 8, 2026"
         }
       ]
     },
@@ -238,45 +238,45 @@
       "id": "tesla-p40",
       "name": "NVIDIA Tesla P40 24GB",
       "vram": 24,
-      "currentPrice": 299,
+      "currentPrice": 290,
       "sampleCount": 51,
-      "proposedPrice": 290,
-      "priceLow": 274,
+      "proposedPrice": 299,
+      "priceLow": 275,
       "priceHigh": 350,
-      "changePct": -3,
+      "changePct": 3.1,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "51 sold listings (median $290.16).",
+      "notes": "51 sold listings (median $299).",
       "recentSamples": [
+        {
+          "title": "NVIDIA Tesla P40 24GB GDDR5 PCIe 3.0 x16 GPU Accelerator AI Deep Learning CardOpens in a new window or tab",
+          "price": 339,
+          "itemId": "336877866074",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "NVIDIA Tesla P40 24GB GDDR5 PCI-E 3.0 x16 GPU Accelerator Card usedOpens in a new window or tab",
+          "price": 275,
+          "itemId": "397698760417",
+          "soldDate": "Sold  Nov 8, 2026"
+        },
         {
           "title": "Nvidia Tesla P40 24GB DDR5 GPU Accelerator Card Dual PCI-E 3.0 x16 For ServersOpens in a new window or tab",
           "price": 275,
           "itemId": "389221097025",
-          "soldDate": "Sold  Nov 1, 2026"
-        },
-        {
-          "title": "Nvidia Tesla P40 24GB GPU GDDR5 PCI-E 3.0 x16 Accelerator Graphics CardOpens in a new window or tab",
-          "price": 275,
-          "itemId": "397972657657",
-          "soldDate": "Sold  Oct 31, 2026"
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
           "title": "Nvidia Tesla P40 24GB GPU Card GDDR5 PCI-E KM3C2 Graphics Card -Opens in a new window or tab",
-          "price": 275,
-          "itemId": "178498312977",
-          "soldDate": "Sold  Oct 31, 2026"
+          "price": 288,
+          "itemId": "377588538762",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "Genuine original NVIDIA Tesla P40 24GB DDR5 Accelerator Card PCI-E FOR SERVERSOpens in a new window or tab",
-          "price": 279,
-          "itemId": "358641957510",
-          "soldDate": "Sold  Oct 31, 2026"
-        },
-        {
-          "title": "Dell NVIDIA Tesla P40 24GB GDDR5 PCI-E 3.0 x16 GPU Accelerator KM3C2Opens in a new window or tab",
-          "price": 356.51,
-          "itemId": "278141133185",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Nvidia Tesla P40 24GB GPU GDDR5 PCI-E 3.0 x16 Accelerator Graphics CardOpens in a new window or tab",
+          "price": 270,
+          "itemId": "800888019573",
+          "soldDate": "Sold  Nov 8, 2026"
         }
       ]
     },
@@ -284,45 +284,45 @@
       "id": "rtx-4080-super",
       "name": "NVIDIA GeForce RTX 4080 Super 16GB",
       "vram": 16,
-      "currentPrice": 1150,
-      "sampleCount": 53,
+      "currentPrice": 1200,
+      "sampleCount": 47,
       "proposedPrice": 1200,
-      "priceLow": 999,
+      "priceLow": 1125,
       "priceHigh": 1300,
-      "changePct": 4.3,
+      "changePct": 0,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "53 sold listings (median $1199.95).",
+      "notes": "47 sold listings (median $1200).",
       "recentSamples": [
         {
-          "title": "ASUS TUF Gaming GeForce RTX 4080 SUPER 16GB GDDR6XOpens in a new window or tab",
-          "price": 999.95,
-          "itemId": "137422555960",
-          "soldDate": "Sold  Jul 18, 2026"
+          "title": "MSI GeForce RTX 4080 SUPER EXPERT 16GB GDDR6X Graphics Card DLSS 3 - TestedOpens in a new window or tab",
+          "price": 1389.99,
+          "itemId": "267832134968",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "ASUS ProArt GeForce RTX 4080 Super 16GB - Graphics Card ProArt-RTX4080s-016G D10Opens in a new window or tab",
-          "price": 1175,
-          "itemId": "137883081945",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Lenovo NVIDIA GeForce RTX 4080 Super GDDR6X 16GB Dedicated Graphics Card GPUOpens in a new window or tab",
+          "price": 1239.99,
+          "itemId": "158358427015",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "ASUS TUF Gaming GeForce RTX 4080 SUPER 16GB GDDR6X OC Graphic Card -USEDOpens in a new window or tab",
-          "price": 1244.99,
-          "itemId": "267781525656",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "MSI GeForce RTX 4080 SUPER Gaming X Slim 16GB GDDR6X RGB Lighting Graphics CardOpens in a new window or tab",
+          "price": 1300,
+          "itemId": "317993634478",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "MSI GeForce RTX 4080 Super 16GB Expert (Prestine Condition)Opens in a new window or tab",
-          "price": 1200,
-          "itemId": "366616795962",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "ASUS TUF GeForce RTX 4080 Super OC 16GB Graphics Card TUF-RTX4080S-O16G-GAMINGOpens in a new window or tab",
+          "price": 1399.99,
+          "itemId": "128096528088",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "Gigabyte RTX 4080 Super Gaming OC 16GBOpens in a new window or tab",
-          "price": 1199.99,
-          "itemId": "137868728974",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Proart RTX 4080 super 16gbOpens in a new window or tab",
+          "price": 1125,
+          "itemId": "206674100918",
+          "soldDate": "Sold  Nov 6, 2026"
         }
       ]
     },
@@ -331,44 +331,44 @@
       "name": "NVIDIA GeForce RTX 3080 10GB",
       "vram": 10,
       "currentPrice": 400,
-      "sampleCount": 55,
-      "proposedPrice": 400,
-      "priceLow": 350,
-      "priceHigh": 460,
-      "changePct": 0,
+      "sampleCount": 56,
+      "proposedPrice": 409,
+      "priceLow": 366,
+      "priceHigh": 450,
+      "changePct": 2.3,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "55 sold listings (median $400).",
+      "notes": "56 sold listings (median $409).",
       "recentSamples": [
         {
-          "title": "New ListingMSI GeForce RTX 3080 Gaming Z Trio 10GB GDDR6X Ray Tracing DLSS VROpens in a new window or tab",
-          "price": 340,
-          "itemId": "407332049181",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingHP NVIDIA RTX 3080 10GB GDDR6X Graphics CardOpens in a new window or tab",
+          "price": 409,
+          "itemId": "257844146231",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "New ListingEVGA GeForce RTX 3080 FTW3 Ultra 10GB GDDR6X Graphics Card 10G-P5-3897-KLOpens in a new window or tab",
-          "price": 385,
-          "itemId": "336873832125",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingHP Nvidia GeForce RTX 3080 10GB OEM Graphics Card GPUOpens in a new window or tab",
+          "price": 359.99,
+          "itemId": "117513124457",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "New ListingUsed EVGA RTX 3080 XC3 Ultra 10GB EK Vector Water Block + BackplateOpens in a new window or tab",
-          "price": 350,
-          "itemId": "287697484544",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "NVIDIA Founders Edition GeForce RTX 3080 10GB - Graphics Card - Good ConditionOpens in a new window or tab",
+          "price": 389.99,
+          "itemId": "277879051245",
+          "soldDate": "Sold  Apr 29, 2026"
         },
         {
-          "title": "GIGABYTE GeForce RTX 3080 VISION OC 10GB GDDR6XOpens in a new window or tab",
-          "price": 369.95,
-          "itemId": "198468499703",
-          "soldDate": "Sold  Jul 11, 2026"
+          "title": "EVGA Nvidia GeForce RTX 3080 FTW3 ULTRA GAMING 10GB GDDR6X Graphics Card...Opens in a new window or tab",
+          "price": 405,
+          "itemId": "168827275254",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "Dell Nvidia GeForce RTX 3080 10GBOpens in a new window or tab",
-          "price": 350,
-          "itemId": "128165505063",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingEVGA GeForce RTX 3080 FTW3 Ultra Gaming 10GB GDDR6X Graphics Card...Opens in a new window or tab",
+          "price": 440,
+          "itemId": "327448289427",
+          "soldDate": "Sold  Nov 9, 2026"
         }
       ]
     },
@@ -410,45 +410,45 @@
       "id": "mac-studio-m2-ultra",
       "name": "Apple Mac Studio M2 Ultra (64GB, used)",
       "vram": 64,
-      "currentPrice": 3350,
-      "sampleCount": 45,
+      "currentPrice": 3300,
+      "sampleCount": 47,
       "proposedPrice": 3300,
-      "priceLow": 2802,
-      "priceHigh": 3750,
-      "changePct": -1.5,
+      "priceLow": 2800,
+      "priceHigh": 3599,
+      "changePct": 0,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "45 sold listings (median $3300).",
+      "notes": "47 sold listings (median $3299.67).",
       "recentSamples": [
         {
-          "title": "New ListingApple Mac Studio with M2 Ultra (24/60, 64GB RAM 1TB SSD) in Excellent Condition!Opens in a new window or tab",
-          "price": 2700,
-          "itemId": "327432931486",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Apple Mac Studio M2 Ultra 64GB RAM 1TB SSD 60-Core GPU Magic Keyboard MouseOpens in a new window or tab",
+          "price": 3149.99,
+          "itemId": "900075351604",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "Apple Mac Studio with M2 Ultra (24/60, 64GB RAM 1TB SSD) in Excellent Condition!Opens in a new window or tab",
-          "price": 2700,
-          "itemId": "327415203922",
-          "soldDate": "Sold  Oct 31, 2026"
-        },
-        {
-          "title": "Mac Studio (2023) – Apple M2 Ultra 24-Core CPU • 60-Core GPU – 64GB RAM 1TB SSDOpens in a new window or tab",
-          "price": 3899,
-          "itemId": "257626520612",
-          "soldDate": "Sold  Jul 18, 2026"
-        },
-        {
-          "title": "Apple Mac Studio (1TB SSD, M2 Ultra 24C CPU 60C GPU, 64GB) - MQH63LL/AOpens in a new window or tab",
-          "price": 3199,
-          "itemId": "137860720593",
-          "soldDate": "Sold  Oct 29, 2026"
+          "title": "Apple Mac Studio M2 Ultra 24-Core 64GB RAM 1TB SSD 60-Core GPUOpens in a new window or tab",
+          "price": 3099,
+          "itemId": "257814228598",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
           "title": "Apple Mac Studio 2023 M2 Ultra 24-Core CPU 60-Core GPU 64GB RAM 1TB SSDOpens in a new window or tab",
-          "price": 3250,
-          "itemId": "227485652602",
-          "soldDate": "Sold  Aug 21, 2026"
+          "price": 2800,
+          "itemId": "880092798734",
+          "soldDate": "Sold  Nov 7, 2026"
+        },
+        {
+          "title": "Apple Mac Studio M2 Ultra 24-Core CPU 76-Core GPU 64GB RAM 1TB SSD - NEW SEALED⁠Opens in a new window or tab",
+          "price": 3500,
+          "itemId": "147597112420",
+          "soldDate": "Sold  Nov 6, 2026"
+        },
+        {
+          "title": "Apple Mac Studio (1TB SSD, M2 Ultra, 64GB) Silver - MQH63LL/A (June, 2023)Opens in a new window or tab",
+          "price": 2649,
+          "itemId": "920098815322",
+          "soldDate": "Sold  Nov 3, 2026"
         }
       ]
     },
@@ -456,45 +456,45 @@
       "id": "rtx-5090",
       "name": "NVIDIA GeForce RTX 5090",
       "vram": 32,
-      "currentPrice": 6500,
-      "sampleCount": 55,
-      "proposedPrice": 6450,
-      "priceLow": 5001,
-      "priceHigh": 7500,
-      "changePct": -0.8,
+      "currentPrice": 6450,
+      "sampleCount": 50,
+      "proposedPrice": 6500,
+      "priceLow": 5810,
+      "priceHigh": 7450,
+      "changePct": 0.8,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "55 sold listings (median $6450).",
+      "notes": "50 sold listings (median $6500).",
       "recentSamples": [
         {
-          "title": "New ListingGigabyte GeForce RTX 5090 Gaming OC 32GB GDDR7 Graphics CardOpens in a new window or tab",
-          "price": 4500,
-          "itemId": "168831509737",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "ASUS TUF Gaming NVIDIA GeForce RTX 5090 32GB GDDR7 PCIe 5.0 DLSS 4Opens in a new window or tab",
+          "price": 6500,
+          "itemId": "227594796691",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ZOTAC Geforce RTX 5090 Solid OC 32GB GDDR7 FAST SHIPPINGOpens in a new window or tab",
-          "price": 6199.95,
-          "itemId": "267808236146",
-          "soldDate": "Sold  Oct 8, 2026"
+          "title": "New ListingPNY Nvidia GeForce RTX 5090 32GBOpens in a new window or tab",
+          "price": 5000,
+          "itemId": "800897292134",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "NVIDIA GeForce RTX 5090 32GB Founders Edition Graphics CardOpens in a new window or tab",
-          "price": 7299,
-          "itemId": "880060024393",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "PNY NVIDIA GeForce RTX 5090 ARGB Epic-X OC 32GB GDDR7 PCIe 5.0 GPU SealedOpens in a new window or tab",
+          "price": 3500,
+          "itemId": "117134301713",
+          "soldDate": "Sold  Apr 20, 2026"
         },
         {
-          "title": "New ListingNVIDIA GeForce RTX 5090 FE Founders Edition 32GB GDDR7 AI GPU Graphics CardOpens in a new window or tab",
-          "price": 6999,
-          "itemId": "206667573195",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "New ListingNVIDIA GeForce RTX 5090 Founders Edition 32GB GDDR7 – Excellent ConditionOpens in a new window or tab",
+          "price": 6299,
+          "itemId": "900076340513",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "PNY GeForce RTX 5090 ARGB EPIC-X RGB OC 32GB Graphics CardOpens in a new window or tab",
-          "price": 3999.95,
-          "itemId": "198419268962",
-          "soldDate": "Sold  Jun 11, 2026"
+          "title": "New ListingMSI Vanguard GeForce RTX 5090 32GB GDDR7 Graphics Card  ✅Opens in a new window or tab",
+          "price": 7200,
+          "itemId": "198781953937",
+          "soldDate": "Sold  Nov 9, 2026"
         }
       ]
     },
@@ -502,45 +502,45 @@
       "id": "rtx-5080",
       "name": "NVIDIA GeForce RTX 5080",
       "vram": 16,
-      "currentPrice": 1600,
-      "sampleCount": 45,
-      "proposedPrice": 1899,
-      "priceLow": 1499,
-      "priceHigh": 2100,
-      "changePct": 18.7,
+      "currentPrice": 1899,
+      "sampleCount": 48,
+      "proposedPrice": 1900,
+      "priceLow": 1750,
+      "priceHigh": 2200,
+      "changePct": 0.1,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "45 sold listings (median $1899).",
+      "notes": "48 sold listings (median $1899.99).",
       "recentSamples": [
         {
-          "title": "PNY NVIDIA GeForce RTX 5080 16GB GDDR7 OC Ray Tracing DLSS 4 GPUOpens in a new window or tab",
-          "price": 1869,
-          "itemId": "128160153529",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "PNY NVIDIA GeForce RTX 5080 16GB GDDR7 G-SYNC DLSS Tri-Fan Stealth Graphics CardOpens in a new window or tab",
+          "price": 1800,
+          "itemId": "267833694162",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ASUS TUF Gaming NVIDIA GeForce RTX 5080 16GB GDDR7 PCIE 5.0 Graphics CardOpens in a new window or tab",
+          "title": "ASUS Prime OC Edition - GeForce RTX 5080 16GB GDDR7 Graphics CardOpens in a new window or tab",
+          "price": 2049.99,
+          "itemId": "168837489030",
+          "soldDate": "Sold  Nov 9, 2026"
+        },
+        {
+          "title": "GIGABYTE NVIDIA GeForce RTX 5080 16GB GDDR7 Invoice IncludedOpens in a new window or tab",
           "price": 2000,
-          "itemId": "287692640548",
-          "soldDate": "Sold  Nov 1, 2026"
+          "itemId": "366789487042",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "GIGABYTE GeForce RTX 5080 WINDFORCE OC 16GB GDDR7Opens in a new window or tab",
-          "price": 1199.95,
-          "itemId": "117240661417",
-          "soldDate": "Sold  Jun 16, 2026"
+          "title": "New ListingPNY NVIDIA GeForce RTX 5080 16GB GDDR7 OC Graphics CardOpens in a new window or tab",
+          "price": 1750,
+          "itemId": "840109567903",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "Dell OEM NVIDIA GeForce RTX 5080 16GB Graphics Card w/ 12VHPWR Adapter!Opens in a new window or tab",
-          "price": 1249.95,
-          "itemId": "137355180795",
-          "soldDate": "Sold  Jun 27, 2026"
-        },
-        {
-          "title": "MSI GeForce RTX 5080 Shadow 3X OC 16GB GDDR7Opens in a new window or tab",
-          "price": 1179.99,
-          "itemId": "198531229636",
-          "soldDate": "Sold  Aug 5, 2026"
+          "title": "MSI GeForce RTX 5080 Vanguard SOC 16GB GDDR7 Graphics Card PCIe 5.0 GPUOpens in a new window or tab",
+          "price": 2112.47,
+          "itemId": "407172630664",
+          "soldDate": "Sold  Nov 8, 2026"
         }
       ]
     },
@@ -548,45 +548,45 @@
       "id": "rtx-5060-ti-16gb",
       "name": "NVIDIA GeForce RTX 5060 Ti 16GB",
       "vram": 16,
-      "currentPrice": 700,
-      "sampleCount": 58,
-      "proposedPrice": 695,
-      "priceLow": 600,
-      "priceHigh": 750,
-      "changePct": -0.7,
+      "currentPrice": 695,
+      "sampleCount": 59,
+      "proposedPrice": 700,
+      "priceLow": 518,
+      "priceHigh": 755,
+      "changePct": 0.7,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "58 sold listings (median $695).",
+      "notes": "59 sold listings (median $700).",
       "recentSamples": [
         {
-          "title": "New ListingMSI SHADOW 2X GeForce RTX 5060 Ti 16 GB GDDR7Opens in a new window or tab",
-          "price": 600,
-          "itemId": "407332061940",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "ZOTAC GAMING NVIDIA GeForce RTX 5060 Ti 16gb Twin Edge OCOpens in a new window or tab",
+          "price": 500,
+          "itemId": "366783634066",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ASUS NVIDIA GeForce RTX 5060 Ti Dual OC  16GB GDDR7 Graphics Card (Missing I/O)Opens in a new window or tab",
-          "price": 679.99,
-          "itemId": "800854054605",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "nvidia geforce rtx 5060 ti 16 gb PC graphics cardOpens in a new window or tab",
+          "price": 725,
+          "itemId": "900075860368",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "New ListingMSI SHADOW 2X GeForce RTX 5060 Ti 16 GB GDDR7Opens in a new window or tab",
-          "price": 650,
-          "itemId": "407331744014",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "PNY GeForce RTX 5060 Ti OC Overclocked 16GB RAM Graphics Card GPUOpens in a new window or tab",
+          "price": 739,
+          "itemId": "237138190772",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "ASUS Dual GeForce RTX 5060 Ti OC Edition 16GB GDDR7Opens in a new window or tab",
-          "price": 549.95,
-          "itemId": "198485683399",
-          "soldDate": "Sold  Jul 21, 2026"
+          "title": "PNY GeForce RTX 5060 Ti 16GB GDDR7 Graphics Card GMR5060TE5LGFT2AKTV18AJAOpens in a new window or tab",
+          "price": 724.99,
+          "itemId": "128177672230",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "MSI NVIDIA GeForce RTX 5060 Ti 16G SHADOW 2X OC PLUS (16GB GDDR7 VRAM)Opens in a new window or tab",
-          "price": 701,
-          "itemId": "117489397068",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "NVIDIA GeForce RTX 5060 Ti 16GB GDDR7 Graphics Card DACT1250-7663BLK-PUSOpens in a new window or tab",
+          "price": 749.99,
+          "itemId": "137898967837",
+          "soldDate": "Sold  Nov 7, 2026"
         }
       ]
     },
@@ -594,45 +594,45 @@
       "id": "rtx-pro-6000-blackwell",
       "name": "NVIDIA RTX PRO 6000 Blackwell (96GB)",
       "vram": 96,
-      "currentPrice": 15900,
-      "sampleCount": 41,
-      "proposedPrice": 15750,
+      "currentPrice": 15750,
+      "sampleCount": 43,
+      "proposedPrice": 15800,
       "priceLow": 13000,
       "priceHigh": 16850,
-      "changePct": -0.9,
+      "changePct": 0.3,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "41 sold listings (median $15750).",
+      "notes": "43 sold listings (median $15800).",
       "recentSamples": [
         {
-          "title": "New ListingNVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 Workstation Edition 600W GPUOpens in a new window or tab",
-          "price": 15500,
-          "itemId": "137893355027",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 Workstation Edition OEM ExcOpens in a new window or tab",
+          "price": 15999.94,
+          "itemId": "127800980538",
+          "soldDate": "Sold  May 1, 2026"
         },
         {
-          "title": "NVIDIA RTX Pro 6000 Blackwell Workstation Edition 96GB GPU Graphics CardOpens in a new window or tab",
-          "price": 15600,
-          "itemId": "257820662600",
-          "soldDate": "Sold  Nov 1, 2026"
+          "title": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition - 600W - 96GB GDDR7 ECCOpens in a new window or tab",
+          "price": 15999,
+          "itemId": "327445109009",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 AI GPU Workstation Edition - ExcellentOpens in a new window or tab",
-          "price": 15750,
-          "itemId": "128165218363",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "NVIDIA RTX Pro 6000 Blackwell Workstation 96GB GDDR7 Graphics Card- ExcellentOpens in a new window or tab",
+          "price": 15999,
+          "itemId": "227229584979",
+          "soldDate": "Sold  Nov 6, 2026"
         },
         {
-          "title": "NVIDIA RTX Pro 6000 Blackwell Workstation Edition 96GB DDR7 AI vGPU Graphics CarOpens in a new window or tab",
-          "price": 14800,
-          "itemId": "336857801783",
-          "soldDate": "Sold  Oct 29, 2026"
+          "title": "PNY NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 NEW Workstation Edition 600W PCIe 5Opens in a new window or tab",
+          "price": 15999,
+          "itemId": "267827553100",
+          "soldDate": "Sold  Nov 5, 2026"
         },
         {
-          "title": "PNY NVIDIA RTX PRO 6000 Blackwell Workstation 96GB GDDR7 Graphics Card Brand NewOpens in a new window or tab",
-          "price": 15000,
-          "itemId": "327429013966",
-          "soldDate": "Sold  Oct 29, 2026"
+          "title": "NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 Workstation Edition 600W GPUOpens in a new window or tab",
+          "price": 15499.99,
+          "itemId": "377612510052",
+          "soldDate": "Sold  Nov 4, 2026"
         }
       ]
     },
@@ -640,16 +640,22 @@
       "id": "arc-pro-b60",
       "name": "Intel Arc Pro B60 24GB",
       "vram": 24,
-      "currentPrice": 750,
+      "currentPrice": 797,
       "sampleCount": 11,
       "proposedPrice": 797,
       "priceLow": 610,
       "priceHigh": 1047,
-      "changePct": 6.3,
+      "changePct": 0,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
       "notes": "11 sold listings (median $796.88).",
       "recentSamples": [
+        {
+          "title": "ASRock B60 Intel Arc Pro B60 B60 CT 24G 24GB 192-bit GDDR6 PCI Express 5.0 x8 GrOpens in a new window or tab",
+          "price": 1046.99,
+          "itemId": "297951440555",
+          "soldDate": "Sold  Nov 3, 2026"
+        },
         {
           "title": "ASRock Intel Arc Pro B60 Creator 24GB GDDR6 GPU NEW SEALED B60 CT 24GOpens in a new window or tab",
           "price": 879.99,
@@ -673,12 +679,6 @@
           "price": 638,
           "itemId": "198745087474",
           "soldDate": "Sold  Oct 25, 2026"
-        },
-        {
-          "title": "ASRock B60 Intel Arc Pro B60 B60 CT 24G 24GB 192-bit GDDR6 PCI Express 5.0 x8 GrOpens in a new window or tab",
-          "price": 1046.99,
-          "itemId": "297951440555",
-          "soldDate": "Sold  Oct 17, 2026"
         }
       ]
     },
@@ -686,45 +686,45 @@
       "id": "radeon-ai-pro-r9700",
       "name": "AMD Radeon AI PRO R9700 32GB",
       "vram": 32,
-      "currentPrice": 1731,
-      "sampleCount": 41,
-      "proposedPrice": 1750,
-      "priceLow": 1339,
-      "priceHigh": 2004,
-      "changePct": 1.1,
+      "currentPrice": 1750,
+      "sampleCount": 43,
+      "proposedPrice": 1800,
+      "priceLow": 1400,
+      "priceHigh": 2247,
+      "changePct": 2.9,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "41 sold listings (median $1750).",
+      "notes": "43 sold listings (median $1800).",
       "recentSamples": [
         {
-          "title": "ASUS Turbo Radeon AI PRO R9700 32GB Graphics CardOpens in a new window or tab",
-          "price": 1800,
-          "itemId": "880032235835",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "AMD Radeon AI PRO R9700 – 32 GB – erst 3 Monate alt, top Zustand – nur SelbstabhOpens in a new window or tab",
+          "price": 1850,
+          "itemId": "287712231027",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "Gigabyte Radeon AI PRO R9700 AI TOP 32GB GPU Graphics Card Deep LearningOpens in a new window or tab",
+          "title": "Powercolor radeon ai pro r9700 32 gbOpens in a new window or tab",
+          "price": 2300,
+          "itemId": "940062981460",
+          "soldDate": "Sold  Nov 6, 2026"
+        },
+        {
+          "title": "ASUS Radeon AI PRO 32GB R9700 GDDR6 Workstation AI Gaming Graphics Card - MintOpens in a new window or tab",
+          "price": 2250,
+          "itemId": "227598677325",
+          "soldDate": "Sold  Nov 5, 2026"
+        },
+        {
+          "title": "ASRock AMD Radeon AI Pro R9700 32GBOpens in a new window or tab",
+          "price": 2000,
+          "itemId": "900066229189",
+          "soldDate": "Sold  Nov 4, 2026"
+        },
+        {
+          "title": "ASRock Creator Radeon AI Pro R9700 32GB 256bit GDDR6 PCIE 5.0x16 Graphics CardOpens in a new window or tab",
           "price": 2247,
-          "itemId": "820088210168",
-          "soldDate": "Sold  Oct 31, 2026"
-        },
-        {
-          "title": "ASRock Creator Radeon AI Pro R9700 CT 32GB 256bit GDDR6 PCIE 5.0x16 Graphic CardOpens in a new window or tab",
-          "price": 2200,
-          "itemId": "257825850663",
-          "soldDate": "Sold  Oct 30, 2026"
-        },
-        {
-          "title": "ASRock Creator Radeon AI Pro R9700 CT 32GB 256bit GDDR6 PCIE 5.0x16 Graphic CardOpens in a new window or tab",
-          "price": 2200,
-          "itemId": "257823853989",
-          "soldDate": "Sold  Oct 30, 2026"
-        },
-        {
-          "title": "AMD Radeon AI Pro R9700 32GB GDDR6 Workstation Graphics Card OEMOpens in a new window or tab",
-          "price": 2003.72,
-          "itemId": "117489366149",
-          "soldDate": "Sold  Oct 30, 2026"
+          "itemId": "327433701321",
+          "soldDate": "Sold  Nov 4, 2026"
         }
       ]
     },
@@ -732,45 +732,45 @@
       "id": "strix-halo-128gb",
       "name": "AMD Ryzen AI Max+ 395 Mini PC (128GB)",
       "vram": 128,
-      "currentPrice": 3049,
-      "sampleCount": 43,
-      "proposedPrice": 3100,
+      "currentPrice": 3100,
+      "sampleCount": 46,
+      "proposedPrice": 3199,
       "priceLow": 2899,
-      "priceHigh": 3616,
-      "changePct": 1.7,
+      "priceHigh": 3605,
+      "changePct": 3.2,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "43 sold listings (median $3100).",
+      "notes": "46 sold listings (median $3199).",
       "recentSamples": [
         {
-          "title": "NIMO Mini PC Desktop, AMD Ryzen AI Max+ 395 128GB LPDDR5 8000MHz RAM 1TB SSDOpens in a new window or tab",
-          "price": 3699.99,
-          "itemId": "236729525186",
-          "soldDate": "Sold  May 3, 2026"
+          "title": "GMKtec EVO-X2 AI Mini PC Ryzen Al Max+ 395 Superchip 128GB LPDDR5X 2TB SSDOpens in a new window or tab",
+          "price": 3200,
+          "itemId": "860119153990",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "GMKtec EVO-X3 Mini PC AMD Ryzen AI Max+ 395 128GB LPDDR5X RAM 2TB SSD OCuLinkOpens in a new window or tab",
-          "price": 3999.99,
-          "itemId": "820061029264",
-          "soldDate": "Sold  Oct 28, 2026"
+          "title": "GEEKOM A9 Mega AI Mini PC with AMD Ryzen Al Max+ 395 - 128GB LPDDR5x AI RAMOpens in a new window or tab",
+          "price": 3800,
+          "itemId": "117316787713",
+          "soldDate": "Sold  Nov 7, 2026"
         },
         {
-          "title": "GMKtec EVO-X2 AI Mini PC AMD Ryzen AI Max+ 395 Up to 5.1Ghz 128GB RAM 2TB SSDOpens in a new window or tab",
-          "price": 2999,
-          "itemId": "287679597852",
-          "soldDate": "Sold  Oct 27, 2026"
+          "title": "NIMO Mini AI PC Desktop AMD Ryzen AI Max+ 395 128GB LPDDR5 8000MHz RAM 1TB SSDOpens in a new window or tab",
+          "price": 3499.99,
+          "itemId": "236800925081",
+          "soldDate": "Sold  May 7, 2026"
         },
         {
-          "title": "Bosgame M5 Ryzen AI Max+ 395 128GB 2TB Mini PC | Strix HaloOpens in a new window or tab",
-          "price": 2750,
-          "itemId": "940044611663",
-          "soldDate": "Sold  Oct 27, 2026"
+          "title": "Bosgame M5 Ryzen AI Max+ 395 128GB 2TB Mini PC | Strix Halo | Tested WorkingOpens in a new window or tab",
+          "price": 3299,
+          "itemId": "298743359001",
+          "soldDate": "Sold  Nov 4, 2026"
         },
         {
-          "title": "GMKtec EVO-X2 AI Mini PC Ryzen Al Max+ 395 128GB LPDDR5X 2TB+1TB SSDOpens in a new window or tab",
-          "price": 2400,
-          "itemId": "257812205396",
-          "soldDate": "Sold  Oct 22, 2026"
+          "title": "READ Bosgame AI Mini PC Ryzen AI Max+ 395 Blazing Fast 128GB LPDDR5 & 2 TB SDDOpens in a new window or tab",
+          "price": 1999.95,
+          "itemId": "206376949156",
+          "soldDate": "Sold  Jun 28, 2026"
         }
       ]
     },
@@ -778,45 +778,45 @@
       "id": "dgx-spark",
       "name": "NVIDIA DGX Spark (128GB system)",
       "vram": 128,
-      "currentPrice": 7000,
-      "sampleCount": 49,
-      "proposedPrice": 6900,
-      "priceLow": 6200,
-      "priceHigh": 7499,
-      "changePct": -1.4,
+      "currentPrice": 6900,
+      "sampleCount": 47,
+      "proposedPrice": 6600,
+      "priceLow": 6000,
+      "priceHigh": 7099,
+      "changePct": -4.3,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "49 sold listings (median $6900).",
+      "notes": "47 sold listings (median $6600).",
       "recentSamples": [
         {
-          "title": "NVIDIA DGX Spark Mini Server Grace Blackwell Superchip 128GB DDR5Opens in a new window or tab",
-          "price": 5999,
-          "itemId": "880068851016",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "NVIDIA DGX Spark 4 TB NVMe 128 GB DDR5x Unified 20 core Arm - NEW SHIPS NOW READOpens in a new window or tab",
+          "price": 7899.99,
+          "itemId": "327419940273",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "Acer Veriton GN100 Mini PC 128GB RAM 2TB NVMe Wi‑Fi 7 10GbE  (DGX Spark Nvidia)Opens in a new window or tab",
-          "price": 6349.99,
-          "itemId": "900004310131",
-          "soldDate": "Sold  Oct 11, 2026"
+          "title": "NVIDIA DGX Spark 128GB/4TB — AI Workstation (GB10 Grace Blackwell)Opens in a new window or tab",
+          "price": 6000,
+          "itemId": "198781871196",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "NVIDIA DGX Spark 20 core Arm, 10 Cortex-X925 + 10 Cortex-A725 Arm; 128GB LPDDR5xOpens in a new window or tab",
+          "title": "Dell Pro Max GB10 NVIDIA DGX Spark AI Desktop 128GB 2TB SSD FCM1253Opens in a new window or tab",
+          "price": 6300,
+          "itemId": "257829015913",
+          "soldDate": "Sold  Nov 8, 2026"
+        },
+        {
+          "title": "NVIDIA DGX Spark Founders GB10 Grace Blackwell 128GB LPDDR5X 4TB - ExcellentOpens in a new window or tab",
+          "price": 6999,
+          "itemId": "206642118988",
+          "soldDate": "Sold  Nov 8, 2026"
+        },
+        {
+          "title": "Nvidia DGX Spark P4242 GB10 Grace Blackwell Superchip 3.80GHz 128GB RAM 4TB SSDOpens in a new window or tab",
           "price": 6699.99,
-          "itemId": "920056487632",
-          "soldDate": "Sold  Oct 28, 2026"
-        },
-        {
-          "title": "NVIDIA DGX Spark GB10 128GB 4TB + Transferable 3yr Accidental Damage PlanOpens in a new window or tab",
-          "price": 6500,
-          "itemId": "800841270727",
-          "soldDate": "Sold  Oct 28, 2026"
-        },
-        {
-          "title": "NVIDIA DGX Spark 4TB 128GB GB10 Grace Blackwell AI Supercomputer NEW/SEALEDOpens in a new window or tab",
-          "price": 6900,
-          "itemId": "206651010959",
-          "soldDate": "Sold  Oct 28, 2026"
+          "itemId": "237165958390",
+          "soldDate": "Sold  Nov 6, 2026"
         }
       ]
     },
@@ -824,114 +824,114 @@
       "id": "mac-studio-m3-ultra",
       "name": "Apple Mac Studio M3 Ultra (96GB)",
       "vram": 96,
-      "currentPrice": 4550,
-      "sampleCount": 57,
-      "proposedPrice": 4575,
+      "currentPrice": 4575,
+      "sampleCount": 58,
+      "proposedPrice": 4500,
       "priceLow": 4150,
-      "priceHigh": 5215,
-      "changePct": 0.5,
+      "priceHigh": 5200,
+      "changePct": -1.6,
       "status": "APPROVED",
       "source": "REAL_EBAY_SOLD",
-      "notes": "57 sold listings (median $4575).",
+      "notes": "58 sold listings (median $4500).",
       "recentSamples": [
         {
-          "title": "Apple Mac Studio M3 Ultra 28C CPU/60C GPU 96GB 1TB SSD 10GbE SEALED FU973LL/AOpens in a new window or tab",
-          "price": 4549.99,
-          "itemId": "206272589958",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Apple Mac Studio M3 Ultra 28-Core 60-Core 96GB RAM 1TB SSD 10GbE ExcellentOpens in a new window or tab",
+          "price": 4289,
+          "itemId": "237168588701",
+          "soldDate": "Sold  Nov 9, 2026"
         },
         {
-          "title": "Mac Studio M3 Ultra, 96GB RAM, 2TB SSD, 60 Core GPU, Local AI Machine.Opens in a new window or tab",
-          "price": 5499.99,
-          "itemId": "398312161639",
-          "soldDate": "Sold  Oct 31, 2026"
+          "title": "Apple Mac Studio M3 Ultra 28-Core 60-Core 96GB RAM 1TB SSD 10GbE ExcellentOpens in a new window or tab",
+          "price": 4299,
+          "itemId": "117508197936",
+          "soldDate": "Sold  Nov 8, 2026"
         },
         {
-          "title": "Apple Mac Studio M3 Ultra 60-Core 96GB RAM 1TB SSD 2025 Certified RefurbishedOpens in a new window or tab",
-          "price": 5099,
-          "itemId": "307025161170",
-          "soldDate": "Sold  Oct 30, 2026"
+          "title": "Apple Mac Studio M3 Ultra 28/60 core 96GB RAM 1TB SSD Silver MU973LL/A - A3389Opens in a new window or tab",
+          "price": 4049,
+          "itemId": "198752502711",
+          "soldDate": "Sold  Nov 4, 2026"
         },
         {
-          "title": "Mac Studio 2025 M3 Ultra 28-Core CPU 60-Core GPU 96GB 1TB - ExcellentOpens in a new window or tab",
-          "price": 4529.99,
-          "itemId": "297490485196",
-          "soldDate": "Sold  Oct 30, 2026"
+          "title": "Apple Mac Studio M3 Ultra 96GB RAM 1TB SSD 28-core CPU 60-core GPU SAME DAY SHIPOpens in a new window or tab",
+          "price": 4300,
+          "itemId": "800798345861",
+          "soldDate": "Sold  Nov 2, 2026"
         },
         {
-          "title": "Apple Mac Studio 2025 A3389 M3 Ultra 28 Core CPU 96GB RAM 1TB SSD ExcellentOpens in a new window or tab",
-          "price": 3676.95,
-          "itemId": "307221070180",
-          "soldDate": "Sold  Oct 28, 2026"
+          "title": "Apple Mac Studio M3 Ultra Mini Desktop 96GB RAM 1TB SSD Silver Wi-Fi BTOpens in a new window or tab",
+          "price": 4600,
+          "itemId": "198745236529",
+          "soldDate": "Sold  Nov 2, 2026"
         }
       ]
     }
   ],
-  "appliedAt": "2026-11-02T01:54:59.658Z",
+  "appliedAt": "2026-11-10T01:55:13.629Z",
   "appliedCards": [
     {
       "id": "rtx-3090",
       "name": "NVIDIA GeForce RTX 3090",
-      "oldPrice": 750,
-      "newPrice": 860,
-      "diff": 110,
-      "pricePerGb": 35.83
+      "oldPrice": 860,
+      "newPrice": 879,
+      "diff": 19,
+      "pricePerGb": 36.63
     },
     {
       "id": "rtx-4090",
       "name": "NVIDIA GeForce RTX 4090",
       "oldPrice": 1550,
-      "newPrice": 1550,
-      "diff": 0,
-      "pricePerGb": 64.58
+      "newPrice": 1750,
+      "diff": 200,
+      "pricePerGb": 72.92
     },
     {
       "id": "rx-7900-xtx",
       "name": "AMD Radeon RX 7900 XTX",
-      "oldPrice": 975,
-      "newPrice": 1100,
-      "diff": 125,
-      "pricePerGb": 45.83
+      "oldPrice": 1100,
+      "newPrice": 1200,
+      "diff": 100,
+      "pricePerGb": 50
     },
     {
       "id": "rtx-4060-ti-16gb",
       "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
-      "oldPrice": 480,
+      "oldPrice": 470,
       "newPrice": 470,
-      "diff": -10,
+      "diff": 0,
       "pricePerGb": 29.38
     },
     {
       "id": "rtx-3060-12gb",
       "name": "NVIDIA GeForce RTX 3060 12GB",
       "oldPrice": 330,
-      "newPrice": 330,
-      "diff": 0,
-      "pricePerGb": 27.5
+      "newPrice": 335,
+      "diff": 5,
+      "pricePerGb": 27.92
     },
     {
       "id": "tesla-p40",
       "name": "NVIDIA Tesla P40 24GB",
-      "oldPrice": 299,
-      "newPrice": 290,
-      "diff": -9,
-      "pricePerGb": 12.08
+      "oldPrice": 290,
+      "newPrice": 299,
+      "diff": 9,
+      "pricePerGb": 12.46
     },
     {
       "id": "rtx-4080-super",
       "name": "NVIDIA GeForce RTX 4080 Super 16GB",
-      "oldPrice": 1150,
+      "oldPrice": 1200,
       "newPrice": 1200,
-      "diff": 50,
+      "diff": 0,
       "pricePerGb": 75
     },
     {
       "id": "rtx-3080-10gb",
       "name": "NVIDIA GeForce RTX 3080 10GB",
       "oldPrice": 400,
-      "newPrice": 400,
-      "diff": 0,
-      "pricePerGb": 40
+      "newPrice": 409,
+      "diff": 9,
+      "pricePerGb": 40.9
     },
     {
       "id": "rtx-a5000",
@@ -944,82 +944,82 @@
     {
       "id": "mac-studio-m2-ultra",
       "name": "Apple Mac Studio M2 Ultra (64GB, used)",
-      "oldPrice": 3350,
+      "oldPrice": 3300,
       "newPrice": 3300,
-      "diff": -50,
+      "diff": 0,
       "pricePerGb": 51.56
     },
     {
       "id": "rtx-5090",
       "name": "NVIDIA GeForce RTX 5090",
-      "oldPrice": 6500,
-      "newPrice": 6450,
-      "diff": -50,
-      "pricePerGb": 201.56
+      "oldPrice": 6450,
+      "newPrice": 6500,
+      "diff": 50,
+      "pricePerGb": 203.13
     },
     {
       "id": "rtx-5080",
       "name": "NVIDIA GeForce RTX 5080",
-      "oldPrice": 1600,
-      "newPrice": 1899,
-      "diff": 299,
-      "pricePerGb": 118.69
+      "oldPrice": 1899,
+      "newPrice": 1900,
+      "diff": 1,
+      "pricePerGb": 118.75
     },
     {
       "id": "rtx-5060-ti-16gb",
       "name": "NVIDIA GeForce RTX 5060 Ti 16GB",
-      "oldPrice": 700,
-      "newPrice": 695,
-      "diff": -5,
-      "pricePerGb": 43.44
+      "oldPrice": 695,
+      "newPrice": 700,
+      "diff": 5,
+      "pricePerGb": 43.75
     },
     {
       "id": "rtx-pro-6000-blackwell",
       "name": "NVIDIA RTX PRO 6000 Blackwell (96GB)",
-      "oldPrice": 15900,
-      "newPrice": 15750,
-      "diff": -150,
-      "pricePerGb": 164.06
+      "oldPrice": 15750,
+      "newPrice": 15800,
+      "diff": 50,
+      "pricePerGb": 164.58
     },
     {
       "id": "arc-pro-b60",
       "name": "Intel Arc Pro B60 24GB",
-      "oldPrice": 750,
+      "oldPrice": 797,
       "newPrice": 797,
-      "diff": 47,
+      "diff": 0,
       "pricePerGb": 33.21
     },
     {
       "id": "radeon-ai-pro-r9700",
       "name": "AMD Radeon AI PRO R9700 32GB",
-      "oldPrice": 1731,
-      "newPrice": 1750,
-      "diff": 19,
-      "pricePerGb": 54.69
+      "oldPrice": 1750,
+      "newPrice": 1800,
+      "diff": 50,
+      "pricePerGb": 56.25
     },
     {
       "id": "strix-halo-128gb",
       "name": "AMD Ryzen AI Max+ 395 Mini PC (128GB)",
-      "oldPrice": 3049,
-      "newPrice": 3100,
-      "diff": 51,
-      "pricePerGb": 24.22
+      "oldPrice": 3100,
+      "newPrice": 3199,
+      "diff": 99,
+      "pricePerGb": 24.99
     },
     {
       "id": "dgx-spark",
       "name": "NVIDIA DGX Spark (128GB system)",
-      "oldPrice": 7000,
-      "newPrice": 6900,
-      "diff": -100,
-      "pricePerGb": 53.91
+      "oldPrice": 6900,
+      "newPrice": 6600,
+      "diff": -300,
+      "pricePerGb": 51.56
     },
     {
       "id": "mac-studio-m3-ultra",
       "name": "Apple Mac Studio M3 Ultra (96GB)",
-      "oldPrice": 4550,
-      "newPrice": 4575,
-      "diff": 25,
-      "pricePerGb": 47.66
+      "oldPrice": 4575,
+      "newPrice": 4500,
+      "diff": -75,
+      "pricePerGb": 46.88
     }
   ]
 }

@@ -652,5 +652,162 @@
         "pricePerGb": 47.66
       }
     ]
+  },
+  {
+    "appliedAt": "2026-11-10T01:55:13.621Z",
+    "updates": [
+      {
+        "id": "rtx-3090",
+        "name": "NVIDIA GeForce RTX 3090",
+        "oldPrice": 860,
+        "newPrice": 879,
+        "diff": 19,
+        "pricePerGb": 36.63
+      },
+      {
+        "id": "rtx-4090",
+        "name": "NVIDIA GeForce RTX 4090",
+        "oldPrice": 1550,
+        "newPrice": 1750,
+        "diff": 200,
+        "pricePerGb": 72.92
+      },
+      {
+        "id": "rx-7900-xtx",
+        "name": "AMD Radeon RX 7900 XTX",
+        "oldPrice": 1100,
+        "newPrice": 1200,
+        "diff": 100,
+        "pricePerGb": 50
+      },
+      {
+        "id": "rtx-4060-ti-16gb",
+        "name": "NVIDIA GeForce RTX 4060 Ti 16GB",
+        "oldPrice": 470,
+        "newPrice": 470,
+        "diff": 0,
+        "pricePerGb": 29.38
+      },
+      {
+        "id": "rtx-3060-12gb",
+        "name": "NVIDIA GeForce RTX 3060 12GB",
+        "oldPrice": 330,
+        "newPrice": 335,
+        "diff": 5,
+        "pricePerGb": 27.92
+      },
+      {
+        "id": "tesla-p40",
+        "name": "NVIDIA Tesla P40 24GB",
+        "oldPrice": 290,
+        "newPrice": 299,
+        "diff": 9,
+        "pricePerGb": 12.46
+      },
+      {
+        "id": "rtx-4080-super",
+        "name": "NVIDIA GeForce RTX 4080 Super 16GB",
+        "oldPrice": 1200,
+        "newPrice": 1200,
+        "diff": 0,
+        "pricePerGb": 75
+      },
+      {
+        "id": "rtx-3080-10gb",
+        "name": "NVIDIA GeForce RTX 3080 10GB",
+        "oldPrice": 400,
+        "newPrice": 409,
+        "diff": 9,
+        "pricePerGb": 40.9
+      },
+      {
+        "id": "rtx-a5000",
+        "name": "NVIDIA RTX A5000 24GB",
+        "oldPrice": 1505,
+        "newPrice": 1505,
+        "diff": 0,
+        "pricePerGb": 62.71
+      },
+      {
+        "id": "mac-studio-m2-ultra",
+        "name": "Apple Mac Studio M2 Ultra (64GB, used)",
+        "oldPrice": 3300,
+        "newPrice": 3300,
+        "diff": 0,
+        "pricePerGb": 51.56
+      },
+      {
+        "id": "rtx-5090",
+        "name": "NVIDIA GeForce RTX 5090",
+        "oldPrice": 6450,
+        "newPrice": 6500,
+        "diff": 50,
+        "pricePerGb": 203.13
+      },
+      {
+        "id": "rtx-5080",
+        "name": "NVIDIA GeForce RTX 5080",
+        "oldPrice": 1899,
+        "newPrice": 1900,
+        "diff": 1,
+        "pricePerGb": 118.75
+      },
+      {
+        "id": "rtx-5060-ti-16gb",
+        "name": "NVIDIA GeForce RTX 5060 Ti 16GB",
+        "oldPrice": 695,
+        "newPrice": 700,
+        "diff": 5,
+        "pricePerGb": 43.75
+      },
+      {
+        "id": "rtx-pro-6000-blackwell",
+        "name": "NVIDIA RTX PRO 6000 Blackwell (96GB)",
+        "oldPrice": 15750,
+        "newPrice": 15800,
+        "diff": 50,
+        "pricePerGb": 164.58
+      },
+      {
+        "id": "arc-pro-b60",
+        "name": "Intel Arc Pro B60 24GB",
+        "oldPrice": 797,
+        "newPrice": 797,
+        "diff": 0,
+        "pricePerGb": 33.21
+      },
+      {
+        "id": "radeon-ai-pro-r9700",
+        "name": "AMD Radeon AI PRO R9700 32GB",
+        "oldPrice": 1750,
+        "newPrice": 1800,
+        "diff": 50,
+        "pricePerGb": 56.25
+      },
+      {
+        "id": "strix-halo-128gb",
+        "name": "AMD Ryzen AI Max+ 395 Mini PC (128GB)",
+        "oldPrice": 3100,
+        "newPrice": 3199,
+        "diff": 99,
+        "pricePerGb": 24.99
+      },
+      {
+        "id": "dgx-spark",
+        "name": "NVIDIA DGX Spark (128GB system)",
+        "oldPrice": 6900,
+        "newPrice": 6600,
+        "diff": -300,
+        "pricePerGb": 51.56
+      },
+      {
+        "id": "mac-studio-m3-ultra",
+        "name": "Apple Mac Studio M3 Ultra (96GB)",
+        "oldPrice": 4575,
+        "newPrice": 4500,
+        "diff": -75,
+        "pricePerGb": 46.88
+      }
+    ]
   }
 ]
