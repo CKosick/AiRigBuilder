@@ -10,8 +10,10 @@ import {
   CUSTOM_BANDWIDTH_PRESETS,
   clampCustomUnifiedConfig,
   isIntegratedSystem,
+  gpuVendor,
   evaluatePlaygroundModels,
   computeUpgradeCandidates,
+  selectUpgradePicks,
   recommendedPsuWatts,
   renderRigPlaygroundHtml
 } from '../src/components/rigPlayground.js';
@@ -310,5 +312,100 @@ describe('Rig Playground: Custom Unified-Memory Configuration', () => {
     assert.ok(discreteHtml.includes('aria-label="GPU card count"'));
     assert.ok(discreteHtml.includes('Upgrade Engine: Best Single-Card Additions'));
     assert.ok(discreteHtml.includes('Recommended power supply'));
+  });
+});
+
+describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
+  it('derives vendor from GPU name prefix across GPUS_DATA and OWNED_GPUS_SUPPLEMENT and excludes unknown vendors', () => {
+    for (const gpu of ALL_PLAYGROUND_GPUS.filter(g => !isIntegratedSystem(g.id))) {
+      const v = gpuVendor(gpu);
+      assert.ok(v === 'NVIDIA' || v === 'AMD' || v === 'Intel', `${gpu.id} (${gpu.name}) resolves to a known discrete vendor`);
+    }
+    assert.equal(gpuVendor({ name: 'Custom Mystery Accelerator 24GB' }), null);
+    assert.equal(gpuVendor(null), null);
+    assert.deepEqual(
+      computeUpgradeCandidates({ id: 'unknown-gpu', name: 'Mystery Accelerator 24GB', vram: 24, bandwidth: 500, tdp: 250 }, 1),
+      []
+    );
+  });
+
+  it('filters RTX 3080 10GB candidates to NVIDIA only (no AMD or Intel cards)', () => {
+    const rtx3080 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3080-10gb');
+    const candidates = computeUpgradeCandidates(rtx3080, 1, { contextK: 8, kvPrecision: 'FP16' });
+
+    assert.equal(candidates.length, 12);
+    for (const c of candidates) {
+      assert.equal(gpuVendor(c.candidate), 'NVIDIA', `${c.candidate.id} must be NVIDIA`);
+      assert.notEqual(c.candidate.id, 'radeon-ai-pro-r9700');
+      assert.notEqual(c.candidate.id, 'rx-7900-xtx');
+      assert.notEqual(c.candidate.id, 'arc-pro-b60');
+    }
+
+    // Verify AMD owned GPUs only receive AMD candidates
+    const rx7800xt = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rx-7800-xt');
+    const amdCandidates = computeUpgradeCandidates(rx7800xt, 1, { contextK: 8, kvPrecision: 'FP16' });
+    assert.deepEqual(amdCandidates.map(c => c.candidate.id), ['radeon-ai-pro-r9700', 'rx-7900-xtx']);
+  });
+
+  it('selects RTX PRO 6000 as Most models unlocked and Tesla P40 as Best value for an RTX 3080 10GB, and renders value figures in every row', () => {
+    const rtx3080 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3080-10gb');
+    const candidates = computeUpgradeCandidates(rtx3080, 1, { contextK: 8, kvPrecision: 'FP16' });
+    const picks = selectUpgradePicks(candidates);
+
+    assert.equal(picks.sameCard, false);
+    assert.equal(picks.mostUnlocked.candidate.id, 'rtx-pro-6000-blackwell');
+    assert.equal(picks.mostUnlocked.unlocked, 41);
+    assert.equal(picks.mostUnlocked.cost, 15800);
+
+    assert.equal(picks.bestValue.candidate.id, 'tesla-p40');
+    assert.equal(picks.bestValue.unlocked, 27);
+    assert.equal(picks.bestValue.cost, 299);
+    assert.equal(picks.bestValue.unlocksPer1000, 90.3);
+
+    const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3080-10gb', count: 1 });
+    const upgradeSection = html.slice(
+      html.indexOf('playground-upgrade-section'),
+      html.indexOf('playground-results-grid')
+    );
+
+    const pickCards = [...upgradeSection.matchAll(/class="playground-best-upgrade-card"[^>]*data-upgrade-pick="([^"]+)"[^>]*data-candidate-id="([^"]+)"/g)];
+    assert.deepEqual(pickCards.map(m => [m[1], m[2]]), [
+      ['most-unlocked', 'rtx-pro-6000-blackwell'],
+      ['best-value', 'tesla-p40']
+    ]);
+    assert.match(upgradeSection, /Most models unlocked/);
+    assert.match(upgradeSection, /Best value/);
+    assert.match(upgradeSection, /\$15,800/);
+    assert.match(upgradeSection, /\$299/);
+    assert.match(upgradeSection, /90\.30 models unlocked \/ \$1,000/);
+    assert.doesNotMatch(upgradeSection, /Radeon|Arc Pro/i);
+
+    // Every candidate row in the full ranked table renders in unlocked-first order and includes its / $1,000 figure
+    const rowIds = [...upgradeSection.matchAll(/<tr data-candidate-id="([^"]+)">/g)].map(m => m[1]);
+    assert.deepEqual(rowIds, candidates.map(c => c.candidate.id));
+    const valueCells = [...upgradeSection.matchAll(/<td data-label="Models \/ \$1,000">([^<]+)<\/td>/g)].map(m => m[1]);
+    assert.equal(valueCells.length, candidates.length);
+    assert.equal(valueCells[0], '2.59 / $1,000');
+    assert.ok(valueCells.includes('90.30 / $1,000'));
+  });
+
+  it('renders a single headline card carrying both labels when one candidate wins both Most models unlocked and Best value', () => {
+    for (const gpuId of ['arc-pro-b60', 'radeon-ai-pro-r9700', 'rtx-pro-6000-blackwell']) {
+      const gpu = ALL_PLAYGROUND_GPUS.find(g => g.id === gpuId);
+      const candidates = computeUpgradeCandidates(gpu, 1, { contextK: 8, kvPrecision: 'FP16' });
+      const picks = selectUpgradePicks(candidates);
+      assert.equal(picks.sameCard, true, `${gpuId} has a single winner for both picks`);
+
+      const html = renderRigPlaygroundHtml({ gpuId, count: 1 });
+      const upgradeSection = html.slice(
+        html.indexOf('playground-upgrade-section'),
+        html.indexOf('playground-results-grid')
+      );
+      const pickCards = [...upgradeSection.matchAll(/class="playground-best-upgrade-card"/g)];
+      assert.equal(pickCards.length, 1, `${gpuId} renders exactly one headline card`);
+      assert.match(upgradeSection, /data-upgrade-pick="both"/);
+      assert.match(upgradeSection, /Most models unlocked/);
+      assert.match(upgradeSection, /Best value/);
+    }
   });
 });

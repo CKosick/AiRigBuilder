@@ -53,6 +53,20 @@ export function clampCustomUnifiedConfig(rawMemory, rawBandwidth) {
 export const isIntegratedSystem = (gpuId) =>
   INTEGRATED_SYSTEM_IDS.includes(gpuId) || gpuId === CUSTOM_UNIFIED_ID;
 
+/**
+ * Derives a GPU's vendor ('NVIDIA' | 'AMD' | 'Intel' | null) from its name prefix,
+ * covering both GPUS_DATA and OWNED_GPUS_SUPPLEMENT.
+ */
+export function gpuVendor(gpu) {
+  const name = typeof gpu === 'string' ? gpu : gpu?.name;
+  if (typeof name !== 'string') return null;
+  const trimmed = name.trim();
+  if (/^NVIDIA\b/i.test(trimmed)) return 'NVIDIA';
+  if (/^AMD\b/i.test(trimmed)) return 'AMD';
+  if (/^Intel\b/i.test(trimmed)) return 'Intel';
+  return null;
+}
+
 export function findPlaygroundGpu(id) {
   return PLAYGROUND_GPUS.find(g => g.id === id) || GPUS_DATA.find(g => g.id === 'rtx-3080-10gb') || GPUS_DATA[0];
 }
@@ -122,13 +136,17 @@ export function evaluatePlaygroundModels(gpuOrConfig, countOrOptions = {}, optio
 }
 
 /**
- * Upgrade engine: Evaluates adding one card from the tracked discrete GPUs
+ * Upgrade engine: Evaluates adding one same-vendor card from the tracked discrete GPUs
  * (excluding integrated systems) to the currently owned configuration.
  * Mixed add sums VRAM and uses the slower card's bandwidth.
  * Ranked by: most models unlocked desc, ties broken by unlocks per dollar desc, then lower price asc.
  */
 export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrecision = 'FP16' } = {}) {
-  if (isIntegratedSystem(ownedGpu.id)) {
+  if (!ownedGpu || isIntegratedSystem(ownedGpu.id)) {
+    return [];
+  }
+  const ownedVendor = gpuVendor(ownedGpu);
+  if (!ownedVendor) {
     return [];
   }
   const kvScale = KV_PRECISION_SCALES[kvPrecision] ?? 1.0;
@@ -145,6 +163,8 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
   const results = [];
   for (const candidate of GPUS_DATA) {
     if (isIntegratedSystem(candidate.id)) continue;
+    const candidateVendor = gpuVendor(candidate);
+    if (!candidateVendor || candidateVendor !== ownedVendor) continue;
     const newMemory = currentMemory + candidate.vram;
     const newBandwidth = Math.min(currentBandwidth, candidate.bandwidth);
     const newConfig = { memoryGb: newMemory, bandwidthGbs: newBandwidth };
@@ -165,6 +185,7 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
 
     const cost = candidate.usedStreetPrice;
     const unlocksPerDollar = cost > 0 ? (unlocked / cost) : 0;
+    const unlocksPer1000 = Number((unlocksPerDollar * 1000).toFixed(2));
 
     results.push({
       candidate,
@@ -174,6 +195,7 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
       improved,
       cost,
       unlocksPerDollar,
+      unlocksPer1000,
       totalTdp: (ownedGpu.tdp * count) + candidate.tdp,
       totalCards: count + 1
     });
@@ -187,6 +209,69 @@ export function computeUpgradeCandidates(ownedGpu, count, { contextK = 8, kvPrec
   });
 
   return results;
+}
+
+/**
+ * Selects the two headline upgrade picks from a ranked candidate list:
+ * - mostUnlocked: sort winner (most models unlocked, ties: unlocksPerDollar desc, cost asc)
+ * - bestValue: highest unlocksPerDollar among candidates that unlock >= 1 model
+ *   (ties: unlocked desc, cost asc)
+ * - sameCard: true when one candidate wins both picks
+ */
+export function selectUpgradePicks(candidates = []) {
+  const mostUnlocked = candidates[0] || null;
+  const unlocking = candidates.filter(c => c.unlocked >= 1);
+  const bestValue = unlocking.length > 0
+    ? [...unlocking].sort((a, b) => {
+      if (b.unlocksPerDollar !== a.unlocksPerDollar) return b.unlocksPerDollar - a.unlocksPerDollar;
+      if (b.unlocked !== a.unlocked) return b.unlocked - a.unlocked;
+      return a.cost - b.cost;
+    })[0]
+    : null;
+  const sameCard = Boolean(
+    mostUnlocked && bestValue && mostUnlocked.candidate.id === bestValue.candidate.id
+  );
+  return { mostUnlocked, bestValue, sameCard };
+}
+
+function renderUpgradePickCard(pick, badgesHtml, pickKind) {
+  const recommendedPsu = recommendedPsuWatts(pick.totalTdp);
+  const per1000 = (pick.unlocksPerDollar * 1000).toFixed(2);
+  return `
+    <div class="playground-best-upgrade-card" data-upgrade-pick="${pickKind}" data-candidate-id="${pick.candidate.id}">
+      <div class="best-upgrade-title-row">
+        ${badgesHtml}
+        <h3 class="best-upgrade-heading">Add 1x ${pick.candidate.name}</h3>
+      </div>
+
+      <div class="best-upgrade-grid">
+        <div class="best-upgrade-metric">
+          <span class="metric-label">Models Unlocked</span>
+          <strong class="metric-val is-good">+${pick.unlocked}</strong>
+          <span class="metric-sub">Newly fitting models</span>
+        </div>
+        <div class="best-upgrade-metric">
+          <span class="metric-label">Quality Improved</span>
+          <strong class="metric-val">+${pick.improved}</strong>
+          <span class="metric-sub">Promoted to sweet-spot quant</span>
+        </div>
+        <div class="best-upgrade-metric">
+          <span class="metric-label">Est. Used Price</span>
+          <strong class="metric-val">$${pick.cost.toLocaleString()}</strong>
+          <span class="metric-sub">${per1000} models unlocked / $1,000</span>
+        </div>
+        <div class="best-upgrade-metric">
+          <span class="metric-label">New Total VRAM</span>
+          <strong class="metric-val">${pick.newMemory} GB</strong>
+          <span class="metric-sub">at ${pick.newBandwidth} GB/s bandwidth</span>
+        </div>
+      </div>
+
+      <div class="best-upgrade-power">
+        <p><strong>Power Draw:</strong> Resulting configuration draws <strong>${pick.totalTdp}W</strong> GPU TDP. Recommended power supply: <strong>~${recommendedPsu}W PSU</strong> (total TDP + 150W system allowance, rounded up to the next 50W; rule-of-thumb estimate).</p>
+      </div>
+    </div>
+  `;
 }
 
 /**
@@ -212,14 +297,10 @@ export function renderRigPlaygroundHtml(state = {}) {
   const { runsInVram, doesNotFit } = evaluatePlaygroundModels(config, { contextK, kvPrecision });
 
   let upgrades = [];
-  let bestUpgrade = null;
-  let recommendedPsu = 0;
+  let picks = { mostUnlocked: null, bestValue: null, sameCard: false };
   if (!isIntegrated) {
     upgrades = computeUpgradeCandidates(gpu, actualCount, { contextK, kvPrecision });
-    bestUpgrade = upgrades[0];
-    if (bestUpgrade) {
-      recommendedPsu = recommendedPsuWatts(bestUpgrade.totalTdp);
-    }
+    picks = selectUpgradePicks(upgrades);
   }
 
   const memInputValue = state.customMemoryRaw !== undefined ? state.customMemoryRaw : clampedCustom.memoryGb;
@@ -348,60 +429,46 @@ export function renderRigPlaygroundHtml(state = {}) {
             </div>
           </div>
         </div>
-      ` : (bestUpgrade ? `
+      ` : (picks.mostUnlocked ? `
         <div class="playground-upgrade-section">
           <div class="selector-label">
             <span>Upgrade Engine: Best Single-Card Additions</span>
-            <span class="selector-note">Adding one discrete card from the tracker. A mixed add sums VRAM and uses the slower card's bandwidth (conservative assumption).</span>
+            <span class="selector-note">Adding one same-vendor discrete card from the tracker. A mixed add sums VRAM and uses the slower card's bandwidth (conservative assumption).</span>
           </div>
 
-          <!-- Best Upgrade Callout Card -->
-          <div class="playground-best-upgrade-card">
-            <div class="best-upgrade-title-row">
-              <span class="tier-badge-label tier-badge-budget">${icon('zap')} Best Upgrade</span>
-              <h3 class="best-upgrade-heading">Add 1x ${bestUpgrade.candidate.name}</h3>
-            </div>
-
-            <div class="best-upgrade-grid">
-              <div class="best-upgrade-metric">
-                <span class="metric-label">Models Unlocked</span>
-                <strong class="metric-val is-good">+${bestUpgrade.unlocked}</strong>
-                <span class="metric-sub">Newly fitting models</span>
-              </div>
-              <div class="best-upgrade-metric">
-                <span class="metric-label">Quality Improved</span>
-                <strong class="metric-val">+${bestUpgrade.improved}</strong>
-                <span class="metric-sub">Promoted to sweet-spot quant</span>
-              </div>
-              <div class="best-upgrade-metric">
-                <span class="metric-label">Est. Used Price</span>
-                <strong class="metric-val">$${bestUpgrade.cost.toLocaleString()}</strong>
-                <span class="metric-sub">${(bestUpgrade.unlocksPerDollar * 1000).toFixed(2)} unlocks / $1,000</span>
-              </div>
-              <div class="best-upgrade-metric">
-                <span class="metric-label">New Total VRAM</span>
-                <strong class="metric-val">${bestUpgrade.newMemory} GB</strong>
-                <span class="metric-sub">at ${bestUpgrade.newBandwidth} GB/s bandwidth</span>
-              </div>
-            </div>
-
-            <!-- Power & Multi-Card Checklist -->
-            <div class="best-upgrade-power">
-              <p><strong>Power Draw:</strong> Resulting configuration draws <strong>${bestUpgrade.totalTdp}W</strong> GPU TDP. Recommended power supply: <strong>~${recommendedPsu}W PSU</strong> (total TDP + 150W system allowance, rounded up to the next 50W; rule-of-thumb estimate).</p>
-              ${bestUpgrade.totalCards >= 2 ? `
-                <div class="playground-checklist">
-                  <strong>Multi-Card Upgrade Checklist (General Guidance):</strong>
-                  <ul>
-                    <li><strong>PCIe Slot Spacing:</strong> Ensure at least 2 to 3 slots of motherboard clearance between GPUs for cooling fan intake airflow.</li>
-                    <li><strong>PCIe Lane Bifurcation:</strong> Ensure your motherboard and CPU support x8/x8 lane splitting (bifurcation) on primary PCIe slots.</li>
-                    <li><strong>Case Clearance & Power Cables:</strong> Check GPU card length (mm) against case interior, and verify dedicated 8-pin / 12VHPWR PCIe power cables from the PSU.</li>
-                  </ul>
-                </div>
-              ` : ''}
-            </div>
+          <!-- Headline Upgrade Picks -->
+          <div class="playground-upgrade-picks">
+            ${picks.sameCard
+        ? renderUpgradePickCard(
+          picks.mostUnlocked,
+          `<span class="tier-badge-label tier-badge-budget">${icon('zap')} Most models unlocked</span>
+                   <span class="tier-badge-label tier-badge-speed">${icon('chart')} Best value</span>`,
+          'both'
+        )
+        : `${renderUpgradePickCard(
+          picks.mostUnlocked,
+          `<span class="tier-badge-label tier-badge-budget">${icon('zap')} Most models unlocked</span>`,
+          'most-unlocked'
+        )}${picks.bestValue ? renderUpgradePickCard(
+          picks.bestValue,
+          `<span class="tier-badge-label tier-badge-speed">${icon('chart')} Best value</span>`,
+          'best-value'
+        ) : ''}`
+      }
           </div>
 
-          <!-- Top 5 Upgrade Candidates Table -->
+          ${picks.mostUnlocked.totalCards >= 2 ? `
+            <div class="playground-checklist">
+              <strong>Multi-Card Upgrade Checklist (General Guidance):</strong>
+              <ul>
+                <li><strong>PCIe Slot Spacing:</strong> Ensure at least 2 to 3 slots of motherboard clearance between GPUs for cooling fan intake airflow.</li>
+                <li><strong>PCIe Lane Bifurcation:</strong> Ensure your motherboard and CPU support x8/x8 lane splitting (bifurcation) on primary PCIe slots.</li>
+                <li><strong>Case Clearance & Power Cables:</strong> Check GPU card length (mm) against case interior, and verify dedicated 8-pin / 12VHPWR PCIe power cables from the PSU.</li>
+              </ul>
+            </div>
+          ` : ''}
+
+          <!-- Full Ranked Upgrade Candidates Table -->
           <div class="parts-table-wrap">
             <table class="parts-table stack-table">
               <thead>
@@ -412,19 +479,19 @@ export function renderRigPlaygroundHtml(state = {}) {
                   <th scope="col">Est. Used Price</th>
                   <th scope="col">Models Unlocked</th>
                   <th scope="col">Models Improved</th>
-                  <th scope="col">Unlocks / $1,000</th>
+                  <th scope="col">Models Unlocked / $1,000</th>
                 </tr>
               </thead>
               <tbody>
-                ${upgrades.slice(0, 5).map(c => `
-                  <tr>
+                ${upgrades.map(c => `
+                  <tr data-candidate-id="${c.candidate.id}">
                     <td class="stack-head"><strong>${c.candidate.name}</strong></td>
                     <td data-label="Added VRAM">+${c.candidate.vram} GB</td>
                     <td data-label="New Total VRAM">${c.newMemory} GB</td>
                     <td class="part-price-cell" data-label="Est. Used Price">$${c.cost.toLocaleString()}</td>
                     <td data-label="Models Unlocked"><strong class="is-good">+${c.unlocked}</strong></td>
                     <td data-label="Models Improved">+${c.improved}</td>
-                    <td data-label="Unlocks / $1k">${(c.unlocksPerDollar * 1000).toFixed(2)}</td>
+                    <td data-label="Models / $1,000">${(c.unlocksPerDollar * 1000).toFixed(2)} / $1,000</td>
                   </tr>
                 `).join('')}
               </tbody>
