@@ -49,4 +49,22 @@ describe('Phone layout: wide tables become labelled cards', () => {
     assert.match(phone, /\.stack-table td\[data-label\]::before \{[^}]*content: attr\(data-label\)/);
     assert.match(phone, /\.header-container \{[^}]*position: static/, 'header is not pinned on phones');
   });
+
+  it('Item 3: build sheet renders jump links for Parts and Cost breakdown with scroll-margin-top on both targets', () => {
+    const sheetHtml = pages['build sheet'];
+    assert.match(sheetHtml, /<nav class="build-jump-links"[^>]*>[\s\S]*?<a href="#parts-list" class="build-jump-link">Parts<\/a>[\s\S]*?<a href="#cost-breakdown" class="build-jump-link">Cost breakdown<\/a>[\s\S]*?<\/nav>/);
+    assert.match(sheetHtml, /id="parts-list"/);
+    assert.match(sheetHtml, /id="cost-breakdown"/);
+    assert.match(CSS, /#parts-list,\s*#cost-breakdown \{\s*scroll-margin-top: 140px;/);
+  });
+
+  it('Items 4, 6, 7: phone tab swipe fade, 0.75rem text floor on .ticker-tag & .tier-badge-label, and desktop nowrap on .brand-tagline & #btn-why-used', () => {
+    const phone = CSS.slice(CSS.indexOf('@media (max-width: 640px)'));
+    assert.match(phone, /\.nav-tabs::after \{[\s\S]*?linear-gradient[\s\S]*?pointer-events: none;/);
+    assert.match(phone, /\.playground-sticky-summary \{[\s\S]*?position: sticky;[\s\S]*?top: 0;/);
+    assert.match(CSS, /\.ticker-tag \{[^}]*font-size: 0\.75rem;/);
+    assert.match(CSS, /\.tier-badge-label \{[^}]*font-size: 0\.75rem;/);
+    assert.match(CSS, /\.brand-tagline \{[^}]*white-space: nowrap;/);
+    assert.match(CSS, /#btn-why-used \{\s*white-space: nowrap;/);
+  });
 });

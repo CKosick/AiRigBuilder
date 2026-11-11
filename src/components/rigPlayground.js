@@ -71,13 +71,17 @@ export function findPlaygroundGpu(id) {
   return PLAYGROUND_GPUS.find(g => g.id === id) || GPUS_DATA.find(g => g.id === 'rtx-3080-10gb') || GPUS_DATA[0];
 }
 
+export const VISIBLE_PLAYGROUND_MODELS = 8;
+
 export const PLAYGROUND_DEFAULTS = {
   gpuId: 'rtx-3080-10gb',
   count: 1,
   contextK: 8,
   kvPrecision: 'FP16',
   customMemoryGb: CUSTOM_UNIFIED_DEFAULTS.memoryGb,
-  customBandwidthGbs: CUSTOM_UNIFIED_DEFAULTS.bandwidthGbs
+  customBandwidthGbs: CUSTOM_UNIFIED_DEFAULTS.bandwidthGbs,
+  showAllRuns: false,
+  showAllNoFit: false
 };
 
 /**
@@ -278,7 +282,7 @@ function renderUpgradePickCard(pick, badgesHtml, pickKind) {
  * Pure HTML for the playground in a given state.
  */
 export function renderRigPlaygroundHtml(state = {}) {
-  const { gpuId, count, contextK, kvPrecision } = { ...PLAYGROUND_DEFAULTS, ...state };
+  const { gpuId, count, contextK, kvPrecision, showAllRuns, showAllNoFit } = { ...PLAYGROUND_DEFAULTS, ...state };
   const isCustomUnified = gpuId === CUSTOM_UNIFIED_ID;
   const rawMem = state.customMemoryGb !== undefined ? state.customMemoryGb : state.memoryGb;
   const rawBw = state.customBandwidthGbs !== undefined ? state.customBandwidthGbs : state.bandwidthGbs;
@@ -295,6 +299,13 @@ export function renderRigPlaygroundHtml(state = {}) {
 
   const config = { memoryGb: totalMemoryGb, bandwidthGbs: bandwidthGbs };
   const { runsInVram, doesNotFit } = evaluatePlaygroundModels(config, { contextK, kvPrecision });
+  const shownRuns = showAllRuns ? runsInVram : runsInVram.slice(0, VISIBLE_PLAYGROUND_MODELS);
+  const shownNoFit = showAllNoFit ? doesNotFit : doesNotFit.slice(0, VISIBLE_PLAYGROUND_MODELS);
+  const trackedDiscreteGpus = GPUS_DATA.filter(g => !isIntegratedSystem(g.id));
+  const integratedGpus = GPUS_DATA.filter(g => isIntegratedSystem(g.id));
+  const stickyGpuName = isCustomUnified
+    ? `Custom unified memory (${clampedCustom.memoryGb} GB)`
+    : (actualCount > 1 ? `${actualCount}x ${gpu.name}` : gpu.name);
 
   let upgrades = [];
   let picks = { mostUnlocked: null, bestValue: null, sameCard: false };
@@ -321,12 +332,15 @@ export function renderRigPlaygroundHtml(state = {}) {
           <div class="playground-control-group">
             <label for="playground-gpu-select" class="model-filter-label">Owned Hardware</label>
             <select id="playground-gpu-select" class="playground-select" aria-label="Select owned GPU or system">
-              <optgroup label="Tracked GPUs & Systems (${GPUS_DATA.length})">
-                ${GPUS_DATA.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
-                <option value="${CUSTOM_UNIFIED_ID}"${isCustomUnified ? ' selected' : ''}>Custom unified memory (enter your own)</option>
+              <optgroup label="Tracked GPUs">
+                ${trackedDiscreteGpus.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
               </optgroup>
-              <optgroup label="Popular Gaming GPUs — Spec Only (${OWNED_GPUS_SUPPLEMENT.length})">
+              <optgroup label="More cards you might own">
                 ${OWNED_GPUS_SUPPLEMENT.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+              </optgroup>
+              <optgroup label="Integrated and unified memory">
+                ${integratedGpus.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+                <option value="${CUSTOM_UNIFIED_ID}"${isCustomUnified ? ' selected' : ''}>Custom unified memory (enter your own)</option>
               </optgroup>
             </select>
           </div>
@@ -500,83 +514,100 @@ export function renderRigPlaygroundHtml(state = {}) {
         </div>
       ` : '')}
 
-      <!-- Results Grid: Runs in VRAM vs Does Not Fit -->
-      <div class="playground-results-grid">
-        <!-- Section 1: Runs in VRAM -->
-        <div class="playground-results-col">
-          <div class="selector-label">
-            <span class="is-good">Runs in VRAM (${runsInVram.length} Models)</span>
-            <span class="selector-note">Fits with ${contextK}K context at ${kvPrecision} KV precision</span>
-          </div>
-
-          <div class="parts-table-wrap">
-            <table class="parts-table stack-table">
-              <thead>
-                <tr>
-                  <th scope="col">Model</th>
-                  <th scope="col">Chosen Quant</th>
-                  <th scope="col">Typical Speed</th>
-                  <th scope="col">Context Room</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${runsInVram.length === 0 ? `
-                  <tr><td colspan="4" class="text-dim">No models in the catalog fit this configuration with ${contextK}K context.</td></tr>
-                ` : runsInVram.map(({ model: m, fit, speed }) => `
-                  <tr data-model-id="${m.id}">
-                    <td class="stack-head">
-                      <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
-                      <div class="part-spec-sub">${m.parameters}</div>
-                    </td>
-                    <td data-label="Chosen Quant">
-                      <strong>${fit.quant}</strong>
-                      ${fit.status === 'reduced' ? ' <span class="condition-badge condition-used">Reduced</span>' : ' <span class="condition-badge condition-new">Sweet Spot</span>'}
-                    </td>
-                    <td data-label="Typical Speed">${speed ? `~${speed.low}-${speed.high} tok/s` : 'n/a'}</td>
-                    <td data-label="Context Room">${fit.contextLabel}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
+      <!-- Results Grid: Runs on your rig vs Doesn't fit -->
+      <div class="playground-results-section" id="playground-results-section">
+        <div class="playground-sticky-summary" role="region" aria-label="Rig fit summary">
+          <span class="playground-sticky-gpu">${stickyGpuName}</span>
+          <span class="playground-sticky-count">${runsInVram.length} of ${MODELS_DATA.length} run</span>
         </div>
 
-        <!-- Section 2: Does Not Fit -->
-        <div class="playground-results-col">
-          <div class="selector-label">
-            <span class="is-warn">Does Not Fit (${doesNotFit.length} Models)</span>
-            <span class="selector-note">Exceeds ${usableGb} GB usable VRAM (${totalMemoryGb} GB rig - 1 GB overhead)</span>
+        <div class="playground-results-grid">
+          <!-- Section 1: Runs on your rig -->
+          <div class="playground-results-col">
+            <div class="selector-label">
+              <span class="is-good">Runs on your rig (${runsInVram.length})</span>
+              <span class="selector-note">Fits with ${contextK}K context at ${kvPrecision} KV precision</span>
+            </div>
+
+            <div class="parts-table-wrap">
+              <table class="parts-table stack-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Model</th>
+                    <th scope="col">Chosen Quant</th>
+                    <th scope="col">Typical Speed</th>
+                    <th scope="col">Context Room</th>
+                  </tr>
+                </thead>
+                <tbody id="playground-runs-tbody">
+                  ${runsInVram.length === 0 ? `
+                    <tr><td colspan="4" class="text-dim">No models in the catalog fit this configuration with ${contextK}K context.</td></tr>
+                  ` : shownRuns.map(({ model: m, fit, speed }) => `
+                    <tr data-model-id="${m.id}">
+                      <td class="stack-head">
+                        <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
+                        <div class="part-spec-sub">${m.parameters}</div>
+                      </td>
+                      <td data-label="Chosen Quant">
+                        <strong>${fit.quant}</strong>
+                        ${fit.status === 'reduced' ? ' <span class="condition-badge condition-used">Reduced</span>' : ' <span class="condition-badge condition-new">Sweet Spot</span>'}
+                      </td>
+                      <td data-label="Typical Speed">${speed ? `~${speed.low}-${speed.high} tok/s` : 'n/a'}</td>
+                      <td data-label="Context Room">${fit.contextLabel}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ${runsInVram.length > VISIBLE_PLAYGROUND_MODELS ? `
+              <button type="button" class="btn-secondary model-options-toggle playground-group-toggle" id="btn-show-all-runs" aria-expanded="${showAllRuns}" aria-controls="playground-runs-tbody">
+                ${showAllRuns ? 'Show fewer models' : `Show all ${runsInVram.length} models`}
+              </button>
+            ` : ''}
           </div>
 
-          <div class="parts-table-wrap">
-            <table class="parts-table stack-table">
-              <thead>
-                <tr>
-                  <th scope="col">Model</th>
-                  <th scope="col">Smallest Quant</th>
-                  <th scope="col">Shortfall vs Usable VRAM</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${doesNotFit.length === 0 ? `
-                  <tr><td colspan="3" class="text-dim">All 56 models fit in this configuration!</td></tr>
-                ` : doesNotFit.map(({ model: m, fit, shortfall, needed }) => `
-                  <tr data-model-id="${m.id}">
-                    <td class="stack-head">
-                      <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
-                      <div class="part-spec-sub">${m.parameters}</div>
-                    </td>
-                    <td data-label="Smallest Quant">
-                      <strong>${fit.smallestQuant}</strong> (${fit.smallestVram} GB)
-                    </td>
-                    <td data-label="Shortfall">
-                      <span class="no-fit-note"><strong>+${shortfall} GB needed</strong></span>
-                      <div class="part-spec-sub">Needs ${needed} GB with ${contextK}K context vs ${usableGb} GB usable</div>
-                    </td>
+          <!-- Section 2: Doesn't fit -->
+          <div class="playground-results-col">
+            <div class="selector-label">
+              <span class="is-warn">Doesn't fit (${doesNotFit.length})</span>
+              <span class="selector-note">Exceeds ${usableGb} GB usable VRAM (${totalMemoryGb} GB rig - 1 GB overhead)</span>
+            </div>
+
+            <div class="parts-table-wrap">
+              <table class="parts-table stack-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Model</th>
+                    <th scope="col">Smallest Quant</th>
+                    <th scope="col">Shortfall vs Usable VRAM</th>
                   </tr>
-                `).join('')}
-              </tbody>
-            </table>
+                </thead>
+                <tbody id="playground-nofit-tbody">
+                  ${doesNotFit.length === 0 ? `
+                    <tr><td colspan="3" class="text-dim">All 56 models fit in this configuration!</td></tr>
+                  ` : shownNoFit.map(({ model: m, fit, shortfall, needed }) => `
+                    <tr data-model-id="${m.id}">
+                      <td class="stack-head">
+                        <a href="${buildPath(m.id)}" class="model-link"><strong>${m.name}</strong></a>
+                        <div class="part-spec-sub">${m.parameters}</div>
+                      </td>
+                      <td data-label="Smallest Quant">
+                        <strong>${fit.smallestQuant}</strong> (${fit.smallestVram} GB)
+                      </td>
+                      <td data-label="Shortfall">
+                        <span class="no-fit-note"><strong>+${shortfall} GB needed</strong></span>
+                        <div class="part-spec-sub">Needs ${needed} GB with ${contextK}K context vs ${usableGb} GB usable</div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            ${doesNotFit.length > VISIBLE_PLAYGROUND_MODELS ? `
+              <button type="button" class="btn-secondary model-options-toggle playground-group-toggle" id="btn-show-all-nofit" aria-expanded="${showAllNoFit}" aria-controls="playground-nofit-tbody">
+                ${showAllNoFit ? 'Show fewer models' : `Show all ${doesNotFit.length} models`}
+              </button>
+            ` : ''}
           </div>
         </div>
       </div>
@@ -596,6 +627,8 @@ export function createRigPlayground(container) {
   let customBandwidthGbs = PLAYGROUND_DEFAULTS.customBandwidthGbs;
   let customMemoryRaw = String(customMemoryGb);
   let customBandwidthRaw = String(customBandwidthGbs);
+  let showAllRuns = PLAYGROUND_DEFAULTS.showAllRuns;
+  let showAllNoFit = PLAYGROUND_DEFAULTS.showAllNoFit;
 
   function render() {
     const restoreFocus = preserveFocus(container);
@@ -607,7 +640,9 @@ export function createRigPlayground(container) {
       customMemoryGb,
       customBandwidthGbs,
       customMemoryRaw,
-      customBandwidthRaw
+      customBandwidthRaw,
+      showAllRuns,
+      showAllNoFit
     });
     attachEvents();
     restoreFocus();
@@ -704,6 +739,23 @@ export function createRigPlayground(container) {
         }
       });
     });
+
+    // Show all / Show fewer toggles for Runs on your rig & Doesn't fit groups
+    const showAllRunsBtn = container.querySelector('#btn-show-all-runs');
+    if (showAllRunsBtn) {
+      showAllRunsBtn.addEventListener('click', () => {
+        showAllRuns = !showAllRuns;
+        render();
+      });
+    }
+
+    const showAllNoFitBtn = container.querySelector('#btn-show-all-nofit');
+    if (showAllNoFitBtn) {
+      showAllNoFitBtn.addEventListener('click', () => {
+        showAllNoFit = !showAllNoFit;
+        render();
+      });
+    }
   }
 
   render();
@@ -714,6 +766,8 @@ export function createRigPlayground(container) {
       if (newConfig.count !== undefined) count = newConfig.count;
       if (newConfig.contextK !== undefined) contextK = newConfig.contextK;
       if (newConfig.kvPrecision !== undefined) kvPrecision = newConfig.kvPrecision;
+      if (newConfig.showAllRuns !== undefined) showAllRuns = Boolean(newConfig.showAllRuns);
+      if (newConfig.showAllNoFit !== undefined) showAllNoFit = Boolean(newConfig.showAllNoFit);
       if (newConfig.customMemoryGb !== undefined || newConfig.memoryGb !== undefined) {
         const rawM = newConfig.customMemoryGb !== undefined ? newConfig.customMemoryGb : newConfig.memoryGb;
         customMemoryGb = clampCustomUnifiedConfig(rawM, customBandwidthGbs).memoryGb;
@@ -727,7 +781,7 @@ export function createRigPlayground(container) {
       if (isIntegratedSystem(gpuId)) count = 1;
       render();
     },
-    getState: () => ({ gpuId, count, contextK, kvPrecision, customMemoryGb, customBandwidthGbs })
+    getState: () => ({ gpuId, count, contextK, kvPrecision, customMemoryGb, customBandwidthGbs, showAllRuns, showAllNoFit })
   };
 }
 

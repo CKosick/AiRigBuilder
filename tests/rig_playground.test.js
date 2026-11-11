@@ -8,6 +8,7 @@ import {
   CUSTOM_UNIFIED_ID,
   CUSTOM_UNIFIED_DEFAULTS,
   CUSTOM_BANDWIDTH_PRESETS,
+  VISIBLE_PLAYGROUND_MODELS,
   clampCustomUnifiedConfig,
   isIntegratedSystem,
   gpuVendor,
@@ -233,8 +234,8 @@ describe('Rig Playground: Prerendered HTML Output', () => {
       assert.ok(html.includes(`value="${g.id}"`), `${g.id} option present`);
     }
     assert.ok(html.includes(`value="${CUSTOM_UNIFIED_ID}">Custom unified memory (enter your own)</option>`));
-    assert.ok(html.includes('Runs in VRAM'));
-    assert.ok(html.includes('Does Not Fit'));
+    assert.ok(html.includes('Runs on your rig ('));
+    assert.ok(html.includes("Doesn't fit ("));
     assert.ok(html.includes('Upgrade Engine: Best Single-Card Additions'));
   });
 });
@@ -267,7 +268,9 @@ describe('Rig Playground: Custom Unified-Memory Configuration', () => {
       customMemoryGb: 96,
       customBandwidthGbs: 256,
       contextK: 8,
-      kvPrecision: 'FP16'
+      kvPrecision: 'FP16',
+      showAllRuns: true,
+      showAllNoFit: true
     });
 
     // Verify inputs, preset chips, and 75% guidance note render
@@ -286,12 +289,12 @@ describe('Rig Playground: Custom Unified-Memory Configuration', () => {
     assert.ok(!customHtml.includes('Multi-Card Upgrade Checklist'));
     assert.ok(customHtml.includes('Integrated Architecture:'));
 
-    // Extract rendered model links in Runs in VRAM and Does Not Fit sections and compare to direct evaluation
+    // Extract rendered model links in Runs on your rig and Doesn't fit sections and compare to direct evaluation
     const runsSection = customHtml.slice(
-      customHtml.indexOf('Runs in VRAM ('),
-      customHtml.indexOf('Does Not Fit (')
+      customHtml.indexOf('Runs on your rig ('),
+      customHtml.indexOf("Doesn't fit (")
     );
-    const noFitSection = customHtml.slice(customHtml.indexOf('Does Not Fit ('));
+    const noFitSection = customHtml.slice(customHtml.indexOf("Doesn't fit ("));
 
     const renderedRunsIds = [...runsSection.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
     const renderedNoFitIds = [...noFitSection.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
@@ -407,5 +410,104 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
       assert.match(upgradeSection, /Most models unlocked/);
       assert.match(upgradeSection, /Best value/);
     }
+  });
+});
+
+describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Picker Optgroups)', () => {
+  it('Item 1: splits results into "Runs on your rig (N)" and "Doesn\'t fit (M)" showing first 8 models initially and expanding on Show all', () => {
+    assert.equal(VISIBLE_PLAYGROUND_MODELS, 8);
+
+    // 1. Default prerendered state (RTX 3080 10GB: 8 run, 48 don't fit)
+    const rtx3080 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3080-10gb');
+    const defaultEval = evaluatePlaygroundModels(rtx3080, 1, { contextK: 8, kvPrecision: 'FP16' });
+    assert.equal(defaultEval.runsInVram.length, 8);
+    assert.equal(defaultEval.doesNotFit.length, 48);
+
+    const prerenderHtml = renderRigPlaygroundHtml();
+    assert.ok(prerenderHtml.includes('Runs on your rig (8)'));
+    assert.ok(prerenderHtml.includes("Doesn't fit (48)"));
+    assert.ok(prerenderHtml.includes('id="btn-show-all-nofit"'));
+    assert.ok(prerenderHtml.includes('Show all 48 models'));
+
+    // 2. Rig where both groups exceed 8 models (RTX 3060 12GB: 12 run, 44 don't fit)
+    const rtx3060 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3060-12gb');
+    const direct = evaluatePlaygroundModels(rtx3060, 1, { contextK: 8, kvPrecision: 'FP16' });
+    assert.equal(direct.runsInVram.length, 12);
+    assert.equal(direct.doesNotFit.length, 44);
+
+    // Initial state: headings show full counts (12 and 44), tables show first 8 each
+    const initialHtml = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1 });
+    assert.ok(initialHtml.includes('Runs on your rig (12)'));
+    assert.ok(initialHtml.includes("Doesn't fit (44)"));
+    assert.ok(initialHtml.includes('id="btn-show-all-runs"'));
+    assert.ok(initialHtml.includes('Show all 12 models'));
+    assert.ok(initialHtml.includes('id="btn-show-all-nofit"'));
+    assert.ok(initialHtml.includes('Show all 44 models'));
+
+    const runsPart = initialHtml.slice(
+      initialHtml.indexOf('id="playground-runs-tbody"'),
+      initialHtml.indexOf('id="playground-nofit-tbody"')
+    );
+    const noFitPart = initialHtml.slice(initialHtml.indexOf('id="playground-nofit-tbody"'));
+    const initialRunsIds = [...runsPart.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+    const initialNoFitIds = [...noFitPart.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+
+    assert.equal(initialRunsIds.length, 8);
+    assert.equal(initialNoFitIds.length, 8);
+    assert.deepEqual(initialRunsIds, direct.runsInVram.slice(0, 8).map(r => r.model.id));
+    assert.deepEqual(initialNoFitIds, direct.doesNotFit.slice(0, 8).map(r => r.model.id));
+
+    // Expanded state: all 12 and 44 models rendered in order, headings keep full counts, buttons say Show fewer models
+    const expandedHtml = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1, showAllRuns: true, showAllNoFit: true });
+    assert.ok(expandedHtml.includes('Runs on your rig (12)'));
+    assert.ok(expandedHtml.includes("Doesn't fit (44)"));
+    assert.ok(expandedHtml.includes('aria-expanded="true" aria-controls="playground-runs-tbody"'));
+    assert.ok(expandedHtml.includes('aria-expanded="true" aria-controls="playground-nofit-tbody"'));
+
+    const expRunsPart = expandedHtml.slice(
+      expandedHtml.indexOf('id="playground-runs-tbody"'),
+      expandedHtml.indexOf('id="playground-nofit-tbody"')
+    );
+    const expNoFitPart = expandedHtml.slice(expandedHtml.indexOf('id="playground-nofit-tbody"'));
+    const expRunsIds = [...expRunsPart.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+    const expNoFitIds = [...expNoFitPart.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
+
+    assert.deepEqual(expRunsIds, direct.runsInVram.map(r => r.model.id));
+    assert.deepEqual(expNoFitIds, direct.doesNotFit.map(r => r.model.id));
+  });
+
+  it('Item 2: renders sticky summary bar with owned GPU name and "X of 56 run"', () => {
+    const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3090', count: 1 });
+    const rtx3090 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3090');
+    const direct = evaluatePlaygroundModels(rtx3090, 1, { contextK: 8, kvPrecision: 'FP16' });
+
+    assert.match(html, /class="playground-sticky-summary"/);
+    assert.ok(html.includes(`<span class="playground-sticky-gpu">${rtx3090.name}</span>`));
+    assert.ok(html.includes(`<span class="playground-sticky-count">${direct.runsInVram.length} of 56 run</span>`));
+  });
+
+  it('Item 5: groups hardware picker select into Tracked GPUs, More cards you might own, and Integrated and unified memory (with Custom unified memory last)', () => {
+    const html = renderRigPlaygroundHtml();
+    const selectMatch = html.match(/<select id="playground-gpu-select"[\s\S]*?<\/select>/);
+    assert.ok(selectMatch, 'playground-gpu-select present');
+    const selectHtml = selectMatch[0];
+
+    const optgroups = [...selectHtml.matchAll(/<optgroup label="([^"]+)">([\s\S]*?)<\/optgroup>/g)];
+    assert.deepEqual(
+      optgroups.map(m => m[1]),
+      ['Tracked GPUs', 'More cards you might own', 'Integrated and unified memory']
+    );
+
+    const trackedValues = [...optgroups[0][2].matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
+    const ownedValues = [...optgroups[1][2].matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
+    const integratedValues = [...optgroups[2][2].matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
+
+    assert.deepEqual(trackedValues, GPUS_DATA.filter(g => !isIntegratedSystem(g.id)).map(g => g.id));
+    assert.deepEqual(ownedValues, OWNED_GPUS_SUPPLEMENT.map(g => g.id));
+    assert.deepEqual(
+      integratedValues,
+      [...GPUS_DATA.filter(g => isIntegratedSystem(g.id)).map(g => g.id), CUSTOM_UNIFIED_ID]
+    );
+    assert.equal(integratedValues.at(-1), CUSTOM_UNIFIED_ID, 'Custom unified memory is last in final group');
   });
 });

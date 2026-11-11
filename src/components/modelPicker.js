@@ -222,6 +222,10 @@ export function renderModelPickerHtml(state = {}) {
         <div class="model-best-gpu-link">
           <a href="${bestGpuPath(currentModel.id)}" class="best-gpu-cta-link">Best GPU for ${currentModel.name}: Compare 15 GPUs &amp; Multi-GPU Rigs →</a>
         </div>` : ''}
+        <nav class="build-jump-links" aria-label="Build sheet sections">
+          <a href="#parts-list" class="build-jump-link">Parts</a>
+          <a href="#cost-breakdown" class="build-jump-link">Cost breakdown</a>
+        </nav>
       </div>
 
       <div class="spec-badge-box">

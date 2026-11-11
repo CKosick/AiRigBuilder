@@ -114,7 +114,7 @@ body {
   color: var(--emerald);
   padding: 1px 6px;
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -171,6 +171,7 @@ body {
   color: var(--text-muted);
   font-weight: 500;
   letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
 .nav-tabs {
@@ -215,6 +216,10 @@ body {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+#btn-why-used {
+  white-space: nowrap;
 }
 
 .btn-secondary {
@@ -320,8 +325,9 @@ body {
   color: var(--text-dim);
 }
 
-/* "See the parts list" lands below the sticky header, not under it */
-#parts-list {
+/* "See the parts list" and build jump links land below the sticky header, not under it */
+#parts-list,
+#cost-breakdown {
   scroll-margin-top: 140px;
 }
 
@@ -575,7 +581,7 @@ body {
 
 .tier-badge-label {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -2473,6 +2479,20 @@ input[type="range"]::-moz-range-thumb {
   margin-bottom: 1.5rem;
 }
 
+.playground-results-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.playground-sticky-summary {
+  display: none;
+}
+
+.playground-group-toggle {
+  align-self: flex-start;
+}
+
 /* =========================================================
    Phone layout (max-width 640px)
    Everything stays on screen at 320-640px: no clipped content and no
@@ -2556,6 +2576,7 @@ input[type="range"]::-moz-range-thumb {
   }
   .nav-tabs {
     grid-area: tabs;
+    position: relative;
     display: flex;
     flex-wrap: nowrap;
     width: 100%;
@@ -2563,6 +2584,18 @@ input[type="range"]::-moz-range-thumb {
     overflow-x: auto;
     border-radius: var(--radius-md);
     scrollbar-width: none;
+  }
+  .nav-tabs::after {
+    content: '';
+    position: sticky;
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    flex: 0 0 28px;
+    margin-left: -28px;
+    align-self: stretch;
+    background: linear-gradient(90deg, rgba(7, 9, 14, 0), var(--bg-darkest));
+    pointer-events: none;
   }
   .nav-tabs::-webkit-scrollbar {
     display: none;
@@ -2595,7 +2628,8 @@ input[type="range"]::-moz-range-thumb {
     flex: 1 1 100%;
     justify-content: center;
   }
-  #parts-list {
+  #parts-list,
+  #cost-breakdown {
     scroll-margin-top: 1rem; /* the header is not pinned on phones */
   }
 
@@ -2764,6 +2798,46 @@ input[type="range"]::-moz-range-thumb {
   .alert-input,
   .btn-alert-submit {
     height: 44px;
+  }
+
+  /* Playground sticky summary bar and group toggles on phones */
+  .playground-results-section {
+    padding-top: 0.25rem;
+  }
+  .playground-sticky-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(12, 16, 23, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-medium);
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+  .playground-sticky-gpu {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .playground-sticky-count {
+    color: var(--accent-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .playground-results-col {
+    scroll-margin-top: 3rem;
+  }
+  .playground-group-toggle {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
   }
 
 }
@@ -3312,6 +3386,26 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .best-gpu-cta-link:hover {
+  text-decoration: underline;
+}
+
+.build-jump-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.1rem;
+  margin-top: 0.65rem;
+}
+
+.build-jump-link {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.build-jump-link:hover {
   text-decoration: underline;
 }
 
