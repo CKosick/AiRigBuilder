@@ -104,6 +104,22 @@ describe('Price-drop alert cron', () => {
     assert.ok(!JSON.stringify(r.body).includes('@'), 'no subscriber addresses in the response');
   });
 
+  it('responds with HTTP 502 and ok: false when alert email sends fail, keeping subscriber emails out of the body', async () => {
+    const evaluateWithFailure = async () => ({
+      store: 'redis',
+      totalAlerts: 3,
+      activeAlerts: 2,
+      firedCount: 1,
+      firedAlerts: [{ email: 'sent@b.c' }],
+      failedAlerts: [{ id: 'alt_2', email: 'failed@b.c', error: 'HTTP 500' }]
+    });
+    const r = res();
+    await createCheckAlertsHandler({ evaluate: evaluateWithFailure, env: { CRON_SECRET: 's3cret' } })({ headers: { authorization: 'Bearer s3cret' } }, r);
+    assert.equal(r.code, 502);
+    assert.deepEqual(r.body, { ok: false, store: 'redis', totalAlerts: 3, activeAlerts: 2, fired: 1, failed: 1 });
+    assert.ok(!JSON.stringify(r.body).includes('@'), 'no subscriber addresses in the response');
+  });
+
   it('is scheduled daily in vercel.json', () => {
     const crons = JSON.parse(read('vercel.json')).crons;
     assert.deepEqual(crons, [{ path: '/api/cron/check-alerts', schedule: '0 14 * * *' }]);

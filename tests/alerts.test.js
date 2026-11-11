@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import {
   isValidEmail,
   validateAlertInput,
+  MAX_ALERT_TARGET_PRICE,
   registerAlert,
   confirmAlert,
   unsubscribeAlert,
@@ -17,7 +18,9 @@ import {
 } from '../src/services/alertService.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { getAlertStore, FileAlertStore, RedisAlertStore } from '../src/services/alertStore.js';
+import { renderPriceTrackerHtml, MAX_ALERT_TARGET_PRICE as TRACKER_MAX_TARGET_PRICE } from '../src/components/priceTracker.js';
 import subscribeHandler from '../api/alerts/subscribe.js';
+import confirmHandler from '../api/alerts/confirm.js';
 
 // Lifecycle tests use the mock email sender; the "Resend Delivery" tests switch to production mode
 process.env.NODE_ENV = 'test';
@@ -75,6 +78,7 @@ function mockRes() {
     setHeader(k, v) { this.headers[k] = v; },
     status(code) { this.statusCode = code; return this; },
     json(b) { this.body = b; return this; },
+    send(b) { this.body = b; return this; },
     end() { return this; }
   };
 }
@@ -141,6 +145,36 @@ describe('Price-Drop Alerts System', () => {
       assert.equal(badPrice.valid, false);
       assert.match(badPrice.error, /dollar amount/);
     });
+
+    it('accepts target prices above $5,000 up to $25,000 for high-end cards and rejects above $25,000 with an honest range message', () => {
+      assert.equal(MAX_ALERT_TARGET_PRICE, 25000);
+      assert.equal(TRACKER_MAX_TARGET_PRICE, MAX_ALERT_TARGET_PRICE);
+      assert.match(renderPriceTrackerHtml(), /id="alert-price-input"[^>]*max="25000"/);
+
+      const pro6000Prefill = validateAlertInput({
+        email: 'pro@example.com',
+        gpuId: 'rtx-pro-6000-blackwell',
+        targetPrice: 13000
+      });
+      assert.equal(pro6000Prefill.valid, true);
+      assert.equal(pro6000Prefill.price, 13000);
+
+      const atCeiling = validateAlertInput({
+        email: 'pro@example.com',
+        gpuId: 'rtx-pro-6000-blackwell',
+        targetPrice: MAX_ALERT_TARGET_PRICE
+      });
+      assert.equal(atCeiling.valid, true);
+      assert.equal(atCeiling.price, 25000);
+
+      const overCeiling = validateAlertInput({
+        email: 'pro@example.com',
+        gpuId: 'rtx-pro-6000-blackwell',
+        targetPrice: MAX_ALERT_TARGET_PRICE + 1
+      });
+      assert.equal(overCeiling.valid, false);
+      assert.equal(overCeiling.error, 'Target price must be a valid dollar amount greater than $0 and at most $25,000.');
+    });
   });
 
   describe('Double Opt-in Registration & Confirmation', () => {
@@ -191,6 +225,42 @@ describe('Price-Drop Alerts System', () => {
       const res = await confirmAlert('non-existent-token-xyz', TEST_ALERTS_FILE);
       assert.equal(res.success, false);
       assert.match(res.error, /Invalid or expired/);
+    });
+
+    it('does not reactivate an unsubscribed alert when its confirmation token is used', async () => {
+      const reg = await registerAlert({
+        email: 'gone@domain.com',
+        gpuId: 'rtx-3090',
+        targetPrice: 650,
+        filePath: TEST_ALERTS_FILE
+      });
+      await unsubscribeAlert(reg.alert.unsubscribeToken, TEST_ALERTS_FILE);
+
+      const res = await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      assert.equal(res.success, false);
+      assert.match(res.error, /unsubscribed/i);
+      assert.match(res.error, /new alert/i);
+
+      const stored = await loadAlerts(TEST_ALERTS_FILE);
+      assert.equal(stored[0].status, 'UNSUBSCRIBED');
+    });
+
+    it('reports alreadyFired when confirming an alert that has already sent its price-drop email', async () => {
+      const reg = await registerAlert({
+        email: 'done@domain.com',
+        gpuId: 'rtx-3090',
+        targetPrice: 700,
+        filePath: TEST_ALERTS_FILE
+      });
+      await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+
+      const dropped = GPUS_DATA.map(g => g.id === 'rtx-3090' ? { ...g, usedStreetPrice: 680 } : g);
+      await evaluateAndTriggerAlerts(dropped, { filePath: TEST_ALERTS_FILE });
+
+      const reconfirm = await confirmAlert(reg.alert.confirmToken, TEST_ALERTS_FILE);
+      assert.equal(reconfirm.success, true);
+      assert.equal(reconfirm.alreadyFired, true);
+      assert.equal(reconfirm.alreadyConfirmed, undefined);
     });
   });
 
@@ -377,6 +447,55 @@ describe('Price-Drop Alerts System', () => {
         assert.equal(res.body.success, true);
         assert.equal(res.body.alert, undefined);
         assert.doesNotMatch(JSON.stringify(res.body), /[0-9a-f]{8}-[0-9a-f]{4}-/, 'response must not contain any token');
+      } finally {
+        globalThis.fetch = originalFetch;
+        if (saved.url === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = saved.url;
+        if (saved.token === undefined) delete process.env.KV_REST_API_TOKEN; else process.env.KV_REST_API_TOKEN = saved.token;
+      }
+    });
+  });
+
+  describe('Confirm API Endpoint', () => {
+    it('escapes HTML-special characters in the stored email and renders already-fired wording when the alert already fired', async () => {
+      const originalFetch = globalThis.fetch;
+      const saved = { url: process.env.KV_REST_API_URL, token: process.env.KV_REST_API_TOKEN };
+      globalThis.fetch = mockRedisFetch();
+      process.env.KV_REST_API_URL = 'https://r.upstash.io';
+      process.env.KV_REST_API_TOKEN = 't';
+      try {
+        const store = getAlertStore({});
+        await store.put({
+          id: 'alt_xss',
+          email: 'user"><script>alert(1)</script>&\'@example.com',
+          gpuId: 'rtx-3090',
+          gpuName: 'NVIDIA RTX 3090 <24GB>',
+          targetPrice: 650,
+          status: 'PENDING_CONFIRMATION',
+          confirmToken: 'tok-xss',
+          unsubscribeToken: 'unsub-xss',
+          createdAt: '2026-11-10T00:00:00.000Z',
+          fired: false
+        });
+
+        const res = mockRes();
+        await confirmHandler({ query: { token: 'tok-xss' } }, res);
+        assert.equal(res.statusCode, 200);
+        assert.doesNotMatch(res.body, /<script>alert\(1\)<\/script>/);
+        assert.doesNotMatch(res.body, /<24GB>/);
+        assert.match(res.body, /user&quot;&gt;&lt;script&gt;alert\(1\)&lt;\/script&gt;&amp;&#39;@example\.com/);
+        assert.match(res.body, /NVIDIA RTX 3090 &lt;24GB&gt;/);
+
+        // Mark fired and confirm again: page must report the price-drop email was already sent
+        const [activated] = await store.all();
+        activated.fired = true;
+        activated.firedAt = '2026-11-10T01:00:00.000Z';
+        await store.put(activated);
+
+        const firedRes = mockRes();
+        await confirmHandler({ query: { token: 'tok-xss' } }, firedRes);
+        assert.equal(firedRes.statusCode, 200);
+        assert.match(firedRes.body, /price-drop email was already sent for this/i);
+        assert.doesNotMatch(firedRes.body, /is now active/i);
       } finally {
         globalThis.fetch = originalFetch;
         if (saved.url === undefined) delete process.env.KV_REST_API_URL; else process.env.KV_REST_API_URL = saved.url;

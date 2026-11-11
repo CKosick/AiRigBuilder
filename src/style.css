@@ -1693,6 +1693,10 @@ input[type="range"] {
   animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.toast.toast-error {
+  border-color: var(--warn-border);
+}
+
 @keyframes slideUp {
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -1989,6 +1993,10 @@ input[type="range"] {
 
 .toast > .icon {
   color: var(--emerald);
+}
+
+.toast.toast-error > .icon {
+  color: var(--warn-text);
 }
 
 /* =========================================================

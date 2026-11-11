@@ -10,6 +10,8 @@ import { sparklineSvg } from '../utils/sparkline.js';
 import { gpuSummary } from '../utils/siteFacts.js';
 import { icon } from './icons.js';
 
+export const MAX_ALERT_TARGET_PRICE = 25000;
+
 function sortGpus(sortBy, sortAsc) {
   return [...GPUS_DATA].sort((a, b) => {
     let valA, valB;
@@ -142,7 +144,7 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
               <label for="alert-price-input">Target Price ($)</label>
               <div class="input-prefix-wrapper">
                 <span class="currency-prefix">$</span>
-                <input type="number" id="alert-price-input" min="50" max="5000" step="10" value="650" required placeholder="650" class="alert-input">
+                <input type="number" id="alert-price-input" min="50" max="${MAX_ALERT_TARGET_PRICE}" step="10" value="650" required placeholder="650" class="alert-input">
               </div>
             </div>
             <div class="alert-input-group alert-email-group">
@@ -292,12 +294,12 @@ export function createPriceTracker(container) {
         const email = emailInput?.value?.trim();
 
         if (!email || !email.includes('@')) {
-          showToast('Please enter a valid email address.');
+          showToast('Please enter a valid email address.', 'error');
           return;
         }
 
         if (!targetPrice || targetPrice <= 0) {
-          showToast('Please enter a valid target price.');
+          showToast('Please enter a valid target price.', 'error');
           return;
         }
 
@@ -345,7 +347,7 @@ export function createPriceTracker(container) {
         const targetPrice = Number(targetPriceInput?.value) || activeModalGpu?.usedPriceLow || activeModalGpu?.usedStreetPrice;
 
         if (!email || !email.includes('@')) {
-          showToast('Please enter a valid email address.');
+          showToast('Please enter a valid email address.', 'error');
           return;
         }
 
@@ -364,10 +366,10 @@ export function createPriceTracker(container) {
             showToast(`Confirmation link sent to ${email}!`);
             emailInput.value = '';
           } else {
-            showToast(data.error || 'Failed to create alert.');
+            showToast(data.error || 'Failed to create alert.', 'error');
           }
         } catch (_) {
-          showToast('Could not reach the alert service. Your alert was not saved.');
+          showToast('Could not reach the alert service. Your alert was not saved.', 'error');
         } finally {
           btnSaveAlert.disabled = false;
           btnSaveAlert.textContent = 'Set Alert';
@@ -482,16 +484,17 @@ export function createPriceTracker(container) {
     });
   }
 
-  function showToast(msg) {
+  function showToast(msg, variant = 'success') {
     const existing = document.querySelector('.toast-container');
     if (existing) existing.remove();
 
+    const isError = variant === 'error';
     const toastBox = document.createElement('div');
     toastBox.className = 'toast-container';
     toastBox.setAttribute('role', 'status');
     toastBox.innerHTML = `
-      <div class="toast">
-        ${icon('check')}
+      <div class="toast${isError ? ' toast-error' : ''}">
+        ${icon(isError ? 'alert' : 'check')}
         <span>${msg}</span>
       </div>
     `;

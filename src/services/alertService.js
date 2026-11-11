@@ -87,6 +87,8 @@ export async function sendEmail({ to, subject, html, text }) {
 
 const SEND_FAILED_MESSAGE = "We couldn't send your confirmation email right now. Please try again in a few minutes.";
 
+export const MAX_ALERT_TARGET_PRICE = 25000;
+
 /**
  * Validate alert input parameters
  */
@@ -101,8 +103,8 @@ export function validateAlertInput({ email, gpuId, targetPrice }) {
   }
 
   const price = Number(targetPrice);
-  if (isNaN(price) || price <= 0 || price > 5000) {
-    return { valid: false, error: 'Target price must be a valid dollar amount greater than $0.' };
+  if (isNaN(price) || price <= 0 || price > MAX_ALERT_TARGET_PRICE) {
+    return { valid: false, error: `Target price must be a valid dollar amount greater than $0 and at most $${MAX_ALERT_TARGET_PRICE.toLocaleString()}.` };
   }
 
   return { valid: true, gpu, price };
@@ -254,6 +256,17 @@ export async function confirmAlert(token, filePath) {
 
   if (!alert) {
     return { success: false, error: 'Invalid or expired confirmation token.' };
+  }
+
+  if (alert.status === 'UNSUBSCRIBED') {
+    return {
+      success: false,
+      error: 'This alert was unsubscribed and cannot be reactivated. You can create a new alert on the GPU Price Tracker.'
+    };
+  }
+
+  if (alert.fired) {
+    return { success: true, alreadyFired: true, alert };
   }
 
   if (alert.status === 'ACTIVE') {

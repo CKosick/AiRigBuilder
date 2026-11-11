@@ -2,6 +2,15 @@
 // Vercel Serverless Function: Activates alert on double opt-in click
 import { confirmAlert } from '../../src/services/alertService.js';
 
+export function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export default async function handler(req, res) {
   const token = req.query.token || (req.url && new URL(req.url, 'http://localhost').searchParams.get('token'));
 
@@ -18,21 +27,36 @@ export default async function handler(req, res) {
   }
 
   if (!result.success) {
-    return sendHtmlResponse(res, 400, 'Confirmation Failed', result.error, false);
+    return sendHtmlResponse(res, 400, 'Confirmation Failed', escapeHtml(result.error), false);
   }
 
   const alert = result.alert;
+  const safeGpuName = escapeHtml(alert.gpuName);
+  const safeTargetPrice = escapeHtml(alert.targetPrice);
+
+  if (result.alreadyFired) {
+    return sendHtmlResponse(
+      res,
+      200,
+      'Alert Already Completed ✅',
+      `The price-drop email was already sent for this <strong>${safeGpuName}</strong> alert (target <strong>$${safeTargetPrice}</strong>). Create a new alert on the GPU Price Tracker if you want to watch another target price.`,
+      true,
+      alert
+    );
+  }
+
   return sendHtmlResponse(
     res,
     200,
     'Alert Confirmed & Activated! 🚀',
-    `Your price drop alert for <strong>${alert.gpuName}</strong> at <strong>$${alert.targetPrice}</strong> or lower is now active. We'll email you once our weekly price estimate (from current eBay listings) drops to your target. Alerts are checked daily.`,
+    `Your price drop alert for <strong>${safeGpuName}</strong> at <strong>$${safeTargetPrice}</strong> or lower is now active. We'll email you once our weekly price estimate (from current eBay listings) drops to your target. Alerts are checked daily.`,
     true,
     alert
   );
 }
 
 function sendHtmlResponse(res, statusCode, title, message, isSuccess, alert = null) {
+  const safeTitle = escapeHtml(title);
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.status(statusCode).send(`
     <!DOCTYPE html>
@@ -40,7 +64,7 @@ function sendHtmlResponse(res, statusCode, title, message, isSuccess, alert = nu
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${title} — AiRigBuilder</title>
+      <title>${safeTitle} — AiRigBuilder</title>
       <style>
         body {
           margin: 0;
@@ -107,13 +131,13 @@ function sendHtmlResponse(res, statusCode, title, message, isSuccess, alert = nu
     <body>
       <div class="card">
         <div class="icon">${isSuccess ? '✅' : '⚠️'}</div>
-        <h1>${title}</h1>
+        <h1>${safeTitle}</h1>
         <p>${message}</p>
         ${alert ? `
           <div class="details-box">
-            <div style="color: #cbd5e1; margin-bottom: 4px;"><strong>Target GPU:</strong> ${alert.gpuName}</div>
-            <div style="color: #cbd5e1; margin-bottom: 4px;"><strong>Trigger Price:</strong> ≤ $${alert.targetPrice}</div>
-            <div style="color: #cbd5e1;"><strong>Subscriber:</strong> ${alert.email}</div>
+            <div style="color: #cbd5e1; margin-bottom: 4px;"><strong>Target GPU:</strong> ${escapeHtml(alert.gpuName)}</div>
+            <div style="color: #cbd5e1; margin-bottom: 4px;"><strong>Trigger Price:</strong> ≤ $${escapeHtml(alert.targetPrice)}</div>
+            <div style="color: #cbd5e1;"><strong>Subscriber:</strong> ${escapeHtml(alert.email)}</div>
           </div>
         ` : ''}
         <a href="/" class="btn">← Back to AiRigBuilder</a>

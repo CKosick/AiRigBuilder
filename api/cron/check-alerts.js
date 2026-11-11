@@ -20,10 +20,12 @@ export function createCheckAlertsHandler({ evaluate = evaluateAndTriggerAlerts, 
 
     try {
       const result = await evaluate(gpus);
+      const failed = (result.failedAlerts || []).length;
+      const ok = failed === 0;
       // Counts only: subscriber addresses stay out of the HTTP response
-      const summary = { ok: true, store: result.store, totalAlerts: result.totalAlerts, activeAlerts: result.activeAlerts, fired: result.firedCount, failed: (result.failedAlerts || []).length };
+      const summary = { ok, store: result.store, totalAlerts: result.totalAlerts, activeAlerts: result.activeAlerts, fired: result.firedCount, failed };
       console.log('Price-drop alert check:', JSON.stringify(summary));
-      return res.status(200).json(summary);
+      return res.status(ok ? 200 : 502).json(summary);
     } catch (err) {
       console.error('Price-drop alert check failed:', err);
       return res.status(500).json({ ok: false, error: 'Alert check failed' });
