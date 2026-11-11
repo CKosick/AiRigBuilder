@@ -34,7 +34,7 @@
   /* Typography Colors */
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  --text-dim: #8b97a8;
   --text-highlight: #ffffff;
 
   /* Fonts */
@@ -1073,9 +1073,28 @@ body {
 
 input[type="range"] {
   accent-color: var(--emerald);
-  height: 6px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--emerald);
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--emerald);
+  border: none;
   cursor: pointer;
 }
 
@@ -2551,7 +2570,8 @@ input[type="range"] {
   .nav-tab-btn {
     flex: 1 0 auto;
     justify-content: center;
-    padding: 6px 8px;
+    min-height: 44px;
+    padding: 10px 8px;
     font-size: 0.78rem;
     border-radius: var(--radius-sm);
     white-space: nowrap;
@@ -2712,6 +2732,38 @@ input[type="range"] {
   .vram-breakdown-legend {
     gap: 0.5rem 1rem;
     font-size: 0.75rem;
+  }
+
+  /* Phone tap targets: at least 44px tall for chips, toggles, sort, and tracker controls */
+  .filter-btn,
+  .vram-pill,
+  .builds-preset-btn,
+  .custom-bw-chip,
+  .builds-filter-reset,
+  .btn-view-history,
+  .alert-select,
+  .alert-input,
+  .btn-alert-submit,
+  .modal-price-input,
+  .modal-email-input,
+  .modal-close-btn,
+  .btn-sm,
+  .btn-sm-primary {
+    min-height: 44px;
+  }
+  .filter-btn,
+  .vram-pill,
+  .builds-preset-btn,
+  .custom-bw-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+  }
+  .alert-select,
+  .alert-input,
+  .btn-alert-submit {
+    height: 44px;
   }
 
 }
