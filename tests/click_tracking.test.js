@@ -66,6 +66,13 @@ describe('First-Party Outbound Click Tracking', () => {
         linkId: 'gpu:rtx-3090:ebay-sold'
       });
       assert.equal(gpuRes.valid, true);
+
+      const gpuAmazonRes = validateClickPayload({
+        path: '/gpu/rtx-3090',
+        merchant: 'Amazon',
+        linkId: 'gpu:rtx-3090:amazon'
+      });
+      assert.equal(gpuAmazonRes.valid, true);
     });
 
     it('rejects missing fields, unexpected fields, unknown merchants, and overlong strings', () => {
@@ -299,6 +306,10 @@ describe('First-Party Outbound Click Tracking', () => {
 
       const trackerHtml = renderPriceTrackerHtml();
       assert.match(trackerHtml, /id="modal-ebay-link"[^>]*data-click-merchant="eBay Sold"/);
+      assert.match(gpuHtml, /data-click-merchant="Amazon"/);
+      assert.match(gpuHtml, /data-click-id="gpu:rtx-3090:amazon"/);
+      assert.match(gpuHtml, /tag=airigbuilder-20/);
+      assert.match(trackerHtml, /id="modal-amazon-link"[^>]*data-click-merchant="Amazon"/);
     });
 
     it('fires navigator.sendBeacon("/api/click", ...) on sponsored link click without blocking navigation', () => {

@@ -212,6 +212,9 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
               <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-ebay-link" class="btn-secondary btn-text-sm" data-click-merchant="eBay Sold" data-link-kind="modal-ebay-sold">
                 ${icon('search')}Check eBay Sold Listings →
               </a>
+              <a href="#" target="_blank" rel="${AFFILIATE_LINK_REL}" id="modal-amazon-link" class="btn-secondary btn-text-sm" data-click-merchant="Amazon" data-link-kind="modal-amazon">
+                ${icon('cart')}Buy on Amazon →
+              </a>
             </div>
           </div>
         </div>
@@ -440,6 +443,20 @@ export function createPriceTracker(container) {
     ebayLink.href = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold', `gpu-${gpu.id}`);
     ebayLink.setAttribute('data-click-id', `gpu:${gpu.id}:modal-ebay-sold`);
     ebayLink.setAttribute('data-gpu-id', gpu.id);
+
+    // Amazon Link
+    const amazonLink = container.querySelector('#modal-amazon-link');
+    if (amazonLink) {
+      if (gpu.amazonSearchUrl) {
+        amazonLink.href = formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`);
+        amazonLink.setAttribute('data-click-id', `gpu:${gpu.id}:modal-amazon`);
+        amazonLink.setAttribute('data-gpu-id', gpu.id);
+        amazonLink.hidden = false;
+      } else {
+        amazonLink.href = '#';
+        amazonLink.hidden = true;
+      }
+    }
 
     // Remember what opened the dialog so focus can return there on close
     modalReturnFocus = document.activeElement;

@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   AFFILIATE_CONFIG,
+  AFFILIATE_LINK_REL,
   amazonTag,
   ebayCampaignId,
   ebayCustomId,
@@ -13,6 +14,9 @@ import {
   formatAffiliateUrl
 } from '../src/config/affiliates.js';
 import { BUILDS_DATA } from '../src/data/builds.js';
+import { GPUS_DATA } from '../src/data/gpus.js';
+import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
+import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderShell } from '../src/components/shell.js';
 import { parseRoute } from '../src/routes.js';
 
@@ -282,6 +286,79 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.ok(shellHtml.includes('Amazon Associates'), 'Footer mentions Amazon Associates');
       assert.ok(shellHtml.includes('eBay Partner Network'), 'Footer mentions eBay Partner Network');
       assert.ok(shellHtml.includes('B&H Photo'), 'Footer mentions B&H Photo');
+    });
+  });
+
+  describe('GPU Page & Tracker Modal Amazon Buy Buttons', () => {
+    it('every GPUS_DATA entry defines an untagged Amazon search URL targeting the card', () => {
+      assert.equal(GPUS_DATA.length, 19, 'GPUS_DATA must have exactly 19 tracked GPUs');
+      for (const gpu of GPUS_DATA) {
+        assert.ok(gpu.amazonSearchUrl, `GPU ${gpu.id} is missing amazonSearchUrl`);
+        assert.match(
+          gpu.amazonSearchUrl,
+          /^https:\/\/www\.amazon\.com\/s\?k=/,
+          `GPU ${gpu.id} amazonSearchUrl must be an Amazon search URL (got ${gpu.amazonSearchUrl})`
+        );
+        assert.ok(
+          !gpu.amazonSearchUrl.includes('tag='),
+          `GPU ${gpu.id} amazonSearchUrl in gpus.js must be untagged (got ${gpu.amazonSearchUrl})`
+        );
+      }
+    });
+
+    it('renders Buy on Amazon button carrying airigbuilder-20 tag exactly once, beside unchanged eBay button', () => {
+      for (const gpu of GPUS_DATA) {
+        const html = renderGpuDetailHtml(gpu);
+
+        // eBay button remains intact and unchanged
+        const expectedEbayHref = formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold', `gpu-${gpu.id}`);
+        assert.ok(html.includes(`href="${expectedEbayHref}"`), `${gpu.id} detail page has eBay link`);
+        assert.ok(html.includes('data-click-merchant="eBay Sold"'), `${gpu.id} detail page has eBay click merchant`);
+        assert.ok(html.includes(`data-click-id="gpu:${gpu.id}:ebay-sold"`), `${gpu.id} detail page has eBay click id`);
+        assert.ok(html.includes('Check eBay Sold Listings →'), `${gpu.id} detail page has eBay button label`);
+
+        // Amazon button is rendered beside eBay button with exact tagging and tracking
+        const expectedAmazonHref = formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`);
+        assert.ok(html.includes(`href="${expectedAmazonHref}"`), `${gpu.id} detail page has Amazon link`);
+        assert.match(expectedAmazonHref, /tag=airigbuilder-20/, `${gpu.id} Amazon link carries tag`);
+        // Verify tag appears exactly once
+        const tagCount = (expectedAmazonHref.match(/tag=airigbuilder-20/g) || []).length;
+        assert.equal(tagCount, 1, `${gpu.id} Amazon link carries tag exactly once`);
+
+        // Button attributes & styling family
+        assert.ok(
+          html.includes(`rel="${AFFILIATE_LINK_REL}"`),
+          `${gpu.id} has affiliate rel`
+        );
+        assert.ok(
+          html.includes('class="btn-primary" data-click-merchant="Amazon"'),
+          `${gpu.id} detail page has Amazon button with btn-primary class`
+        );
+        assert.ok(
+          html.includes(`data-click-id="gpu:${gpu.id}:amazon"`),
+          `${gpu.id} detail page has Amazon click id`
+        );
+        assert.ok(
+          html.includes('Buy on Amazon →'),
+          `${gpu.id} detail page has Buy on Amazon button label`
+        );
+
+        // Position: Amazon button appears after the eBay button
+        const ebayPos = html.indexOf('Check eBay Sold Listings →');
+        const amazonPos = html.indexOf('Buy on Amazon →');
+        assert.ok(ebayPos !== -1 && amazonPos !== -1 && amazonPos > ebayPos, `${gpu.id} Amazon button sits after eBay button`);
+      }
+    });
+
+    it('renders Buy on Amazon link in price tracker modal with proper merchant attributes', () => {
+      const trackerHtml = renderPriceTrackerHtml();
+      assert.ok(trackerHtml.includes('id="modal-ebay-link"'), 'Tracker modal has eBay link');
+      assert.ok(trackerHtml.includes('id="modal-amazon-link"'), 'Tracker modal has Amazon link');
+      assert.match(
+        trackerHtml,
+        /id="modal-amazon-link"[^>]*class="btn-secondary btn-text-sm"[^>]*data-click-merchant="Amazon"[^>]*data-link-kind="modal-amazon"/,
+        'Tracker modal Amazon link has matching styling family and tracking data attributes'
+      );
     });
   });
 });

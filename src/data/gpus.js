@@ -72,7 +72,8 @@ export const GPUS_DATA = [
         "price": 849
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+3090+24GB"
   },
   {
     "id": "rtx-4090",
@@ -145,7 +146,8 @@ export const GPUS_DATA = [
         "price": 1750
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4090+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4090+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+4090+24GB"
   },
   {
     "id": "rx-7900-xtx",
@@ -217,7 +219,8 @@ export const GPUS_DATA = [
         "price": 1200
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RX+7900+XTX+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RX+7900+XTX+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RX+7900+XTX+24GB"
   },
   {
     "id": "rtx-4060-ti-16gb",
@@ -288,7 +291,8 @@ export const GPUS_DATA = [
         "price": 470
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4060+Ti+16GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4060+Ti+16GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+4060+Ti+16GB"
   },
   {
     "id": "rtx-3060-12gb",
@@ -359,7 +363,8 @@ export const GPUS_DATA = [
         "price": 325
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+3060+12GB"
   },
   {
     "id": "tesla-p40",
@@ -430,7 +435,8 @@ export const GPUS_DATA = [
         "price": 298
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+Tesla+P40+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+Tesla+P40+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=NVIDIA+Tesla+P40+24GB"
   },
   {
     "id": "rtx-4080-super",
@@ -501,7 +507,8 @@ export const GPUS_DATA = [
         "price": 1240
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4080+Super+16GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4080+Super+16GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+4080+Super+16GB"
   },
   {
     "id": "rtx-3080-10gb",
@@ -571,7 +578,8 @@ export const GPUS_DATA = [
         "price": 410
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+3080+10GB"
   },
   {
     "id": "rtx-a5000",
@@ -642,7 +650,8 @@ export const GPUS_DATA = [
         "price": 1505
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+RTX+A5000+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+RTX+A5000+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=NVIDIA+RTX+A5000+24GB"
   },
   {
     "id": "mac-studio-m2-ultra",
@@ -714,7 +723,8 @@ export const GPUS_DATA = [
         "price": 3300
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M2+Ultra+unified+memory&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M2+Ultra+unified+memory&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=Apple+Mac+Studio+M2+Ultra"
   },
   {
     "id": "rtx-5090",
@@ -755,7 +765,8 @@ export const GPUS_DATA = [
         "price": 5999
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+5090+32GB"
   },
   {
     "id": "rtx-5080",
@@ -795,7 +806,8 @@ export const GPUS_DATA = [
         "price": 2000
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5080+16GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5080+16GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+5080+16GB"
   },
   {
     "id": "rtx-5060-ti-16gb",
@@ -835,7 +847,8 @@ export const GPUS_DATA = [
         "price": 700
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5060+Ti+16GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5060+Ti+16GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=RTX+5060+Ti+16GB"
   },
   {
     "id": "rtx-pro-6000-blackwell",
@@ -876,7 +889,8 @@ export const GPUS_DATA = [
         "price": 15800
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=NVIDIA+RTX+PRO+6000+Blackwell"
   },
   {
     "id": "arc-pro-b60",
@@ -916,7 +930,8 @@ export const GPUS_DATA = [
         "price": 880
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Arc+Pro+B60+24GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Arc+Pro+B60+24GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=Intel+Arc+Pro+B60+24GB"
   },
   {
     "id": "radeon-ai-pro-r9700",
@@ -956,7 +971,8 @@ export const GPUS_DATA = [
         "price": 1800
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Radeon+AI+PRO+R9700+32GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Radeon+AI+PRO+R9700+32GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=AMD+Radeon+AI+PRO+R9700+32GB"
   },
   {
     "id": "strix-halo-128gb",
@@ -996,7 +1012,8 @@ export const GPUS_DATA = [
         "price": 3199
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=AMD+Ryzen+AI+Max%2B+395"
   },
   {
     "id": "dgx-spark",
@@ -1036,7 +1053,8 @@ export const GPUS_DATA = [
         "price": 6700
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=NVIDIA+DGX+Spark&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=NVIDIA+DGX+Spark&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=NVIDIA+DGX+Spark"
   },
   {
     "id": "mac-studio-m3-ultra",
@@ -1076,6 +1094,7 @@ export const GPUS_DATA = [
         "price": 4500
       }
     ],
-    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1"
+    "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1",
+    "amazonSearchUrl": "https://www.amazon.com/s?k=Apple+Mac+Studio+M3+Ultra"
   }
 ];
