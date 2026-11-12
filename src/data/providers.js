@@ -1,7 +1,7 @@
 // Cloud GPU hourly rates, one entry per offer. The break-even calculator's providers below and
 // every model's cloud alternative (models.js cloudOffers) read their rate from here.
-export const CLOUD_RATES_AS_OF = 'November 2026';
-export const CLOUD_RATES_AS_OF_DATE = '2026-11-01';
+export const CLOUD_RATES_AS_OF = 'December 2026';
+export const CLOUD_RATES_AS_OF_DATE = '2026-12-01';
 
 export const CLOUD_RATES = {
   'runpod-dual-3090': { label: 'RunPod 2x RTX 3090', hourlyRate: 1.00 },
