@@ -14,9 +14,9 @@ const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 describe('Item 5: GPU page titles and descriptions carry $ and thousands separators', () => {
   it('formats RTX 5090 (> $1,000) with dollar signs and thousands separators in title and description', () => {
     const meta = pageMeta(parseRoute('/gpu/rtx-5090'));
-    assert.ok(meta.title.includes('($6,500)'), `Expected ($6,500) in title, got: ${meta.title}`);
-    assert.ok(meta.description.includes('about $6,500 on eBay'), `Expected 'about $6,500 on eBay' in description, got: ${meta.description}`);
-    assert.ok(meta.description.includes('(range $5,810–$7,450, $203.13/GB VRAM)'), `Expected formatted range and $/GB in description, got: ${meta.description}`);
+    assert.ok(meta.title.includes('($5,999)'), `Expected ($5,999) in title, got: ${meta.title}`);
+    assert.ok(meta.description.includes('about $5,999 on eBay'), `Expected 'about $5,999 on eBay' in description, got: ${meta.description}`);
+    assert.ok(meta.description.includes('(range $5,400–$7,000, $187.47/GB VRAM)'), `Expected formatted range and $/GB in description, got: ${meta.description}`);
   });
 
   it('formats every GPU page title and description with dollar signs and thousands separators', () => {

@@ -36,7 +36,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB Total GDDR6X, 936 GB/s, NVLink compatible',
             condition: 'Used (eBay)',
-            price: 1758, // 2x $879
+            price: 1698, // 2x $849
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Look for Founder Edition or EVGA FTW3. Dual 24GB fits Q4_K_M at 16k context with an 8-bit KV cache (or 8k context at FP16).'
@@ -131,7 +131,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB Total GDDR6X, 936 GB/s',
             condition: 'Used (eBay)',
-            price: 1758,
+            price: 1698,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Proven price-to-VRAM sweet spot.'
@@ -294,7 +294,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB GDDR6X, 936 GB/s bandwidth',
             condition: 'Used (eBay)',
-            price: 1758,
+            price: 1698,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Exllamav2 4.0bpw runs at ~22 tok/s with 16k context for long reasoning traces.'
@@ -389,7 +389,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB (or 2x RTX A5000)',
             spec: '48GB Total VRAM, 936 GB/s',
             condition: 'Used (eBay)',
-            price: 1758,
+            price: 1698,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Fits DeepSeek-R1-70B Q4_K_M + 32K context window.'
@@ -542,7 +542,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB GDDR6X, 936 GB/s',
             condition: 'Used (eBay)',
-            price: 1758,
+            price: 1698,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Dual 3090s allow running Qwen 2.5 72B Q4_K_M at 17 tok/s.'
@@ -637,7 +637,7 @@ export const BUILDS_DATA = {
             name: '2x NVIDIA GeForce RTX 3090 24GB',
             spec: '48GB GDDR6X, 936 GB/s',
             condition: 'Used (eBay)',
-            price: 1758,
+            price: 1698,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: 'Dual 3090 setup.'
@@ -790,7 +790,7 @@ export const BUILDS_DATA = {
             name: '1x NVIDIA GeForce RTX 3090 24GB',
             spec: '24GB GDDR6X, 936 GB/s bandwidth',
             condition: 'Used (eBay)',
-            price: 879,
+            price: 849,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
             notes: '24GB fits Mistral NeMo 12B at FP16 or Mistral Small 24B at Q5_K_M with 32K context.'
@@ -1088,7 +1088,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3060 12GB',
             spec: '12GB GDDR6, 170W TDP, 360 GB/s bandwidth',
             condition: 'Used (eBay)',
-            price: 335,
+            price: 325,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1',
             notes: 'The cheapest card that can run 8B models at full Q8 precision completely in VRAM.'
@@ -1183,7 +1183,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3080 10GB',
             spec: '10GB GDDR6X, 760 GB/s bandwidth, 320W TDP',
             condition: 'Used (eBay)',
-            price: 409,
+            price: 410,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1',
             notes: 'Incredible memory bandwidth for the price. 10GB runs 8B at Q6_K (7.8 GB) with ~8K context; Q8_0 (9.2 GB) does not fit once runtime overhead is counted.'
@@ -1681,7 +1681,7 @@ export const TIER_RTX_5090 = {
       name: 'NVIDIA GeForce RTX 5090 32GB',
       spec: '32GB GDDR7, 1792 GB/s bandwidth, 575W TDP',
       condition: 'New',
-      price: 6500,
+      price: 5999,
       merchant: 'eBay / Retail',
       url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1',
       notes: 'Fastest 32GB consumer card for local AI with 1,792 GB/s memory bandwidth. (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).'
@@ -1777,7 +1777,7 @@ export const TIER_RAM_OFFLOAD = {
       name: '1x NVIDIA GeForce RTX 3090 24GB',
       spec: '24GB GDDR6X, 936 GB/s bandwidth (partial layer & KV/prompt offload accelerator)',
       condition: 'Used (eBay)',
-      price: 879,
+      price: 849,
       merchant: 'eBay Sold',
       url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1',
       notes: 'Holds shared attention/shared layers and accelerates prompt processing; the 192GB system RAM pool holds the full MoE weights.'

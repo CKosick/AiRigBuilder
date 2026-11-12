@@ -79,14 +79,14 @@ describe('Cloud rental callout on tier cards', () => {
   });
 
   it('formats rental-fees equivalence across <12m (1 decimal), 12-60m (whole months), and >60m (more than 5 years)', () => {
-    // Golden Llama 3.3 70B budget dual-3090 tier ($2,592 at $0.42/hr)
+    // Golden Llama 3.3 70B budget dual-3090 tier ($2,532 at $0.42/hr)
     const llamaBudget = BUILDS_DATA['llama-3.3-70b'].tiers.find(t => t.id === 'tier-budget-used');
     const llamaCallout = getTierCloudCallout(llamaBudget);
-    assert.equal(llamaCallout.tierTotal, 2592);
-    assert.equal(Math.round(llamaCallout.rawMonths), 51);
+    assert.equal(llamaCallout.tierTotal, 2532);
+    assert.equal(Math.round(llamaCallout.rawMonths), 50);
     assert.equal(
       llamaCallout.line,
-      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 51 months of rental fees."
+      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 50 months of rental fees."
     );
     assert.equal(llamaCallout.subLine, `Cloud rates checked ${CLOUD_RATES_AS_OF}`);
 
@@ -110,7 +110,7 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(llamaDefaultHtml.includes('class="tier-cloud-callout"'));
     assert.ok(
       llamaDefaultHtml.includes(
-        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 51 months of rental fees."
+        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 50 months of rental fees."
       )
     );
     assert.ok(llamaDefaultHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`));

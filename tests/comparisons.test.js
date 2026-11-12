@@ -126,18 +126,18 @@ describe('Computed Spot Check 2: Best GPU for Llama 3.3 70B', () => {
   it('computes correct labeled picks and integrated systems note', () => {
     const html = renderBestGpuHtml('llama-3.3-70b');
 
-    // Cheapest: 2x Tesla P40 ($598)
+    // Cheapest: 2x Tesla P40 ($596)
     assert.ok(html.includes('Cheapest That Runs It'));
     assert.ok(html.includes('2x NVIDIA Tesla P40 24GB'));
-    assert.ok(html.includes('$598'));
+    assert.ok(html.includes('$596'));
 
-    // Best Value Full Fit: 2x Tesla P40 ($598)
+    // Best Value Full Fit: 2x Tesla P40 ($596)
     assert.ok(html.includes('Best Value Full Fit'));
 
-    // Fastest: 2x RTX 5090 ($13,000)
+    // Fastest: 2x RTX 5090 ($11,998)
     assert.ok(html.includes('Fastest Discrete Rig'));
     assert.ok(html.includes('2x NVIDIA GeForce RTX 5090'));
-    assert.ok(html.includes('$13,000'));
+    assert.ok(html.includes('$11,998'));
 
     // Integrated systems note
     assert.ok(html.includes('Integrated Unified-Memory Systems'));

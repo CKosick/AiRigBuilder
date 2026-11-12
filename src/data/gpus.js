@@ -1,6 +1,6 @@
 // The GPUs and AI systems tracked for local AI, with used prices estimated from current eBay listings
-// Last updated: 2026-11-10T01:55:13.621Z
-export const GPUS_UPDATED_AT = '2026-11-10T01:55:13.621Z';
+// Last updated: 2026-11-12T05:50:34.240Z
+export const GPUS_UPDATED_AT = '2026-11-12T05:50:34.240Z';
 export const GPUS_DATA = [
   {
     "id": "rtx-3090",
@@ -9,13 +9,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 936,
     "tdp": 350,
-    "usedStreetPrice": 879,
-    "usedPriceLow": 511,
-    "usedPriceHigh": 1000,
+    "usedStreetPrice": 849,
+    "usedPriceLow": 512,
+    "usedPriceHigh": 987,
     "newPrice": null,
-    "trend7d": 2.2,
-    "trend30d": 22.4,
-    "pricePerGb": 36.63,
+    "trend7d": null,
+    "trend30d": 18.2,
+    "pricePerGb": 35.38,
     "multiGpuScore": 9.8,
     "aiRating": "King of Local 70B",
     "summary": "The uncontested value king of local AI. Dual 3090s give 48GB VRAM with NVLink support for about {dualPrice} total GPU spend. Excellent memory bandwidth (936 GB/s).",
@@ -69,7 +69,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 879
+        "price": 849
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3090+24GB&LH_Sold=1&LH_Complete=1"
@@ -82,10 +82,10 @@ export const GPUS_DATA = [
     "bandwidth": 1008,
     "tdp": 450,
     "usedStreetPrice": 1750,
-    "usedPriceLow": 1200,
-    "usedPriceHigh": 2100,
+    "usedPriceLow": 1350,
+    "usedPriceHigh": 2150,
     "newPrice": 1849,
-    "trend7d": 12.9,
+    "trend7d": null,
     "trend30d": 13.6,
     "pricePerGb": 72.92,
     "multiGpuScore": 6.5,
@@ -155,11 +155,11 @@ export const GPUS_DATA = [
     "bandwidth": 960,
     "tdp": 355,
     "usedStreetPrice": 1200,
-    "usedPriceLow": 1000,
-    "usedPriceHigh": 1300,
+    "usedPriceLow": 999,
+    "usedPriceHigh": 1349,
     "newPrice": 919,
-    "trend7d": 9.1,
-    "trend30d": 38.9,
+    "trend7d": null,
+    "trend30d": 22.6,
     "pricePerGb": 50,
     "multiGpuScore": 7.2,
     "aiRating": "High Bandwidth Alternative",
@@ -230,7 +230,7 @@ export const GPUS_DATA = [
     "usedPriceLow": 400,
     "usedPriceHigh": 500,
     "newPrice": 449,
-    "trend7d": 0,
+    "trend7d": null,
     "trend30d": 22.1,
     "pricePerGb": 29.38,
     "multiGpuScore": 8.5,
@@ -297,13 +297,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 360,
     "tdp": 170,
-    "usedStreetPrice": 335,
-    "usedPriceLow": 286,
-    "usedPriceHigh": 361,
+    "usedStreetPrice": 325,
+    "usedPriceLow": 285,
+    "usedPriceHigh": 362,
     "newPrice": 279,
-    "trend7d": 1.5,
-    "trend30d": 9.1,
-    "pricePerGb": 27.92,
+    "trend7d": null,
+    "trend30d": 0,
+    "pricePerGb": 27.08,
     "multiGpuScore": 8,
     "aiRating": "Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for about {price} allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
@@ -356,7 +356,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 335
+        "price": 325
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1"
@@ -368,13 +368,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR5",
     "bandwidth": 346,
     "tdp": 250,
-    "usedStreetPrice": 299,
-    "usedPriceLow": 275,
+    "usedStreetPrice": 298,
+    "usedPriceLow": 270,
     "usedPriceHigh": 350,
     "newPrice": null,
-    "trend7d": 3.1,
-    "trend30d": 9.5,
-    "pricePerGb": 12.46,
+    "trend7d": null,
+    "trend30d": 7.6,
+    "pricePerGb": 12.42,
     "multiGpuScore": 6,
     "aiRating": "Tinkerer Ultra-Budget 24GB",
     "summary": "24GB VRAM for about {price}. A datacentre Pascal card requiring a custom cooling fan shroud and no video output. Slow on FP16, but runs GGUF quantized models surprisingly well.",
@@ -427,7 +427,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 299
+        "price": 298
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+Tesla+P40+24GB&LH_Sold=1&LH_Complete=1"
@@ -439,13 +439,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 736,
     "tdp": 320,
-    "usedStreetPrice": 1200,
+    "usedStreetPrice": 1240,
     "usedPriceLow": 1125,
-    "usedPriceHigh": 1300,
+    "usedPriceHigh": 1349,
     "newPrice": 999,
-    "trend7d": 0,
-    "trend30d": 8.8,
-    "pricePerGb": 75,
+    "trend7d": null,
+    "trend30d": 7.8,
+    "pricePerGb": 77.5,
     "multiGpuScore": 6.8,
     "aiRating": "Fast Compute, VRAM Bottleneck",
     "summary": "Fast 736 GB/s bandwidth and great Ada Lovelace inference speed, but capped at 16GB VRAM. Expensive per GB compared to used 3090.",
@@ -498,7 +498,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 1200
+        "price": 1240
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4080+Super+16GB&LH_Sold=1&LH_Complete=1"
@@ -510,13 +510,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 760,
     "tdp": 320,
-    "usedStreetPrice": 409,
-    "usedPriceLow": 366,
-    "usedPriceHigh": 450,
+    "usedStreetPrice": 410,
+    "usedPriceLow": 380,
+    "usedPriceHigh": 475,
     "newPrice": null,
-    "trend7d": 2.3,
-    "trend30d": 6.8,
-    "pricePerGb": 40.9,
+    "trend7d": null,
+    "trend30d": 2.5,
+    "pricePerGb": 41,
     "multiGpuScore": 7,
     "aiRating": "High Bandwidth 8B Speeder",
     "summary": "Fast 760 GB/s bandwidth at about {price} used, providing 100+ tok/s on 8B models. However, 10GB VRAM is tight for modern context windows.",
@@ -568,7 +568,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 409
+        "price": 410
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1"
@@ -584,7 +584,7 @@ export const GPUS_DATA = [
     "usedPriceLow": 1200,
     "usedPriceHigh": 1600,
     "newPrice": 2250,
-    "trend7d": 0,
+    "trend7d": null,
     "trend30d": 27.5,
     "pricePerGb": 62.71,
     "multiGpuScore": 9.9,
@@ -655,8 +655,8 @@ export const GPUS_DATA = [
     "usedPriceLow": 2800,
     "usedPriceHigh": 3599,
     "newPrice": null,
-    "trend7d": 0,
-    "trend30d": -0.3,
+    "trend7d": null,
+    "trend30d": -2.9,
     "pricePerGb": 51.56,
     "multiGpuScore": 10,
     "aiRating": "Unified Memory Champion",
@@ -723,14 +723,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR7",
     "bandwidth": 1792,
     "tdp": 575,
-    "usedStreetPrice": 6500,
-    "usedPriceLow": 5810,
-    "usedPriceHigh": 7450,
+    "usedStreetPrice": 5999,
+    "usedPriceLow": 5400,
+    "usedPriceHigh": 7000,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 0.8,
-    "trend30d": null,
-    "pricePerGb": 203.13,
+    "trend7d": null,
+    "trend30d": -9.1,
+    "pricePerGb": 187.47,
     "multiGpuScore": 5,
     "aiRating": "Fastest 32GB Consumer Card",
     "summary": "The fastest consumer card for local AI: 32GB of GDDR7 at 1,792 GB/s, nearly double a 3090's bandwidth. Fits 30B-class models at Q8 and MoE models like Qwen 3 30B-A3B with long context on one card. It has sold far above its launch MSRP through 2026, so the price here comes from current listings.",
@@ -752,7 +752,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 6500
+        "price": 5999
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1"
@@ -764,14 +764,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR7",
     "bandwidth": 960,
     "tdp": 360,
-    "usedStreetPrice": 1900,
+    "usedStreetPrice": 2000,
     "usedPriceLow": 1750,
-    "usedPriceHigh": 2200,
+    "usedPriceHigh": 2300,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 0.1,
-    "trend30d": null,
-    "pricePerGb": 118.75,
+    "trend7d": null,
+    "trend30d": 25,
+    "pricePerGb": 125,
     "multiGpuScore": 5,
     "aiRating": "Fast but 16GB-Limited",
     "summary": "16GB of GDDR7 at 960 GB/s: about as fast as a 3090 for models that fit, but 16GB tops out around 14B dense models at high quants, or MoE models such as gpt-oss-20b and Gemma 4 26B MoE at Q4.",
@@ -792,7 +792,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 1900
+        "price": 2000
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5080+16GB&LH_Sold=1&LH_Complete=1"
@@ -806,11 +806,11 @@ export const GPUS_DATA = [
     "tdp": 180,
     "usedStreetPrice": 700,
     "usedPriceLow": 518,
-    "usedPriceHigh": 755,
+    "usedPriceHigh": 760,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 0.7,
-    "trend30d": null,
+    "trend7d": null,
+    "trend30d": 5.3,
     "pricePerGb": 43.75,
     "multiGpuScore": 7,
     "aiRating": "Cheapest New 16GB NVIDIA",
@@ -849,8 +849,8 @@ export const GPUS_DATA = [
     "usedPriceHigh": 16850,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 0.3,
-    "trend30d": null,
+    "trend7d": null,
+    "trend30d": 4.6,
     "pricePerGb": 164.58,
     "multiGpuScore": 8,
     "aiRating": "One-Card 96GB Answer",
@@ -885,14 +885,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 456,
     "tdp": 200,
-    "usedStreetPrice": 797,
+    "usedStreetPrice": 880,
     "usedPriceLow": 610,
     "usedPriceHigh": 1047,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 0,
-    "trend30d": null,
-    "pricePerGb": 33.21,
+    "trend7d": null,
+    "trend30d": 29.2,
+    "pricePerGb": 36.67,
     "multiGpuScore": 7,
     "aiRating": "Budget 24GB, Linux Dual-Card",
     "summary": "24GB of GDDR6 at 456 GB/s for far less than other 24GB cards, at 120-200W depending on the partner board. Its local AI story is two cards on Linux with Intel's inference stack; software support still lags CUDA, especially on Windows. Intel sells no reference card, so every B60 is a partner board. Dual-GPU 48GB boards are excluded from the price.",
@@ -913,7 +913,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 797
+        "price": 880
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Arc+Pro+B60+24GB&LH_Sold=1&LH_Complete=1"
@@ -926,12 +926,12 @@ export const GPUS_DATA = [
     "bandwidth": 640,
     "tdp": 300,
     "usedStreetPrice": 1800,
-    "usedPriceLow": 1400,
+    "usedPriceLow": 1450,
     "usedPriceHigh": 2247,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 2.9,
-    "trend30d": null,
+    "trend7d": null,
+    "trend30d": 23.3,
     "pricePerGb": 56.25,
     "multiGpuScore": 9,
     "aiRating": "32GB Blower for Multi-GPU",
@@ -967,11 +967,11 @@ export const GPUS_DATA = [
     "tdp": 120,
     "usedStreetPrice": 3199,
     "usedPriceLow": 2899,
-    "usedPriceHigh": 3605,
+    "usedPriceHigh": 3603,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": 3.2,
-    "trend30d": null,
+    "trend7d": null,
+    "trend30d": 4.8,
     "pricePerGb": 24.99,
     "multiGpuScore": 3,
     "aiRating": "Cheapest 96GB-Class System",
@@ -1005,14 +1005,14 @@ export const GPUS_DATA = [
     "vramType": "Unified LPDDR5X",
     "bandwidth": 273,
     "tdp": 140,
-    "usedStreetPrice": 6600,
-    "usedPriceLow": 6000,
-    "usedPriceHigh": 7099,
+    "usedStreetPrice": 6700,
+    "usedPriceLow": 5999,
+    "usedPriceHigh": 7250,
     "newPrice": null,
     "soldNew": true,
-    "trend7d": -4.3,
-    "trend30d": null,
-    "pricePerGb": 51.56,
+    "trend7d": null,
+    "trend30d": 8.1,
+    "pricePerGb": 52.34,
     "multiGpuScore": 6,
     "aiRating": "CUDA in a 128GB Box",
     "summary": "A complete desktop AI system, not a graphics card: NVIDIA's GB10 Grace Blackwell chip with 128GB of unified LPDDR5X and the full CUDA stack in a small box. The catch is bandwidth: 273 GB/s is under a third of a 3090's, so large dense models generate slowly for the price; MoE models suit it better.",
@@ -1033,7 +1033,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 6600
+        "price": 6700
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=NVIDIA+DGX+Spark&LH_Sold=1&LH_Complete=1"
@@ -1046,12 +1046,12 @@ export const GPUS_DATA = [
     "bandwidth": 819,
     "tdp": 480,
     "usedStreetPrice": 4500,
-    "usedPriceLow": 4150,
-    "usedPriceHigh": 5200,
+    "usedPriceLow": 4199,
+    "usedPriceHigh": 5199,
     "newPrice": null,
     "soldNew": false,
-    "trend7d": -1.6,
-    "trend30d": null,
+    "trend7d": null,
+    "trend30d": -3.2,
     "pricePerGb": 46.88,
     "multiGpuScore": 9,
     "aiRating": "Silent 96GB Unified Box",

@@ -206,7 +206,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       assert.equal(offload.fit.quantVram, expectedVram);
       assert.equal(offload.fit.contextLabel, '32K+');
       const offloadTotal = offload.parts.reduce((sum, p) => sum + (p.price || 0), 0);
-      assert.equal(offloadTotal, 5443, `${id} tier-ram-offload parts total is $5,443`);
+      assert.equal(offloadTotal, 5413, `${id} tier-ram-offload parts total is $5,413`);
       assert.equal(cheapestFittingTotal(sheet), offloadTotal, `${id} cheapestFittingTotal equals tier-ram-offload parts total ($${offloadTotal})`);
 
       // Verify M5 Ultra tiers fit as well
@@ -263,7 +263,7 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
         assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
 
         // RAM offload remains the cheapest fitting rig
-        assert.equal(cheapestFittingTotal(sheet), 5443, `${id} cheapest fitting tier is RAM offload at $5,443`);
+        assert.equal(cheapestFittingTotal(sheet), 5413, `${id} cheapest fitting tier is RAM offload at $5,413`);
       }
     }
 
