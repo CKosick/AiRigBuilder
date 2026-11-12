@@ -19,7 +19,7 @@ export const CLOUD_RATES = {
   'vast-single-3060': { label: 'Vast.ai 1x RTX 3060', hourlyRate: 0.07 },
   'runpod-quad-4090': { label: 'RunPod 4x RTX 4090', hourlyRate: 3.56 },
   'runpod-quad-a100-80gb': { label: 'RunPod 4x A100 80GB', hourlyRate: 7.16 },
-  'vast-8x-h100': { label: 'Vast.ai 8x H100', hourlyRate: 19.20 },
+  'vast-8x-h100': { label: 'Vast.ai 8x H100', hourlyRate: 21.33 },
 };
 
 // Providers offered in the break-even calculator
