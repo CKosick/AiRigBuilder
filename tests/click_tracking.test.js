@@ -9,6 +9,8 @@ import { buildClickPayload, initOutboundClickTracking } from '../src/utils/click
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
+import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
+import { AFFILIATE_LINK_REL, RUNPOD_REFERRAL_URL, VAST_REFERRAL_URL } from '../src/config/affiliates.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 
 function createMockRes() {
@@ -73,6 +75,39 @@ describe('First-Party Outbound Click Tracking', () => {
         linkId: 'gpu:rtx-3090:amazon'
       });
       assert.equal(gpuAmazonRes.valid, true);
+
+      assert.equal(
+        validateClickPayload({
+          path: '/builds/llama-3.3-70b',
+          merchant: 'RunPod',
+          linkId: 'runpod-dual-3090'
+        }).valid,
+        true
+      );
+      assert.equal(
+        validateClickPayload({
+          path: '/builds/llama-3.3-70b',
+          merchant: 'Vast',
+          linkId: 'vast-single-4090'
+        }).valid,
+        true
+      );
+      assert.equal(
+        validateClickPayload({
+          path: '/calculator',
+          merchant: 'RunPod',
+          linkId: 'calculator-runpod'
+        }).valid,
+        true
+      );
+      assert.equal(
+        validateClickPayload({
+          path: '/calculator',
+          merchant: 'Vast',
+          linkId: 'calculator-vast'
+        }).valid,
+        true
+      );
     });
 
     it('rejects missing fields, unexpected fields, unknown merchants, and overlong strings', () => {
@@ -310,6 +345,18 @@ describe('First-Party Outbound Click Tracking', () => {
       assert.match(gpuHtml, /data-click-id="gpu:rtx-3090:amazon"/);
       assert.match(gpuHtml, /tag=airigbuilder-20/);
       assert.match(trackerHtml, /id="modal-amazon-link"[^>]*data-click-merchant="Amazon"/);
+
+      const calcHtml = renderBreakEvenHtml();
+      assert.ok(
+        calcHtml.includes(
+          `<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="calculator-runpod">Rent on RunPod</a>`
+        )
+      );
+      assert.ok(
+        calcHtml.includes(
+          `<a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="calculator-vast">Rent on Vast.ai</a>`
+        )
+      );
     });
 
     it('fires navigator.sendBeacon("/api/click", ...) on sponsored link click without blocking navigation', () => {

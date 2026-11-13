@@ -29,7 +29,9 @@ export const KNOWN_MERCHANTS = new Set([
   'eBay / Amazon',
   'eBay / Enterprise',
   'eBay / Retail',
-  'eBay / Apple'
+  'eBay / Apple',
+  'RunPod',
+  'Vast'
 ]);
 
 export function formatCounterKey(day, linkId, merchant) {

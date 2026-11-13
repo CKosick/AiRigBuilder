@@ -2,6 +2,7 @@
 // Matches a tier's GPU configuration against an explicit table of CLOUD_RATES offer IDs
 // and computes the rental-fees-only equivalence at 4 hrs/day.
 import { CLOUD_RATES, CLOUD_RATES_AS_OF } from '../data/providers.js';
+import { AFFILIATE_LINK_REL, getCloudReferralUrl } from '../config/affiliates.js';
 
 export const CLOUD_CALLOUT_DAILY_HOURS = 4;
 export const CLOUD_CALLOUT_DAYS_PER_MONTH = 30.44;
@@ -121,16 +122,39 @@ export function getTierCloudCallout(tier) {
   return { ...match, ...callout };
 }
 
+function cloudReferralLinkMeta(offerId) {
+  const href = getCloudReferralUrl(offerId);
+  if (!href) return null;
+  if (offerId.startsWith('runpod-')) {
+    return { href, merchant: 'RunPod', label: 'Rent on RunPod' };
+  }
+  if (offerId.startsWith('vast-')) {
+    return { href, merchant: 'Vast', label: 'Rent on Vast.ai' };
+  }
+  return null;
+}
+
 /**
  * Renders the HTML callout block for a matched tier, or empty string if unmatched.
  */
 export function renderTierCloudCalloutHtml(tier) {
   const callout = getTierCloudCallout(tier);
   if (!callout) return '';
+  const linksHtml = callout.offers
+    .map(offer => {
+      const meta = cloudReferralLinkMeta(offer.id);
+      if (!meta) return '';
+      return `<a href="${meta.href}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="${meta.merchant}" data-click-id="${offer.id}">${meta.label}</a>`;
+    })
+    .filter(Boolean)
+    .join('\n            ');
   return `
         <div class="tier-cloud-callout">
           <div class="tier-cloud-callout-line">${callout.line}</div>
-          <div class="tier-cloud-callout-sub">${callout.subLine}</div>
+          <div class="tier-cloud-callout-sub">${callout.subLine}</div>${linksHtml ? `
+          <div class="tier-cloud-callout-actions">
+            ${linksHtml}
+          </div>` : ''}
         </div>`;
 }
 

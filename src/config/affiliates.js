@@ -74,6 +74,24 @@ export const ebayParams = AFFILIATE_CONFIG.ebayParams;
  */
 export const AFFILIATE_LINK_REL = 'sponsored noopener noreferrer';
 
+// Public referral URLs for cloud GPU rental partners
+export const RUNPOD_REFERRAL_URL = 'https://runpod.io?ref=2stimz9v';
+export const VAST_REFERRAL_URL = 'https://cloud.vast.ai/?ref_id=859243';
+
+/**
+ * Maps a CLOUD_RATES offer ID prefix ('runpod-' / 'vast-') to its referral URL,
+ * returning null for any other ID or non-string input.
+ *
+ * @param {string} offerId
+ * @returns {string | null}
+ */
+export function getCloudReferralUrl(offerId) {
+  if (typeof offerId !== 'string') return null;
+  if (offerId.startsWith('runpod-')) return RUNPOD_REFERRAL_URL;
+  if (offerId.startsWith('vast-')) return VAST_REFERRAL_URL;
+  return null;
+}
+
 // EPN allows customid values up to 256 alphanumeric/hyphen/underscore characters.
 export const EPN_CUSTOMID_MAX_LEN = 256;
 

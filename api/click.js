@@ -38,7 +38,11 @@ export function validateClickPayload(body) {
     typeof linkId !== 'string' ||
     linkId.length === 0 ||
     linkId.length > MAX_LINK_ID_LEN ||
-    (!linkId.startsWith('build:') && !linkId.startsWith('gpu:')) ||
+    (!linkId.startsWith('build:') &&
+      !linkId.startsWith('gpu:') &&
+      !linkId.startsWith('runpod-') &&
+      !linkId.startsWith('vast-') &&
+      !linkId.startsWith('calculator-')) ||
     CONTROL_OR_PIPE_RE.test(linkId)
   ) {
     return { valid: false, error: 'Invalid link identifier.' };

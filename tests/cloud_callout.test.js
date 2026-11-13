@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import { BUILDS_DATA } from '../src/data/builds.js';
 import { CLOUD_RATES, CLOUD_RATES_AS_OF } from '../src/data/providers.js';
 import {
+  AFFILIATE_LINK_REL,
+  RUNPOD_REFERRAL_URL,
+  VAST_REFERRAL_URL
+} from '../src/config/affiliates.js';
+import {
   TIER_CLOUD_MATCH_TABLE,
   matchTierCloudConfig,
   computeCloudRentalCallout,
@@ -105,7 +110,7 @@ describe('Cloud rental callout on tier cards', () => {
     );
   });
 
-  it('renders in prerendered HTML for matched default tiers, updates on tier switch, has no outbound links, and preserves the Cloud Alternative badge', () => {
+  it('renders in prerendered HTML for matched default tiers, updates on tier switch, renders tracked referral links, and preserves the Cloud Alternative badge', () => {
     const llamaDefaultHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
     assert.ok(llamaDefaultHtml.includes('class="tier-cloud-callout"'));
     assert.ok(
@@ -116,18 +121,41 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(llamaDefaultHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`));
     assert.ok(llamaDefaultHtml.includes('<div class="spec-badge-label">Cloud Alternative</div>'));
 
-    // Ensure no outbound links inside the callout
+    // Matched dual-3090 tier renders both provider referral links with sponsored rel and click tracking
     const calloutChunk = renderTierCloudCalloutHtml(
       BUILDS_DATA['llama-3.3-70b'].tiers.find(t => t.id === 'tier-budget-used')
     );
-    assert.ok(!calloutChunk.includes('<a '), 'Callout must contain no outbound links');
+    assert.ok(
+      calloutChunk.includes(
+        `<a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="vast-dual-3090">Rent on Vast.ai</a>`
+      ),
+      'Dual-3090 callout renders tracked Vast.ai referral link'
+    );
+    assert.ok(
+      calloutChunk.includes(
+        `<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="runpod-dual-3090">Rent on RunPod</a>`
+      ),
+      'Dual-3090 callout renders tracked RunPod referral link'
+    );
 
-    // Switching to unmatched Mac Studio M2 Ultra tier omits the callout
+    // Single-provider matched tier (e.g. RTX 3060 12GB) renders only Vast.ai link
+    const single3060Tier = Object.values(BUILDS_DATA)
+      .flatMap(s => s.tiers)
+      .find(t => matchTierCloudConfig(t)?.configId === 'single-rtx-3060-12gb');
+    assert.ok(single3060Tier, 'Found a single-rtx-3060-12gb tier');
+    const single3060Callout = renderTierCloudCalloutHtml(single3060Tier);
+    assert.ok(single3060Callout.includes('Rent on Vast.ai'));
+    assert.ok(single3060Callout.includes('data-click-id="vast-single-3060"'));
+    assert.ok(!single3060Callout.includes('Rent on RunPod'));
+
+    // Switching to unmatched Mac Studio M2 Ultra tier omits the callout and links
     const llamaMacHtml = renderModelPickerHtml({
       activeModelId: 'llama-3.3-70b',
       activeTierId: 'tier-best-new'
     });
     assert.ok(!llamaMacHtml.includes('class="tier-cloud-callout"'));
+    assert.ok(!llamaMacHtml.includes('Rent on RunPod'));
+    assert.ok(!llamaMacHtml.includes('Rent on Vast.ai'));
 
     // Switching to matched balanced dual-3090 tier ($3,373 -> more than 5 years)
     const llamaBalancedHtml = renderModelPickerHtml({

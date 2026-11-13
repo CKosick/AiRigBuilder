@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {
   AFFILIATE_CONFIG,
   AFFILIATE_LINK_REL,
+  RUNPOD_REFERRAL_URL,
+  VAST_REFERRAL_URL,
+  getCloudReferralUrl,
   amazonTag,
   ebayCampaignId,
   ebayCustomId,
@@ -277,7 +280,7 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.ok(ebayCount > 0, 'Checked at least one eBay link');
     });
 
-    it('renders the canonical Amazon Associates disclosure and all three programs in the footer', () => {
+    it('renders the canonical Amazon Associates disclosure and all referral partners in the footer', () => {
       const shellHtml = renderShell(parseRoute('/'));
       assert.ok(
         shellHtml.includes('As an Amazon Associate, AiRigBuilder earns from qualifying purchases.'),
@@ -286,6 +289,26 @@ describe('Affiliate Configuration & Attribution System', () => {
       assert.ok(shellHtml.includes('Amazon Associates'), 'Footer mentions Amazon Associates');
       assert.ok(shellHtml.includes('eBay Partner Network'), 'Footer mentions eBay Partner Network');
       assert.ok(shellHtml.includes('B&H Photo'), 'Footer mentions B&H Photo');
+      assert.ok(shellHtml.includes('RunPod'), 'Footer mentions RunPod');
+      assert.ok(shellHtml.includes('Vast.ai'), 'Footer mentions Vast.ai');
+    });
+  });
+
+  describe('Cloud Rental Referral URLs (RunPod & Vast.ai)', () => {
+    it('exports the RunPod and Vast.ai referral URL constants', () => {
+      assert.equal(RUNPOD_REFERRAL_URL, 'https://runpod.io?ref=2stimz9v');
+      assert.equal(VAST_REFERRAL_URL, 'https://cloud.vast.ai/?ref_id=859243');
+    });
+
+    it('maps CLOUD_RATES offer ID prefixes to their referral URL and returns null otherwise', () => {
+      assert.equal(getCloudReferralUrl('runpod-dual-3090'), RUNPOD_REFERRAL_URL);
+      assert.equal(getCloudReferralUrl('runpod-single-4090'), RUNPOD_REFERRAL_URL);
+      assert.equal(getCloudReferralUrl('vast-dual-3090'), VAST_REFERRAL_URL);
+      assert.equal(getCloudReferralUrl('vast-single-3060'), VAST_REFERRAL_URL);
+      assert.equal(getCloudReferralUrl('lambda-h100'), null);
+      assert.equal(getCloudReferralUrl(''), null);
+      assert.equal(getCloudReferralUrl(null), null);
+      assert.equal(getCloudReferralUrl(undefined), null);
     });
   });
 

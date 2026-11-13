@@ -1,6 +1,7 @@
 // Cloud Break-Even Calculator Component (airigbuilder.com)
 // The backlink and traffic engine comparing used local AI rigs vs RunPod/Vast.ai
 import { CLOUD_PROVIDERS, CLOUD_RATES, CLOUD_RATES_AS_OF } from '../data/providers.js';
+import { AFFILIATE_LINK_REL, RUNPOD_REFERRAL_URL, VAST_REFERRAL_URL } from '../config/affiliates.js';
 import { icon } from './icons.js';
 import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
 import { loadChartJs } from '../utils/chartLoader.js';
@@ -224,6 +225,10 @@ export function renderBreakEvenHtml(state = {}) {
           <button class="btn-secondary btn-nowrap" id="btn-copy-calc-reddit">
             ${icon('copy')}Copy Summary
           </button>
+        </div>
+        <div class="calc-referral-actions">
+          <a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="calculator-runpod">Rent on RunPod</a>
+          <a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="calculator-vast">Rent on Vast.ai</a>
         </div>
       </div>
     </div>

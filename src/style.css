@@ -1175,6 +1175,13 @@ input[type="range"]::-moz-range-thumb {
   color: var(--text-dim);
 }
 
+.tier-cloud-callout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+}
+
 /* ==========================================================================
    VIEW 2: CLOUD BREAK-EVEN CALCULATOR
    ========================================================================== */
@@ -1379,6 +1386,13 @@ input[type="range"]::-moz-range-thumb {
 
 .calc-narrative-text strong {
   color: var(--emerald);
+}
+
+.calc-referral-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 /* ==========================================================================
