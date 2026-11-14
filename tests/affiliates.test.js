@@ -354,8 +354,8 @@ describe('Affiliate Configuration & Attribution System', () => {
           `${gpu.id} has affiliate rel`
         );
         assert.ok(
-          html.includes('class="btn-primary" data-click-merchant="Amazon"'),
-          `${gpu.id} detail page has Amazon button with btn-primary class`
+          html.includes('class="btn-secondary" data-click-merchant="Amazon"'),
+          `${gpu.id} detail page has Amazon button with btn-secondary class`
         );
         assert.ok(
           html.includes(`data-click-id="gpu:${gpu.id}:amazon"`),

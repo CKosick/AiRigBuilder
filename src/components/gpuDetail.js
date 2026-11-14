@@ -67,7 +67,7 @@ export function renderGpuDetailHtml(gpu) {
           ${icon('search')}Check eBay Sold Listings →
         </a>
         ${gpu.amazonSearchUrl ? `
-        <a href="${formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary" data-click-merchant="Amazon" data-click-id="gpu:${gpu.id}:amazon" data-gpu-id="${gpu.id}" data-link-kind="amazon">
+        <a href="${formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${gpu.id}:amazon" data-gpu-id="${gpu.id}" data-link-kind="amazon">
           ${icon('cart')}Buy on Amazon →
         </a>` : ''}
         </div>
