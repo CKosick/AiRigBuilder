@@ -1,6 +1,6 @@
 // The GPUs and AI systems tracked for local AI, with used prices estimated from current eBay listings
-// Last updated: 2026-11-12T05:50:34.240Z
-export const GPUS_UPDATED_AT = '2026-11-12T05:50:34.240Z';
+// Last updated: 2026-11-15T01:27:19.828Z
+export const GPUS_UPDATED_AT = '2026-11-15T01:27:19.828Z';
 export const GPUS_DATA = [
   {
     "id": "rtx-3090",
@@ -10,8 +10,8 @@ export const GPUS_DATA = [
     "bandwidth": 936,
     "tdp": 350,
     "usedStreetPrice": 849,
-    "usedPriceLow": 512,
-    "usedPriceHigh": 987,
+    "usedPriceLow": 555,
+    "usedPriceHigh": 910,
     "newPrice": null,
     "trend7d": null,
     "trend30d": 18.2,
@@ -82,13 +82,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 1008,
     "tdp": 450,
-    "usedStreetPrice": 1750,
+    "usedStreetPrice": 1600,
     "usedPriceLow": 1350,
-    "usedPriceHigh": 2150,
+    "usedPriceHigh": 2000,
     "newPrice": 1849,
     "trend7d": null,
-    "trend30d": 13.6,
-    "pricePerGb": 72.92,
+    "trend30d": 3.9,
+    "pricePerGb": 66.67,
     "multiGpuScore": 6.5,
     "aiRating": "Peak Consumer Compute",
     "summary": "The fastest consumer chip for inference and fine-tuning. 1008 GB/s bandwidth and 4th-gen Tensor Cores deliver blistering speeds, but at about {price} used it is costly for raw VRAM.",
@@ -143,7 +143,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 1750
+        "price": 1600
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4090+24GB&LH_Sold=1&LH_Complete=1",
@@ -158,7 +158,7 @@ export const GPUS_DATA = [
     "tdp": 355,
     "usedStreetPrice": 1200,
     "usedPriceLow": 999,
-    "usedPriceHigh": 1349,
+    "usedPriceHigh": 1350,
     "newPrice": 919,
     "trend7d": null,
     "trend30d": 22.6,
@@ -229,13 +229,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 288,
     "tdp": 165,
-    "usedStreetPrice": 470,
-    "usedPriceLow": 400,
-    "usedPriceHigh": 500,
+    "usedStreetPrice": 490,
+    "usedPriceLow": 435,
+    "usedPriceHigh": 502,
     "newPrice": 449,
     "trend7d": null,
-    "trend30d": 22.1,
-    "pricePerGb": 29.38,
+    "trend30d": 27.3,
+    "pricePerGb": 30.63,
     "multiGpuScore": 8.5,
     "aiRating": "Modern Low-Power 16GB",
     "summary": "The cheapest modern 16GB Ada card. Extremely power-efficient (165W) and easy to cool. Bandwidth is limited (288 GB/s), but perfect for 8B-14B models or budget 2x setup.",
@@ -288,7 +288,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 470
+        "price": 490
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4060+Ti+16GB&LH_Sold=1&LH_Complete=1",
@@ -301,13 +301,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6",
     "bandwidth": 360,
     "tdp": 170,
-    "usedStreetPrice": 325,
-    "usedPriceLow": 285,
-    "usedPriceHigh": 362,
+    "usedStreetPrice": 340,
+    "usedPriceLow": 300,
+    "usedPriceHigh": 365,
     "newPrice": 279,
     "trend7d": null,
-    "trend30d": 0,
-    "pricePerGb": 27.08,
+    "trend30d": 4.6,
+    "pricePerGb": 28.33,
     "multiGpuScore": 8,
     "aiRating": "Budget Gateway",
     "summary": "The undisputed budget gateway into local AI. 12GB of VRAM for about {price} allows running Llama 3 8B at full Q8 or Mistral NeMo at Q4. Great price-to-VRAM ratio.",
@@ -360,7 +360,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 325
+        "price": 340
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1",
@@ -373,13 +373,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR5",
     "bandwidth": 346,
     "tdp": 250,
-    "usedStreetPrice": 298,
+    "usedStreetPrice": 299,
     "usedPriceLow": 270,
     "usedPriceHigh": 350,
     "newPrice": null,
     "trend7d": null,
-    "trend30d": 7.6,
-    "pricePerGb": 12.42,
+    "trend30d": 7.9,
+    "pricePerGb": 12.46,
     "multiGpuScore": 6,
     "aiRating": "Tinkerer Ultra-Budget 24GB",
     "summary": "24GB VRAM for about {price}. A datacentre Pascal card requiring a custom cooling fan shroud and no video output. Slow on FP16, but runs GGUF quantized models surprisingly well.",
@@ -432,7 +432,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 298
+        "price": 299
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Nvidia+Tesla+P40+24GB&LH_Sold=1&LH_Complete=1",
@@ -445,13 +445,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 736,
     "tdp": 320,
-    "usedStreetPrice": 1240,
-    "usedPriceLow": 1125,
-    "usedPriceHigh": 1349,
+    "usedStreetPrice": 1245,
+    "usedPriceLow": 1130,
+    "usedPriceHigh": 1359,
     "newPrice": 999,
     "trend7d": null,
-    "trend30d": 7.8,
-    "pricePerGb": 77.5,
+    "trend30d": 8.3,
+    "pricePerGb": 77.81,
     "multiGpuScore": 6.8,
     "aiRating": "Fast Compute, VRAM Bottleneck",
     "summary": "Fast 736 GB/s bandwidth and great Ada Lovelace inference speed, but capped at 16GB VRAM. Expensive per GB compared to used 3090.",
@@ -504,7 +504,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 1240
+        "price": 1245
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+4080+Super+16GB&LH_Sold=1&LH_Complete=1",
@@ -517,13 +517,13 @@ export const GPUS_DATA = [
     "vramType": "GDDR6X",
     "bandwidth": 760,
     "tdp": 320,
-    "usedStreetPrice": 410,
-    "usedPriceLow": 380,
-    "usedPriceHigh": 475,
+    "usedStreetPrice": 435,
+    "usedPriceLow": 385,
+    "usedPriceHigh": 483,
     "newPrice": null,
     "trend7d": null,
-    "trend30d": 2.5,
-    "pricePerGb": 41,
+    "trend30d": 8.8,
+    "pricePerGb": 43.5,
     "multiGpuScore": 7,
     "aiRating": "High Bandwidth 8B Speeder",
     "summary": "Fast 760 GB/s bandwidth at about {price} used, providing 100+ tok/s on 8B models. However, 10GB VRAM is tight for modern context windows.",
@@ -575,7 +575,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 410
+        "price": 435
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1",
@@ -660,13 +660,13 @@ export const GPUS_DATA = [
     "vramType": "Unified LPDDR5",
     "bandwidth": 800,
     "tdp": 140,
-    "usedStreetPrice": 3300,
-    "usedPriceLow": 2800,
-    "usedPriceHigh": 3599,
+    "usedStreetPrice": 3199,
+    "usedPriceLow": 2700,
+    "usedPriceHigh": 3500,
     "newPrice": null,
     "trend7d": null,
-    "trend30d": -2.9,
-    "pricePerGb": 51.56,
+    "trend30d": -5.9,
+    "pricePerGb": 49.98,
     "multiGpuScore": 10,
     "aiRating": "Unified Memory Champion",
     "summary": "A used 2023 Mac Studio with M2 Ultra and 64GB of unified memory, the configuration this row prices. At 800GB/s, and with about 48GB usable as GPU memory (macOS defaults to 75% of RAM), it runs 70B models at Q4 in a silent desktop. 128GB and 192GB configurations sell for more and are not covered by this price.",
@@ -720,7 +720,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 3300
+        "price": 3199
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M2+Ultra+unified+memory&LH_Sold=1&LH_Complete=1",
@@ -733,14 +733,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR7",
     "bandwidth": 1792,
     "tdp": 575,
-    "usedStreetPrice": 5999,
-    "usedPriceLow": 5400,
-    "usedPriceHigh": 7000,
+    "usedStreetPrice": 6000,
+    "usedPriceLow": 5750,
+    "usedPriceHigh": 6799,
     "newPrice": null,
     "soldNew": true,
     "trend7d": null,
     "trend30d": -9.1,
-    "pricePerGb": 187.47,
+    "pricePerGb": 187.5,
     "multiGpuScore": 5,
     "aiRating": "Fastest 32GB Consumer Card",
     "summary": "The fastest consumer card for local AI: 32GB of GDDR7 at 1,792 GB/s, nearly double a 3090's bandwidth. Fits 30B-class models at Q8 and MoE models like Qwen 3 30B-A3B with long context on one card. It has sold far above its launch MSRP through 2026, so the price here comes from current listings.",
@@ -762,7 +762,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 5999
+        "price": 6000
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1",
@@ -776,8 +776,8 @@ export const GPUS_DATA = [
     "bandwidth": 960,
     "tdp": 360,
     "usedStreetPrice": 2000,
-    "usedPriceLow": 1750,
-    "usedPriceHigh": 2300,
+    "usedPriceLow": 1725,
+    "usedPriceHigh": 2299,
     "newPrice": null,
     "soldNew": true,
     "trend7d": null,
@@ -816,14 +816,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR7",
     "bandwidth": 448,
     "tdp": 180,
-    "usedStreetPrice": 700,
-    "usedPriceLow": 518,
-    "usedPriceHigh": 760,
+    "usedStreetPrice": 725,
+    "usedPriceLow": 524,
+    "usedPriceHigh": 790,
     "newPrice": null,
     "soldNew": true,
     "trend7d": null,
-    "trend30d": 5.3,
-    "pricePerGb": 43.75,
+    "trend30d": 9,
+    "pricePerGb": 45.31,
     "multiGpuScore": 7,
     "aiRating": "Cheapest New 16GB NVIDIA",
     "summary": "The cheapest current-generation 16GB NVIDIA card: 448 GB/s at 180W. Runs 8-14B models at Q8 and small-active MoE models such as gpt-oss-20b comfortably. Check listings are the 16GB card; an 8GB version uses the same name.",
@@ -844,7 +844,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 700
+        "price": 725
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+5060+Ti+16GB&LH_Sold=1&LH_Complete=1",
@@ -857,14 +857,14 @@ export const GPUS_DATA = [
     "vramType": "GDDR7 ECC",
     "bandwidth": 1792,
     "tdp": 600,
-    "usedStreetPrice": 15800,
-    "usedPriceLow": 13000,
+    "usedStreetPrice": 15900,
+    "usedPriceLow": 13500,
     "usedPriceHigh": 16850,
     "newPrice": null,
     "soldNew": true,
     "trend7d": null,
-    "trend30d": 4.6,
-    "pricePerGb": 164.58,
+    "trend30d": 5.3,
+    "pricePerGb": 165.63,
     "multiGpuScore": 8,
     "aiRating": "One-Card 96GB Answer",
     "summary": "One card with 96GB of ECC GDDR7 at 1,792 GB/s: runs 70B at Q8, gpt-oss-120b at native precision and Llama 4 Scout at Q4 on a single GPU, with no multi-card setup. A workstation card whose price has climbed sharply through 2026, so this row goes stale fastest. The 300W Max-Q version is a different card and is excluded from the price.",
@@ -886,7 +886,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 15800
+        "price": 15900
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1",
@@ -981,14 +981,14 @@ export const GPUS_DATA = [
     "vramType": "Unified LPDDR5X-8000",
     "bandwidth": 256,
     "tdp": 120,
-    "usedStreetPrice": 3199,
+    "usedStreetPrice": 3100,
     "usedPriceLow": 2899,
-    "usedPriceHigh": 3603,
+    "usedPriceHigh": 3600,
     "newPrice": null,
     "soldNew": true,
     "trend7d": null,
-    "trend30d": 4.8,
-    "pricePerGb": 24.99,
+    "trend30d": 1.6,
+    "pricePerGb": 24.22,
     "multiGpuScore": 3,
     "aiRating": "Cheapest 96GB-Class System",
     "summary": "A complete \"Strix Halo\" mini PC, not a graphics card: AMD's Ryzen AI Max+ 395 with 128GB of LPDDR5X-8000 shared memory, of which up to 96GB can be assigned to its built-in Radeon 8060S graphics. It fits 70B models at Q4-Q6 and Qwen 3 235B at Q2_K, but slowly: 256 GB/s means single-digit tokens per second on dense 70B; MoE models run much faster. Systems come from several makers (GMKtec EVO-X2, Framework Desktop and others) and prices vary.",
@@ -1009,7 +1009,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 3199
+        "price": 3100
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1",
@@ -1063,14 +1063,14 @@ export const GPUS_DATA = [
     "vramType": "Unified LPDDR5",
     "bandwidth": 819,
     "tdp": 480,
-    "usedStreetPrice": 4500,
-    "usedPriceLow": 4199,
-    "usedPriceHigh": 5199,
+    "usedStreetPrice": 4499,
+    "usedPriceLow": 4100,
+    "usedPriceHigh": 5100,
     "newPrice": null,
     "soldNew": false,
     "trend7d": null,
     "trend30d": -3.2,
-    "pricePerGb": 46.88,
+    "pricePerGb": 46.86,
     "multiGpuScore": 9,
     "aiRating": "Silent 96GB Unified Box",
     "summary": "A complete desktop system, not a graphics card: the 2025 Mac Studio with M3 Ultra and 96GB of unified memory at 819GB/s, the base configuration this row prices (256GB versions cost far more and are excluded). About 72GB is usable as GPU memory by default, enough for 70B at Q5 or Llama 4 Scout at Q4. Apple now sells the M5 Ultra instead, so this is a used price.",
@@ -1091,7 +1091,7 @@ export const GPUS_DATA = [
       },
       {
         "date": "Nov 2026",
-        "price": 4500
+        "price": 4499
       }
     ],
     "ebaySoldUrl": "https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1",

@@ -1088,7 +1088,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3060 12GB',
             spec: '12GB GDDR6, 170W TDP, 360 GB/s bandwidth',
             condition: 'Used (eBay)',
-            price: 325,
+            price: 340,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3060+12GB&LH_Sold=1&LH_Complete=1',
             notes: 'The cheapest card that can run 8B models at full Q8 precision completely in VRAM.'
@@ -1183,7 +1183,7 @@ export const BUILDS_DATA = {
             name: 'NVIDIA GeForce RTX 3080 10GB',
             spec: '10GB GDDR6X, 760 GB/s bandwidth, 320W TDP',
             condition: 'Used (eBay)',
-            price: 410,
+            price: 435,
             merchant: 'eBay Sold',
             url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+3080+10GB&LH_Sold=1&LH_Complete=1',
             notes: 'Incredible memory bandwidth for the price. 10GB runs 8B at Q6_K (7.8 GB) with ~8K context; Q8_0 (9.2 GB) does not fit once runtime overhead is counted.'
@@ -1401,7 +1401,7 @@ export const TIER_RTX_PRO_6000 = {
       name: 'NVIDIA RTX PRO 6000 Blackwell (96GB)',
       spec: '96GB GDDR7 ECC, 1792 GB/s bandwidth, 600W TDP',
       condition: 'New (Enterprise)',
-      price: 15800,
+      price: 15900,
       merchant: 'eBay / Enterprise',
       url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+PRO+6000+Blackwell+96GB&LH_Sold=1&LH_Complete=1',
       notes: '96GB GDDR7 ECC on a single card with 1,792 GB/s bandwidth.'
@@ -1497,7 +1497,7 @@ export const TIER_STRIX_HALO = {
       name: 'AMD Ryzen AI Max+ 395 Mini PC (128GB)',
       spec: '16C/32T Zen 5, Radeon 8060S (40 CUs), 128GB unified LPDDR5X-8000 (96GB usable), 256 GB/s',
       condition: 'New',
-      price: 3199,
+      price: 3100,
       merchant: 'eBay / Retail',
       url: 'https://www.ebay.com/sch/i.html?_nkw=Ryzen+AI+Max++395+128GB&LH_Sold=1&LH_Complete=1',
       notes: 'Complete mini PC. Up to 96GB allocated to GPU. 256 GB/s memory bandwidth.'
@@ -1543,7 +1543,7 @@ export const TIER_MAC_M3_ULTRA = {
       name: 'Apple Mac Studio M3 Ultra (96GB)',
       spec: '28-core CPU, 76-core GPU, 96GB unified memory (72GB usable), 819 GB/s',
       condition: 'Used / Refurbished',
-      price: 4500,
+      price: 4499,
       merchant: 'eBay / Apple',
       url: 'https://www.ebay.com/sch/i.html?_nkw=Mac+Studio+M3+Ultra+96GB&LH_Sold=1&LH_Complete=1',
       notes: '72GB usable unified memory with 819 GB/s bandwidth. Whisper quiet desktop operation.'
@@ -1681,7 +1681,7 @@ export const TIER_RTX_5090 = {
       name: 'NVIDIA GeForce RTX 5090 32GB',
       spec: '32GB GDDR7, 1792 GB/s bandwidth, 575W TDP',
       condition: 'New',
-      price: 5999,
+      price: 6000,
       merchant: 'eBay / Retail',
       url: 'https://www.ebay.com/sch/i.html?_nkw=RTX+5090+32GB&LH_Sold=1&LH_Complete=1',
       notes: 'Fastest 32GB consumer card for local AI with 1,792 GB/s memory bandwidth. (Alternative: AMD Radeon AI PRO R9700 32GB offers 32GB VRAM in a dual-slot blower for less, at 640 GB/s without CUDA).'

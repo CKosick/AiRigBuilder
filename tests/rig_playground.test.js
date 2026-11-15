@@ -129,11 +129,11 @@ describe('Rig Playground: Known Answers from Brief', () => {
     assert.equal(topUpgrade.unlocked, 37);
     assert.equal(topUpgrade.improved, 5);
 
-    // Tesla P40 unlocks 24 at $298
+    // Tesla P40 unlocks 24 at $299
     const p40 = upgrades.find(u => u.candidate.id === 'tesla-p40');
     assert.ok(p40);
     assert.equal(p40.unlocked, 24);
-    assert.equal(p40.cost, 298);
+    assert.equal(p40.cost, 299);
 
     // A second RTX 3060 unlocks 22 (12 run today, 34 total)
     const second3060 = upgrades.find(u => u.candidate.id === 'rtx-3060-12gb');
@@ -358,12 +358,12 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.equal(picks.sameCard, false);
     assert.equal(picks.mostUnlocked.candidate.id, 'rtx-pro-6000-blackwell');
     assert.equal(picks.mostUnlocked.unlocked, 41);
-    assert.equal(picks.mostUnlocked.cost, 15800);
+    assert.equal(picks.mostUnlocked.cost, 15900);
 
     assert.equal(picks.bestValue.candidate.id, 'tesla-p40');
     assert.equal(picks.bestValue.unlocked, 27);
-    assert.equal(picks.bestValue.cost, 298);
-    assert.equal(picks.bestValue.unlocksPer1000, 90.6);
+    assert.equal(picks.bestValue.cost, 299);
+    assert.equal(picks.bestValue.unlocksPer1000, 90.3);
 
     const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3080-10gb', count: 1 });
     const upgradeSection = html.slice(
@@ -378,9 +378,9 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     ]);
     assert.match(upgradeSection, /Most models unlocked/);
     assert.match(upgradeSection, /Best value/);
-    assert.match(upgradeSection, /\$15,800/);
-    assert.match(upgradeSection, /\$298/);
-    assert.match(upgradeSection, /90\.60 models unlocked \/ \$1,000/);
+    assert.match(upgradeSection, /\$15,900/);
+    assert.match(upgradeSection, /\$299/);
+    assert.match(upgradeSection, /90\.30 models unlocked \/ \$1,000/);
     assert.doesNotMatch(upgradeSection, /Radeon|Arc Pro/i);
 
     // Every candidate row in the full ranked table renders in unlocked-first order and includes its / $1,000 figure
@@ -388,8 +388,8 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.deepEqual(rowIds, candidates.map(c => c.candidate.id));
     const valueCells = [...upgradeSection.matchAll(/<td data-label="Models \/ \$1,000">([^<]+)<\/td>/g)].map(m => m[1]);
     assert.equal(valueCells.length, candidates.length);
-    assert.equal(valueCells[0], '2.59 / $1,000');
-    assert.ok(valueCells.includes('90.60 / $1,000'));
+    assert.equal(valueCells[0], '2.58 / $1,000');
+    assert.ok(valueCells.includes('90.30 / $1,000'));
   });
 
   it('renders a single headline card carrying both labels when one candidate wins both Most models unlocked and Best value', () => {
