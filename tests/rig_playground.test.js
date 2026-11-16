@@ -62,7 +62,7 @@ describe('Rig Playground: Owned GPUs Supplement Data', () => {
 });
 
 describe('Rig Playground: Equivalence Test (Dual RTX 3090)', () => {
-  it('reproduces site dual-3090 tier verdicts across all 56 models', () => {
+  it('reproduces site dual-3090 tier verdicts across all 70 models', () => {
     const rtx3090 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3090');
     assert.ok(rtx3090, 'rtx-3090 found');
 
@@ -91,7 +91,7 @@ describe('Rig Playground: Equivalence Test (Dual RTX 3090)', () => {
       }
       checked++;
     }
-    assert.equal(checked, 56);
+    assert.equal(checked, 70);
   });
 });
 
@@ -116,29 +116,29 @@ describe('Rig Playground: Known Answers from Brief', () => {
     const rtx3060 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3060-12gb');
     const result = evaluatePlaygroundModels(rtx3060, 1, { contextK: 8, kvPrecision: 'FP16' });
 
-    // 12 models run in VRAM, 44 models do not fit
-    assert.equal(result.runsInVram.length, 12);
-    assert.equal(result.doesNotFit.length, 44);
+    // 14 models run in VRAM, 56 models do not fit
+    assert.equal(result.runsInVram.length, 14);
+    assert.equal(result.doesNotFit.length, 56);
 
     const upgrades = computeUpgradeCandidates(rtx3060, 1, { contextK: 8, kvPrecision: 'FP16' });
     assert.ok(upgrades.length > 0, 'generates upgrade candidates');
 
-    // Best upgrade for discrete cards pool is RTX PRO 6000 (37 unlocks, 5 improved)
+    // Best upgrade for discrete cards pool is RTX PRO 6000 (45 unlocks, 5 improved)
     const topUpgrade = upgrades[0];
     assert.equal(topUpgrade.candidate.id, 'rtx-pro-6000-blackwell');
-    assert.equal(topUpgrade.unlocked, 37);
+    assert.equal(topUpgrade.unlocked, 45);
     assert.equal(topUpgrade.improved, 5);
 
-    // Tesla P40 unlocks 24 at $299
+    // Tesla P40 unlocks 26 at $299
     const p40 = upgrades.find(u => u.candidate.id === 'tesla-p40');
     assert.ok(p40);
-    assert.equal(p40.unlocked, 24);
+    assert.equal(p40.unlocked, 26);
     assert.equal(p40.cost, 299);
 
-    // A second RTX 3060 unlocks 22 (12 run today, 34 total)
+    // A second RTX 3060 unlocks 23 (14 run today, 37 total)
     const second3060 = upgrades.find(u => u.candidate.id === 'rtx-3060-12gb');
     assert.ok(second3060);
-    assert.equal(second3060.unlocked, 22);
+    assert.equal(second3060.unlocked, 23);
   });
 
   it('excludes all integrated system IDs from upgrade candidate pool for discrete owned GPUs', () => {
@@ -357,13 +357,13 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
 
     assert.equal(picks.sameCard, false);
     assert.equal(picks.mostUnlocked.candidate.id, 'rtx-pro-6000-blackwell');
-    assert.equal(picks.mostUnlocked.unlocked, 41);
+    assert.equal(picks.mostUnlocked.unlocked, 49);
     assert.equal(picks.mostUnlocked.cost, 15900);
 
     assert.equal(picks.bestValue.candidate.id, 'tesla-p40');
-    assert.equal(picks.bestValue.unlocked, 27);
+    assert.equal(picks.bestValue.unlocked, 28);
     assert.equal(picks.bestValue.cost, 299);
-    assert.equal(picks.bestValue.unlocksPer1000, 90.3);
+    assert.equal(picks.bestValue.unlocksPer1000, 93.65);
 
     const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3080-10gb', count: 1 });
     const upgradeSection = html.slice(
@@ -380,7 +380,7 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.match(upgradeSection, /Best value/);
     assert.match(upgradeSection, /\$15,900/);
     assert.match(upgradeSection, /\$299/);
-    assert.match(upgradeSection, /90\.30 models unlocked \/ \$1,000/);
+    assert.match(upgradeSection, /93\.65 models unlocked \/ \$1,000/);
     assert.doesNotMatch(upgradeSection, /Radeon|Arc Pro/i);
 
     // Every candidate row in the full ranked table renders in unlocked-first order and includes its / $1,000 figure
@@ -388,12 +388,12 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.deepEqual(rowIds, candidates.map(c => c.candidate.id));
     const valueCells = [...upgradeSection.matchAll(/<td data-label="Models \/ \$1,000">([^<]+)<\/td>/g)].map(m => m[1]);
     assert.equal(valueCells.length, candidates.length);
-    assert.equal(valueCells[0], '2.58 / $1,000');
-    assert.ok(valueCells.includes('90.30 / $1,000'));
+    assert.equal(valueCells[0], '3.08 / $1,000');
+    assert.ok(valueCells.includes('93.65 / $1,000'));
   });
 
   it('renders a single headline card carrying both labels when one candidate wins both Most models unlocked and Best value', () => {
-    for (const gpuId of ['arc-pro-b60', 'radeon-ai-pro-r9700', 'rtx-pro-6000-blackwell']) {
+    for (const gpuId of ['arc-pro-b60', 'radeon-ai-pro-r9700']) {
       const gpu = ALL_PLAYGROUND_GPUS.find(g => g.id === gpuId);
       const candidates = computeUpgradeCandidates(gpu, 1, { contextK: 8, kvPrecision: 'FP16' });
       const picks = selectUpgradePicks(candidates);
@@ -417,32 +417,32 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
   it('Item 1: splits results into "Runs on your rig (N)" and "Doesn\'t fit (M)" showing first 8 models initially and expanding on Show all', () => {
     assert.equal(VISIBLE_PLAYGROUND_MODELS, 8);
 
-    // 1. Default prerendered state (RTX 3080 10GB: 8 run, 48 don't fit)
+    // 1. Default prerendered state (RTX 3080 10GB: 10 run, 60 don't fit)
     const rtx3080 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3080-10gb');
     const defaultEval = evaluatePlaygroundModels(rtx3080, 1, { contextK: 8, kvPrecision: 'FP16' });
-    assert.equal(defaultEval.runsInVram.length, 8);
-    assert.equal(defaultEval.doesNotFit.length, 48);
+    assert.equal(defaultEval.runsInVram.length, 10);
+    assert.equal(defaultEval.doesNotFit.length, 60);
 
     const prerenderHtml = renderRigPlaygroundHtml();
-    assert.ok(prerenderHtml.includes('Runs on your rig (8)'));
-    assert.ok(prerenderHtml.includes("Doesn't fit (48)"));
+    assert.ok(prerenderHtml.includes('Runs on your rig (10)'));
+    assert.ok(prerenderHtml.includes("Doesn't fit (60)"));
     assert.ok(prerenderHtml.includes('id="btn-show-all-nofit"'));
-    assert.ok(prerenderHtml.includes('Show all 48 models'));
+    assert.ok(prerenderHtml.includes('Show all 60 models'));
 
-    // 2. Rig where both groups exceed 8 models (RTX 3060 12GB: 12 run, 44 don't fit)
+    // 2. Rig where both groups exceed 8 models (RTX 3060 12GB: 14 run, 56 don't fit)
     const rtx3060 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3060-12gb');
     const direct = evaluatePlaygroundModels(rtx3060, 1, { contextK: 8, kvPrecision: 'FP16' });
-    assert.equal(direct.runsInVram.length, 12);
-    assert.equal(direct.doesNotFit.length, 44);
+    assert.equal(direct.runsInVram.length, 14);
+    assert.equal(direct.doesNotFit.length, 56);
 
-    // Initial state: headings show full counts (12 and 44), tables show first 8 each
+    // Initial state: headings show full counts (14 and 56), tables show first 8 each
     const initialHtml = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1 });
-    assert.ok(initialHtml.includes('Runs on your rig (12)'));
-    assert.ok(initialHtml.includes("Doesn't fit (44)"));
+    assert.ok(initialHtml.includes('Runs on your rig (14)'));
+    assert.ok(initialHtml.includes("Doesn't fit (56)"));
     assert.ok(initialHtml.includes('id="btn-show-all-runs"'));
-    assert.ok(initialHtml.includes('Show all 12 models'));
+    assert.ok(initialHtml.includes('Show all 14 models'));
     assert.ok(initialHtml.includes('id="btn-show-all-nofit"'));
-    assert.ok(initialHtml.includes('Show all 44 models'));
+    assert.ok(initialHtml.includes('Show all 56 models'));
 
     const runsPart = initialHtml.slice(
       initialHtml.indexOf('id="playground-runs-tbody"'),
@@ -457,10 +457,10 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
     assert.deepEqual(initialRunsIds, direct.runsInVram.slice(0, 8).map(r => r.model.id));
     assert.deepEqual(initialNoFitIds, direct.doesNotFit.slice(0, 8).map(r => r.model.id));
 
-    // Expanded state: all 12 and 44 models rendered in order, headings keep full counts, buttons say Show fewer models
+    // Expanded state: all 14 and 56 models rendered in order, headings keep full counts, buttons say Show fewer models
     const expandedHtml = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1, showAllRuns: true, showAllNoFit: true });
-    assert.ok(expandedHtml.includes('Runs on your rig (12)'));
-    assert.ok(expandedHtml.includes("Doesn't fit (44)"));
+    assert.ok(expandedHtml.includes('Runs on your rig (14)'));
+    assert.ok(expandedHtml.includes("Doesn't fit (56)"));
     assert.ok(expandedHtml.includes('aria-expanded="true" aria-controls="playground-runs-tbody"'));
     assert.ok(expandedHtml.includes('aria-expanded="true" aria-controls="playground-nofit-tbody"'));
 
@@ -476,14 +476,14 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
     assert.deepEqual(expNoFitIds, direct.doesNotFit.map(r => r.model.id));
   });
 
-  it('Item 2: renders sticky summary bar with owned GPU name and "X of 56 run"', () => {
+  it('Item 2: renders sticky summary bar with owned GPU name and "X of 70 run"', () => {
     const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3090', count: 1 });
     const rtx3090 = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-3090');
     const direct = evaluatePlaygroundModels(rtx3090, 1, { contextK: 8, kvPrecision: 'FP16' });
 
     assert.match(html, /class="playground-sticky-summary"/);
     assert.ok(html.includes(`<span class="playground-sticky-gpu">${rtx3090.name}</span>`));
-    assert.ok(html.includes(`<span class="playground-sticky-count">${direct.runsInVram.length} of 56 run</span>`));
+    assert.ok(html.includes(`<span class="playground-sticky-count">${direct.runsInVram.length} of 70 run</span>`));
   });
 
   it('Item 5: groups hardware picker select into Tracked GPUs, More cards you might own, and Integrated and unified memory (with Custom unified memory last)', () => {

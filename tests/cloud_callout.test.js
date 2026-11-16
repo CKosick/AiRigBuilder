@@ -17,7 +17,7 @@ import {
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 
 describe('Cloud rental callout on tier cards', () => {
-  it('classifies every tier in BUILDS_DATA: 112 of 220 matched, all 56 sheets have >= 1 match, and offload/Mac/Strix/5090/PRO6000/4060Ti are unmatched', () => {
+  it('classifies every tier in BUILDS_DATA: 140 of 282 matched, all 70 sheets have >= 1 match, and offload/Mac/Strix/5090/PRO6000/4060Ti are unmatched', () => {
     let totalTiers = 0;
     let matchedTiers = 0;
     let unmatchedTiers = 0;
@@ -26,7 +26,7 @@ describe('Cloud rental callout on tier cards', () => {
     const byConfig = new Map();
 
     const modelIds = Object.keys(BUILDS_DATA);
-    assert.equal(modelIds.length, 56);
+    assert.equal(modelIds.length, 70);
 
     for (const [, sheet] of Object.entries(BUILDS_DATA)) {
       let sheetMatches = 0;
@@ -51,16 +51,16 @@ describe('Cloud rental callout on tier cards', () => {
       if (sheetMatches >= 1) sheetsWithMatch++;
     }
 
-    assert.equal(totalTiers, 220);
-    assert.equal(matchedTiers, 112);
-    assert.equal(unmatchedTiers, 108);
-    assert.equal(sheetsWithMatch, 56);
-    assert.equal(offloadTiers, 6);
+    assert.equal(totalTiers, 282);
+    assert.equal(matchedTiers, 140);
+    assert.equal(unmatchedTiers, 142);
+    assert.equal(sheetsWithMatch, 70);
+    assert.equal(offloadTiers, 9);
 
-    assert.equal(byConfig.get('dual-rtx-3090'), 44);
+    assert.equal(byConfig.get('dual-rtx-3090'), 68);
     assert.equal(byConfig.get('single-rtx-3090'), 26);
-    assert.equal(byConfig.get('single-rtx-3080-10gb'), 8);
-    assert.equal(byConfig.get('single-rtx-3060-12gb'), 8);
+    assert.equal(byConfig.get('single-rtx-3080-10gb'), 10);
+    assert.equal(byConfig.get('single-rtx-3060-12gb'), 10);
     assert.equal(byConfig.get('single-rtx-4090-24gb'), 26);
     assert.equal(TIER_CLOUD_MATCH_TABLE.length, 5);
   });

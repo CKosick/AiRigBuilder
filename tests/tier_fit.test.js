@@ -221,11 +221,16 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
 
   it('Apple Mac Studio M5 Ultra tiers (256GB and 512GB) are inserted only on sheets where smallest quant > 95GB', () => {
     const expectedColossals = [
+      'beam-1.0-501b-a23b',
       'deepseek-r1-full',
       'deepseek-v3-moe',
       'deepseek-v3.2',
       'glm-5.3',
+      'kimi-k2.7-code',
       'llama-4-maverick',
+      'minimax-m3',
+      'mistral-large-4-1t-a52b',
+      'muse-spark-open-816b-a42b',
       'qwen-3-coder-480b-a35b',
       'qwen-3.5-397b-a17b'
     ];
@@ -253,12 +258,12 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       const sum512 = t512.parts.reduce((sum, p) => sum + (p.price || 0), 0);
       assert.equal(sum512, 22299, `${id} M5 Ultra 512GB tier price is $22,299`);
 
-      if (id === 'glm-5.3') {
-        assert.equal(t256.fit.status, 'none', `${id} M5 Ultra 256GB cannot hold 216.7GB smallest quant`);
+      if (id === 'glm-5.3' || id === 'mistral-large-4-1t-a52b' || id === 'kimi-k2.7-code') {
+        assert.equal(t256.fit.status, 'none', `${id} M5 Ultra 256GB cannot hold smallest quant`);
         assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
         assert.equal(cheapestFittingTotal(sheet), 22299, `${id} cheapest fitting tier is M5 Ultra 512GB at $22,299`);
       } else {
-        // The other 6 models have a valid fit on both tiers
+        // The other 9 models have a valid fit on both tiers
         assert.notEqual(t256.fit.status, 'none', `${id} M5 Ultra 256GB fits or reduced`);
         assert.equal(t512.fit.status, 'fits', `${id} M5 Ultra 512GB fits recommended quant`);
 
@@ -284,10 +289,13 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
       .map(([id]) => id)
       .sort();
     assert.deepEqual(offloadModels, [
+      'beam-1.0-501b-a23b',
       'deepseek-r1-full',
       'deepseek-v3-moe',
       'deepseek-v3.2',
       'llama-4-maverick',
+      'minimax-m3',
+      'muse-spark-open-816b-a42b',
       'qwen-3-coder-480b-a35b',
       'qwen-3.5-397b-a17b'
     ]);
@@ -383,10 +391,10 @@ describe('New hardware tiers fit outcomes and price-sync', () => {
 
 
 describe('Extended fit math and context/KV precision controls', () => {
-  it('default-state equivalence: tierFit at defaults matches stored tier.fit across all 56 models and tiers', () => {
+  it('default-state equivalence: tierFit at defaults matches stored tier.fit across all 70 models and tiers', () => {
     let checkedTiers = 0;
     const modelIds = Object.keys(BUILDS_DATA);
-    assert.equal(modelIds.length, 56, 'All 56 models present in BUILDS_DATA');
+    assert.equal(modelIds.length, 70, 'All 70 models present in BUILDS_DATA');
 
     for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
       const m = MODELS_DATA.find(x => x.id === modelId);
@@ -513,8 +521,8 @@ describe('Extended fit math and context/KV precision controls', () => {
 
 
 describe('VRAM breakdown bar and figure equivalence', () => {
-  it('catalog-wide figure equivalence: weightsGb + contextGb + overheadGb = needsGb and headroom/shortfall across all 56 models and non-offload tiers', () => {
-    assert.equal(Object.keys(BUILDS_DATA).length, 56, 'All 56 models in catalog');
+  it('catalog-wide figure equivalence: weightsGb + contextGb + overheadGb = needsGb and headroom/shortfall across all 70 models and non-offload tiers', () => {
+    assert.equal(Object.keys(BUILDS_DATA).length, 70, 'All 70 models in catalog');
 
     for (const [modelId, sheet] of Object.entries(BUILDS_DATA)) {
       const m = MODELS_DATA.find(x => x.id === modelId);

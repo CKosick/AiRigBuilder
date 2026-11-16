@@ -5,9 +5,9 @@ import { parseRoute, SECTIONS } from '../src/routes.js';
 import { renderShell } from '../src/components/shell.js';
 
 describe('Cmd+K Quick Switcher Index Integrity', () => {
-  it('builds exactly 98 entries across all 5 catalog types', () => {
+  it('builds exactly 112 entries across all 5 catalog types', () => {
     const index = buildSearchIndex();
-    assert.equal(index.length, 98, 'index length must be 56 + 19 + 10 + 8 + 5 = 98');
+    assert.equal(index.length, 112, 'index length must be 70 + 19 + 10 + 8 + 5 = 112');
 
     const counts = {
       Model: 0,
@@ -25,7 +25,7 @@ describe('Cmd+K Quick Switcher Index Integrity', () => {
       counts[entry.type]++;
     }
 
-    assert.equal(counts.Model, 56, '56 models');
+    assert.equal(counts.Model, 70, '70 models');
     assert.equal(counts.GPU, 19, '19 GPUs');
     assert.equal(counts.Comparison, 10, '10 comparisons');
     assert.equal(counts['Best GPU'], 8, '8 best-GPU pages');

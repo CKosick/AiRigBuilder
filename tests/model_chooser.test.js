@@ -35,8 +35,8 @@ describe('Model chooser', () => {
 
   it('"Coding & vision" and search narrow the list; no match offers a reset', () => {
     const coding = filterModels({ codingOnly: true }).map(m => m.id);
-    assert.ok(coding.length === 19 && coding.every(id => MODELS_DATA.find(x => x.id === id)?.useCases?.some(u => u === 'coding' || u === 'vision')));
-    assert.deepEqual(filterModels({ searchQuery: 'gemma' }).map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(m.name)).map(m => m.id));
+    assert.ok(coding.length === 30 && coding.every(id => MODELS_DATA.find(x => x.id === id)?.useCases?.some(u => u === 'coding' || u === 'vision')));
+    assert.deepEqual(filterModels({ searchQuery: 'gemma' }).map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(`${m.name} ${m.description}`)).map(m => m.id));
     assert.match(renderModelPickerHtml({ searchQuery: 'no-such-model' }), /No models match these filters\.[\s\S]*id="btn-reset-model-filter"/);
   });
 

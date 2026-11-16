@@ -10,7 +10,11 @@ const EXPECTED_CODING = [
   'starcoder2-15b',
   'qwen-3-coder-480b-a35b',
   'north-mini-code-1.0',
-  'granite-4.2-30b'
+  'granite-4.2-30b',
+  'minimax-m3',
+  'kimi-k2.7-code',
+  'beam-1.0-501b-a23b',
+  'laguna-s-2.1'
 ];
 
 const EXPECTED_REASONING = [
@@ -37,7 +41,14 @@ const EXPECTED_VISION = [
   'qwen-3.5-122b-a10b',
   'qwen-3.8-27b',
   'muse-glimmer-30b',
-  'glm-5.3-flash'
+  'glm-5.3-flash',
+  'mistral-large-4-1t-a52b',
+  'muse-spark-open-816b-a42b',
+  'inkling-small',
+  'nemotron-3.5-bolt-e4b',
+  'nemotron-3.5-bolt-74b-a9b',
+  'nemotron-3.5-super-vl-120b-a12b',
+  'command-a-plus'
 ];
 
 describe('Model useCases data and /builds preset filters', () => {
@@ -54,7 +65,7 @@ describe('Model useCases data and /builds preset filters', () => {
     assert.equal(visionIds.length, EXPECTED_VISION.length);
 
     const allTaggedSet = new Set([...EXPECTED_CODING, ...EXPECTED_REASONING, ...EXPECTED_VISION]);
-    assert.equal(allTaggedSet.size, 27);
+    assert.equal(allTaggedSet.size, 38);
 
     for (const m of MODELS_DATA) {
       if (allTaggedSet.has(m.id)) {
@@ -66,33 +77,33 @@ describe('Model useCases data and /builds preset filters', () => {
   });
 
   it('reproduces exact preset filter counts and AND combinations', () => {
-    assert.equal(filterBuildsIndexModels([]).length, 56);
-    assert.equal(filterBuildsIndexModels(['vram-16']).length, 16);
-    assert.equal(filterBuildsIndexModels(['vram-24']).length, 33);
-    assert.equal(filterBuildsIndexModels(['under-1500']).length, 34);
-    assert.equal(filterBuildsIndexModels(['moe']).length, 23);
-    assert.equal(filterBuildsIndexModels(['coding']).length, 6);
+    assert.equal(filterBuildsIndexModels([]).length, 70);
+    assert.equal(filterBuildsIndexModels(['vram-16']).length, 18);
+    assert.equal(filterBuildsIndexModels(['vram-24']).length, 35);
+    assert.equal(filterBuildsIndexModels(['under-1500']).length, 36);
+    assert.equal(filterBuildsIndexModels(['moe']).length, 35);
+    assert.equal(filterBuildsIndexModels(['coding']).length, 10);
     assert.equal(filterBuildsIndexModels(['reasoning']).length, 8);
-    assert.equal(filterBuildsIndexModels(['vision']).length, 13);
+    assert.equal(filterBuildsIndexModels(['vision']).length, 20);
 
     // AND combinations
     const vram24AndCoding = filterBuildsIndexModels(['vram-24', 'coding']);
-    assert.ok(vram24AndCoding.length > 0 && vram24AndCoding.length < 6);
+    assert.ok(vram24AndCoding.length > 0 && vram24AndCoding.length < 10);
     assert.ok(vram24AndCoding.every(m => m.recommendedVram <= 24 && m.useCases?.includes('coding')));
 
     const moeAndVision = filterBuildsIndexModels(['moe', 'vision']);
-    assert.ok(moeAndVision.length > 0 && moeAndVision.length < 13);
+    assert.ok(moeAndVision.length > 0 && moeAndVision.length < 20);
     assert.ok(moeAndVision.every(m => m.activeParamsB < m.totalParamsB && m.useCases?.includes('vision')));
 
     const disjoint = filterBuildsIndexModels(['coding', 'vision']);
     assert.equal(disjoint.length, 0);
   });
 
-  it('prerendered /builds HTML contains all 56 model rows and the preset chip row', () => {
+  it('prerendered /builds HTML contains all 70 model rows and the preset chip row', () => {
     const html = renderBuildsIndexHtml();
     const rowIds = [...html.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
-    assert.equal(rowIds.length, 56);
-    assert.equal(new Set(rowIds).size, 56);
+    assert.equal(rowIds.length, 70);
+    assert.equal(new Set(rowIds).size, 70);
 
     assert.match(html, /data-preset="all" aria-pressed="true">\s*All models\s*<\/button>/);
     for (const preset of BUILDS_INDEX_PRESETS) {
@@ -101,13 +112,13 @@ describe('Model useCases data and /builds preset filters', () => {
         `chip present for ${preset.id}`
       );
     }
-    assert.ok(html.includes('56 of 56 models'));
+    assert.ok(html.includes('70 of 70 models'));
     assert.match(html, /id="btn-reset-builds-filter"[^>]*hidden/);
   });
 
-  it('home chooser "Coding & vision" toggle matches 19 models from useCases', () => {
+  it('home chooser "Coding & vision" toggle matches 30 models from useCases', () => {
     const matched = filterModels({ codingOnly: true });
-    assert.equal(matched.length, 19);
+    assert.equal(matched.length, 30);
     const expectedIds = new Set([...EXPECTED_CODING, ...EXPECTED_VISION]);
     assert.deepEqual(new Set(matched.map(m => m.id)), expectedIds);
   });

@@ -107,18 +107,18 @@ describe('Computed Spot Check 1: RTX 3090 vs RTX 5090', () => {
       if (runs3090 !== runs5090) diffModels.push(model.id);
     }
 
-    assert.equal(single3090, 34);
-    assert.equal(single5090, 35);
-    assert.equal(dual3090, 41);
-    assert.equal(dual5090, 43);
+    assert.equal(single3090, 37);
+    assert.equal(single5090, 38);
+    assert.equal(dual3090, 45);
+    assert.equal(dual5090, 48);
     assert.deepEqual(diffModels, ['mixtral-8x7b']);
 
     const html = renderGpuComparisonHtml('rtx-3090', 'rtx-5090');
-    assert.ok(html.includes('34 of 56'));
-    assert.ok(html.includes('35 of 56'));
-    assert.ok(html.includes('41 of 56'));
-    assert.ok(html.includes('43 of 56'));
-    assert.ok(html.includes('1 of 56 catalog models run on only one of these two cards'));
+    assert.ok(html.includes('37 of 70'));
+    assert.ok(html.includes('38 of 70'));
+    assert.ok(html.includes('45 of 70'));
+    assert.ok(html.includes('48 of 70'));
+    assert.ok(html.includes('1 of 70 catalog models run on only one of these two cards'));
   });
 });
 
