@@ -12,8 +12,8 @@ import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { tierFit } from '../src/utils/tierFit.js';
 
 describe('Curated Comparisons & Best-GPU Data Integrity', () => {
-  it('defines exactly 10 discrete GPU comparison pairs', () => {
-    assert.equal(COMPARISON_PAIRS.length, 10);
+  it('defines exactly 12 discrete GPU comparison pairs', () => {
+    assert.equal(COMPARISON_PAIRS.length, 12);
     const seen = new Set();
     for (const [a, b] of COMPARISON_PAIRS) {
       assert.notEqual(a, b, 'cannot compare GPU to itself');
@@ -32,8 +32,8 @@ describe('Curated Comparisons & Best-GPU Data Integrity', () => {
     }
   });
 
-  it('defines exactly 8 models for best-GPU pages', () => {
-    assert.equal(BEST_GPU_MODELS.length, 8);
+  it('defines exactly 14 models for best-GPU pages', () => {
+    assert.equal(BEST_GPU_MODELS.length, 14);
     const seen = new Set();
     for (const id of BEST_GPU_MODELS) {
       assert.ok(MODELS_DATA.some(m => m.id === id), `model ${id} must exist in MODELS_DATA`);

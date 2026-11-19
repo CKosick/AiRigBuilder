@@ -11,7 +11,9 @@ export const COMPARISON_PAIRS = [
   ['tesla-p40', 'rtx-3090'],
   ['rtx-a5000', 'rtx-3090'],
   ['rtx-4080-super', 'rx-7900-xtx'],
-  ['rtx-4060-ti-16gb', 'rtx-5060-ti-16gb']
+  ['rtx-4060-ti-16gb', 'rtx-5060-ti-16gb'],
+  ['radeon-ai-pro-r9700', 'rtx-5090'],
+  ['rtx-5090', 'rtx-pro-6000-blackwell']
 ];
 
 export const BEST_GPU_MODELS = [
@@ -22,7 +24,13 @@ export const BEST_GPU_MODELS = [
   'gemma-3-27b',
   'mixtral-8x22b',
   'command-r-plus',
-  'qwen-3-32b'
+  'qwen-3-32b',
+  'deepseek-r1-full',
+  'gpt-oss-120b',
+  'qwen-3-235b-a22b',
+  'llama-4-scout',
+  'qwen-3-coder-480b-a35b',
+  'deepseek-v4-flash'
 ];
 
 export const comparisonSlug = (a, b) => `${a}-vs-${b}`;
