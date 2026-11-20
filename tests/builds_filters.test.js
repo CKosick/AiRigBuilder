@@ -123,17 +123,17 @@ describe('Model useCases data and /builds preset filters', () => {
     assert.match(html, /id="btn-reset-builds-filter"[^>]*hidden/);
   });
 
-  it('prerendered /builds HTML splits top group into 128 GB+ Colossal MoE and 48-96 GB workstation groups, both populated', () => {
+  it('prerendered /builds HTML splits top group into 128 GB+ Colossal MoE and 48-127 GB workstation groups, both populated', () => {
     const html = renderBuildsIndexHtml();
     assert.ok(html.includes('128 GB+ VRAM: Colossal MoE'));
-    assert.ok(html.includes('48–96 GB VRAM: Dual-GPU & Workstation'));
+    assert.ok(html.includes('48–127 GB VRAM: Dual-GPU & Workstation'));
 
     const sections = [...html.matchAll(/<section class="builds-index-group"[\s\S]*?<\/section>/g)].map(m => m[0]);
     assert.equal(sections.length, 5, '5 populated VRAM groups');
 
     const countRows = (sec) => [...sec.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
     assert.equal(countRows(sections[0]).length, 19, '128 GB+ Colossal MoE group has 19 models');
-    assert.equal(countRows(sections[1]).length, 14, '48-96 GB group has 14 models');
+    assert.equal(countRows(sections[1]).length, 14, '48-127 GB group has 14 models');
     assert.equal(sections.reduce((sum, s) => sum + countRows(s).length, 0), 70, 'all 70 models distributed across 5 groups');
   });
 

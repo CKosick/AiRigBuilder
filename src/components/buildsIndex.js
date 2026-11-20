@@ -8,7 +8,7 @@ import { cheapestFittingTotal } from '../utils/tierFit.js';
 
 const VRAM_GROUPS = [
   { min: 128, title: '128 GB+ VRAM: Colossal MoE', blurb: 'Unified-memory Mac Studio (256 GB / 512 GB) tiers, 192 GB RAM offload, and multi-GPU workstation rigs for frontier MoE models.' },
-  { min: 48, title: '48–96 GB VRAM: Dual-GPU & Workstation', blurb: 'Dual used RTX 3090s (48 GB), 96 GB workstation rigs (RTX PRO 6000 Blackwell), and 128 GB unified-memory systems.' },
+  { min: 48, title: '48–127 GB VRAM: Dual-GPU & Workstation', blurb: 'Dual used RTX 3090s (48 GB), 96 GB workstation rigs (RTX PRO 6000 Blackwell), and 128 GB unified-memory systems.' },
   { min: 20, title: '24–32 GB VRAM: 22B–35B Models', blurb: 'One 24 GB card (a used RTX 3090 or Tesla P40) runs these at Q4 with room for context.' },
   { min: 13, title: '16 GB VRAM: 11B–15B Models', blurb: 'A 16 GB card such as the RTX 4060 Ti 16GB, or a used 3090 for long context.' },
   { min: 0, title: '8–12 GB VRAM: 3B–9B Starter Models', blurb: 'Budget single-GPU builds around an RTX 3060 12GB.' }
