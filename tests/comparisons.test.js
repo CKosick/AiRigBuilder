@@ -6,9 +6,11 @@ import { MODELS_DATA } from '../src/data/models.js';
 import { INTEGRATED_SYSTEM_IDS } from '../src/components/rigPlayground.js';
 import { parseRoute, tabViewFor, buildPath, gpuPath } from '../src/routes.js';
 import { renderGpuComparisonHtml } from '../src/components/gpuComparison.js';
-import { renderBestGpuHtml } from '../src/components/bestGpu.js';
+import { renderBestGpuHtml, evaluateBestGpu } from '../src/components/bestGpu.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
+import { TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512 } from '../src/data/builds.js';
+import { AFFILIATE_LINK_REL } from '../src/config/affiliates.js';
 import { tierFit } from '../src/utils/tierFit.js';
 
 describe('Curated Comparisons & Best-GPU Data Integrity', () => {
@@ -139,7 +141,8 @@ describe('Computed Spot Check 2: Best GPU for Llama 3.3 70B', () => {
     assert.ok(html.includes('2x NVIDIA GeForce RTX 5090'));
     assert.ok(html.includes('$12,000'));
 
-    // Integrated systems note
+    // Integrated systems note (aside-only case: discrete $598 < unified $3,100)
+    assert.ok(!html.includes('Unified-Memory Pick'));
     assert.ok(html.includes('Integrated Unified-Memory Systems'));
     assert.ok(html.includes('Apple Mac Studio M2 Ultra'));
     assert.ok(html.includes('Apple Mac Studio M3 Ultra'));
@@ -148,6 +151,100 @@ describe('Computed Spot Check 2: Best GPU for Llama 3.3 70B', () => {
 
     // Link back to build sheet
     assert.ok(html.includes('href="/"'));
+  });
+});
+
+describe('Best-GPU Unified-Memory Pick & Amazon Action', () => {
+  const tierPrice = (tier) => tier.parts.reduce((s, p) => s + (p.price || 0), 0);
+
+  it('derives M5 Ultra candidate values directly from builds.js tiers and populates glm-5.3 and kimi-k2.7-code with zero empty slots', () => {
+    for (const modelId of ['glm-5.3', 'kimi-k2.7-code']) {
+      const ev = evaluateBestGpu(modelId);
+      assert.equal(ev.runningConfigs.length, 0, `${modelId} has no fitting discrete GPU`);
+      assert.ok(ev.unifiedPick, `${modelId} has a unifiedPick`);
+      assert.equal(ev.unifiedPick.id, TIER_MAC_M5_ULTRA_512.id);
+      assert.equal(ev.unifiedPick.memoryGb, TIER_MAC_M5_ULTRA_512.memoryGb);
+      assert.equal(ev.unifiedPick.totalPrice, tierPrice(TIER_MAC_M5_ULTRA_512));
+      assert.equal(ev.showUnifiedPick, true);
+
+      const html = renderBestGpuHtml(modelId);
+      assert.ok(html.includes('Unified-Memory Pick'));
+      assert.ok(html.includes(TIER_MAC_M5_ULTRA_512.name));
+      assert.ok(html.includes(`$${ev.unifiedPick.totalPrice.toLocaleString('en-US')}`));
+      assert.ok(html.includes(`href="${buildPath(modelId)}" class="btn-secondary"`));
+      assert.ok(!html.includes('class="pick-none"'), `${modelId} must omit empty discrete placeholder cards`);
+      assert.ok(!html.includes('class="integrated-system-note"'), `${modelId} must drop the aside when unified card renders`);
+    }
+  });
+
+  it('renders M5 Ultra 256GB unified card on deepseek-r1-full and qwen-3-coder-480b-a35b while preserving discrete empty slot only when discrete runs it', () => {
+    for (const modelId of ['deepseek-r1-full', 'qwen-3-coder-480b-a35b']) {
+      const ev = evaluateBestGpu(modelId);
+      assert.ok(ev.runningConfigs.length > 0);
+      assert.equal(ev.unifiedPick.id, TIER_MAC_M5_ULTRA_256.id);
+      assert.equal(ev.unifiedPick.memoryGb, TIER_MAC_M5_ULTRA_256.memoryGb);
+      assert.equal(ev.unifiedPick.totalPrice, tierPrice(TIER_MAC_M5_ULTRA_256));
+      assert.equal(ev.showUnifiedPick, true);
+
+      const html = renderBestGpuHtml(modelId);
+      assert.ok(html.includes('Unified-Memory Pick'));
+      assert.ok(html.includes(TIER_MAC_M5_ULTRA_256.name));
+      assert.ok(html.includes('$9,499'));
+      assert.ok(html.includes('$31,800'));
+      assert.ok(!html.includes('class="integrated-system-note"'));
+    }
+
+    // deepseek-r1-full has full discrete fit too -> 0 empty slots
+    assert.ok(!renderBestGpuHtml('deepseek-r1-full').includes('class="pick-none"'));
+    // qwen-3-coder-480b-a35b runs on discrete 2x PRO 6000 (reduced), lacks discrete full fit -> keeps Best Value Full Fit placeholder
+    const qwenCoderHtml = renderBestGpuHtml('qwen-3-coder-480b-a35b');
+    assert.equal((qwenCoderHtml.match(/class="pick-none"/g) || []).length, 1);
+    assert.ok(qwenCoderHtml.includes('No discrete GPU configuration achieves a full recommended quant fit.'));
+  });
+
+  it('renders unified card when unified pick undercuts cheapest discrete pick and drops aside (gpt-oss-120b)', () => {
+    const ev = evaluateBestGpu('gpt-oss-120b');
+    assert.equal(ev.cheapestThatRuns.totalPrice, 15900);
+    assert.equal(ev.unifiedPick.id, 'strix-halo-128gb');
+    assert.equal(ev.unifiedPick.totalPrice, 3100);
+    assert.equal(ev.showUnifiedPick, true);
+
+    const html = renderBestGpuHtml('gpt-oss-120b');
+    assert.ok(html.includes('Unified-Memory Pick'));
+    assert.ok(html.includes('$3,100'));
+    assert.ok(html.includes('$15,900'));
+    assert.ok(!html.includes('class="integrated-system-note"'));
+  });
+
+  it('keeps aside and omits unified card when discrete picks are full and cheaper (llama-3.3-70b)', () => {
+    const ev = evaluateBestGpu('llama-3.3-70b');
+    assert.equal(ev.cheapestThatRuns.totalPrice, 598);
+    assert.equal(ev.unifiedPick.totalPrice, 3100);
+    assert.equal(ev.showUnifiedPick, false);
+
+    const html = renderBestGpuHtml('llama-3.3-70b');
+    assert.ok(!html.includes('Unified-Memory Pick'));
+    assert.ok(html.includes('class="integrated-system-note"'));
+  });
+
+  it('renders tracked Amazon buy links under View GPU Details on discrete pick cards', () => {
+    const html = renderBestGpuHtml('llama-3.3-70b');
+    const picksSection = html.slice(html.indexOf('class="best-gpu-picks-grid"'), html.indexOf('class="integrated-system-note"'));
+
+    for (const gpuId of ['tesla-p40', 'rtx-5090']) {
+      assert.ok(
+        picksSection.includes(`href="https://www.amazon.com/s?`) &&
+        picksSection.includes('tag=airigbuilder-20') &&
+        picksSection.includes(`rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${gpuId}:amazon" data-gpu-id="${gpuId}" data-link-kind="amazon"`),
+        `Discrete pick card for ${gpuId} must include tracked Amazon action`
+      );
+    }
+
+    // Unified pick card uses Build Sheet link and does not render a GPU Amazon link
+    const glmHtml = renderBestGpuHtml('glm-5.3');
+    const glmPicks = glmHtml.slice(glmHtml.indexOf('class="best-gpu-picks-grid"'), glmHtml.indexOf('class="compare-card"'));
+    assert.ok(!glmPicks.includes('Buy on Amazon'));
+    assert.ok(glmPicks.includes(`href="${buildPath('glm-5.3')}"`));
   });
 });
 

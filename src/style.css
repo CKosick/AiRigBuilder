@@ -3328,6 +3328,10 @@ input[type="range"]::-moz-range-thumb {
   border-color: rgba(16, 185, 129, 0.45);
 }
 
+.best-gpu-pick-card.pick-unified {
+  border-color: var(--border-glow);
+}
+
 .pick-badge {
   font-size: 0.75rem;
   font-weight: 700;
@@ -3371,6 +3375,9 @@ input[type="range"]::-moz-range-thumb {
 
 .pick-action {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .pick-action .btn-secondary {

@@ -8,6 +8,7 @@ import { createClickHandler, validateClickPayload } from '../api/click.js';
 import { buildClickPayload, initOutboundClickTracking } from '../src/utils/clickTracker.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
+import { renderBestGpuHtml } from '../src/components/bestGpu.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 import { AFFILIATE_LINK_REL, RUNPOD_REFERRAL_URL, VAST_REFERRAL_URL } from '../src/config/affiliates.js';
@@ -402,6 +403,17 @@ describe('First-Party Outbound Click Tracking', () => {
           assert.equal(rel, AFFILIATE_LINK_REL);
           assert.equal(validateClickPayload({ path: `/builds/${model.id}`, merchant, linkId }).valid, true);
         }
+      }
+
+      // Best-GPU discrete pick card Amazon actions carry rel + valid click payload
+      const bestGpuHtml = renderBestGpuHtml('llama-3.3-70b');
+      const bestGpuAmazonMatches = [...bestGpuHtml.matchAll(/<a href="([^"]+)"[^>]*rel="([^"]+)"[^>]*data-click-merchant="([^"]+)" data-click-id="([^"]+)"[^>]*data-link-kind="amazon">/g)];
+      assert.equal(bestGpuAmazonMatches.length, 2, 'llama-3.3-70b has 2 discrete pick cards with Amazon buy actions');
+      for (const [tagHtml, href, rel, merchant, linkId] of bestGpuAmazonMatches) {
+        assert.ok(href.includes('tag=airigbuilder-20'), `expected Amazon tag in ${tagHtml}`);
+        assert.equal(rel, AFFILIATE_LINK_REL);
+        assert.equal(merchant, 'Amazon');
+        assert.equal(validateClickPayload({ path: '/best-gpu/llama-3.3-70b', merchant, linkId }).valid, true);
       }
     });
 

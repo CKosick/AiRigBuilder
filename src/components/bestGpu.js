@@ -2,19 +2,25 @@
 // Pure HTML shared by browser router and scripts/prerender.js.
 import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
+import { TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512 } from '../data/builds.js';
 import { INTEGRATED_SYSTEM_IDS } from './rigPlayground.js';
 import { tierFit } from '../utils/tierFit.js';
 import { estimateSpeedToks } from '../utils/speedEstimate.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { buildPath, gpuPath, shortGpuName } from '../routes.js';
 import { icon } from './icons.js';
 
-function formatToksSpeed(model, quantName, bandwidthGbs) {
-  if (!quantName || !bandwidthGbs) return '—';
-  const quantObj = model.quants?.find(q => q.name.split(' ')[0] === quantName);
-  if (!quantObj) return '—';
-  const speed = estimateSpeedToks(model, quantObj, bandwidthGbs);
-  if (!speed) return '—';
-  return `~${speed.low}-${speed.high} tok/s`;
+const UNIFIED_BUILD_TIERS = [TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512];
+
+function evaluateMemoryConfig(model, memoryGb, bandwidth) {
+  const fit = tierFit(model, { memoryGb }, { contextK: 8, kvScale: 1 });
+  const quantObj = fit.quant ? model.quants?.find(q => q.name.split(' ')[0] === fit.quant) : null;
+  const speed = quantObj ? estimateSpeedToks(model, quantObj, bandwidth) : null;
+  return {
+    fit,
+    speed,
+    speedStr: speed ? `~${speed.low}-${speed.high} tok/s` : '—'
+  };
 }
 
 function statusBadge(fit) {
@@ -28,7 +34,7 @@ function statusBadge(fit) {
 }
 
 /**
- * Evaluates discrete GPU configurations for a model and returns key picks.
+ * Evaluates discrete GPU configurations and unified-memory candidates for a model.
  * Reused by renderBestGpuHtml and Open Graph image generator.
  *
  * @param {string} modelId
@@ -44,9 +50,7 @@ export function evaluateBestGpu(modelId) {
   for (const gpu of discreteGpus) {
     for (const count of [1, 2]) {
       const memoryGb = gpu.vram * count;
-      const fit = tierFit(model, { memoryGb }, { contextK: 8, kvScale: 1 });
-      const quantObj = fit.quant ? model.quants?.find(q => q.name.split(' ')[0] === fit.quant) : null;
-      const speed = quantObj ? estimateSpeedToks(model, quantObj, gpu.bandwidth) : null;
+      const { fit, speed, speedStr } = evaluateMemoryConfig(model, memoryGb, gpu.bandwidth);
       allConfigs.push({
         gpu,
         count,
@@ -56,7 +60,7 @@ export function evaluateBestGpu(modelId) {
         totalPrice: gpu.usedStreetPrice * count,
         fit,
         speed,
-        speedStr: speed ? `~${speed.low}-${speed.high} tok/s` : '—'
+        speedStr
       });
     }
   }
@@ -74,10 +78,49 @@ export function evaluateBestGpu(modelId) {
   // 3. Fastest: highest computed speed range among fitting configurations
   const fastest = [...runningConfigs].sort((a, b) => (b.speed?.high || 0) - (a.speed?.high || 0) || a.totalPrice - b.totalPrice)[0] || null;
 
-  // Integrated systems check
+  // Integrated systems check (tracked GPUS_DATA entries + build-sheet M5 Ultra templates)
   const runningSystems = INTEGRATED_SYSTEM_IDS
     .map(id => GPUS_DATA.find(g => g.id === id))
     .filter(g => g && tierFit(model, { memoryGb: g.vram }, { contextK: 8, kvScale: 1 }).status !== 'none');
+
+  const unifiedCandidates = [
+    ...runningSystems.map(g => ({
+      id: g.id,
+      name: g.name,
+      fullName: g.name,
+      memoryGb: g.vram,
+      bandwidth: g.bandwidth,
+      totalPrice: g.usedStreetPrice
+    })),
+    ...UNIFIED_BUILD_TIERS.map(tier => ({
+      id: tier.id,
+      name: tier.name,
+      fullName: tier.name,
+      memoryGb: tier.memoryGb,
+      bandwidth: tier.bandwidthGbs,
+      totalPrice: tier.parts.reduce((sum, part) => sum + (part.price || 0), 0)
+    }))
+  ];
+
+  const unifiedConfigs = unifiedCandidates
+    .map(sys => ({
+      ...sys,
+      ...evaluateMemoryConfig(model, sys.memoryGb, sys.bandwidth)
+    }))
+    .filter(c => c.fit.status !== 'none');
+
+  const unifiedPick = [...unifiedConfigs].sort(
+    (a, b) => a.totalPrice - b.totalPrice || (b.speed?.high || 0) - (a.speed?.high || 0)
+  )[0] || null;
+
+  const showUnifiedPick = Boolean(
+    unifiedPick && (
+      !cheapestThatRuns ||
+      !bestValueFullFit ||
+      !fastest ||
+      unifiedPick.totalPrice < cheapestThatRuns.totalPrice
+    )
+  );
 
   // Best configuration for each of the 15 discrete GPUs
   const gpuRows = discreteGpus.map(gpu => {
@@ -116,16 +159,24 @@ export function evaluateBestGpu(modelId) {
     bestValueFullFit,
     fastest,
     runningSystems,
+    unifiedPick,
+    showUnifiedPick,
     gpuRows
   };
 }
 
 /**
- * Groups the three best-GPU picks by configuration (GPU ID + card count)
+ * Groups the three discrete best-GPU picks by configuration (GPU ID + card count)
  * so duplicate configurations render once in the position of their first pick
- * with combined labels.
+ * with combined labels, appending the unified-memory pick when applicable.
  */
-export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest }) {
+export function groupBestGpuPicks({
+  cheapestThatRuns,
+  bestValueFullFit,
+  fastest,
+  unifiedPick = null,
+  showUnifiedPick = false
+}) {
   const rawSlots = [
     {
       role: 'cheapest',
@@ -162,11 +213,15 @@ export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest 
     }
   ];
 
+  const hasDiscreteRunner = Boolean(cheapestThatRuns || bestValueFullFit || fastest);
+  const omitEmptyDiscrete = Boolean(showUnifiedPick && unifiedPick && !hasDiscreteRunner);
+
   const grouped = [];
   const byConfigKey = new Map();
 
   for (const slot of rawSlots) {
     if (!slot.config) {
+      if (omitEmptyDiscrete) continue;
       grouped.push({
         roles: [slot.role],
         cardClasses: [slot.cardClass],
@@ -191,6 +246,7 @@ export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest 
     } else {
       const card = {
         key,
+        isUnified: false,
         roles: [slot.role],
         cardClasses: [slot.cardClass],
         labels: [slot.label],
@@ -205,6 +261,21 @@ export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest 
     }
   }
 
+  if (showUnifiedPick && unifiedPick) {
+    grouped.push({
+      key: `unified:${unifiedPick.id}`,
+      isUnified: true,
+      roles: ['unified'],
+      cardClasses: ['pick-unified'],
+      labels: ['Unified-Memory Pick'],
+      combinedLabel: 'Unified-Memory Pick',
+      isGreen: unifiedPick.fit.status === 'fits',
+      config: unifiedPick,
+      emptyText: '',
+      fitMetaHtml: `<span>Fit: <strong>${unifiedPick.fit.status === 'fits' ? 'Full Fit' : 'Reduced Fit'} (${unifiedPick.fit.quant})</strong></span>`
+    });
+  }
+
   return grouped;
 }
 
@@ -212,8 +283,8 @@ export function groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest 
 export function renderBestGpuHtml(modelId) {
   const evalResult = evaluateBestGpu(modelId);
   if (!evalResult) return '';
-  const { model, cheapestThatRuns, bestValueFullFit, fastest, runningSystems, gpuRows } = evalResult;
-  const pickCards = groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest });
+  const { model, cheapestThatRuns, bestValueFullFit, fastest, runningSystems, unifiedPick, showUnifiedPick, gpuRows } = evalResult;
+  const pickCards = groupBestGpuPicks({ cheapestThatRuns, bestValueFullFit, fastest, unifiedPick, showUnifiedPick });
 
   return `
     <article class="best-gpu-detail" aria-labelledby="best-gpu-title">
@@ -253,7 +324,13 @@ export function renderBestGpuHtml(modelId) {
                 <span>Speed: <strong>${card.config.speedStr}</strong></span>
               </div>
               <div class="pick-action">
+                ${card.isUnified ? `
+                <a href="${buildPath(model.id)}" class="btn-secondary">View ${model.name} Build Sheet →</a>
+                ` : `
                 <a href="${gpuPath(card.config.gpu.id)}" class="btn-secondary">View ${shortGpuName(card.config.gpu)} Details →</a>
+                ${card.config.gpu.amazonSearchUrl ? `
+                <a href="${formatAffiliateUrl(card.config.gpu.amazonSearchUrl, 'Amazon', `gpu-${card.config.gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${card.config.gpu.id}:amazon" data-gpu-id="${card.config.gpu.id}" data-link-kind="amazon">${icon('cart')}Buy on Amazon →</a>` : ''}
+                `}
               </div>
             ` : `
               <p class="pick-none">${card.emptyText}</p>
@@ -262,8 +339,8 @@ export function renderBestGpuHtml(modelId) {
         </div>
       </section>
 
-      <!-- Integrated Systems Note (if applicable) -->
-      ${runningSystems.length > 0 ? `
+      <!-- Integrated Systems Note (if applicable and no unified pick card is shown) -->
+      ${!showUnifiedPick && runningSystems.length > 0 ? `
       <aside class="integrated-system-note" aria-label="Integrated systems note">
         ${icon('bulb')}
         <div>
