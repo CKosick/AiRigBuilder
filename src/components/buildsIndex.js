@@ -64,10 +64,18 @@ export const BUILDS_INDEX_PRESETS = [
 
 const PRESET_BY_ID = new Map(BUILDS_INDEX_PRESETS.map(p => [p.id, p]));
 
-export function filterBuildsIndexModels(activePresetIds = [], models = MODELS_DATA.filter(m => BUILDS_DATA[m.id])) {
+export function filterBuildsIndexModels(
+  activePresetIds = [],
+  models = MODELS_DATA.filter(m => BUILDS_DATA[m.id]),
+  searchQuery = ''
+) {
   const active = [...activePresetIds].map(id => PRESET_BY_ID.get(id)).filter(Boolean);
-  if (!active.length) return models;
-  return models.filter(m => active.every(preset => preset.match(m)));
+  const query = typeof searchQuery === 'string' ? searchQuery.trim().toLowerCase() : '';
+  return models.filter(m => {
+    if (active.length && !active.every(preset => preset.match(m))) return false;
+    if (query && !m.name.toLowerCase().includes(query)) return false;
+    return true;
+  });
 }
 
 export function renderBuildsIndexHtml() {
@@ -143,9 +151,12 @@ export function renderBuildsIndexHtml() {
         <div class="vram-filter" role="group" aria-label="Preset model filters">
           ${presetChipsHtml}
         </div>
-        <div class="builds-index-status">
-          <p class="model-results-count" id="builds-index-count" aria-live="polite">${models.length} of ${models.length} models</p>
-          <button type="button" class="btn-secondary builds-filter-reset" id="btn-reset-builds-filter" hidden>Reset</button>
+        <div class="builds-index-controls">
+          <input type="search" id="builds-search-input" class="model-search builds-search-input" aria-label="Filter models by name" placeholder="Filter by model name">
+          <div class="builds-index-status">
+            <p class="model-results-count" id="builds-index-count" aria-live="polite">${models.length} of ${models.length} models</p>
+            <button type="button" class="btn-secondary builds-filter-reset" id="btn-reset-builds-filter" hidden>Reset</button>
+          </div>
         </div>
       </div>
       ${groupHtml}
@@ -164,19 +175,22 @@ export function createBuildsIndex(container) {
   const allModels = MODELS_DATA.filter(m => BUILDS_DATA[m.id]);
   const totalCount = allModels.length;
   const activePresets = new Set();
+  let searchQuery = '';
 
   const countEl = root.querySelector('#builds-index-count');
   const resetBtn = root.querySelector('#btn-reset-builds-filter');
+  const searchInput = root.querySelector('#builds-search-input');
   const presetBtns = Array.from(root.querySelectorAll('.builds-preset-btn'));
   const groupSections = Array.from(root.querySelectorAll('.builds-index-group'));
 
   const applyFilters = () => {
-    const matchedIds = new Set(filterBuildsIndexModels(activePresets, allModels).map(m => m.id));
-    const hasActive = activePresets.size > 0;
+    const matchedIds = new Set(filterBuildsIndexModels(activePresets, allModels, searchQuery).map(m => m.id));
+    const hasPresets = activePresets.size > 0;
+    const hasActive = hasPresets || searchQuery.trim().length > 0;
 
     presetBtns.forEach(btn => {
       const id = btn.dataset.preset;
-      const isPressed = id === 'all' ? !hasActive : activePresets.has(id);
+      const isPressed = id === 'all' ? !hasPresets : activePresets.has(id);
       btn.classList.toggle('active', isPressed);
       btn.setAttribute('aria-pressed', String(isPressed));
     });
@@ -200,6 +214,13 @@ export function createBuildsIndex(container) {
     }
   };
 
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value || '';
+      applyFilters();
+    });
+  }
+
   root.addEventListener('click', (e) => {
     const presetBtn = e.target.closest('.builds-preset-btn');
     if (presetBtn) {
@@ -218,6 +239,8 @@ export function createBuildsIndex(container) {
     const reset = e.target.closest('#btn-reset-builds-filter');
     if (reset) {
       activePresets.clear();
+      searchQuery = '';
+      if (searchInput) searchInput.value = '';
       applyFilters();
     }
   });

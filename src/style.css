@@ -2450,11 +2450,18 @@ input[type="range"]::-moz-range-thumb {
   margin-bottom: 1.5rem;
 }
 
+.builds-index-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
 .builds-index-status {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-left: auto;
 }
 
 .builds-filter-reset {
@@ -2688,13 +2695,18 @@ input[type="range"]::-moz-range-thumb {
     padding: 1.15rem 1rem;
   }
 
-  /* Model chooser: full-width search, two columns of models */
+  /* Model chooser and /builds controls: full-width search, two columns of models */
   .model-filters-side,
+  .builds-index-controls,
   .model-search {
     width: 100%;
   }
   .model-search {
     flex: 1;
+    min-width: 0;
+  }
+  .builds-search-input {
+    min-height: 44px;
   }
   .model-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));

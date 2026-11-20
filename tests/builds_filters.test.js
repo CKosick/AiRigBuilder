@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { MODELS_DATA } from '../src/data/models.js';
-import { BUILDS_INDEX_PRESETS, filterBuildsIndexModels, renderBuildsIndexHtml } from '../src/components/buildsIndex.js';
+import { BUILDS_INDEX_PRESETS, filterBuildsIndexModels, renderBuildsIndexHtml, createBuildsIndex } from '../src/components/buildsIndex.js';
 import { filterModels } from '../src/components/modelPicker.js';
 
 const EXPECTED_CODING = [
@@ -97,6 +97,12 @@ describe('Model useCases data and /builds preset filters', () => {
 
     const disjoint = filterBuildsIndexModels(['coding', 'vision']);
     assert.equal(disjoint.length, 0);
+
+    // Filter-by-name search
+    const gemmaMatches = filterBuildsIndexModels([], undefined, '  GeMmA ');
+    assert.deepEqual(gemmaMatches.map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(m.name)).map(m => m.id));
+    assert.equal(filterBuildsIndexModels(['moe'], undefined, 'gemma').every(m => m.activeParamsB < m.totalParamsB && /gemma/i.test(m.name)), true);
+    assert.equal(filterBuildsIndexModels([], undefined, '   ').length, 70);
   });
 
   it('prerendered /builds HTML contains all 70 model rows and the preset chip row', () => {
@@ -112,6 +118,7 @@ describe('Model useCases data and /builds preset filters', () => {
         `chip present for ${preset.id}`
       );
     }
+    assert.ok(html.includes('id="builds-search-input"'));
     assert.ok(html.includes('70 of 70 models'));
     assert.match(html, /id="btn-reset-builds-filter"[^>]*hidden/);
   });
@@ -128,6 +135,112 @@ describe('Model useCases data and /builds preset filters', () => {
     assert.equal(countRows(sections[0]).length, 19, '128 GB+ Colossal MoE group has 19 models');
     assert.equal(countRows(sections[1]).length, 14, '48-96 GB group has 14 models');
     assert.equal(sections.reduce((sum, s) => sum + countRows(s).length, 0), 70, 'all 70 models distributed across 5 groups');
+  });
+
+  it('createBuildsIndex filters rows and hides empty groups on search input, restores on clear/reset', () => {
+    const html = renderBuildsIndexHtml();
+    const makeClassList = () => {
+      const set = new Set();
+      return {
+        toggle(cls, force) {
+          if (force) set.add(cls);
+          else set.delete(cls);
+        },
+        contains(cls) {
+          return set.has(cls);
+        }
+      };
+    };
+
+    const countEl = { textContent: '70 of 70 models' };
+    const resetBtn = { hidden: true };
+    const searchListeners = [];
+    const searchInput = {
+      value: '',
+      addEventListener(type, fn) {
+        if (type === 'input') searchListeners.push(fn);
+      }
+    };
+    const presetBtns = [...html.matchAll(/data-preset="([^"]+)"/g)].map(m => ({
+      dataset: { preset: m[1] },
+      attrs: {},
+      classList: makeClassList(),
+      setAttribute(k, v) { this.attrs[k] = v; }
+    }));
+    const sections = [...html.matchAll(/<section class="builds-index-group"[\s\S]*?<\/section>/g)].map(m => {
+      const rows = [...m[0].matchAll(/<tr data-model-id="([^"]+)">/g)].map(r => ({
+        dataset: { modelId: r[1] },
+        hidden: false
+      }));
+      return {
+        hidden: false,
+        rows,
+        querySelectorAll(sel) {
+          return sel === 'tbody tr[data-model-id]' ? this.rows : [];
+        }
+      };
+    });
+
+    const clickListeners = [];
+    const root = {
+      querySelector(sel) {
+        if (sel === '#builds-index-count') return countEl;
+        if (sel === '#btn-reset-builds-filter') return resetBtn;
+        if (sel === '#builds-search-input') return searchInput;
+        return null;
+      },
+      querySelectorAll(sel) {
+        if (sel === '.builds-preset-btn') return presetBtns;
+        if (sel === '.builds-index-group') return sections;
+        return [];
+      },
+      addEventListener(type, fn) {
+        if (type === 'click') clickListeners.push(fn);
+      }
+    };
+
+    const container = {
+      querySelector(sel) {
+        return sel === '.builds-index' ? root : null;
+      }
+    };
+
+    createBuildsIndex(container);
+
+    // Type 'kimi' -> only Kimi K2.7 Code matches (in 128 GB+ group), remaining 4 groups hide
+    const expectedKimi = MODELS_DATA.filter(m => /kimi/i.test(m.name)).length;
+    searchInput.value = 'kimi';
+    searchListeners.forEach(fn => fn());
+    assert.equal(countEl.textContent, `${expectedKimi} of 70 models`);
+    assert.equal(resetBtn.hidden, false);
+    assert.equal(sections[0].hidden, false, '128 GB+ group stays visible');
+    assert.equal(sections.slice(1).every(s => s.hidden), true, 'all empty groups hide when zero rows match');
+
+    // Clear search -> all 70 models and all 5 groups visible again
+    searchInput.value = '';
+    searchListeners.forEach(fn => fn());
+    assert.equal(countEl.textContent, '70 of 70 models');
+    assert.equal(resetBtn.hidden, true);
+    assert.equal(sections.every(s => !s.hidden), true);
+
+    // Search + Reset button clears and restores everything
+    searchInput.value = 'no-such-model';
+    searchListeners.forEach(fn => fn());
+    assert.equal(countEl.textContent, '0 of 70 models');
+    assert.equal(sections.every(s => s.hidden), true);
+    assert.equal(resetBtn.hidden, false);
+
+    clickListeners.forEach(fn => fn({
+      target: {
+        closest(sel) {
+          return sel === '#btn-reset-builds-filter' ? resetBtn : null;
+        }
+      }
+    }));
+    assert.equal(searchInput.value, '');
+    assert.equal(countEl.textContent, '70 of 70 models');
+    assert.equal(resetBtn.hidden, true);
+    assert.equal(sections.every(s => !s.hidden), true);
   });
 
   it('home chooser "Coding & vision" toggle matches 30 models from useCases', () => {
