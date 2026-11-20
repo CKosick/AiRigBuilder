@@ -538,6 +538,13 @@ body {
   color: var(--text-highlight);
 }
 
+.spec-badge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
 /* Tier Selector Tabs */
 .tier-tabs-container {
   display: grid;
@@ -2795,6 +2802,7 @@ input[type="range"]::-moz-range-thumb {
   .builds-preset-btn,
   .custom-bw-chip,
   .builds-filter-reset,
+  .spec-badge-actions .btn-secondary,
   .btn-view-history,
   .alert-select,
   .alert-input,

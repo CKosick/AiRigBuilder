@@ -148,14 +148,17 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(single3060Callout.includes('data-click-id="vast-single-3060"'));
     assert.ok(!single3060Callout.includes('Rent on RunPod'));
 
-    // Switching to unmatched Mac Studio M2 Ultra tier omits the callout and links
+    // Switching to unmatched Mac Studio M2 Ultra tier omits the tier callout and its tier-level referral links,
+    // while the model's Cloud Alternative banner badge keeps its RunPod link.
     const llamaMacHtml = renderModelPickerHtml({
       activeModelId: 'llama-3.3-70b',
       activeTierId: 'tier-best-new'
     });
-    assert.ok(!llamaMacHtml.includes('class="tier-cloud-callout"'));
-    assert.ok(!llamaMacHtml.includes('Rent on RunPod'));
-    assert.ok(!llamaMacHtml.includes('Rent on Vast.ai'));
+    const llamaMacTierSection = llamaMacHtml.slice(llamaMacHtml.indexOf('class="tier-tabs-container"'));
+    assert.ok(!llamaMacTierSection.includes('class="tier-cloud-callout"'));
+    assert.ok(!llamaMacTierSection.includes('Rent on RunPod'));
+    assert.ok(!llamaMacTierSection.includes('Rent on Vast.ai'));
+    assert.ok(llamaMacHtml.includes(`<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="runpod-dual-3090">Rent on RunPod</a>`));
 
     // Switching to matched balanced dual-3090 tier ($3,373 -> more than 5 years)
     const llamaBalancedHtml = renderModelPickerHtml({

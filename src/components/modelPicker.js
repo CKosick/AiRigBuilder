@@ -2,8 +2,8 @@
 import { MODELS_DATA } from '../data/models.js';
 import { BUILDS_DATA } from '../data/builds.js';
 import { isBestGpuModel, bestGpuPath } from '../data/comparisons.js';
-import { CLOUD_RATES_AS_OF } from '../data/providers.js';
-import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
+import { CLOUD_RATES, CLOUD_RATES_AS_OF } from '../data/providers.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL, getCloudReferralUrl } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
 import { fillGpuPrices, cloudAlternative } from '../utils/siteFacts.js';
 import { DEFAULT_MODEL_ID, SITE_URL, buildPath } from '../routes.js';
@@ -152,6 +152,41 @@ const escapeAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;
  * Pure HTML for the picker in a given state. The component renders it in the browser
  * and scripts/prerender.js renders it at build time, so both produce the same markup.
  */
+const CLOUD_BADGE_PROVIDERS = [
+  { prefix: 'runpod-', provider: 'runpod', merchant: 'RunPod', label: 'Rent on RunPod' },
+  { prefix: 'vast-', provider: 'vast', merchant: 'Vast', label: 'Rent on Vast.ai' }
+];
+
+/** Renders deduplicated per-provider referral links for the Cloud Alternative badge. */
+function renderCloudBadgeActionsHtml(model) {
+  const byProvider = new Map();
+  for (const offerId of model.cloudOffers || []) {
+    const meta = CLOUD_BADGE_PROVIDERS.find(p => offerId.startsWith(p.prefix));
+    const rate = CLOUD_RATES[offerId]?.hourlyRate;
+    if (!meta || typeof rate !== 'number') continue;
+
+    const existing = byProvider.get(meta.provider);
+    if (!existing || rate < existing.rate) {
+      byProvider.set(meta.provider, { ...meta, offerId, rate });
+    }
+  }
+
+  const linksHtml = [...byProvider.values()]
+    .map(entry => {
+      const href = getCloudReferralUrl(entry.offerId);
+      if (!href) return '';
+      return `<a href="${href}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="${entry.merchant}" data-click-id="${entry.offerId}">${entry.label}</a>`;
+    })
+    .filter(Boolean)
+    .join('\n          ');
+
+  if (!linksHtml) return '';
+  return `
+        <div class="spec-badge-actions">
+          ${linksHtml}
+        </div>`;
+}
+
 export function renderModelPickerHtml(state = {}) {
   const {
     activeModelId, activeTierId, contextK, kvPrecision, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
@@ -243,7 +278,7 @@ export function renderModelPickerHtml(state = {}) {
       <div class="spec-badge-box">
         <div class="spec-badge-label">Cloud Alternative</div>
         <div class="spec-badge-value spec-badge-cost">${cloud.rate}</div>
-        <div class="sub-note">${cloud.label} · Cloud rates checked ${CLOUD_RATES_AS_OF}</div>
+        <div class="sub-note">${cloud.label} · Cloud rates checked ${CLOUD_RATES_AS_OF}</div>${renderCloudBadgeActionsHtml(currentModel)}
       </div>
     </div>
 

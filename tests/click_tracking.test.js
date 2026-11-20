@@ -12,6 +12,7 @@ import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 import { AFFILIATE_LINK_REL, RUNPOD_REFERRAL_URL, VAST_REFERRAL_URL } from '../src/config/affiliates.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
+import { MODELS_DATA } from '../src/data/models.js';
 
 function createMockRes() {
   return {
@@ -357,6 +358,51 @@ describe('First-Party Outbound Click Tracking', () => {
           `<a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="calculator-vast">Rent on Vast.ai</a>`
         )
       );
+
+      // Cloud Alternative badge referral links: single-provider and dual-provider models
+      const badgeSlice = (modelId) => {
+        const html = renderModelPickerHtml({ activeModelId: modelId });
+        return html.slice(html.indexOf('Cloud Alternative'), html.indexOf('class="quant-options"'));
+      };
+
+      const llamaBadge = badgeSlice('llama-3.3-70b');
+      assert.ok(
+        llamaBadge.includes(
+          `<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="runpod-dual-3090">Rent on RunPod</a>`
+        )
+      );
+      assert.ok(!llamaBadge.includes('Rent on Vast.ai'));
+
+      const r1FullBadge = badgeSlice('deepseek-r1-full');
+      assert.ok(
+        r1FullBadge.includes(
+          `<a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="vast-8x-h100">Rent on Vast.ai</a>`
+        )
+      );
+      assert.ok(!r1FullBadge.includes('Rent on RunPod'));
+
+      const gpt20Badge = badgeSlice('gpt-oss-20b');
+      assert.ok(
+        gpt20Badge.includes(
+          `<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="runpod-single-3090">Rent on RunPod</a>`
+        )
+      );
+      assert.ok(
+        gpt20Badge.includes(
+          `<a href="${VAST_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="Vast" data-click-id="vast-single-3090">Rent on Vast.ai</a>`
+        )
+      );
+
+      // Every model's badge link(s) pass validateClickPayload
+      for (const model of MODELS_DATA) {
+        const badge = badgeSlice(model.id);
+        const matches = [...badge.matchAll(/<a href="([^"]+)"[^>]*rel="([^"]+)"[^>]*data-click-merchant="([^"]+)" data-click-id="([^"]+)">/g)];
+        assert.ok(matches.length >= 1, `${model.id} renders at least one Cloud Alternative link`);
+        for (const [, , rel, merchant, linkId] of matches) {
+          assert.equal(rel, AFFILIATE_LINK_REL);
+          assert.equal(validateClickPayload({ path: `/builds/${model.id}`, merchant, linkId }).valid, true);
+        }
+      }
     });
 
     it('fires navigator.sendBeacon("/api/click", ...) on sponsored link click without blocking navigation', () => {
