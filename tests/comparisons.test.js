@@ -34,8 +34,8 @@ describe('Curated Comparisons & Best-GPU Data Integrity', () => {
     }
   });
 
-  it('defines exactly 14 models for best-GPU pages', () => {
-    assert.equal(BEST_GPU_MODELS.length, 14);
+  it('defines exactly 16 models for best-GPU pages', () => {
+    assert.equal(BEST_GPU_MODELS.length, 16);
     const seen = new Set();
     for (const id of BEST_GPU_MODELS) {
       assert.ok(MODELS_DATA.some(m => m.id === id), `model ${id} must exist in MODELS_DATA`);

@@ -70,15 +70,15 @@ function extractRenderedVerdictLines(svg) {
 }
 
 describe('Dynamic Open Graph Images', () => {
-  it('identifies exactly 115 entity routes', () => {
+  it('identifies exactly 117 entity routes', () => {
     const routes = allRoutes();
     const entityRoutes = routes.filter(isEntityRoute);
-    assert.equal(entityRoutes.length, 115);
+    assert.equal(entityRoutes.length, 117);
     assert.equal(MODELS_DATA.length, 70);
     assert.equal(GPUS_DATA.length, 19);
     assert.equal(COMPARISON_PAIRS.length, 12);
-    assert.equal(BEST_GPU_MODELS.length, 14);
-    assert.equal(70 + 19 + 12 + 14, 115);
+    assert.equal(BEST_GPU_MODELS.length, 16);
+    assert.equal(70 + 19 + 12 + 16, 117);
   });
 
   describe('Pre-raster SVG figure assertions across page families', () => {
@@ -322,10 +322,10 @@ describe('Dynamic Open Graph Images', () => {
     });
   });
 
-  describe('Rasterized PNG generation (all 115 images)', () => {
-    it('generates 115 cards with exact 1200x630 dimensions and under 200KB size', () => {
+  describe('Rasterized PNG generation (all 117 images)', () => {
+    it('generates 117 cards with exact 1200x630 dimensions and under 200KB size', () => {
       const allOg = renderAllOgImages();
-      assert.equal(allOg.length, 115);
+      assert.equal(allOg.length, 117);
 
       for (const img of allOg) {
         assert.ok(img.slug, 'Must have slug');
