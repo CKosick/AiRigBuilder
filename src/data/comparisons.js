@@ -32,7 +32,9 @@ export const BEST_GPU_MODELS = [
   'qwen-3-coder-480b-a35b',
   'deepseek-v4-flash',
   'glm-5.3',
-  'kimi-k2.7-code'
+  'kimi-k2.7-code',
+  'mistral-large-4-1t-a52b',
+  'muse-spark-open-816b-a42b'
 ];
 
 export const comparisonSlug = (a, b) => `${a}-vs-${b}`;
