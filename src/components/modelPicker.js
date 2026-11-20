@@ -56,7 +56,7 @@ export const MODEL_PICKER_DEFAULTS = {
 };
 
 // "Runs well in" choices, compared with each model's recommendedVram (its sweet-spot quant)
-export const VRAM_BUDGETS = [12, 16, 24, 48, 96];
+export const VRAM_BUDGETS = [12, 16, 24, 32, 48, 96, 192];
 // The chooser lists this many models until "Show all" is pressed
 export const VISIBLE_MODELS = 10;
 

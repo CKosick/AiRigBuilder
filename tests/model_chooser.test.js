@@ -23,7 +23,10 @@ describe('Model chooser', () => {
   });
 
   it('"Runs well in" keeps models whose recommended VRAM fits', () => {
+    assert.deepEqual(VRAM_BUDGETS, [12, 16, 24, 32, 48, 96, 192]);
+    const defaultHtml = renderModelPickerHtml();
     for (const v of VRAM_BUDGETS) {
+      assert.ok(defaultHtml.includes(`data-vram="${v}"`), `renders ${v} GB pill`);
       const ids = filterModels({ vramBudget: v }).map(m => m.id);
       const expected = MODELS_DATA.filter(m => m.recommendedVram <= v).map(m => m.id);
       assert.deepEqual(ids, expected, `${v} GB`);
@@ -36,7 +39,7 @@ describe('Model chooser', () => {
   it('"Coding & vision" and search narrow the list; no match offers a reset', () => {
     const coding = filterModels({ codingOnly: true }).map(m => m.id);
     assert.ok(coding.length === 30 && coding.every(id => MODELS_DATA.find(x => x.id === id)?.useCases?.some(u => u === 'coding' || u === 'vision')));
-    assert.deepEqual(filterModels({ searchQuery: 'gemma' }).map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(`${m.name} ${m.description}`)).map(m => m.id));
+    assert.deepEqual(filterModels({ searchQuery: 'gemma' }).map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(`${m.name} ${m.creator} ${m.description}`)).map(m => m.id));
     assert.match(renderModelPickerHtml({ searchQuery: 'no-such-model' }), /No models match these filters\.[\s\S]*id="btn-reset-model-filter"/);
   });
 
