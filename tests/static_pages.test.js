@@ -317,10 +317,13 @@ describe('Generated page content without JavaScript', () => {
     }
   });
 
-  it('every page links to every build sheet and GPU page (crawlable internal links)', () => {
+  it('every page links to every build sheet, GPU page, comparison, and best-GPU guide (crawlable internal links)', () => {
     const html = byPath['/guide'];
-    for (const m of MODELS_DATA) assert.ok(html.includes(`href="${buildPath(m.id)}"`), m.id);
-    for (const g of GPUS_DATA) assert.ok(html.includes(`href="/gpu/${g.id}"`), g.id);
+    const footerDir = html.slice(html.indexOf('<details class="footer-directory">'), html.indexOf('</details>', html.indexOf('<details class="footer-directory">')));
+    for (const m of MODELS_DATA) assert.ok(footerDir.includes(`href="${buildPath(m.id)}"`), m.id);
+    for (const g of GPUS_DATA) assert.ok(footerDir.includes(`href="/gpu/${g.id}"`), g.id);
+    for (const [a, b] of COMPARISON_PAIRS) assert.ok(footerDir.includes(`href="${comparePath(a, b)}"`), `${a}-vs-${b}`);
+    for (const id of BEST_GPU_MODELS) assert.ok(footerDir.includes(`href="${bestGpuPath(id)}"`), id);
     assert.ok(!/href="#(builds|playground|calculator|tracker|guide)"/.test(html), 'no #hash navigation links left');
   });
 

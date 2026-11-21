@@ -2,12 +2,16 @@
 // Pure HTML shared by the browser (src/main.js) and the build-time prerender (scripts/prerender.js).
 import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
+import { COMPARISON_PAIRS, BEST_GPU_MODELS } from '../data/comparisons.js';
 import { siteFacts } from '../utils/siteFacts.js';
 import { renderHomeFaqHtml } from './homeFaq.js';
 import { renderHomeHeroHtml } from './homeHero.js';
-import { SECTIONS, tabViewFor, buildPath, gpuPath } from '../routes.js';
+import { SECTIONS, tabViewFor, buildPath, gpuPath, comparePath, bestGpuPath, shortGpuName } from '../routes.js';
 import { icon } from './icons.js';
 import { renderCommandPaletteHtml } from './commandPalette.js';
+
+const gpuById = new Map(GPUS_DATA.map(g => [g.id, g]));
+const modelById = new Map(MODELS_DATA.map(m => [m.id, m]));
 
 const TAB_LABELS = {
   builds: { icon: 'monitor', text: 'Builds' },
@@ -145,7 +149,7 @@ export function renderShell(route, panels = {}) {
         </nav>
       </div>
       <details class="footer-directory">
-        <summary>All build sheets and tracked GPUs</summary>
+        <summary>All build sheets, GPUs, comparisons, and best-GPU guides</summary>
         <div class="footer-directory-cols">
           <nav aria-label="Build sheets by model">
             <h2>Build Sheets</h2>
@@ -154,6 +158,23 @@ export function renderShell(route, panels = {}) {
           <nav aria-label="Tracked GPUs">
             <h2>Used GPU Prices</h2>
             <ul>${GPUS_DATA.map(g => `<li><a href="${gpuPath(g.id)}">${g.name}</a></li>`).join('')}</ul>
+          </nav>
+          <nav aria-label="Best GPU guides by model">
+            <h2>Best GPU Guides</h2>
+            <ul>${BEST_GPU_MODELS.map(id => {
+              const m = modelById.get(id);
+              return `<li><a href="${bestGpuPath(id)}">Best GPU for ${m ? m.name : id}</a></li>`;
+            }).join('')}</ul>
+          </nav>
+          <nav aria-label="GPU comparisons">
+            <h2>GPU Comparisons</h2>
+            <ul>${COMPARISON_PAIRS.map(([a, b]) => {
+              const gpuA = gpuById.get(a);
+              const gpuB = gpuById.get(b);
+              const labelA = gpuA ? shortGpuName(gpuA) : a;
+              const labelB = gpuB ? shortGpuName(gpuB) : b;
+              return `<li><a href="${comparePath(a, b)}">${labelA} vs ${labelB}</a></li>`;
+            }).join('')}</ul>
           </nav>
         </div>
       </details>
