@@ -175,7 +175,7 @@ export function pageMeta(route) {
     const nameB = shortGpuName(gpuB);
     meta = {
       title: `${nameA} vs ${nameB}: Local LLM Specs | ${SITE_NAME}`,
-      description: `Compare ${nameA} vs ${nameB} for local LLMs: VRAM, bandwidth, power draw, used prices, and model fit speeds across 56 models.`
+      description: `Compare ${nameA} vs ${nameB} for local LLMs: VRAM, bandwidth, power draw, used prices, and model fit speeds across ${MODELS_DATA.length} models.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: `${nameA} vs ${nameB}`, path: route.path });
   } else if (route.view === 'best-gpu') {

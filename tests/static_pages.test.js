@@ -304,6 +304,17 @@ describe('Generated page content without JavaScript', () => {
     assert.ok(visibleAppText(byPath['/calculator']).includes('Break-Even Point'));
     assert.ok(visibleAppText(byPath['/calculator']).includes('pays for itself'));
     assert.ok(visibleAppText(byPath['/guide']).includes('The Exact VRAM Math Formula'));
+    const guideHtml = byPath['/guide'];
+    const guideCardCount = (guideHtml.match(/class="guide-card\b/g) || []).length;
+    assert.equal(guideCardCount, 6);
+    assert.ok(
+      visibleAppText(guideHtml).includes(`Here are the ${guideCardCount} critical architectural traps to avoid.`),
+      'guide intro count must match rendered guide-card count'
+    );
+    for (const [a, b] of COMPARISON_PAIRS) {
+      const desc = attr(byPath[comparePath(a, b)], /<meta\s+name="description"\s+content="([^"]+)"/);
+      assert.ok(desc.includes(`across ${MODELS_DATA.length} models`), `${a}-vs-${b} meta description must use live model count ${MODELS_DATA.length}`);
+    }
   });
 
   it('every page links to every build sheet and GPU page (crawlable internal links)', () => {

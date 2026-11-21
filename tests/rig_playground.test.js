@@ -510,4 +510,20 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
     );
     assert.equal(integratedValues.at(-1), CUSTOM_UNIFIED_ID, 'Custom unified memory is last in final group');
   });
+
+  it('uses live MODELS_DATA.length in intro, Catalog Fit fraction, and empty no-fit message (no stale 56)', () => {
+    const defaultHtml = renderRigPlaygroundHtml();
+    assert.ok(defaultHtml.includes(`our ${MODELS_DATA.length} local LLMs`));
+    assert.ok(defaultHtml.includes(`>10 / ${MODELS_DATA.length}</strong>`));
+    assert.ok(!defaultHtml.includes('56 local LLMs'));
+    assert.ok(!defaultHtml.includes('/ 56</strong>'));
+
+    const allFitHtml = renderRigPlaygroundHtml({
+      gpuId: CUSTOM_UNIFIED_ID,
+      customMemoryGb: 1024,
+      customBandwidthGbs: 1200
+    });
+    assert.ok(allFitHtml.includes(`>${MODELS_DATA.length} / ${MODELS_DATA.length}</strong>`));
+    assert.ok(allFitHtml.includes(`All ${MODELS_DATA.length} models fit in this configuration!`));
+  });
 });

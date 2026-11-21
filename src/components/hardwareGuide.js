@@ -13,7 +13,7 @@ export function renderHardwareGuideHtml() {
         Local AI Hardware Guide & Crucial Gotchas
       </h1>
       <p class="section-lead">
-        Building a multi-GPU local AI rig is not like building a gaming PC. Here are the 5 critical architectural traps to avoid.
+        Building a multi-GPU local AI rig is not like building a gaming PC. Here are the 6 critical architectural traps to avoid.
       </p>
     </div>
 

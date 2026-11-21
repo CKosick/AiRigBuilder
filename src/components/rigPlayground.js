@@ -94,7 +94,7 @@ export function recommendedPsuWatts(totalTdpWatts, systemAllowanceWatts = 150) {
 }
 
 /**
- * Evaluates all 56 models in MODELS_DATA against a synthetic rig configuration.
+ * Evaluates all models in MODELS_DATA against a synthetic rig configuration.
  * Returns partitioned lists: { runsInVram, doesNotFit }.
  */
 export function evaluatePlaygroundModels(gpuOrConfig, countOrOptions = {}, options = {}) {
@@ -322,7 +322,7 @@ export function renderRigPlaygroundHtml(state = {}) {
       <div class="playground-header">
         <h1>Local AI Rig Playground</h1>
         <p class="playground-intro">
-          Select the GPU you already own (or an integrated system) to see which of our 56 local LLMs run in VRAM, your generation speeds, and the highest-impact upgrades for your setup.
+          Select the GPU you already own (or an integrated system) to see which of our ${MODELS_DATA.length} local LLMs run in VRAM, your generation speeds, and the highest-impact upgrades for your setup.
         </p>
       </div>
 
@@ -428,7 +428,7 @@ export function renderRigPlaygroundHtml(state = {}) {
         ` : ''}
         <div class="rig-status-item">
           <span class="rig-status-label">Catalog Fit</span>
-          <strong class="rig-status-val status-runs">${runsInVram.length} / 56</strong>
+          <strong class="rig-status-val status-runs">${runsInVram.length} / ${MODELS_DATA.length}</strong>
           <span class="rig-status-sub">${doesNotFit.length} models exceed VRAM</span>
         </div>
       </div>
@@ -584,7 +584,7 @@ export function renderRigPlaygroundHtml(state = {}) {
                 </thead>
                 <tbody id="playground-nofit-tbody">
                   ${doesNotFit.length === 0 ? `
-                    <tr><td colspan="3" class="text-dim">All 56 models fit in this configuration!</td></tr>
+                    <tr><td colspan="3" class="text-dim">All ${MODELS_DATA.length} models fit in this configuration!</td></tr>
                   ` : shownNoFit.map(({ model: m, fit, shortfall, needed }) => `
                     <tr data-model-id="${m.id}">
                       <td class="stack-head">
