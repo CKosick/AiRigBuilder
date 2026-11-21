@@ -1,7 +1,7 @@
 import './style.css';
 import { renderShell } from './components/shell.js';
 import { createModelPicker } from './components/modelPicker.js';
-import { createBreakEvenCalc } from './components/breakEvenCalc.js';
+import { createBreakEvenCalc, parseCalculatorCostParam, clampRigCost } from './components/breakEvenCalc.js';
 import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
@@ -48,7 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let breakEvenController = null;
 
   const modelPickerController = createModelPicker(modelPickerRoot, (rigData) => {
-    navigate(parseRoute('/calculator'));
+    const calcCost = typeof rigData?.upfrontCost === 'number' && Number.isFinite(rigData.upfrontCost)
+      ? clampRigCost(rigData.upfrontCost)
+      : null;
+    navigate(parseRoute('/calculator'), { search: calcCost !== null ? `?cost=${calcCost}` : '' });
     if (breakEvenController) {
       breakEvenController.preloadRig(rigData);
     }
@@ -62,7 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  breakEvenController = createBreakEvenCalc(viewCalculator);
+  const initialCalcCost = route.view === 'calculator' ? parseCalculatorCostParam(window.location.search) : null;
+  breakEvenController = createBreakEvenCalc(
+    viewCalculator,
+    initialCalcCost !== null ? { rigUpfrontCost: initialCalcCost } : {}
+  );
   createPriceTracker(trackerRoot);
   createHardwareGuide(viewGuide);
   createRigPlayground(viewPlayground);
@@ -154,10 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
    * Moves to a route with the History API.
    * replace: rewrite the current entry instead of adding one; scroll: jump back to the top.
    */
-  function navigate(next, { replace = false, scroll = true } = {}) {
+  function navigate(next, { replace = false, scroll = true, search = '' } = {}) {
     if (!next) return;
-    if (next.path !== window.location.pathname) {
-      history[replace ? 'replaceState' : 'pushState'](null, '', next.path);
+    const targetUrl = `${next.path}${search}`;
+    if (targetUrl !== `${window.location.pathname}${window.location.search}`) {
+      history[replace ? 'replaceState' : 'pushState'](null, '', targetUrl);
     }
     showRoute(next);
     if (scroll) window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
@@ -208,13 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const next = parseRoute(url.pathname);
     if (!next) return;
     e.preventDefault();
-    navigate(next);
+    navigate(next, { search: url.search });
+    if (next.view === 'calculator' && breakEvenController) {
+      const calcCost = parseCalculatorCostParam(url.search);
+      if (calcCost !== null) breakEvenController.preloadRig({ upfrontCost: calcCost });
+    }
     document.getElementById('main-content').focus({ preventScroll: true });
   });
 
   // Back / forward between pages
   window.addEventListener('popstate', () => {
-    showRoute(parseRoute(window.location.pathname) || parseRoute('/'));
+    const next = parseRoute(window.location.pathname) || parseRoute('/');
+    showRoute(next);
+    if (next.view === 'calculator' && breakEvenController) {
+      const calcCost = parseCalculatorCostParam(window.location.search);
+      if (calcCost !== null) breakEvenController.preloadRig({ upfrontCost: calcCost });
+    }
   });
 
   // In-page links to the old #section anchors still work

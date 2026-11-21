@@ -11,8 +11,10 @@ import {
   SYSTEM_WATTS_MIN,
   SYSTEM_WATTS_MAX,
   clampRigCost,
+  parseCalculatorCostParam,
   renderBreakEvenHtml
 } from '../src/components/breakEvenCalc.js';
+import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 
 describe('Cloud Break-Even Calculator Logic', () => {
   it('correctly calculates break-even for Dual 3090 baseline at 4 hrs/day', () => {
@@ -121,5 +123,23 @@ describe('Break-Even Calculator UI Ceilings & Paired Numeric Cost Input', () => 
     assert.ok(html.includes('id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="35000" step="10" value="22299"'));
     assert.ok(html.includes('id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="400" max="35000" step="1" value="22299"'));
     assert.ok(html.includes('id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="25.00" value="21.33"'));
+  });
+
+  it('parses ?cost query param cleanly with clamping and links build sheet Calculate Break-Even ROI -> with build total', () => {
+    assert.equal(parseCalculatorCostParam('?cost=22299'), 22299);
+    assert.equal(parseCalculatorCostParam('?cost=2532'), 2532);
+    assert.equal(parseCalculatorCostParam('?cost=100'), 400);
+    assert.equal(parseCalculatorCostParam('?cost=99999'), 35000);
+    assert.equal(parseCalculatorCostParam('?cost=abc'), null);
+    assert.equal(parseCalculatorCostParam('?cost='), null);
+    assert.equal(parseCalculatorCostParam('?cost=Infinity'), null);
+    assert.equal(parseCalculatorCostParam('?foo=123'), null);
+    assert.equal(parseCalculatorCostParam(''), null);
+
+    const glmHtml = renderModelPickerHtml({ activeModelId: 'glm-5.3' });
+    assert.match(glmHtml, /<a href="\/calculator\?cost=22299" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
+
+    const llamaHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
+    assert.match(llamaHtml, /<a href="\/calculator\?cost=2532" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
   });
 });

@@ -17,6 +17,17 @@ export function clampRigCost(value) {
   return Math.min(RIG_COST_MAX, Math.max(RIG_COST_MIN, Math.round(value)));
 }
 
+export function parseCalculatorCostParam(search) {
+  if (!search) return null;
+  const params = new URLSearchParams(search);
+  if (!params.has('cost')) return null;
+  const raw = params.get('cost');
+  if (raw === null || raw.trim() === '') return null;
+  const num = Number(raw);
+  if (!Number.isFinite(num)) return null;
+  return clampRigCost(num);
+}
+
 function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }

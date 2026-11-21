@@ -394,9 +394,9 @@ export function renderModelPickerHtml(state = {}) {
           <button class="btn-secondary" id="btn-copy-parts-list">
             ${icon('copy')}<span>Copy parts list</span>
           </button>
-          <button class="btn-primary" id="btn-send-to-calc">
+          <a href="/calculator?cost=${partsSubtotal}" class="btn-primary" id="btn-send-to-calc">
             ${icon('calculator')}Calculate Break-Even ROI →
-          </button>
+          </a>
         </div>
       </div>
 
@@ -667,7 +667,9 @@ export function createModelPicker(container, onNavigateToCalc, { initialModelId,
     // Send to Break-Even Calculator
     const btnSendToCalc = container.querySelector('#btn-send-to-calc');
     if (btnSendToCalc && onNavigateToCalc) {
-      btnSendToCalc.addEventListener('click', () => {
+      btnSendToCalc.addEventListener('click', (e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
         const { partsSubtotal, systemWatts } = computeCosts(currentBuild().currentTier);
         onNavigateToCalc({
           modelId: activeModelId,
