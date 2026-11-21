@@ -9,6 +9,7 @@ import { buildClickPayload, initOutboundClickTracking } from '../src/utils/click
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
 import { renderGpuDetailHtml } from '../src/components/gpuDetail.js';
 import { renderBestGpuHtml } from '../src/components/bestGpu.js';
+import { renderGpuComparisonHtml } from '../src/components/gpuComparison.js';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { renderBreakEvenHtml } from '../src/components/breakEvenCalc.js';
 import { AFFILIATE_LINK_REL, RUNPOD_REFERRAL_URL, VAST_REFERRAL_URL } from '../src/config/affiliates.js';
@@ -414,6 +415,25 @@ describe('First-Party Outbound Click Tracking', () => {
         assert.equal(rel, AFFILIATE_LINK_REL);
         assert.equal(merchant, 'Amazon');
         assert.equal(validateClickPayload({ path: '/best-gpu/llama-3.3-70b', merchant, linkId }).valid, true);
+      }
+
+      // Compare page Check Prices actions match gpuDetail click tracking
+      const compareHtml = renderGpuComparisonHtml('rtx-3090', 'rtx-4090');
+      const compareActionMatches = [...compareHtml.matchAll(/<a href="([^"]+)"[^>]*rel="([^"]+)"[^>]*data-click-merchant="([^"]+)" data-click-id="([^"]+)" data-gpu-id="([^"]+)" data-link-kind="([^"]+)">/g)];
+      assert.equal(compareActionMatches.length, 4, 'rtx-3090 vs rtx-4090 renders 4 buy actions (eBay Sold + Amazon per GPU)');
+      for (const [, href, rel, merchant, linkId, gpuId, linkKind] of compareActionMatches) {
+        assert.equal(rel, AFFILIATE_LINK_REL);
+        if (linkKind === 'ebay-sold') {
+          assert.equal(merchant, 'eBay Sold');
+          assert.equal(linkId, `gpu:${gpuId}:ebay-sold`);
+          assert.ok(href.includes('campid=5339219563') && href.includes(`customid=gpu-${gpuId}`));
+        } else {
+          assert.equal(linkKind, 'amazon');
+          assert.equal(merchant, 'Amazon');
+          assert.equal(linkId, `gpu:${gpuId}:amazon`);
+          assert.ok(href.includes('tag=airigbuilder-20'));
+        }
+        assert.equal(validateClickPayload({ path: '/compare/rtx-3090-vs-rtx-4090', merchant, linkId }).valid, true);
       }
     });
 

@@ -275,4 +275,24 @@ describe('Internal Links', () => {
     const otherHtml = renderModelPickerHtml({ activeModelId: 'llama-3.1-8b' });
     assert.ok(!otherHtml.includes('/best-gpu/llama-3.1-8b'));
   });
+
+  it('adds eBay Sold and Amazon buy actions to the Check Prices row across all comparison pairs matching gpuDetail', () => {
+    for (const [a, b] of COMPARISON_PAIRS) {
+      const html = renderGpuComparisonHtml(a, b);
+      assert.ok(html.includes('<strong>Check Prices</strong>'), `${a}-vs-${b} renders Check Prices row`);
+      const specTable = html.slice(html.indexOf('Hardware Specifications'), html.indexOf('Model Support Summary'));
+      for (const gpuId of [a, b]) {
+        assert.ok(
+          specTable.includes(`rel="${AFFILIATE_LINK_REL}" class="btn-primary" data-click-merchant="eBay Sold" data-click-id="gpu:${gpuId}:ebay-sold" data-gpu-id="${gpuId}" data-link-kind="ebay-sold"`),
+          `${a}-vs-${b} renders eBay Sold action for ${gpuId}`
+        );
+        assert.ok(specTable.includes(`customid=gpu-${gpuId}`), `${a}-vs-${b} carries customid=gpu-${gpuId}`);
+        assert.ok(
+          specTable.includes(`rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${gpuId}:amazon" data-gpu-id="${gpuId}" data-link-kind="amazon"`),
+          `${a}-vs-${b} renders Amazon action for ${gpuId}`
+        );
+        assert.ok(specTable.includes('tag=airigbuilder-20'), `${a}-vs-${b} carries airigbuilder-20 Amazon tag`);
+      }
+    }
+  });
 });

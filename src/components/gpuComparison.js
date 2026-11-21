@@ -4,8 +4,23 @@ import { GPUS_DATA } from '../data/gpus.js';
 import { MODELS_DATA } from '../data/models.js';
 import { tierFit } from '../utils/tierFit.js';
 import { estimateSpeedToks } from '../utils/speedEstimate.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { gpuPath, buildPath, shortGpuName } from '../routes.js';
 import { icon } from './icons.js';
+
+function renderGpuBuyActions(gpu) {
+  return `
+    <div class="compare-gpu-actions">
+      <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary" data-click-merchant="eBay Sold" data-click-id="gpu:${gpu.id}:ebay-sold" data-gpu-id="${gpu.id}" data-link-kind="ebay-sold">
+        ${icon('search')}Check eBay Sold Listings →
+      </a>
+      ${gpu.amazonSearchUrl ? `
+      <a href="${formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${gpu.id}:amazon" data-gpu-id="${gpu.id}" data-link-kind="amazon">
+        ${icon('cart')}Buy on Amazon →
+      </a>` : ''}
+    </div>
+  `;
+}
 
 function formatToksSpeed(model, quantName, bandwidthGbs) {
   if (!quantName || !bandwidthGbs) return '—';
@@ -143,6 +158,11 @@ export function renderGpuComparisonHtml(gpuIdA, gpuIdB) {
                 <td class="stack-head"><strong>Multi-GPU Score</strong></td>
                 <td class="part-price-cell" data-label="${nameA}">${gpuA.multiGpuScore !== undefined ? `${gpuA.multiGpuScore}/10` : '—'}</td>
                 <td class="part-price-cell" data-label="${nameB}">${gpuB.multiGpuScore !== undefined ? `${gpuB.multiGpuScore}/10` : '—'}</td>
+              </tr>
+              <tr>
+                <td class="stack-head"><strong>Check Prices</strong></td>
+                <td class="stack-wide" data-label="${nameA}">${renderGpuBuyActions(gpuA)}</td>
+                <td class="stack-wide" data-label="${nameB}">${renderGpuBuyActions(gpuB)}</td>
               </tr>
             </tbody>
           </table>
