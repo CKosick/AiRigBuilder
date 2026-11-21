@@ -1,9 +1,12 @@
 // Used GPU Price Tracker Component (airigbuilder.com)
 // The SEO moat tracking street prices for the GPUs and AI systems that matter for local AI
 import { GPUS_DATA } from '../data/gpus.js';
+import { COMPARISON_PAIRS, comparePath } from '../data/comparisons.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { preserveFocus } from '../utils/focus.js';
-import { gpuPath } from '../routes.js';
+import { gpuPath, shortGpuName } from '../routes.js';
+
+const gpuById = new Map(GPUS_DATA.map(g => [g.id, g]));
 import { drawPriceHistoryChart } from './priceHistoryChart.js';
 import { trendBadgeHtml } from '../utils/priceTrends.js';
 import { sparklineSvg } from '../utils/sparkline.js';
@@ -124,6 +127,20 @@ export function renderPriceTrackerHtml({ sortBy = 'pricePerGb', sortAsc = true }
           </tbody>
         </table>
       </div>
+
+      <!-- Popular Head-to-Head Comparisons -->
+      <section class="gpu-detail-card tracker-comparisons" aria-labelledby="tracker-comparisons-title">
+        <h2 id="tracker-comparisons-title">Popular Head-to-Head Comparisons</h2>
+        <ul class="gpu-detail-others">
+          ${COMPARISON_PAIRS.map(([a, b]) => {
+            const gpuA = gpuById.get(a);
+            const gpuB = gpuById.get(b);
+            const labelA = gpuA ? shortGpuName(gpuA) : a;
+            const labelB = gpuB ? shortGpuName(gpuB) : b;
+            return `<li><a href="${comparePath(a, b)}">${labelA} vs ${labelB}</a></li>`;
+          }).join('')}
+        </ul>
+      </section>
 
       <!-- Price Drop Email Alerts Banner -->
       <div class="price-alert-banner">

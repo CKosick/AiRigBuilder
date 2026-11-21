@@ -2275,6 +2275,7 @@ input[type="range"]::-moz-range-thumb {
   margin-bottom: 1.5rem;
 }
 
+.gpu-detail-card h2,
 .gpu-detail-card h3 {
   font-size: 1rem;
   font-weight: 700;

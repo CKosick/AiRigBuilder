@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { renderPriceTrackerHtml } from '../src/components/priceTracker.js';
 import { sparklineSvg } from '../src/utils/sparkline.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
+import { COMPARISON_PAIRS, comparePath } from '../src/data/comparisons.js';
+import { shortGpuName } from '../src/routes.js';
 
 /** Runs fn with every GPU's 7d trend temporarily replaced. */
 function withTrends(value, fn) {
@@ -43,6 +45,26 @@ describe('Tracker ranking', () => {
   it('puts the price-alert form after the price table', () => {
     const html = renderPriceTrackerHtml();
     assert.ok(html.indexOf('class="gpu-table-card"') < html.indexOf('class="price-alert-banner"'));
+  });
+
+  it('renders Popular Head-to-Head Comparisons strip below the tracker table with all 12 curated links', () => {
+    const html = renderPriceTrackerHtml();
+    const tableIdx = html.indexOf('class="gpu-table-card"');
+    const stripIdx = html.indexOf('Popular Head-to-Head Comparisons');
+    const alertIdx = html.indexOf('class="price-alert-banner"');
+    assert.ok(tableIdx < stripIdx && stripIdx < alertIdx, 'comparisons strip sits between table and price alert banner');
+
+    const strip = html.slice(html.indexOf('tracker-comparisons'), alertIdx);
+    const links = [...strip.matchAll(/<a href="([^"]+)">([^<]+)<\/a>/g)];
+    assert.equal(links.length, COMPARISON_PAIRS.length);
+    for (const [a, b] of COMPARISON_PAIRS) {
+      const gpuA = GPUS_DATA.find(g => g.id === a);
+      const gpuB = GPUS_DATA.find(g => g.id === b);
+      assert.ok(
+        strip.includes(`<a href="${comparePath(a, b)}">${shortGpuName(gpuA)} vs ${shortGpuName(gpuB)}</a>`),
+        `tracker strip must include ${comparePath(a, b)}`
+      );
+    }
   });
 });
 
