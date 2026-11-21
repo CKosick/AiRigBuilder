@@ -2,6 +2,17 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { computeBreakEven } from '../src/utils/breakEven.js';
+import {
+  BREAK_EVEN_DEFAULTS,
+  RIG_COST_MIN,
+  RIG_COST_MAX,
+  CLOUD_RATE_MIN,
+  CLOUD_RATE_MAX,
+  SYSTEM_WATTS_MIN,
+  SYSTEM_WATTS_MAX,
+  clampRigCost,
+  renderBreakEvenHtml
+} from '../src/components/breakEvenCalc.js';
 
 describe('Cloud Break-Even Calculator Logic', () => {
   it('correctly calculates break-even for Dual 3090 baseline at 4 hrs/day', () => {
@@ -79,5 +90,36 @@ describe('Cloud Break-Even Calculator Logic', () => {
 
     assert.ok(res.monthlyNetSavings < 0, 'Net savings should be negative');
     assert.equal(res.breakEvenMonths, Infinity, 'Break-even months must be Infinity when savings <= 0');
+  });
+});
+
+describe('Break-Even Calculator UI Ceilings & Paired Numeric Cost Input', () => {
+  it('raises rig cost, cloud rate, and power draw ceilings while preserving minimums and defaults', () => {
+    assert.equal(RIG_COST_MIN, 400);
+    assert.equal(RIG_COST_MAX, 35000);
+    assert.equal(CLOUD_RATE_MIN, 0.10);
+    assert.equal(CLOUD_RATE_MAX, 25.00);
+    assert.equal(SYSTEM_WATTS_MIN, 150);
+    assert.equal(SYSTEM_WATTS_MAX, 2000);
+    assert.equal(BREAK_EVEN_DEFAULTS.rigUpfrontCost, 2532);
+    assert.equal(BREAK_EVEN_DEFAULTS.hourlyCloudRate, 1.00);
+
+    const html = renderBreakEvenHtml();
+    assert.ok(html.includes('id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="35000" step="10" value="2532"'));
+    assert.ok(html.includes('id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="400" max="35000" step="1" value="2532"'));
+    assert.ok(html.includes('id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="25.00" value="1.00"'));
+    assert.ok(html.includes('id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="2000" step="25" value="820"'));
+  });
+
+  it('holds flagship build cost $22,299 and $21.33/hr cloud rate without clamping', () => {
+    assert.equal(clampRigCost(22299), 22299);
+    assert.equal(clampRigCost(100), 400);
+    assert.equal(clampRigCost(99999), 35000);
+
+    const html = renderBreakEvenHtml({ rigUpfrontCost: 22299, hourlyCloudRate: 21.33 });
+    assert.ok(html.includes('id="badge-rig-cost">$22,299</span>'));
+    assert.ok(html.includes('id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="35000" step="10" value="22299"'));
+    assert.ok(html.includes('id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="400" max="35000" step="1" value="22299"'));
+    assert.ok(html.includes('id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="25.00" value="21.33"'));
   });
 });

@@ -6,6 +6,21 @@ import { icon } from './icons.js';
 import { computeBreakEven, BASELINE_RIG } from '../utils/breakEven.js';
 import { loadChartJs } from '../utils/chartLoader.js';
 
+export const RIG_COST_MIN = 400;
+export const RIG_COST_MAX = 35000;
+export const CLOUD_RATE_MIN = 0.10;
+export const CLOUD_RATE_MAX = 25.00;
+export const SYSTEM_WATTS_MIN = 150;
+export const SYSTEM_WATTS_MAX = 2000;
+
+export function clampRigCost(value) {
+  return Math.min(RIG_COST_MAX, Math.max(RIG_COST_MIN, Math.round(value)));
+}
+
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 export const BREAK_EVEN_DEFAULTS = {
   rigUpfrontCost: BASELINE_RIG.cost, // $ (Dual used 3090 rig build sheet)
   dailyUsageHours: 4, // hrs/day
@@ -109,7 +124,8 @@ export function renderBreakEvenHtml(state = {}) {
             <span>Local AI Rig Total Build Cost</span>
             <span class="calc-badge-val" id="badge-rig-cost">$${rigUpfrontCost.toLocaleString()}</span>
           </div>
-          <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="4500" step="10" value="${rigUpfrontCost}">
+          <input type="range" id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="${RIG_COST_MIN}" max="${RIG_COST_MAX}" step="10" value="${rigUpfrontCost}">
+          <input type="number" class="calc-text-input calc-rig-cost-input" id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="${RIG_COST_MIN}" max="${RIG_COST_MAX}" step="1" value="${rigUpfrontCost}">
           <div class="sub-note">
             Includes used GPUs, motherboard, PSU, RAM, storage
           </div>
@@ -151,7 +167,7 @@ export function renderBreakEvenHtml(state = {}) {
             <div class="calc-input-label">
               <span>Cloud $/hr</span>
             </div>
-            <input type="number" class="calc-text-input" id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="10.00" value="${hourlyCloudRate.toFixed(2)}">
+            <input type="number" class="calc-text-input" id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="${CLOUD_RATE_MIN.toFixed(2)}" max="${CLOUD_RATE_MAX.toFixed(2)}" value="${hourlyCloudRate.toFixed(2)}">
           </div>
           <div>
             <div class="calc-input-label">
@@ -167,7 +183,7 @@ export function renderBreakEvenHtml(state = {}) {
             <span>Rig Load Power Draw</span>
             <span class="calc-badge-val" id="badge-watts">${systemWatts} Watts</span>
           </div>
-          <input type="range" id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="1400" step="25" value="${systemWatts}">
+          <input type="range" id="input-system-watts" aria-label="Rig load power draw (watts)" min="${SYSTEM_WATTS_MIN}" max="${SYSTEM_WATTS_MAX}" step="25" value="${systemWatts}">
         </div>
 
         <div class="calc-input-block">
@@ -235,8 +251,10 @@ export function renderBreakEvenHtml(state = {}) {
   `;
 }
 
-export function createBreakEvenCalc(container) {
-  let rigUpfrontCost = BREAK_EVEN_DEFAULTS.rigUpfrontCost;
+export function createBreakEvenCalc(container, initialState = {}) {
+  let rigUpfrontCost = Number.isFinite(initialState.rigUpfrontCost)
+    ? clampRigCost(initialState.rigUpfrontCost)
+    : BREAK_EVEN_DEFAULTS.rigUpfrontCost;
   let dailyUsageHours = BREAK_EVEN_DEFAULTS.dailyUsageHours;
   let selectedProviderId = BREAK_EVEN_DEFAULTS.selectedProviderId;
   let hourlyCloudRate = BREAK_EVEN_DEFAULTS.hourlyCloudRate;
@@ -419,11 +437,36 @@ export function createBreakEvenCalc(container) {
   }
 
   function attachEvents() {
-    // Sliders
+    // Sliders & numeric inputs
     const inputRigCost = container.querySelector('#input-rig-cost');
+    const inputRigCostNumber = container.querySelector('#input-rig-cost-number');
     if (inputRigCost) {
       inputRigCost.addEventListener('input', (e) => {
-        rigUpfrontCost = parseInt(e.target.value, 10);
+        const parsed = parseInt(e.target.value, 10);
+        if (!Number.isFinite(parsed)) return;
+        rigUpfrontCost = clampRigCost(parsed);
+        if (inputRigCostNumber) inputRigCostNumber.value = String(rigUpfrontCost);
+        update();
+      });
+    }
+    if (inputRigCostNumber) {
+      inputRigCostNumber.addEventListener('input', (e) => {
+        const raw = e.target.value.trim();
+        if (!raw) return;
+        const parsed = Number(raw);
+        if (!Number.isFinite(parsed) || parsed < RIG_COST_MIN || parsed > RIG_COST_MAX) return;
+        rigUpfrontCost = clampRigCost(parsed);
+        if (inputRigCost) inputRigCost.value = String(rigUpfrontCost);
+        update();
+      });
+      inputRigCostNumber.addEventListener('change', (e) => {
+        const raw = e.target.value.trim();
+        const parsed = raw ? Number(raw) : NaN;
+        rigUpfrontCost = Number.isFinite(parsed)
+          ? clampRigCost(parsed)
+          : BREAK_EVEN_DEFAULTS.rigUpfrontCost;
+        inputRigCostNumber.value = String(rigUpfrontCost);
+        if (inputRigCost) inputRigCost.value = String(rigUpfrontCost);
         update();
       });
     }
@@ -454,7 +497,11 @@ export function createBreakEvenCalc(container) {
     const inputHourly = container.querySelector('#input-hourly-rate');
     if (inputHourly) {
       inputHourly.addEventListener('change', (e) => {
-        hourlyCloudRate = parseFloat(e.target.value) || 0.88;
+        const parsed = parseFloat(e.target.value);
+        hourlyCloudRate = Number.isFinite(parsed)
+          ? Math.round(clampNumber(parsed, CLOUD_RATE_MIN, CLOUD_RATE_MAX) * 100) / 100
+          : BREAK_EVEN_DEFAULTS.hourlyCloudRate;
+        inputHourly.value = hourlyCloudRate.toFixed(2);
         selectedProviderId = 'custom';
         if (selectProvider) selectProvider.value = 'custom';
         update();
@@ -536,6 +583,21 @@ export function createBreakEvenCalc(container) {
     }, 3200);
   }
 
+  function applyPreload(params) {
+    if (typeof params.upfrontCost === 'number' && Number.isFinite(params.upfrontCost)) {
+      rigUpfrontCost = clampRigCost(params.upfrontCost);
+    }
+    if (typeof params.systemWatts === 'number' && Number.isFinite(params.systemWatts)) {
+      systemWatts = clampNumber(Math.round(params.systemWatts), SYSTEM_WATTS_MIN, SYSTEM_WATTS_MAX);
+    }
+    if (typeof params.dailyHours === 'number' && Number.isFinite(params.dailyHours)) {
+      dailyUsageHours = params.dailyHours;
+    }
+    if (typeof params.kwhRate === 'number' && Number.isFinite(params.kwhRate)) {
+      kwhRate = params.kwhRate;
+    }
+  }
+
   render();
 
   return {
@@ -545,10 +607,7 @@ export function createBreakEvenCalc(container) {
         if (pendingPreload) {
           const params = pendingPreload;
           pendingPreload = null;
-          if (params.upfrontCost) rigUpfrontCost = params.upfrontCost;
-          if (params.systemWatts) systemWatts = params.systemWatts;
-          if (params.dailyHours) dailyUsageHours = params.dailyHours;
-          if (params.kwhRate) kwhRate = params.kwhRate;
+          applyPreload(params);
           render();
         } else {
           renderChart(pendingStats || calculate());
@@ -560,10 +619,7 @@ export function createBreakEvenCalc(container) {
       if (!hasBeenShown) {
         pendingPreload = params;
       }
-      if (params.upfrontCost) rigUpfrontCost = params.upfrontCost;
-      if (params.systemWatts) systemWatts = params.systemWatts;
-      if (params.dailyHours) dailyUsageHours = params.dailyHours;
-      if (params.kwhRate) kwhRate = params.kwhRate;
+      applyPreload(params);
       render();
     }
   };
