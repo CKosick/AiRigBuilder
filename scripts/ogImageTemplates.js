@@ -31,6 +31,7 @@ export const COMPARE_CARD_INNER_WIDTH = 426; // 490 - 32*2
 export const COMPARE_SPEC_VALUE_WIDTH = 286; // 426 - 140
 export const BEST_GPU_PRIMARY_INNER_WIDTH = 464; // 520 - 28*2
 export const BEST_GPU_SECONDARY_INNER_WIDTH = 424; // 480 - 28*2
+export const BEST_GPU_FULL_INNER_WIDTH = 984; // 1040 - 28*2
 
 function escapeXml(str) {
   if (str === null || str === undefined) return '';
@@ -426,52 +427,82 @@ export function renderComparisonSvg(gpuA, gpuB) {
   });
 }
 
+function formatBestGpuSlot(pick, fallbackUnified, defaultPillLabel, maxWidth, { nameMaxSize = 30, nameMinSize = 16 } = {}) {
+  const chosen = pick || fallbackUnified;
+  const isUnifiedFallback = !pick && Boolean(fallbackUnified);
+  const pillLabel = isUnifiedFallback ? 'UNIFIED-MEMORY PICK' : defaultPillLabel;
+  const name = chosen ? chosen.name : 'None';
+  const priceStr = chosen ? `$${chosen.totalPrice.toLocaleString('en-US')}` : 'N/A';
+  const specs = chosen
+    ? isUnifiedFallback
+      ? `${chosen.memoryGb} GB Unified · ${chosen.fit?.quant ? `${chosen.fit.status === 'fits' ? 'Full Fit' : 'Reduced Fit'} (${chosen.fit.quant}) · ` : ''}${chosen.speedStr}`
+      : `${chosen.memoryGb} GB VRAM · ${chosen.speedStr}`
+    : '';
+  return {
+    chosen,
+    isUnifiedFallback,
+    pillLabel,
+    name,
+    priceStr,
+    specs,
+    nameFit: fitSingleLineText(name, maxWidth, nameMaxSize, nameMinSize),
+    priceFit: fitSingleLineText(priceStr, maxWidth, 48, 24),
+    specsFit: fitSingleLineText(specs, maxWidth, 18, 12)
+  };
+}
+
 /**
- * 4. Best GPU Rankings Card (8 models)
+ * 4. Best GPU Rankings Card (18 models)
  */
 export function renderBestGpuSvg(model, bestGpuPick) {
   const title = `Best GPU for ${model.name}`;
   const subtitle = `Ranked GPU hardware configurations for ${model.parameters} parameters`;
 
-  const cheapest = bestGpuPick?.cheapestThatRuns;
-  const bestValue = bestGpuPick?.bestValueFullFit;
+  const cheapest = bestGpuPick?.cheapestThatRuns || null;
+  const bestValue = bestGpuPick?.bestValueFullFit || null;
+  const unified = bestGpuPick?.unifiedPick || null;
 
-  const cheapConfigName = cheapest ? cheapest.name : 'None';
-  const cheapPriceStr = cheapest ? `$${cheapest.totalPrice.toLocaleString('en-US')}` : 'N/A';
-  const cheapSpecs = cheapest ? `${cheapest.memoryGb} GB VRAM · ${cheapest.speedStr}` : '';
-
-  const bestConfigName = bestValue ? bestValue.name : 'None';
-  const bestPriceStr = bestValue ? `$${bestValue.totalPrice.toLocaleString('en-US')}` : 'N/A';
-  const bestSpecs = bestValue ? `${bestValue.memoryGb} GB VRAM · ${bestValue.speedStr}` : '';
-
-  const cheapNameFit = fitSingleLineText(cheapConfigName, BEST_GPU_PRIMARY_INNER_WIDTH, 30, 16);
-  const cheapPriceFit = fitSingleLineText(cheapPriceStr, BEST_GPU_PRIMARY_INNER_WIDTH, 48, 24);
-  const cheapSpecsFit = fitSingleLineText(cheapSpecs, BEST_GPU_PRIMARY_INNER_WIDTH, 18, 12);
-
-  const bestNameFit = fitSingleLineText(bestConfigName, BEST_GPU_SECONDARY_INNER_WIDTH, 30, 16);
-  const bestPriceFit = fitSingleLineText(bestPriceStr, BEST_GPU_SECONDARY_INNER_WIDTH, 48, 24);
-  const bestSpecsFit = fitSingleLineText(bestSpecs, BEST_GPU_SECONDARY_INNER_WIDTH, 18, 12);
-
-  const content = `
+  let content;
+  if (!cheapest && !bestValue && unified) {
+    const fullSlot = formatBestGpuSlot(null, unified, 'UNIFIED-MEMORY PICK', BEST_GPU_FULL_INNER_WIDTH, {
+      nameMaxSize: 34,
+      nameMinSize: 18
+    });
+    content = `
+  <g transform="translate(80, 270)">
+    <!-- Single Full-Width Unified-Memory Pick (no discrete configuration runs this model) -->
+    <g transform="translate(0, 0)">
+      <rect width="1040" height="250" rx="20" fill="url(#cardGrad)" stroke="#10b981" stroke-width="2"/>
+      ${renderPill({ x: 28, y: 24, height: 28, label: fullSlot.pillLabel, maxWidth: BEST_GPU_FULL_INNER_WIDTH, fill: '#064e3b', stroke: null, textColor: '#34d399' })}
+      <text x="28" y="96" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${fullSlot.nameFit.fontSize}" font-weight="700">${escapeXml(fullSlot.name)}</text>
+      <text x="28" y="156" fill="#10b981" font-family="Inter, sans-serif" font-size="${fullSlot.priceFit.fontSize}" font-weight="700">${escapeXml(fullSlot.priceStr)}</text>
+      <text x="28" y="198" fill="#94a3b8" font-family="Inter, sans-serif" font-size="${fullSlot.specsFit.fontSize}" font-weight="500">${escapeXml(fullSlot.specs)}</text>
+    </g>
+  </g>`;
+  } else {
+    const cheapSlot = formatBestGpuSlot(cheapest, unified, 'CHEAPEST TO RUN IT', BEST_GPU_PRIMARY_INNER_WIDTH);
+    const bestSlot = formatBestGpuSlot(bestValue, unified, 'BEST VALUE FULL FIT', BEST_GPU_SECONDARY_INNER_WIDTH);
+    content = `
   <g transform="translate(80, 270)">
     <!-- Primary Pick: Cheapest That Runs It -->
     <g transform="translate(0, 0)">
       <rect width="520" height="250" rx="20" fill="url(#cardGrad)" stroke="#10b981" stroke-width="2"/>
-      ${renderPill({ x: 28, y: 24, height: 28, label: 'CHEAPEST TO RUN IT', maxWidth: BEST_GPU_PRIMARY_INNER_WIDTH, fill: '#064e3b', stroke: null, textColor: '#34d399' })}
-      <text x="28" y="90" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${cheapNameFit.fontSize}" font-weight="700">${escapeXml(cheapConfigName)}</text>
-      <text x="28" y="152" fill="#10b981" font-family="Inter, sans-serif" font-size="${cheapPriceFit.fontSize}" font-weight="700">${escapeXml(cheapPriceStr)}</text>
-      <text x="28" y="195" fill="#94a3b8" font-family="Inter, sans-serif" font-size="${cheapSpecsFit.fontSize}" font-weight="500">${escapeXml(cheapSpecs)}</text>
+      ${renderPill({ x: 28, y: 24, height: 28, label: cheapSlot.pillLabel, maxWidth: BEST_GPU_PRIMARY_INNER_WIDTH, fill: '#064e3b', stroke: null, textColor: '#34d399' })}
+      <text x="28" y="90" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${cheapSlot.nameFit.fontSize}" font-weight="700">${escapeXml(cheapSlot.name)}</text>
+      <text x="28" y="152" fill="#10b981" font-family="Inter, sans-serif" font-size="${cheapSlot.priceFit.fontSize}" font-weight="700">${escapeXml(cheapSlot.priceStr)}</text>
+      <text x="28" y="195" fill="#94a3b8" font-family="Inter, sans-serif" font-size="${cheapSlot.specsFit.fontSize}" font-weight="500">${escapeXml(cheapSlot.specs)}</text>
     </g>
 
-    <!-- Secondary Pick: Best Value Full Fit -->
+    <!-- Secondary Pick: Best Value Full Fit (or Unified-Memory Pick fallback) -->
     <g transform="translate(560, 0)">
       <rect width="480" height="250" rx="20" fill="url(#cardGrad)" stroke="#1e293b" stroke-width="1.5"/>
-      ${renderPill({ x: 28, y: 24, height: 28, label: 'BEST VALUE FULL FIT', maxWidth: BEST_GPU_SECONDARY_INNER_WIDTH })}
-      <text x="28" y="90" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${bestNameFit.fontSize}" font-weight="700">${escapeXml(bestConfigName)}</text>
-      <text x="28" y="152" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${bestPriceFit.fontSize}" font-weight="700">${escapeXml(bestPriceStr)}</text>
-      <text x="28" y="195" fill="#94a3b8" font-family="Inter, sans-serif" font-size="${bestSpecsFit.fontSize}" font-weight="500">${escapeXml(bestSpecs)}</text>
+      ${renderPill({ x: 28, y: 24, height: 28, label: bestSlot.pillLabel, maxWidth: BEST_GPU_SECONDARY_INNER_WIDTH })}
+      <text x="28" y="90" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${bestSlot.nameFit.fontSize}" font-weight="700">${escapeXml(bestSlot.name)}</text>
+      <text x="28" y="152" fill="#f8fafc" font-family="Inter, sans-serif" font-size="${bestSlot.priceFit.fontSize}" font-weight="700">${escapeXml(bestSlot.priceStr)}</text>
+      <text x="28" y="195" fill="#94a3b8" font-family="Inter, sans-serif" font-size="${bestSlot.specsFit.fontSize}" font-weight="500">${escapeXml(bestSlot.specs)}</text>
     </g>
   </g>`;
+  }
 
   return svgShell({
     badgeText: 'BEST GPU RANKINGS',

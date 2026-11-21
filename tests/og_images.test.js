@@ -25,7 +25,8 @@ import {
   COMPARE_CARD_INNER_WIDTH,
   COMPARE_SPEC_VALUE_WIDTH,
   BEST_GPU_PRIMARY_INNER_WIDTH,
-  BEST_GPU_SECONDARY_INNER_WIDTH
+  BEST_GPU_SECONDARY_INNER_WIDTH,
+  BEST_GPU_FULL_INNER_WIDTH
 } from '../scripts/ogImageTemplates.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
@@ -114,6 +115,44 @@ describe('Dynamic Open Graph Images', () => {
       assert.ok(svg.includes('vs'));
       assert.ok(svg.includes('$849'), 'Should include RTX 3090 price');
       assert.ok(svg.includes('$1,600'), 'Should include RTX 4090 price');
+    });
+
+    it('renders single full-width UNIFIED-MEMORY PICK card for unified-only flagships and preserves two-discrete cards', () => {
+      for (const modelId of ['glm-5.3', 'kimi-k2.7-code', 'mistral-large-4-1t-a52b']) {
+        const svg = generateOgSvg({ view: 'best-gpu', path: `/best-gpu/${modelId}`, modelId });
+        assert.ok(svg.includes('width="1040"'), `${modelId} renders single full-width card`);
+        assert.ok(svg.includes('UNIFIED-MEMORY PICK'), `${modelId} pill`);
+        assert.ok(svg.includes('Apple Mac Studio M5 Ultra (512GB Unified)'), `${modelId} system name`);
+        assert.ok(svg.includes('$22,299'), `${modelId} price`);
+        assert.ok(!svg.includes('>None<') && !svg.includes('>N/A<'), `${modelId} has no None/N/A placeholders`);
+        const png = renderSvgToPng(svg);
+        const dims = parsePngDimensions(png);
+        assert.deepEqual(dims, { width: 1200, height: 630 });
+        assert.ok(png.length < 200 * 1024);
+      }
+
+      // One-discrete + unified fallback: qwen-3-coder-480b-a35b
+      const coderSvg = generateOgSvg({ view: 'best-gpu', path: '/best-gpu/qwen-3-coder-480b-a35b', modelId: 'qwen-3-coder-480b-a35b' });
+      assert.ok(coderSvg.includes('CHEAPEST TO RUN IT'));
+      assert.ok(coderSvg.includes('2x RTX PRO 6000 Blackwell (96GB)'));
+      assert.ok(coderSvg.includes('$31,800'));
+      assert.ok(coderSvg.includes('UNIFIED-MEMORY PICK'));
+      assert.ok(coderSvg.includes('Apple Mac Studio M5 Ultra (256GB Unified)'));
+      assert.ok(coderSvg.includes('$9,499'));
+      assert.ok(!coderSvg.includes('>None<') && !coderSvg.includes('>N/A<'));
+
+      // Discrete two-pick cards remain unchanged (no UNIFIED-MEMORY PICK)
+      const gpt120Svg = generateOgSvg({ view: 'best-gpu', path: '/best-gpu/gpt-oss-120b', modelId: 'gpt-oss-120b' });
+      assert.ok(gpt120Svg.includes('CHEAPEST TO RUN IT'));
+      assert.ok(gpt120Svg.includes('BEST VALUE FULL FIT'));
+      assert.ok(gpt120Svg.includes('1x RTX PRO 6000 Blackwell (96GB)'));
+      assert.ok(gpt120Svg.includes('$15,900'));
+      assert.ok(!gpt120Svg.includes('UNIFIED-MEMORY PICK'));
+
+      const llama70Svg = generateOgSvg({ view: 'best-gpu', path: '/best-gpu/llama-3.3-70b', modelId: 'llama-3.3-70b' });
+      assert.ok(llama70Svg.includes('CHEAPEST TO RUN IT'));
+      assert.ok(llama70Svg.includes('BEST VALUE FULL FIT'));
+      assert.ok(!llama70Svg.includes('UNIFIED-MEMORY PICK'));
     });
   });
 
@@ -238,7 +277,9 @@ describe('Dynamic Open Graph Images', () => {
         { label: 'EFFICIENCY', maxWidth: GPU_EFFICIENCY_CARD_INNER_WIDTH },
         { label: 'VERDICT', maxWidth: GPU_VERDICT_CARD_INNER_WIDTH },
         { label: 'CHEAPEST TO RUN IT', maxWidth: BEST_GPU_PRIMARY_INNER_WIDTH },
-        { label: 'BEST VALUE FULL FIT', maxWidth: BEST_GPU_SECONDARY_INNER_WIDTH }
+        { label: 'BEST VALUE FULL FIT', maxWidth: BEST_GPU_SECONDARY_INNER_WIDTH },
+        { label: 'UNIFIED-MEMORY PICK', maxWidth: BEST_GPU_SECONDARY_INNER_WIDTH },
+        { label: 'UNIFIED-MEMORY PICK', maxWidth: BEST_GPU_FULL_INNER_WIDTH }
       ];
       for (const { label, maxWidth } of pills) {
         const pill = fitPillLabel(label, { maxWidth });
@@ -284,11 +325,21 @@ describe('Dynamic Open Graph Images', () => {
         }
       }
 
-      // Best-GPU pages (8 models)
+      // Best-GPU pages (18 models)
       for (const modelId of BEST_GPU_MODELS) {
         const pick = evaluateBestGpu(modelId);
-        const cheapName = pick?.cheapestThatRuns?.name || 'None';
-        const bestName = pick?.bestValueFullFit?.name || 'None';
+        if (!pick?.cheapestThatRuns && !pick?.bestValueFullFit && pick?.unifiedPick) {
+          const fullName = pick.unifiedPick.name;
+          const fullFit = fitSingleLineText(fullName, BEST_GPU_FULL_INNER_WIDTH, 34, 18);
+          assert.ok(
+            fullFit.width <= BEST_GPU_FULL_INNER_WIDTH,
+            `${modelId} unified full pick "${fullName}" (${fullFit.width.toFixed(1)}px) fits full-width box (${BEST_GPU_FULL_INNER_WIDTH}px)`
+          );
+          continue;
+        }
+
+        const cheapName = (pick?.cheapestThatRuns || pick?.unifiedPick)?.name || 'None';
+        const bestName = (pick?.bestValueFullFit || pick?.unifiedPick)?.name || 'None';
 
         const cheapFit = fitSingleLineText(cheapName, BEST_GPU_PRIMARY_INNER_WIDTH, 30, 16);
         assert.ok(
