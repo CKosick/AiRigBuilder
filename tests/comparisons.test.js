@@ -295,4 +295,30 @@ describe('Internal Links', () => {
       }
     }
   });
+
+  it('supports 1x/2x toggle and Differences only filter composing cleanly on per-model comparison table', () => {
+    const defaultHtml = renderGpuComparisonHtml('rtx-3090', 'rtx-5090');
+    assert.ok(defaultHtml.includes('data-compare-count="1" aria-pressed="true"'));
+    assert.ok(defaultHtml.includes('data-compare-count="2" aria-pressed="false"'));
+    assert.ok(defaultHtml.includes('id="btn-compare-diff-only" aria-pressed="false"'));
+    const defaultRows = [...defaultHtml.matchAll(/<tr data-model-id="([^"]+)"/g)].map(m => m[1]);
+    assert.equal(defaultRows.length, 70);
+
+    // 2x mode switches columns and updates per-model fit evaluations
+    const dualHtml = renderGpuComparisonHtml('rtx-3090', 'rtx-5090', { cardCount: 2 });
+    assert.ok(dualHtml.includes('2x RTX 3090 Fit') && dualHtml.includes('2x RTX 5090 Fit'));
+    assert.ok(dualHtml.includes('data-compare-count="2" aria-pressed="true"'));
+    const dualScoutRow = dualHtml.match(/<tr data-model-id="llama-4-scout"[\s\S]*?<\/tr>/)[0];
+    assert.ok(dualScoutRow.includes("Won't fit"));
+    assert.ok(dualScoutRow.includes('Reduced (Q3_K_M)'));
+
+    // 2x + Differences only keeps differing models (48) and hides identical rows (e.g. glm-5.3)
+    const dualDiffHtml = renderGpuComparisonHtml('rtx-3090', 'rtx-5090', { cardCount: 2, differencesOnly: true });
+    assert.ok(dualDiffHtml.includes('id="btn-compare-diff-only" aria-pressed="true"'));
+    const diffRows = [...dualDiffHtml.matchAll(/<tr data-model-id="([^"]+)"/g)].map(m => m[1]);
+    assert.equal(diffRows.length, 48);
+    assert.ok(diffRows.includes('llama-4-scout'), 'llama-4-scout differs in 2x mode and stays visible');
+    assert.ok(diffRows.includes('command-r-plus'), 'command-r-plus differs in 2x mode and stays visible');
+    assert.ok(!diffRows.includes('glm-5.3'), 'glm-5.3 is identical non-fit on both 2x cards and is hidden');
+  });
 });

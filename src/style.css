@@ -3285,6 +3285,15 @@ input[type="range"]::-moz-range-thumb {
   font-size: 0.84rem;
 }
 
+.compare-table-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .row-different {
   background: rgba(16, 185, 129, 0.05);
 }

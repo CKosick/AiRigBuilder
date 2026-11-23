@@ -5,6 +5,7 @@ import { MODELS_DATA } from '../data/models.js';
 import { tierFit } from '../utils/tierFit.js';
 import { estimateSpeedToks } from '../utils/speedEstimate.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
+import { preserveFocus } from '../utils/focus.js';
 import { gpuPath, buildPath, shortGpuName } from '../routes.js';
 import { icon } from './icons.js';
 
@@ -42,13 +43,16 @@ function statusBadge(fit) {
 }
 
 /** Pure HTML for one GPU vs GPU comparison page. */
-export function renderGpuComparisonHtml(gpuIdA, gpuIdB) {
+export function renderGpuComparisonHtml(gpuIdA, gpuIdB, { cardCount = 1, differencesOnly = false } = {}) {
   const gpuA = GPUS_DATA.find(g => g.id === gpuIdA);
   const gpuB = GPUS_DATA.find(g => g.id === gpuIdB);
   if (!gpuA || !gpuB) return '';
 
+  const activeCount = cardCount === 2 ? 2 : 1;
   const nameA = shortGpuName(gpuA);
   const nameB = shortGpuName(gpuB);
+  const colA = activeCount === 2 ? `2x ${nameA}` : nameA;
+  const colB = activeCount === 2 ? `2x ${nameB}` : nameB;
 
   // Compute model support metrics
   let singleA = 0;
@@ -69,22 +73,28 @@ export function renderGpuComparisonHtml(gpuIdA, gpuIdB) {
     if (runsB) singleB++;
     if (fitDualA.status !== 'none') dualA++;
     if (fitDualB.status !== 'none') dualB++;
-
-    const isDifferent = (runsA !== runsB) || (fitA.status !== fitB.status) || (fitA.quant !== fitB.quant);
     if (runsA !== runsB) onlyOneRuns++;
 
-    const speedA = formatToksSpeed(model, fitA.quant, gpuA.bandwidth);
-    const speedB = formatToksSpeed(model, fitB.quant, gpuB.bandwidth);
+    const activeFitA = activeCount === 2 ? fitDualA : fitA;
+    const activeFitB = activeCount === 2 ? fitDualB : fitB;
+    const isDifferent = (activeFitA.status !== activeFitB.status) || (activeFitA.quant !== activeFitB.quant);
+
+    const speedA = formatToksSpeed(model, activeFitA.quant, gpuA.bandwidth);
+    const speedB = formatToksSpeed(model, activeFitB.quant, gpuB.bandwidth);
+    const hasAnyDiff = isDifferent || (speedA !== speedB);
 
     return {
       model,
-      fitA,
-      fitB,
+      fitA: activeFitA,
+      fitB: activeFitB,
       speedA,
       speedB,
-      isDifferent
+      isDifferent,
+      hasAnyDiff
     };
   });
+
+  const visibleRows = differencesOnly ? modelRows.filter(r => r.hasAnyDiff) : modelRows;
 
   return `
     <article class="compare-detail" aria-labelledby="compare-detail-title">
@@ -203,25 +213,37 @@ export function renderGpuComparisonHtml(gpuIdA, gpuIdB) {
       <section class="compare-card" aria-labelledby="compare-models-title">
         <h2 id="compare-models-title" class="section-title">Per-Model Fit &amp; Speed Comparison</h2>
         <p class="section-desc">Evaluated at default 8K context and FP16 KV cache precision. Highlighted rows indicate models where the two cards produce different fit statuses or quantization tiers.</p>
+        <div class="compare-table-controls" role="group" aria-label="Comparison table filters">
+          <div class="count-filter compare-mode-toggle" role="group" aria-label="GPU configuration count">
+            <span class="model-filter-label">Cards</span>
+            <button type="button" class="filter-btn compare-count-btn ${activeCount === 1 ? 'active' : ''}" data-compare-count="1" aria-pressed="${activeCount === 1}">1x Single-GPU</button>
+            <button type="button" class="filter-btn compare-count-btn ${activeCount === 2 ? 'active' : ''}" data-compare-count="2" aria-pressed="${activeCount === 2}">2x Dual-GPU</button>
+          </div>
+          <div class="count-filter compare-diff-wrap">
+            <button type="button" class="filter-btn compare-diff-toggle ${differencesOnly ? 'active' : ''}" id="btn-compare-diff-only" aria-pressed="${differencesOnly}">Differences only</button>
+          </div>
+        </div>
         <div class="parts-table-wrap">
           <table class="parts-table stack-table">
             <thead>
               <tr>
                 <th scope="col" class="col-model">Model</th>
-                <th scope="col" class="col-fit">${nameA} Fit</th>
-                <th scope="col" class="col-speed">${nameA} Speed</th>
-                <th scope="col" class="col-fit">${nameB} Fit</th>
-                <th scope="col" class="col-speed">${nameB} Speed</th>
+                <th scope="col" class="col-fit">${colA} Fit</th>
+                <th scope="col" class="col-speed">${colA} Speed</th>
+                <th scope="col" class="col-fit">${colB} Fit</th>
+                <th scope="col" class="col-speed">${colB} Speed</th>
               </tr>
             </thead>
             <tbody>
-              ${modelRows.map(row => `
-                <tr class="${row.isDifferent ? 'row-different' : ''}">
+              ${visibleRows.length === 0 ? `
+                <tr><td colspan="5" class="text-dim">All ${MODELS_DATA.length} models have identical fit status and speed in ${activeCount}x mode.</td></tr>
+              ` : visibleRows.map(row => `
+                <tr data-model-id="${row.model.id}" class="${row.isDifferent ? 'row-different' : ''}">
                   <td class="stack-head"><a href="${buildPath(row.model.id)}">${row.model.name}</a></td>
-                  <td data-label="${nameA} Fit">${statusBadge(row.fitA)}</td>
-                  <td class="part-price-cell" data-label="${nameA} Speed">${row.speedA}</td>
-                  <td data-label="${nameB} Fit">${statusBadge(row.fitB)}</td>
-                  <td class="part-price-cell" data-label="${nameB} Speed">${row.speedB}</td>
+                  <td data-label="${colA} Fit">${statusBadge(row.fitA)}</td>
+                  <td class="part-price-cell" data-label="${colA} Speed">${row.speedA}</td>
+                  <td data-label="${colB} Fit">${statusBadge(row.fitB)}</td>
+                  <td class="part-price-cell" data-label="${colB} Speed">${row.speedB}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -234,12 +256,49 @@ export function renderGpuComparisonHtml(gpuIdA, gpuIdB) {
 
 export function createGpuComparison(container) {
   let shownSlug = null;
+  let activeGpuIdA = null;
+  let activeGpuIdB = null;
+  let cardCount = 1;
+  let differencesOnly = false;
+
+  function render() {
+    if (!activeGpuIdA || !activeGpuIdB) return;
+    const restoreFocus = preserveFocus(container);
+    container.innerHTML = renderGpuComparisonHtml(activeGpuIdA, activeGpuIdB, { cardCount, differencesOnly });
+    attachEvents();
+    restoreFocus();
+  }
+
+  function attachEvents() {
+    container.querySelectorAll('.compare-count-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nextCount = Number(btn.getAttribute('data-compare-count')) === 2 ? 2 : 1;
+        if (nextCount !== cardCount) {
+          cardCount = nextCount;
+          render();
+        }
+      });
+    });
+
+    const diffBtn = container.querySelector('#btn-compare-diff-only');
+    if (diffBtn) {
+      diffBtn.addEventListener('click', () => {
+        differencesOnly = !differencesOnly;
+        render();
+      });
+    }
+  }
+
   return {
     show(gpuIdA, gpuIdB) {
       const slug = `${gpuIdA}-vs-${gpuIdB}`;
       if (shownSlug !== slug) {
-        container.innerHTML = renderGpuComparisonHtml(gpuIdA, gpuIdB);
         shownSlug = slug;
+        activeGpuIdA = gpuIdA;
+        activeGpuIdB = gpuIdB;
+        cardCount = 1;
+        differencesOnly = false;
+        render();
       }
     }
   };
