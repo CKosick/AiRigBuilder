@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
+import { TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512 } from '../src/data/builds.js';
 import { OWNED_GPUS_SUPPLEMENT } from '../src/data/ownedGpus.js';
 import {
   ALL_PLAYGROUND_GPUS,
@@ -10,6 +11,7 @@ import {
   CUSTOM_BANDWIDTH_PRESETS,
   VISIBLE_PLAYGROUND_MODELS,
   clampCustomUnifiedConfig,
+  getUnifiedTierPresets,
   isIntegratedSystem,
   gpuVendor,
   evaluatePlaygroundModels,
@@ -506,9 +508,45 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
     assert.deepEqual(ownedValues, OWNED_GPUS_SUPPLEMENT.map(g => g.id));
     assert.deepEqual(
       integratedValues,
-      [...GPUS_DATA.filter(g => isIntegratedSystem(g.id)).map(g => g.id), CUSTOM_UNIFIED_ID]
+      [
+        ...GPUS_DATA.filter(g => isIntegratedSystem(g.id)).map(g => g.id),
+        TIER_MAC_M5_ULTRA_256.id,
+        TIER_MAC_M5_ULTRA_512.id,
+        CUSTOM_UNIFIED_ID
+      ]
     );
     assert.equal(integratedValues.at(-1), CUSTOM_UNIFIED_ID, 'Custom unified memory is last in final group');
+  });
+
+  it('adds Mac Studio M5 Ultra 256GB and 512GB presets derived from builds.js tiers without adding them to GPUS_DATA', () => {
+    const presets = getUnifiedTierPresets();
+    assert.deepEqual(presets.map(p => p.id), [TIER_MAC_M5_ULTRA_256.id, TIER_MAC_M5_ULTRA_512.id]);
+    assert.equal(presets[0].name, 'Mac Studio M5 Ultra (256GB Unified)');
+    assert.equal(presets[0].vram, TIER_MAC_M5_ULTRA_256.memoryGb);
+    assert.equal(presets[0].bandwidth, TIER_MAC_M5_ULTRA_256.bandwidthGbs);
+    assert.equal(presets[1].name, 'Mac Studio M5 Ultra (512GB Unified)');
+    assert.equal(presets[1].vram, TIER_MAC_M5_ULTRA_512.memoryGb);
+    assert.equal(presets[1].bandwidth, TIER_MAC_M5_ULTRA_512.bandwidthGbs);
+
+    for (const p of presets) {
+      assert.ok(!GPUS_DATA.some(g => g.id === p.id), `${p.id} must not be added to GPUS_DATA`);
+      assert.equal(isIntegratedSystem(p.id), true);
+    }
+
+    const html256 = renderRigPlaygroundHtml({ gpuId: TIER_MAC_M5_ULTRA_256.id });
+    assert.ok(html256.includes('192 GB'));
+    assert.ok(html256.includes('1200 GB/s'));
+    assert.ok(html256.includes(`>67 / ${MODELS_DATA.length}</strong>`));
+    assert.ok(html256.includes('1 (Locked Integrated System)'));
+    assert.ok(!html256.includes('Upgrade Engine: Best Single-Card Additions'));
+
+    const html512 = renderRigPlaygroundHtml({ gpuId: TIER_MAC_M5_ULTRA_512.id });
+    assert.ok(html512.includes('384 GB'));
+    assert.ok(html512.includes('1200 GB/s'));
+    assert.ok(html512.includes(`>${MODELS_DATA.length} / ${MODELS_DATA.length}</strong>`));
+    assert.ok(html512.includes(`All ${MODELS_DATA.length} models fit in this configuration!`));
+    assert.ok(html512.includes('1 (Locked Integrated System)'));
+    assert.ok(!html512.includes('Upgrade Engine: Best Single-Card Additions'));
   });
 
   it('uses live MODELS_DATA.length in intro, Catalog Fit fraction, and empty no-fit message (no stale 56)', () => {

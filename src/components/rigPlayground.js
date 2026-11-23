@@ -2,6 +2,7 @@
 import { GPUS_DATA } from '../data/gpus.js';
 import { OWNED_GPUS_SUPPLEMENT } from '../data/ownedGpus.js';
 import { MODELS_DATA } from '../data/models.js';
+import { TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512 } from '../data/builds.js';
 import { tierFit } from '../utils/tierFit.js';
 import { estimateSpeedToks } from '../utils/speedEstimate.js';
 import { buildPath } from '../routes.js';
@@ -50,8 +51,23 @@ export function clampCustomUnifiedConfig(rawMemory, rawBandwidth) {
   };
 }
 
+const UNIFIED_BUILD_TEMPLATES = [TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512];
+
+export function getUnifiedTierPresets() {
+  return UNIFIED_BUILD_TEMPLATES.map(tier => ({
+    id: tier.id,
+    name: tier.name.replace(/^Apple /, ''),
+    vram: tier.memoryGb,
+    bandwidth: tier.bandwidthGbs,
+    tdp: tier.estimatedTdpWatts,
+    isUnifiedPreset: true
+  }));
+}
+
 export const isIntegratedSystem = (gpuId) =>
-  INTEGRATED_SYSTEM_IDS.includes(gpuId) || gpuId === CUSTOM_UNIFIED_ID;
+  INTEGRATED_SYSTEM_IDS.includes(gpuId) ||
+  UNIFIED_BUILD_TEMPLATES.some(t => t.id === gpuId) ||
+  gpuId === CUSTOM_UNIFIED_ID;
 
 /**
  * Derives a GPU's vendor ('NVIDIA' | 'AMD' | 'Intel' | null) from its name prefix,
@@ -68,7 +84,12 @@ export function gpuVendor(gpu) {
 }
 
 export function findPlaygroundGpu(id) {
-  return PLAYGROUND_GPUS.find(g => g.id === id) || GPUS_DATA.find(g => g.id === 'rtx-3080-10gb') || GPUS_DATA[0];
+  return (
+    PLAYGROUND_GPUS.find(g => g.id === id) ||
+    getUnifiedTierPresets().find(g => g.id === id) ||
+    GPUS_DATA.find(g => g.id === 'rtx-3080-10gb') ||
+    GPUS_DATA[0]
+  );
 }
 
 export const VISIBLE_PLAYGROUND_MODELS = 8;
@@ -303,6 +324,7 @@ export function renderRigPlaygroundHtml(state = {}) {
   const shownNoFit = showAllNoFit ? doesNotFit : doesNotFit.slice(0, VISIBLE_PLAYGROUND_MODELS);
   const trackedDiscreteGpus = GPUS_DATA.filter(g => !isIntegratedSystem(g.id));
   const integratedGpus = GPUS_DATA.filter(g => isIntegratedSystem(g.id));
+  const unifiedTierPresets = getUnifiedTierPresets();
   const stickyGpuName = isCustomUnified
     ? `Custom unified memory (${clampedCustom.memoryGb} GB)`
     : (actualCount > 1 ? `${actualCount}x ${gpu.name}` : gpu.name);
@@ -340,6 +362,7 @@ export function renderRigPlaygroundHtml(state = {}) {
               </optgroup>
               <optgroup label="Integrated and unified memory">
                 ${integratedGpus.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB, ${g.bandwidth} GB/s)</option>`).join('')}
+                ${unifiedTierPresets.map(g => `<option value="${g.id}" ${!isCustomUnified && g.id === gpu.id ? 'selected' : ''}>${g.name} (${g.vram} GB usable, ${g.bandwidth.toLocaleString('en-US')} GB/s)</option>`).join('')}
                 <option value="${CUSTOM_UNIFIED_ID}"${isCustomUnified ? ' selected' : ''}>Custom unified memory (enter your own)</option>
               </optgroup>
             </select>
