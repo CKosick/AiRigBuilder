@@ -136,12 +136,12 @@ describe('Computed Spot Check 2: Best GPU for Llama 3.3 70B', () => {
     // Best Value Full Fit: 2x Tesla P40 ($598)
     assert.ok(html.includes('Best Value Full Fit'));
 
-    // Fastest: 2x RTX 5090 ($12,000)
+    // Fastest: 2x RTX 5090 ($12,140)
     assert.ok(html.includes('Fastest Discrete Rig'));
     assert.ok(html.includes('2x NVIDIA GeForce RTX 5090'));
-    assert.ok(html.includes('$12,000'));
+    assert.ok(html.includes('$12,140'));
 
-    // Integrated systems note (aside-only case: discrete $598 < unified $3,100)
+    // Integrated systems note (aside-only case: discrete $598 < unified $3,149)
     assert.ok(!html.includes('Unified-Memory Pick'));
     assert.ok(html.includes('Integrated Unified-Memory Systems'));
     assert.ok(html.includes('Apple Mac Studio M2 Ultra'));
@@ -190,7 +190,7 @@ describe('Best-GPU Unified-Memory Pick & Amazon Action', () => {
       assert.ok(html.includes('Unified-Memory Pick'));
       assert.ok(html.includes(TIER_MAC_M5_ULTRA_256.name));
       assert.ok(html.includes('$9,499'));
-      assert.ok(html.includes('$31,800'));
+      assert.ok(html.includes('$31,600'));
       assert.ok(!html.includes('class="integrated-system-note"'));
     }
 
@@ -204,22 +204,22 @@ describe('Best-GPU Unified-Memory Pick & Amazon Action', () => {
 
   it('renders unified card when unified pick undercuts cheapest discrete pick and drops aside (gpt-oss-120b)', () => {
     const ev = evaluateBestGpu('gpt-oss-120b');
-    assert.equal(ev.cheapestThatRuns.totalPrice, 15900);
+    assert.equal(ev.cheapestThatRuns.totalPrice, 15800);
     assert.equal(ev.unifiedPick.id, 'strix-halo-128gb');
-    assert.equal(ev.unifiedPick.totalPrice, 3100);
+    assert.equal(ev.unifiedPick.totalPrice, 3200);
     assert.equal(ev.showUnifiedPick, true);
 
     const html = renderBestGpuHtml('gpt-oss-120b');
     assert.ok(html.includes('Unified-Memory Pick'));
-    assert.ok(html.includes('$3,100'));
-    assert.ok(html.includes('$15,900'));
+    assert.ok(html.includes('$3,200'));
+    assert.ok(html.includes('$15,800'));
     assert.ok(!html.includes('class="integrated-system-note"'));
   });
 
   it('keeps aside and omits unified card when discrete picks are full and cheaper (llama-3.3-70b)', () => {
     const ev = evaluateBestGpu('llama-3.3-70b');
     assert.equal(ev.cheapestThatRuns.totalPrice, 598);
-    assert.equal(ev.unifiedPick.totalPrice, 3100);
+    assert.equal(ev.unifiedPick.totalPrice, 3149);
     assert.equal(ev.showUnifiedPick, false);
 
     const html = renderBestGpuHtml('llama-3.3-70b');

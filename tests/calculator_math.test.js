@@ -103,12 +103,12 @@ describe('Break-Even Calculator UI Ceilings & Paired Numeric Cost Input', () => 
     assert.equal(CLOUD_RATE_MAX, 25.00);
     assert.equal(SYSTEM_WATTS_MIN, 150);
     assert.equal(SYSTEM_WATTS_MAX, 2000);
-    assert.equal(BREAK_EVEN_DEFAULTS.rigUpfrontCost, 2532);
+    assert.equal(BREAK_EVEN_DEFAULTS.rigUpfrontCost, 2654);
     assert.equal(BREAK_EVEN_DEFAULTS.hourlyCloudRate, 1.00);
 
     const html = renderBreakEvenHtml();
-    assert.ok(html.includes('id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="35000" step="10" value="2532"'));
-    assert.ok(html.includes('id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="400" max="35000" step="1" value="2532"'));
+    assert.ok(html.includes('id="input-rig-cost" aria-label="Local AI rig total build cost (dollars)" min="400" max="35000" step="10" value="2654"'));
+    assert.ok(html.includes('id="input-rig-cost-number" aria-label="Local AI rig total build cost (exact dollars)" min="400" max="35000" step="1" value="2654"'));
     assert.ok(html.includes('id="input-hourly-rate" aria-label="Cloud price (dollars per hour)" step="0.05" min="0.10" max="25.00" value="1.00"'));
     assert.ok(html.includes('id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="2000" step="25" value="820"'));
   });
@@ -140,6 +140,6 @@ describe('Break-Even Calculator UI Ceilings & Paired Numeric Cost Input', () => 
     assert.match(glmHtml, /<a href="\/calculator\?cost=22299" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
 
     const llamaHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
-    assert.match(llamaHtml, /<a href="\/calculator\?cost=2532" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
+    assert.match(llamaHtml, /<a href="\/calculator\?cost=2654" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
   });
 });

@@ -84,14 +84,14 @@ describe('Cloud rental callout on tier cards', () => {
   });
 
   it('formats rental-fees equivalence across <12m (1 decimal), 12-60m (whole months), and >60m (more than 5 years)', () => {
-    // Golden Llama 3.3 70B budget dual-3090 tier ($2,532 at $0.42/hr)
+    // Golden Llama 3.3 70B budget dual-3090 tier ($2,654 at $0.42/hr)
     const llamaBudget = BUILDS_DATA['llama-3.3-70b'].tiers.find(t => t.id === 'tier-budget-used');
     const llamaCallout = getTierCloudCallout(llamaBudget);
-    assert.equal(llamaCallout.tierTotal, 2532);
-    assert.equal(Math.round(llamaCallout.rawMonths), 50);
+    assert.equal(llamaCallout.tierTotal, 2654);
+    assert.equal(Math.round(llamaCallout.rawMonths), 52);
     assert.equal(
       llamaCallout.line,
-      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 50 months of rental fees."
+      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 52 months of rental fees."
     );
     assert.equal(llamaCallout.subLine, `Cloud rates checked ${CLOUD_RATES_AS_OF}`);
 
@@ -115,7 +115,7 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(llamaDefaultHtml.includes('class="tier-cloud-callout"'));
     assert.ok(
       llamaDefaultHtml.includes(
-        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 50 months of rental fees."
+        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 52 months of rental fees."
       )
     );
     assert.ok(llamaDefaultHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`));
@@ -160,7 +160,7 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(!llamaMacTierSection.includes('Rent on Vast.ai'));
     assert.ok(llamaMacHtml.includes(`<a href="${RUNPOD_REFERRAL_URL}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary btn-text-sm" data-click-merchant="RunPod" data-click-id="runpod-dual-3090">Rent on RunPod</a>`));
 
-    // Switching to matched balanced dual-3090 tier ($3,373 -> more than 5 years)
+    // Switching to matched balanced dual-3090 tier ($3,473 -> more than 5 years)
     const llamaBalancedHtml = renderModelPickerHtml({
       activeModelId: 'llama-3.3-70b',
       activeTierId: 'tier-balanced-mix'

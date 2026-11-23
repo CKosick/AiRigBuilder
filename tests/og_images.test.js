@@ -83,20 +83,20 @@ describe('Dynamic Open Graph Images', () => {
   });
 
   describe('Pre-raster SVG figure assertions across page families', () => {
-    it('RTX 3090 GPU card carries $849 and range $555 - $910', () => {
+    it('RTX 3090 GPU card carries $910 and range $700 - $1,000', () => {
       const route = { view: 'gpu', path: '/gpu/rtx-3090', gpuId: 'rtx-3090' };
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('GeForce RTX 3090'));
-      assert.ok(svg.includes('$849'), 'Should contain tracked used price $849');
-      assert.ok(svg.includes('$555') && svg.includes('$910'), 'Should contain low and high price range');
+      assert.ok(svg.includes('$910'), 'Should contain tracked used price $910');
+      assert.ok(svg.includes('$700') && svg.includes('$1,000'), 'Should contain low and high price range');
       assert.ok(svg.includes('24 GB') && svg.includes('936 GB/s'), 'Should contain specs');
     });
 
-    it('Llama 3.3 70B build card carries cheapest tier total $2,532 and min VRAM', () => {
+    it('Llama 3.3 70B build card carries cheapest tier total $2,654 and min VRAM', () => {
       const route = { view: 'builds', path: '/builds/llama-3.3-70b', modelId: 'llama-3.3-70b' };
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('Llama 3.3 70B'));
-      assert.ok(svg.includes('$2,532'), 'Should display cheapest fitting build total $2,532');
+      assert.ok(svg.includes('$2,654'), 'Should display cheapest fitting build total $2,654');
       assert.ok(svg.includes('40 GB'), 'Should display minimum required VRAM (40 GB)');
     });
 
@@ -113,8 +113,8 @@ describe('Dynamic Open Graph Images', () => {
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('RTX 3090') && svg.includes('RTX 4090'));
       assert.ok(svg.includes('vs'));
-      assert.ok(svg.includes('$849'), 'Should include RTX 3090 price');
-      assert.ok(svg.includes('$1,600'), 'Should include RTX 4090 price');
+      assert.ok(svg.includes('$910'), 'Should include RTX 3090 price');
+      assert.ok(svg.includes('$1,750'), 'Should include RTX 4090 price');
     });
 
     it('renders single full-width UNIFIED-MEMORY PICK card for unified-only flagships and preserves two-discrete cards', () => {
@@ -135,7 +135,7 @@ describe('Dynamic Open Graph Images', () => {
       const coderSvg = generateOgSvg({ view: 'best-gpu', path: '/best-gpu/qwen-3-coder-480b-a35b', modelId: 'qwen-3-coder-480b-a35b' });
       assert.ok(coderSvg.includes('CHEAPEST TO RUN IT'));
       assert.ok(coderSvg.includes('2x RTX PRO 6000 Blackwell (96GB)'));
-      assert.ok(coderSvg.includes('$31,800'));
+      assert.ok(coderSvg.includes('$31,600'));
       assert.ok(coderSvg.includes('UNIFIED-MEMORY PICK'));
       assert.ok(coderSvg.includes('Apple Mac Studio M5 Ultra (256GB Unified)'));
       assert.ok(coderSvg.includes('$9,499'));
@@ -146,7 +146,7 @@ describe('Dynamic Open Graph Images', () => {
       assert.ok(gpt120Svg.includes('CHEAPEST TO RUN IT'));
       assert.ok(gpt120Svg.includes('BEST VALUE FULL FIT'));
       assert.ok(gpt120Svg.includes('1x RTX PRO 6000 Blackwell (96GB)'));
-      assert.ok(gpt120Svg.includes('$15,900'));
+      assert.ok(gpt120Svg.includes('$15,800'));
       assert.ok(!gpt120Svg.includes('UNIFIED-MEMORY PICK'));
 
       const llama70Svg = generateOgSvg({ view: 'best-gpu', path: '/best-gpu/llama-3.3-70b', modelId: 'llama-3.3-70b' });

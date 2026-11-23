@@ -360,7 +360,7 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.equal(picks.sameCard, false);
     assert.equal(picks.mostUnlocked.candidate.id, 'rtx-pro-6000-blackwell');
     assert.equal(picks.mostUnlocked.unlocked, 49);
-    assert.equal(picks.mostUnlocked.cost, 15900);
+    assert.equal(picks.mostUnlocked.cost, 15800);
 
     assert.equal(picks.bestValue.candidate.id, 'tesla-p40');
     assert.equal(picks.bestValue.unlocked, 28);
@@ -380,7 +380,7 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     ]);
     assert.match(upgradeSection, /Most models unlocked/);
     assert.match(upgradeSection, /Best value/);
-    assert.match(upgradeSection, /\$15,900/);
+    assert.match(upgradeSection, /\$15,800/);
     assert.match(upgradeSection, /\$299/);
     assert.match(upgradeSection, /93\.65 models unlocked \/ \$1,000/);
     assert.doesNotMatch(upgradeSection, /Radeon|Arc Pro/i);
@@ -390,7 +390,7 @@ describe('Rig Playground: Same-Vendor Filtering & Value Headline Picks', () => {
     assert.deepEqual(rowIds, candidates.map(c => c.candidate.id));
     const valueCells = [...upgradeSection.matchAll(/<td data-label="Models \/ \$1,000">([^<]+)<\/td>/g)].map(m => m[1]);
     assert.equal(valueCells.length, candidates.length);
-    assert.equal(valueCells[0], '3.08 / $1,000');
+    assert.equal(valueCells[0], '3.10 / $1,000');
     assert.ok(valueCells.includes('93.65 / $1,000'));
   });
 
