@@ -221,12 +221,17 @@ describe('Weekly price review pipeline', () => {
     });
 
     it('leaves every other card on its previous rules', () => {
-      for (const t of reviewTargets().filter(x => !['rtx-3090', 'rtx-4090', 'rtx-a5000'].includes(x.id))) {
+      for (const t of reviewTargets().filter(x => !['rtx-3090', 'rtx-4090', 'rtx-a5000', 'rtx-pro-6000-blackwell'].includes(x.id))) {
         assert.equal(t.rejectPattern, undefined, t.id);
         assert.equal(t.rejectSystems, undefined, t.id);
         assert.equal(t.queries, undefined, t.id);
         assert.equal(t.pageSize, undefined, t.id);
       }
+      const pro6000 = card('rtx-pro-6000-blackwell');
+      assert.equal(pro6000.rejectSystems, true);
+      assert.equal(pro6000.rejectPattern, undefined);
+      assert.equal(pro6000.queries, undefined);
+      assert.equal(pro6000.pageSize, undefined);
     });
 
     it('configures production search targets for thin cards (3090, 4090, A5000)', () => {
@@ -246,6 +251,53 @@ describe('Weekly price review pipeline', () => {
       assert.equal(tA5000.query, 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)');
       assert.equal(tA5000.pageSize, 240);
       assert.equal(tA5000.maxSensiblePrice, 1600);
+    });
+
+    it('rejects Run 6 caveat, shroud, full-PC, and multi-card lot gaps without false positives on genuine cards', () => {
+      const t3090 = card('rtx-3090');
+      const t3080 = card('rtx-3080-10gb');
+      const t3060 = card('rtx-3060-12gb');
+      const t7900 = card('rx-7900-xtx');
+      const t5090 = card('rtx-5090');
+      const t5080 = card('rtx-5080');
+      const t5060 = card('rtx-5060-ti-16gb');
+      const tPro6000 = card('rtx-pro-6000-blackwell');
+      const tA5000 = card('rtx-a5000');
+      const tStrix = card('strix-halo-128gb');
+      const tSpark = card('dgx-spark');
+
+      // Standalone word-boundary 'read', 'read discription', and 'as/is'
+      assert.equal(listingRejection({ title: 'ZOTAC GAMING NVIDIA GeForce RTX 5080 16GB GDDR7 SOLID OC - White - AS/IS READ', price: 1075 }, t5080), 'excluded-term');
+      assert.equal(listingRejection({ title: 'MSI SHADOW GeForce RTX 5080 16GB GDDR7 PCI Express 5.0 Graphics Card (READ)', price: 1499.99 }, t5080), 'excluded-term');
+      assert.equal(listingRejection({ title: 'NVIDIA GeForce RTX 3090 Founders Edition 24GB GDDR6 Graphics Card (READ)', price: 999.99 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'ASUS TUF Gaming GeForce RTX 3090 OC 24GB GDDR6X Graphics Card *READ*', price: 999 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'GIGABYTE GeForce RTX 3080 VISION OC 10G 10GB GDDR6X RGB HDMI PCIe *Read*', price: 399.95 }, t3080), 'excluded-term');
+      assert.equal(listingRejection({ title: 'READ DISCRIPTION ASRock Radeon RX 7900 XTX 24GB GDDR6 PCIe HDMI/DP DX12 2-Slot', price: 750 }, t7900), 'excluded-term');
+      assert.equal(listingRejection({ title: 'READ Bosgame AI Mini PC Ryzen AI Max+ 395 Blazing Fast 128GB LPDDR5 & 2 TB SDD', price: 1999.95 }, tStrix), 'excluded-term');
+      assert.equal(matchesExcludeTerm('nvidia geforce rtx 3080 10gb gddr6x cuda vr ready hdmi/displayport', 'read'), false);
+      assert.equal(listingRejection({ title: 'NVIDIA GeForce RTX 3080 10GB GDDR6X CUDA VR Ready HDMI/DisplayPort', price: 449.99 }, t3080), null);
+
+      // 'shroud' for rtx-5090
+      assert.equal(listingRejection({ title: 'GIGABYTE GeForce RTX 5090 Gaming OC 32G 32GB RGB Triple Fan SHROUD', price: 3999 }, t5090), 'excluded-keyword');
+      assert.equal(listingRejection({ title: 'NVIDIA GeForce RTX 5090 Founders Edition FE 32GB GDDR7 Graphics Card', price: 5999 }, t5090), null);
+
+      // rejectSystems for rtx-pro-6000-blackwell (including "FULL PC", while Workstation GPU cards & 96GB RAM alias stay allowed)
+      assert.equal(listingRejection({ title: 'NVIDIA RTX PRO 6000 WORKSTATION Blackwell 96gb 600W - FULL PC', price: 16999 }, tPro6000), 'complete-system');
+      assert.equal(listingRejection({ title: 'NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 Workstation Edition 600W GPU Excellent', price: 15499 }, tPro6000), null);
+      assert.equal(listingRejection({ title: 'NVIDIA RTX PRO 6000 Blackwell 96GB RAM - Graphics Card', price: 15800 }, tPro6000), null);
+
+      // Multi-card lots for single-card targets without rejecting Ventus 2X / Shadow 2X / Ventus 3X / 4x DisplayPort / integrated system promos
+      assert.equal(listingRejection({ title: '2x Gigabyte GeForce RTX 5060 Ti AERO OC 16GB White - Matched Pair', price: 699 }, t5060), 'multi-card-lot');
+      assert.equal(listingRejection({ title: 'Pair of TWO ! NVIDIA RTX A5000 24GB GDDR6 PCIe x16', price: 1500 }, tA5000), 'multi-card-lot');
+      assert.equal(listingRejection({ title: '2x EVGA GeForce RTX 3090 FTW3 24GB', price: 900 }, t3090), 'multi-card-lot');
+      assert.equal(listingRejection({ title: 'New Listing2x EVGA GeForce RTX 3090 24GB', price: 900 }, t3090), 'multi-card-lot');
+      assert.equal(listingRejection({ title: 'Lot of 2 EVGA RTX 3090 24GB FTW3', price: 900 }, t3090), 'excluded-term');
+      assert.equal(listingRejection({ title: 'MSI Shadow 2X NVIDIA GeForce RTX 5060 Ti 16GB OC Edition Graphics Card', price: 750 }, t5060), null);
+      assert.equal(listingRejection({ title: 'MSI Ventus 3X GeForce RTX 5080 16GB Graphics Card', price: 1799.99 }, t5080), null);
+      assert.equal(listingRejection({ title: 'MSI GeForce RTX 3060 Ventus 2X 12GB OC', price: 316 }, t3060), null);
+      assert.equal(listingRejection({ title: 'PNY NVIDIA RTX A5000 4x DisplayPort 24GB GDDR6 Graphics Card VCNRTXA5000', price: 1199.99 }, tA5000), null);
+      assert.equal(listingRejection({ title: '1 x NVIDIA RTX PRO 6000 Blackwell 96GB GDDR7 Workstation Edition (600W)', price: 15000 }, tPro6000), null);
+      assert.equal(listingRejection({ title: 'NVIDIA DGX Spark 128GB RAM 4TB SSD - Buy 2 Get Free Connector', price: 7850 }, tSpark), null);
     });
   });
 

@@ -27,8 +27,8 @@ const hasPrice = (price) => typeof price === 'number' && price > 0;
 export const GLOBAL_EXCLUDE_TERMS = [
   'not working', 'defective', 'no post', 'failed', 'partially works',
   'for parts', 'for part', 'parts only', 'for repair', 'part/repair', 'parts/repair',
-  'read description', 'read desc',
-  'as is', 'as-is', 'broken', 'water damage', 'damaged',
+  'read description', 'read desc', 'read discription', 'read',
+  'as is', 'as-is', 'as/is', 'broken', 'water damage', 'damaged',
   'non-working', 'non working', 'non-functional', 'non functional',
   'dead', 'no video', 'does not boot', 'overheating', 'rust',
   'board only', 'cooler only', 'box only', 'heatsink only', 'shroud only',
@@ -38,7 +38,8 @@ export const GLOBAL_EXCLUDE_TERMS = [
 ];
 
 // Terms that match as whole words only (\b...\b), so "Trusted Seller" does not trip "rust"
-export const GLOBAL_EXCLUDE_WORDS = new Set(['dead', 'rust']);
+// and "VR Ready" / "Threadripper" do not trip "read"
+export const GLOBAL_EXCLUDE_WORDS = new Set(['dead', 'rust', 'read']);
 
 export function matchesExcludeTerm(title, term) {
   if (GLOBAL_EXCLUDE_WORDS.has(term)) {
@@ -67,10 +68,10 @@ export const SEARCH_TARGETS = [
   { id: 'mac-studio-m2-ultra', titlePattern: 'm2\\s*ultra', category: '', query: 'Mac Studio M2 Ultra 64GB -(Max,128GB,192GB,broken,parts,box,m1,m3)', minSensiblePrice: 1900, maxSensiblePrice: 4200, excludeKeywords: ['m2 max', 'm1 max', '128gb', '128 gb', '192gb', '192 gb', 'parts only', 'box only', 'broken', 'accessory'] },
   // Catalog refresh batch 1 (2026-10-16). Unpriced until their first price is approved.
   // Sensible-price bounds are deliberately wide; the first review is checked by hand.
-  { id: 'rtx-5090', titlePattern: '5090', category: '27386', query: 'RTX 5090 32GB -(box,cooler,broken,parts,waterblock,damaged,read,pc,desktop,system,laptop)', minSensiblePrice: 1500, maxSensiblePrice: 9000, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'waterblock', 'damaged', 'read description', 'for repair', 'laptop'] },
+  { id: 'rtx-5090', titlePattern: '5090', category: '27386', query: 'RTX 5090 32GB -(box,cooler,broken,parts,waterblock,damaged,read,pc,desktop,system,laptop)', minSensiblePrice: 1500, maxSensiblePrice: 9000, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'shroud', 'waterblock', 'damaged', 'read description', 'for repair', 'laptop'] },
   { id: 'rtx-5080', titlePattern: '5080', category: '27386', query: 'RTX 5080 16GB -(box,cooler,broken,parts,pc,desktop,system,laptop)', minSensiblePrice: 700, maxSensiblePrice: 2600, excludeKeywords: ['parts', 'box only', 'broken', 'cooler only', 'laptop', '5070', '5090'] },
   { id: 'rtx-5060-ti-16gb', titlePattern: '5060\\s*ti', category: '27386', query: 'RTX 5060 Ti 16GB -(8GB,box,broken,parts,laptop)', minSensiblePrice: 300, maxSensiblePrice: 1300, excludeKeywords: ['8gb', '8 gb', 'parts', 'box only', 'broken', 'laptop'] },
-  { id: 'rtx-pro-6000-blackwell', titlePattern: 'pro\\s*6000', category: '27386', query: 'RTX PRO 6000 Blackwell 96GB -(Max-Q,server,box,broken,parts)', minSensiblePrice: 5000, maxSensiblePrice: 22000, excludeKeywords: ['max-q', 'max q', 'server edition', 'ada', 'parts', 'box only', 'broken'] },
+  { id: 'rtx-pro-6000-blackwell', titlePattern: 'pro\\s*6000', rejectSystems: true, category: '27386', query: 'RTX PRO 6000 Blackwell 96GB -(Max-Q,server,box,broken,parts)', minSensiblePrice: 5000, maxSensiblePrice: 22000, excludeKeywords: ['max-q', 'max q', 'server edition', 'ada', 'parts', 'box only', 'broken'] },
   { id: 'arc-pro-b60', titlePattern: 'b60', category: '27386', query: 'Arc Pro B60 24GB -(dual,48GB,B50,box,broken,parts)', minSensiblePrice: 350, maxSensiblePrice: 1500, excludeKeywords: ['dual', '48gb', '48 gb', 'b50', 'b580', 'b70', 'parts', 'box only', 'broken'] },
   { id: 'radeon-ai-pro-r9700', titlePattern: 'r9700', category: '27386', query: 'Radeon AI PRO R9700 32GB -(box,broken,parts)', minSensiblePrice: 900, maxSensiblePrice: 2800, excludeKeywords: ['parts', 'box only', 'broken', '9070'] },
   { id: 'strix-halo-128gb', titlePattern: 'max\\+?\\s*395', category: '', query: 'Ryzen AI Max+ 395 128GB mini PC -(64GB,32GB,laptop,tablet,parts,broken)', minSensiblePrice: 1300, maxSensiblePrice: 4500, excludeKeywords: ['64gb', '64 gb', '32gb', '32 gb', 'laptop', 'tablet', 'z13', 'flow', 'barebone', 'parts', 'broken'] },
@@ -90,7 +91,7 @@ export function reviewTargets(gpus = GPUS_DATA) {
 // Complete computers that merely contain the card: prebuilt/gaming/workstation PCs, a CPU model,
 // a system drive in the title, or a named workstation line. Only applied to targets with
 // rejectSystems (a graphics card tracked on its own).
-export const SYSTEM_TITLE_PATTERN = String.raw`\b(gaming|desktop|workstation|tower)\s+(pc|computer)\b|\bprebuilt\b|\bi[3579][- ]\d{4,5}|\bryzen\s*[3579]\s*\d{4}|\bthreadripper\b|\bxeon\b|\b\d+\s*(tb|gb)\s*(ssd|nvme|hdd)\b|\bprecision\s*\d{4}\b|\bthinkstation\b|\bhp\s*z\d\b|\bz[2468]\s*g\d\b|\baurora\s*r\d+\b`;
+export const SYSTEM_TITLE_PATTERN = String.raw`\b(gaming|desktop|workstation|tower|full)\s+(pc|computer)\b|\bprebuilt\b|\bi[3579][- ]\d{4,5}|\bryzen\s*[3579]\s*\d{4}|\bthreadripper\b|\bxeon\b|\b\d+\s*(tb|gb)\s*(ssd|nvme|hdd)\b|\bprecision\s*\d{4}\b|\bthinkstation\b|\bhp\s*z\d\b|\bz[2468]\s*g\d\b|\baurora\s*r\d+\b`;
 const SYSTEM_TITLE_RE = new RegExp(SYSTEM_TITLE_PATTERN, 'i');
 // System RAM ("32GB DDR5", "64GB RAM") also marks a complete system, except when the amount is the
 // card's own VRAM: GPU sellers often write "24gb RAM" for the card's memory (an Oct 16 RTX 4090
@@ -103,11 +104,23 @@ export function looksLikeSystem(title, target) {
   return [...title.matchAll(SYSTEM_RAM_RE)].some(m => Number(m[1]) !== target.vram);
 }
 
+// Clear multi-card lot/pair phrasing for single-card GPU targets (category === '27386').
+// Avoids false positives on GPU cooler names ("Ventus 2X", "Shadow 2X", "Ventus 3X", "Inspire 3X")
+// and port specs ("4x DisplayPort").
+export const MULTI_CARD_LOT_PATTERN = String.raw`\bmatched\s+pair\b|\bpair\s+of\b|\b(?:set|bundle)\s+of\s+[2-9]\b|\bqty[:\s]*[2-9]\b|^(?:new\s+listing\s*)?\(?[2-9]\s*x\b|\b[2-9]\s*x\s+(?:pair|matched|cards|gpus|units)\b|\b(?:pair|matched)\b.*\b[2-9]\s*x\b`;
+const MULTI_CARD_LOT_RE = new RegExp(MULTI_CARD_LOT_PATTERN, 'i');
+
+/** True when the title describes a multi-card lot or pair rather than a single GPU. */
+export function looksLikeMultiCardLot(title) {
+  return MULTI_CARD_LOT_RE.test(title);
+}
+
 /**
  * Why a listing does not count for a target, or null if it is usable. Reasons, in the order
  * they are checked: invalid, excluded-term (global), excluded-keyword (target), title-mismatch
  * (does not name the card), wrong-variant (target's rejectPattern, e.g. 3090 Ti), complete-system
- * (targets with rejectSystems), out-of-range (outside the sensible price bounds).
+ * (targets with rejectSystems), multi-card-lot (single-card targets in category 27386),
+ * out-of-range (outside the sensible price bounds).
  */
 export function listingRejection(listing, target) {
   const title = String(listing.title || '').replace(/opens in a new window.*/i, '').trim().toLowerCase();
@@ -118,6 +131,7 @@ export function listingRejection(listing, target) {
   if (!new RegExp(target.titlePattern, 'i').test(title)) return 'title-mismatch'; // the title must name the card
   if (target.rejectPattern && new RegExp(target.rejectPattern, 'i').test(title)) return 'wrong-variant';
   if (target.rejectSystems && looksLikeSystem(title, target)) return 'complete-system';
+  if (target.category === '27386' && looksLikeMultiCardLot(title)) return 'multi-card-lot';
   if (price < target.minSensiblePrice || price > target.maxSensiblePrice) return 'out-of-range';
   return null;
 }
