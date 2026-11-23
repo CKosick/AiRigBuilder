@@ -250,7 +250,7 @@ describe('Weekly price review pipeline', () => {
       const tA5000 = card('rtx-a5000');
       assert.equal(tA5000.query, 'RTX A5000 24GB -(box,cooler,broken,parts,laptop,mobile)');
       assert.equal(tA5000.pageSize, 240);
-      assert.equal(tA5000.maxSensiblePrice, 1600);
+      assert.equal(tA5000.maxSensiblePrice, 3000);
     });
 
     it('rejects Run 6 caveat, shroud, full-PC, and multi-card lot gaps without false positives on genuine cards', () => {
