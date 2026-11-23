@@ -5,13 +5,31 @@ import { MODELS_DATA } from '../data/models.js';
 import { TIER_MAC_M5_ULTRA_256, TIER_MAC_M5_ULTRA_512 } from '../data/builds.js';
 import { tierFit } from '../utils/tierFit.js';
 import { estimateSpeedToks } from '../utils/speedEstimate.js';
-import { buildPath } from '../routes.js';
+import { buildPath, gpuPath } from '../routes.js';
+import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
 import { icon } from './icons.js';
 import { preserveFocus } from '../utils/focus.js';
 import { CONTEXT_STEPS, KV_PRECISION_OPTIONS, KV_PRECISION_SCALES } from './modelPicker.js';
 
 export const PLAYGROUND_GPUS = [...GPUS_DATA, ...OWNED_GPUS_SUPPLEMENT];
 export const ALL_PLAYGROUND_GPUS = PLAYGROUND_GPUS;
+const TRACKED_GPU_IDS = new Set(GPUS_DATA.map(g => g.id));
+const hasGpuPage = (gpu) => Boolean(gpu && TRACKED_GPU_IDS.has(gpu.id));
+
+function renderUpgradeBuyActions(gpu, { compact = false } = {}) {
+  if (!hasGpuPage(gpu)) return '';
+  const btnCls = compact ? ' btn-text-sm' : '';
+  const ebayBtn = gpu.ebaySoldUrl ? `
+        <a href="${formatAffiliateUrl(gpu.ebaySoldUrl, 'eBay Sold', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-primary${btnCls}" data-click-merchant="eBay Sold" data-click-id="gpu:${gpu.id}:ebay-sold" data-gpu-id="${gpu.id}" data-link-kind="ebay-sold">
+          ${icon('search')}${compact ? 'eBay Sold →' : 'Check eBay Sold Listings →'}
+        </a>` : '';
+  const amazonBtn = gpu.amazonSearchUrl ? `
+        <a href="${formatAffiliateUrl(gpu.amazonSearchUrl, 'Amazon', `gpu-${gpu.id}`)}" target="_blank" rel="${AFFILIATE_LINK_REL}" class="btn-secondary${btnCls}" data-click-merchant="Amazon" data-click-id="gpu:${gpu.id}:amazon" data-gpu-id="${gpu.id}" data-link-kind="amazon">
+          ${icon('cart')}Buy on Amazon →
+        </a>` : '';
+  if (!ebayBtn && !amazonBtn) return '';
+  return `<div class="${compact ? 'playground-table-actions' : 'playground-upgrade-actions'}">${ebayBtn}${amazonBtn}</div>`;
+}
 
 export const INTEGRATED_SYSTEM_IDS = [
   'mac-studio-m2-ultra',
@@ -259,14 +277,18 @@ export function selectUpgradePicks(candidates = []) {
   return { mostUnlocked, bestValue, sameCard };
 }
 
-function renderUpgradePickCard(pick, badgesHtml, pickKind) {
+export function renderUpgradePickCard(pick, badgesHtml, pickKind) {
   const recommendedPsu = recommendedPsuWatts(pick.totalTdp);
   const per1000 = (pick.unlocksPerDollar * 1000).toFixed(2);
+  const candidate = pick.candidate;
+  const headingName = hasGpuPage(candidate)
+    ? `<a href="${gpuPath(candidate.id)}">${candidate.name}</a>`
+    : candidate.name;
   return `
-    <div class="playground-best-upgrade-card" data-upgrade-pick="${pickKind}" data-candidate-id="${pick.candidate.id}">
+    <div class="playground-best-upgrade-card" data-upgrade-pick="${pickKind}" data-candidate-id="${candidate.id}">
       <div class="best-upgrade-title-row">
         ${badgesHtml}
-        <h3 class="best-upgrade-heading">Add 1x ${pick.candidate.name}</h3>
+        <h3 class="best-upgrade-heading">Add 1x ${headingName}</h3>
       </div>
 
       <div class="best-upgrade-grid">
@@ -295,6 +317,7 @@ function renderUpgradePickCard(pick, badgesHtml, pickKind) {
       <div class="best-upgrade-power">
         <p><strong>Power Draw:</strong> Resulting configuration draws <strong>${pick.totalTdp}W</strong> GPU TDP. Recommended power supply: <strong>~${recommendedPsu}W PSU</strong> (total TDP + 150W system allowance, rounded up to the next 50W; rule-of-thumb estimate).</p>
       </div>
+      ${renderUpgradeBuyActions(candidate)}
     </div>
   `;
 }
@@ -517,18 +540,20 @@ export function renderRigPlaygroundHtml(state = {}) {
                   <th scope="col">Models Unlocked</th>
                   <th scope="col">Models Improved</th>
                   <th scope="col">Models Unlocked / $1,000</th>
+                  <th scope="col">Check Prices</th>
                 </tr>
               </thead>
               <tbody>
                 ${upgrades.map(c => `
                   <tr data-candidate-id="${c.candidate.id}">
-                    <td class="stack-head"><strong>${c.candidate.name}</strong></td>
+                    <td class="stack-head"><strong>${hasGpuPage(c.candidate) ? `<a href="${gpuPath(c.candidate.id)}">${c.candidate.name}</a>` : c.candidate.name}</strong></td>
                     <td data-label="Added VRAM">+${c.candidate.vram} GB</td>
                     <td data-label="New Total VRAM">${c.newMemory} GB</td>
                     <td class="part-price-cell" data-label="Est. Used Price">$${c.cost.toLocaleString()}</td>
                     <td data-label="Models Unlocked"><strong class="is-good">+${c.unlocked}</strong></td>
                     <td data-label="Models Improved">+${c.improved}</td>
                     <td data-label="Models / $1,000">${(c.unlocksPerDollar * 1000).toFixed(2)} / $1,000</td>
+                    <td class="stack-wide" data-label="Check Prices">${renderUpgradeBuyActions(c.candidate, { compact: true })}</td>
                   </tr>
                 `).join('')}
               </tbody>

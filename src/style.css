@@ -2828,7 +2828,11 @@ input[type="range"]::-moz-range-thumb {
   .modal-email-input,
   .modal-close-btn,
   .btn-sm,
-  .btn-sm-primary {
+  .btn-sm-primary,
+  .playground-upgrade-actions .btn-primary,
+  .playground-upgrade-actions .btn-secondary,
+  .playground-table-actions .btn-primary,
+  .playground-table-actions .btn-secondary {
     min-height: 44px;
   }
   .filter-btn,
@@ -2882,6 +2886,13 @@ input[type="range"]::-moz-range-thumb {
   }
   .playground-group-toggle {
     min-height: 44px;
+    width: 100%;
+    justify-content: center;
+  }
+  .playground-upgrade-actions .btn-primary,
+  .playground-upgrade-actions .btn-secondary,
+  .playground-table-actions .btn-primary,
+  .playground-table-actions .btn-secondary {
     width: 100%;
     justify-content: center;
   }
@@ -3154,6 +3165,16 @@ input[type="range"]::-moz-range-thumb {
   color: var(--text-main);
 }
 
+.best-upgrade-heading a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.best-upgrade-heading a:hover {
+  color: var(--accent-text);
+  text-decoration: underline;
+}
+
 .best-upgrade-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -3180,6 +3201,24 @@ input[type="range"]::-moz-range-thumb {
 
 .best-upgrade-power p {
   margin: 0 0 0.75rem 0;
+}
+
+.playground-upgrade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.playground-table-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.playground-table-actions .btn-primary,
+.playground-table-actions .btn-secondary {
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .playground-checklist {

@@ -83,5 +83,35 @@ export const CLOUD_PROVIDERS = [
     setupFee: 0,
     reliability: '98.5%',
     notes: 'Budget single 24GB cloud instance.'
+  },
+  {
+    id: 'runpod-quad-4090',
+    name: 'RunPod (4x RTX 4090 96GB)',
+    category: 'Quad 24GB (96GB VRAM)',
+    hourlyRate: CLOUD_RATES['runpod-quad-4090'].hourlyRate,
+    storageCostPerMonth: 7.00,
+    setupFee: 0,
+    reliability: '99.5%',
+    notes: 'Quad 4090 instance for 70B-120B high-speed inference.'
+  },
+  {
+    id: 'runpod-quad-a100-80gb',
+    name: 'RunPod (4x A100 80GB SXM)',
+    category: 'Quad Datacenter (320GB VRAM)',
+    hourlyRate: CLOUD_RATES['runpod-quad-a100-80gb'].hourlyRate,
+    storageCostPerMonth: 10.00,
+    setupFee: 0,
+    reliability: '99.5%',
+    notes: 'Quad 80GB SXM4 datacenter cluster for large MoE models.'
+  },
+  {
+    id: 'vast-8x-h100',
+    name: 'Vast.ai (8x H100 640GB)',
+    category: 'Frontier Cluster (640GB VRAM)',
+    hourlyRate: CLOUD_RATES['vast-8x-h100'].hourlyRate,
+    storageCostPerMonth: 6.00,
+    setupFee: 0,
+    reliability: '98.5% (Community host)',
+    notes: '8x H100 SXM cluster for frontier 400B-1T+ models.'
   }
 ];

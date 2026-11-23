@@ -109,4 +109,20 @@ describe('Cloud rates are stored once', () => {
       `Cloud rates as-of date (${CLOUD_RATES_AS_OF_DATE}) is ${Math.floor(ageDays)} days old (exceeds ${MAX_AGE_DAYS} days). The cloud rates need their monthly re-check.`
     );
   });
+
+  it('includes high-tier quad and 8x H100 offers in CLOUD_PROVIDERS and renders them in the calculator selector', () => {
+    for (const id of ['runpod-quad-4090', 'runpod-quad-a100-80gb', 'vast-8x-h100']) {
+      const p = CLOUD_PROVIDERS.find(entry => entry.id === id);
+      assert.ok(p, `CLOUD_PROVIDERS includes ${id}`);
+      assert.equal(p.hourlyRate, CLOUD_RATES[id].hourlyRate, `${id} reads live rate from CLOUD_RATES`);
+    }
+
+    const calcHtml = renderBreakEvenHtml();
+    assert.ok(calcHtml.includes(`value="runpod-quad-4090" >`));
+    assert.ok(calcHtml.includes(`($${CLOUD_RATES['runpod-quad-4090'].hourlyRate.toFixed(2)}/hr)`));
+    assert.ok(calcHtml.includes(`value="runpod-quad-a100-80gb" >`));
+    assert.ok(calcHtml.includes(`($${CLOUD_RATES['runpod-quad-a100-80gb'].hourlyRate.toFixed(2)}/hr)`));
+    assert.ok(calcHtml.includes(`value="vast-8x-h100" >`));
+    assert.ok(calcHtml.includes(`($${CLOUD_RATES['vast-8x-h100'].hourlyRate.toFixed(2)}/hr)`));
+  });
 });

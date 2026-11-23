@@ -17,15 +17,27 @@ export function clampRigCost(value) {
   return Math.min(RIG_COST_MAX, Math.max(RIG_COST_MIN, Math.round(value)));
 }
 
-export function parseCalculatorCostParam(search) {
+export function clampSystemWatts(value) {
+  return Math.min(SYSTEM_WATTS_MAX, Math.max(SYSTEM_WATTS_MIN, Math.round(value)));
+}
+
+function parseNumericQueryParam(search, key, clampFn) {
   if (!search) return null;
   const params = new URLSearchParams(search);
-  if (!params.has('cost')) return null;
-  const raw = params.get('cost');
+  if (!params.has(key)) return null;
+  const raw = params.get(key);
   if (raw === null || raw.trim() === '') return null;
   const num = Number(raw);
   if (!Number.isFinite(num)) return null;
-  return clampRigCost(num);
+  return clampFn(num);
+}
+
+export function parseCalculatorCostParam(search) {
+  return parseNumericQueryParam(search, 'cost', clampRigCost);
+}
+
+export function parseCalculatorWattsParam(search) {
+  return parseNumericQueryParam(search, 'watts', clampSystemWatts);
 }
 
 function clampNumber(value, min, max) {
@@ -270,7 +282,9 @@ export function createBreakEvenCalc(container, initialState = {}) {
   let selectedProviderId = BREAK_EVEN_DEFAULTS.selectedProviderId;
   let hourlyCloudRate = BREAK_EVEN_DEFAULTS.hourlyCloudRate;
   let monthlyDiskFee = BREAK_EVEN_DEFAULTS.monthlyDiskFee;
-  let systemWatts = BREAK_EVEN_DEFAULTS.systemWatts;
+  let systemWatts = Number.isFinite(initialState.systemWatts)
+    ? clampSystemWatts(initialState.systemWatts)
+    : BREAK_EVEN_DEFAULTS.systemWatts;
   let kwhRate = BREAK_EVEN_DEFAULTS.kwhRate;
   let resaleRetentionPct = BREAK_EVEN_DEFAULTS.resaleRetentionPct;
 
@@ -599,7 +613,7 @@ export function createBreakEvenCalc(container, initialState = {}) {
       rigUpfrontCost = clampRigCost(params.upfrontCost);
     }
     if (typeof params.systemWatts === 'number' && Number.isFinite(params.systemWatts)) {
-      systemWatts = clampNumber(Math.round(params.systemWatts), SYSTEM_WATTS_MIN, SYSTEM_WATTS_MAX);
+      systemWatts = clampSystemWatts(params.systemWatts);
     }
     if (typeof params.dailyHours === 'number' && Number.isFinite(params.dailyHours)) {
       dailyUsageHours = params.dailyHours;

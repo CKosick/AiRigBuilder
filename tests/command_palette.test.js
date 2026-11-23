@@ -1,8 +1,13 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { buildSearchIndex, searchEntries, renderCommandPaletteHtml } from '../src/components/commandPalette.js';
 import { parseRoute, SECTIONS } from '../src/routes.js';
 import { renderShell } from '../src/components/shell.js';
+
+const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 describe('Cmd+K Quick Switcher Index Integrity', () => {
   it('builds exactly 124 entries across all 5 catalog types', () => {
@@ -150,6 +155,23 @@ describe('Cmd+K Matching Known Answers & Ranking', () => {
     if (nonPrefixIndex !== -1) {
       assert.ok(llamaResults[nonPrefixIndex].name.toLowerCase().includes('llama'));
     }
+  });
+
+  it('indexes model.creator so searching "meta", "alibaba", or "openai" finds matching models and removes stale count comments', () => {
+    const metaResults = searchEntries('meta', index);
+    assert.ok(metaResults.some(r => r.id === 'llama-3.3-70b'), 'Meta search surfaces Llama 3.3 70B');
+    assert.ok(metaResults.some(r => r.id === 'deepseek-r1-70b'), 'Meta search surfaces DeepSeek / Meta distill');
+
+    const alibabaResults = searchEntries('alibaba', index);
+    assert.ok(alibabaResults.some(r => r.id === 'qwen-2.5-72b'), 'Alibaba search surfaces Qwen models');
+
+    const openaiResults = searchEntries('openai', index);
+    assert.ok(openaiResults.some(r => r.id === 'gpt-oss-120b'), 'OpenAI search surfaces gpt-oss-120b');
+    assert.ok(openaiResults.some(r => r.id === 'gpt-oss-20b'), 'OpenAI search surfaces gpt-oss-20b');
+
+    const src = fs.readFileSync(path.join(ROOT_DIR, 'src', 'components', 'commandPalette.js'), 'utf-8');
+    assert.ok(!src.includes('98 entries'), 'no stale 98 entries comment');
+    assert.ok(!src.includes('56 models'), 'no stale 56 models comment');
   });
 });
 

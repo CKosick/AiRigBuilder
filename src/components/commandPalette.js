@@ -13,23 +13,24 @@ const escapeHtml = (s) => String(s)
   .replace(/"/g, '&quot;');
 
 /**
- * Builds the searchable index (98 entries: 56 models, 19 GPUs, 10 comparisons, 8 best-GPU, 5 sections).
- * Derived at runtime from data catalogs; every path is guaranteed to resolve in parseRoute.
+ * Builds the searchable quick-switcher index across all catalog models, GPUs, comparisons,
+ * best-GPU pages, and top-level sections. Every path resolves cleanly in parseRoute.
  */
 export function buildSearchIndex() {
   const entries = [];
 
-  // 1. 56 models
+  // 1. Models
   for (const model of MODELS_DATA) {
     entries.push({
       id: model.id,
       name: model.name,
+      creator: model.creator || '',
       path: buildPath(model.id),
       type: 'Model'
     });
   }
 
-  // 2. 19 GPUs
+  // 2. GPUs
   for (const gpu of GPUS_DATA) {
     entries.push({
       id: gpu.id,
@@ -40,7 +41,7 @@ export function buildSearchIndex() {
     });
   }
 
-  // 3. 10 comparison pages
+  // 3. Comparison pages
   for (const [a, b] of COMPARISON_PAIRS) {
     const gpuA = GPUS_DATA.find(g => g.id === a);
     const gpuB = GPUS_DATA.find(g => g.id === b);
@@ -55,18 +56,19 @@ export function buildSearchIndex() {
     });
   }
 
-  // 4. 8 best-GPU pages
+  // 4. Best-GPU pages
   for (const modelId of BEST_GPU_MODELS) {
     const model = MODELS_DATA.find(m => m.id === modelId);
     entries.push({
       id: `best-gpu-${modelId}`,
       name: model ? model.name : modelId,
+      creator: model?.creator || '',
       path: bestGpuPath(modelId),
       type: 'Best GPU'
     });
   }
 
-  // 5. 5 sections
+  // 5. Sections
   for (const section of SECTIONS) {
     entries.push({
       id: section.view,
@@ -81,8 +83,8 @@ export function buildSearchIndex() {
 
 /**
  * Pure search function:
- * - Empty query returns the 5 sections.
- * - Non-empty query splits on whitespace tokens; every token must appear in entry's name or id.
+ * - Empty query returns the site sections.
+ * - Non-empty query splits on whitespace tokens; every token must appear in entry's name, id, fullName, or creator.
  * - Ranking: entries whose name starts with full query first, then remaining matches in catalog order.
  * - Capped at 10 results.
  */
@@ -101,10 +103,11 @@ export function searchEntries(query, index) {
     const nameLower = entry.name.toLowerCase();
     const idLower = (entry.id || '').toLowerCase();
     const fullLower = (entry.fullName || '').toLowerCase();
+    const creatorLower = (entry.creator || '').toLowerCase();
 
-    // Every token must appear in name, id, or full name
+    // Every token must appear in name, id, full name, or creator
     const matchesAll = tokens.every(token => (
-      nameLower.includes(token) || idLower.includes(token) || fullLower.includes(token)
+      nameLower.includes(token) || idLower.includes(token) || fullLower.includes(token) || creatorLower.includes(token)
     ));
 
     if (!matchesAll) continue;

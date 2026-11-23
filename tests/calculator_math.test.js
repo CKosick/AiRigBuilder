@@ -11,7 +11,9 @@ import {
   SYSTEM_WATTS_MIN,
   SYSTEM_WATTS_MAX,
   clampRigCost,
+  clampSystemWatts,
   parseCalculatorCostParam,
+  parseCalculatorWattsParam,
   renderBreakEvenHtml
 } from '../src/components/breakEvenCalc.js';
 import { renderModelPickerHtml } from '../src/components/modelPicker.js';
@@ -137,9 +139,28 @@ describe('Break-Even Calculator UI Ceilings & Paired Numeric Cost Input', () => 
     assert.equal(parseCalculatorCostParam(''), null);
 
     const glmHtml = renderModelPickerHtml({ activeModelId: 'glm-5.3' });
-    assert.match(glmHtml, /<a href="\/calculator\?cost=22299" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
+    assert.match(glmHtml, /<a href="\/calculator\?cost=22299&watts=220" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
 
     const llamaHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
-    assert.match(llamaHtml, /<a href="\/calculator\?cost=2654" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
+    assert.match(llamaHtml, /<a href="\/calculator\?cost=2654&watts=820" class="btn-primary" id="btn-send-to-calc">[\s\S]*Calculate Break-Even ROI →\s*<\/a>/);
+  });
+
+  it('parses and clamps ?watts query param cleanly alongside ?cost', () => {
+    assert.equal(clampSystemWatts(220), 220);
+    assert.equal(clampSystemWatts(50), 150);
+    assert.equal(clampSystemWatts(5000), 2000);
+
+    assert.equal(parseCalculatorWattsParam('?cost=22299&watts=220'), 220);
+    assert.equal(parseCalculatorWattsParam('?watts=50'), 150);
+    assert.equal(parseCalculatorWattsParam('?watts=5000'), 2000);
+    assert.equal(parseCalculatorWattsParam('?watts=abc'), null);
+    assert.equal(parseCalculatorWattsParam('?watts='), null);
+    assert.equal(parseCalculatorWattsParam('?watts=Infinity'), null);
+    assert.equal(parseCalculatorWattsParam('?cost=22299'), null);
+
+    const html = renderBreakEvenHtml({ rigUpfrontCost: 22299, systemWatts: 220 });
+    assert.ok(html.includes('id="badge-rig-cost">$22,299</span>'));
+    assert.ok(html.includes('id="badge-watts">220 Watts</span>'));
+    assert.ok(html.includes('id="input-system-watts" aria-label="Rig load power draw (watts)" min="150" max="2000" step="25" value="220"'));
   });
 });

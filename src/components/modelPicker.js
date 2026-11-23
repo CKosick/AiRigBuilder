@@ -204,7 +204,7 @@ export function renderModelPickerHtml(state = {}) {
   const filteredModels = filterModels({ vramBudget, codingOnly, searchQuery });
   const shownModels = visibleModels(filteredModels, activeModelId, showAllModels);
   const costs = computeTierCosts(currentTier, { salesTaxRate, dailyUsageHours, kwhRate });
-  const { partsSubtotal, taxAmount } = costs;
+  const { partsSubtotal, taxAmount, systemWatts } = costs;
 
   return `
     <!-- Model chooser: VRAM and use filters, search, then the matching models by full name -->
@@ -394,7 +394,7 @@ export function renderModelPickerHtml(state = {}) {
           <button class="btn-secondary" id="btn-copy-parts-list">
             ${icon('copy')}<span>Copy parts list</span>
           </button>
-          <a href="/calculator?cost=${partsSubtotal}" class="btn-primary" id="btn-send-to-calc">
+          <a href="/calculator?cost=${partsSubtotal}&watts=${systemWatts}" class="btn-primary" id="btn-send-to-calc">
             ${icon('calculator')}Calculate Break-Even ROI →
           </a>
         </div>

@@ -73,7 +73,11 @@ export function filterBuildsIndexModels(
   const query = typeof searchQuery === 'string' ? searchQuery.trim().toLowerCase() : '';
   return models.filter(m => {
     if (active.length && !active.every(preset => preset.match(m))) return false;
-    if (query && !m.name.toLowerCase().includes(query)) return false;
+    if (query) {
+      const matchesName = m.name.toLowerCase().includes(query);
+      const matchesCreator = (m.creator || '').toLowerCase().includes(query);
+      if (!matchesName && !matchesCreator) return false;
+    }
     return true;
   });
 }
@@ -143,7 +147,7 @@ export function renderBuildsIndexHtml() {
       <div class="tracker-header-row">
         <div class="tracker-title">
           <h1>Local AI Build Sheets for ${models.length} Models</h1>
-          <p>Each build sheet has three verified rigs: <strong>Budget Used</strong>, <strong>Balanced</strong> and <strong>Best New</strong>, with full parts lists, power draw and first-year cost. Pick the model you want to run.</p>
+          <p>Each build sheet lists verified hardware tiers matched to the model's VRAM needs, with full parts lists, power draw, and first-year cost. Pick the model you want to run.</p>
         </div>
         <a href="/calculator" class="btn-secondary">${icon('calculator')}Compare against cloud rental →</a>
       </div>
@@ -152,7 +156,7 @@ export function renderBuildsIndexHtml() {
           ${presetChipsHtml}
         </div>
         <div class="builds-index-controls">
-          <input type="search" id="builds-search-input" class="model-search builds-search-input" aria-label="Filter models by name" placeholder="Filter by model name">
+          <input type="search" id="builds-search-input" class="model-search builds-search-input" aria-label="Filter models by name or creator" placeholder="Filter by model or creator">
           <div class="builds-index-status">
             <p class="model-results-count" id="builds-index-count" aria-live="polite">${models.length} of ${models.length} models</p>
             <button type="button" class="btn-secondary builds-filter-reset" id="btn-reset-builds-filter" hidden>Reset</button>

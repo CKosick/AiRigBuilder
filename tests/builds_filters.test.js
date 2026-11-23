@@ -98,15 +98,29 @@ describe('Model useCases data and /builds preset filters', () => {
     const disjoint = filterBuildsIndexModels(['coding', 'vision']);
     assert.equal(disjoint.length, 0);
 
-    // Filter-by-name search
+    // Filter-by-name and creator search (consistent with filterModels)
     const gemmaMatches = filterBuildsIndexModels([], undefined, '  GeMmA ');
     assert.deepEqual(gemmaMatches.map(m => m.id), MODELS_DATA.filter(m => /gemma/i.test(m.name)).map(m => m.id));
     assert.equal(filterBuildsIndexModels(['moe'], undefined, 'gemma').every(m => m.activeParamsB < m.totalParamsB && /gemma/i.test(m.name)), true);
     assert.equal(filterBuildsIndexModels([], undefined, '   ').length, 70);
+
+    const metaMatches = filterBuildsIndexModels([], undefined, 'meta');
+    assert.deepEqual(metaMatches.map(m => m.id), MODELS_DATA.filter(m => /meta/i.test(m.creator)).map(m => m.id));
+    assert.equal(metaMatches.length, 10);
+
+    const alibabaMatches = filterBuildsIndexModels([], undefined, 'alibaba');
+    assert.deepEqual(alibabaMatches.map(m => m.id), MODELS_DATA.filter(m => /alibaba/i.test(m.creator)).map(m => m.id));
+    assert.equal(alibabaMatches.length, 19);
+
+    const alibabaMoe = filterBuildsIndexModels(['moe'], undefined, 'alibaba');
+    assert.ok(alibabaMoe.length > 0 && alibabaMoe.every(m => m.activeParamsB < m.totalParamsB && /alibaba/i.test(m.creator)));
   });
 
-  it('prerendered /builds HTML contains all 70 model rows and the preset chip row', () => {
+  it('prerendered /builds HTML contains all 70 model rows, the preset chip row, and accurate tier lead copy', () => {
     const html = renderBuildsIndexHtml();
+    assert.ok(html.includes("Each build sheet lists verified hardware tiers matched to the model's VRAM needs, with full parts lists, power draw, and first-year cost. Pick the model you want to run."));
+    assert.ok(!html.includes('three verified rigs'));
+    assert.ok(!html.includes('Budget Used'));
     const rowIds = [...html.matchAll(/<tr data-model-id="([^"]+)">/g)].map(m => m[1]);
     assert.equal(rowIds.length, 70);
     assert.equal(new Set(rowIds).size, 70);

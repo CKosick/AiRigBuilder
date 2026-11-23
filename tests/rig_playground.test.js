@@ -18,8 +18,10 @@ import {
   computeUpgradeCandidates,
   selectUpgradePicks,
   recommendedPsuWatts,
+  renderUpgradePickCard,
   renderRigPlaygroundHtml
 } from '../src/components/rigPlayground.js';
+import { AFFILIATE_LINK_REL } from '../src/config/affiliates.js';
 import { tierFit } from '../src/utils/tierFit.js';
 
 describe('Rig Playground: Owned GPUs Supplement Data', () => {
@@ -160,8 +162,8 @@ describe('Rig Playground: Known Answers from Brief', () => {
     // Verify rendered HTML for RTX 3060 has RTX PRO 6000 in callout and no system in upgrade section
     const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3060-12gb', count: 1 });
     assert.ok(
-      html.includes('Add 1x NVIDIA RTX PRO 6000 Blackwell'),
-      'Rendered best-upgrade callout names RTX PRO 6000'
+      html.includes('Add 1x <a href="/gpu/rtx-pro-6000-blackwell">NVIDIA RTX PRO 6000 Blackwell'),
+      'Rendered best-upgrade callout links RTX PRO 6000'
     );
     const upgradeSection = html.slice(
       html.indexOf('playground-upgrade-section'),
@@ -563,5 +565,47 @@ describe('Rig Playground: Phone Length & Polish (Group Split, Sticky Summary, Pi
     });
     assert.ok(allFitHtml.includes(`>${MODELS_DATA.length} / ${MODELS_DATA.length}</strong>`));
     assert.ok(allFitHtml.includes(`All ${MODELS_DATA.length} models fit in this configuration!`));
+  });
+
+  it('links upgrade GPU names to /gpu/:id and renders tracked eBay Sold and Buy on Amazon actions in pick cards and ranked table, omitting links when no GPU page exists', () => {
+    const html = renderRigPlaygroundHtml({ gpuId: 'rtx-3080-10gb', count: 1 });
+    const upgradeSection = html.slice(
+      html.indexOf('playground-upgrade-section'),
+      html.indexOf('playground-results-grid')
+    );
+
+    // Pick cards for rtx-pro-6000-blackwell (Most models unlocked) and tesla-p40 (Best value)
+    for (const id of ['rtx-pro-6000-blackwell', 'tesla-p40']) {
+      const gpu = GPUS_DATA.find(g => g.id === id);
+      assert.ok(upgradeSection.includes(`<a href="/gpu/${id}">${gpu.name}</a>`), `Link to /gpu/${id}`);
+      assert.ok(upgradeSection.includes(`rel="${AFFILIATE_LINK_REL}" class="btn-primary" data-click-merchant="eBay Sold" data-click-id="gpu:${id}:ebay-sold" data-gpu-id="${id}" data-link-kind="ebay-sold"`), `Pick card eBay Sold click attrs for ${id}`);
+      assert.ok(upgradeSection.includes(`rel="${AFFILIATE_LINK_REL}" class="btn-secondary" data-click-merchant="Amazon" data-click-id="gpu:${id}:amazon" data-gpu-id="${id}" data-link-kind="amazon"`), `Pick card Amazon click attrs for ${id}`);
+    }
+
+    // Ranked upgrade table has Check Prices column and links for every tracked candidate
+    const tablePart = upgradeSection.slice(upgradeSection.indexOf('<table'));
+    assert.ok(tablePart.includes('<th scope="col">Check Prices</th>'));
+    for (const gpu of GPUS_DATA.filter(g => !isIntegratedSystem(g.id) && gpuVendor(g) === 'NVIDIA')) {
+      assert.ok(tablePart.includes(`<a href="/gpu/${gpu.id}">${gpu.name}</a>`), `Table links ${gpu.id}`);
+      assert.ok(tablePart.includes(`data-click-id="gpu:${gpu.id}:ebay-sold"`), `Table eBay Sold link for ${gpu.id}`);
+      assert.ok(tablePart.includes(`data-click-id="gpu:${gpu.id}:amazon"`), `Table Amazon link for ${gpu.id}`);
+    }
+    assert.ok(tablePart.includes('data-label="Check Prices"'));
+
+    // Candidate with no /gpu/:id page gets no detail link and no eBay/Amazon actions
+    const noPageCandidate = ALL_PLAYGROUND_GPUS.find(g => g.id === 'rtx-4070');
+    const noPageCard = renderUpgradePickCard({
+      candidate: noPageCandidate,
+      unlocked: 5,
+      improved: 2,
+      cost: 1000,
+      newMemory: 34,
+      newBandwidth: 760,
+      unlocksPerDollar: 0.005,
+      totalTdp: 770
+    }, '<span class="tier-badge-label">Most models unlocked</span>', 'most-unlocked');
+    assert.ok(noPageCard.includes(`Add 1x ${noPageCandidate.name}</h3>`));
+    assert.ok(!noPageCard.includes('/gpu/'));
+    assert.ok(!noPageCard.includes('data-click-id'));
   });
 });

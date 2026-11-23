@@ -1,7 +1,13 @@
 import './style.css';
 import { renderShell } from './components/shell.js';
 import { createModelPicker } from './components/modelPicker.js';
-import { createBreakEvenCalc, parseCalculatorCostParam, clampRigCost } from './components/breakEvenCalc.js';
+import {
+  createBreakEvenCalc,
+  parseCalculatorCostParam,
+  parseCalculatorWattsParam,
+  clampRigCost,
+  clampSystemWatts
+} from './components/breakEvenCalc.js';
 import { createPriceTracker } from './components/priceTracker.js';
 import { createHardwareGuide } from './components/hardwareGuide.js';
 import { createGpuDetail } from './components/gpuDetail.js';
@@ -47,11 +53,37 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Subcomponents
   let breakEvenController = null;
 
+  const calcInitialFromSearch = (search) => {
+    const cost = parseCalculatorCostParam(search);
+    const watts = parseCalculatorWattsParam(search);
+    return {
+      ...(cost !== null ? { rigUpfrontCost: cost } : {}),
+      ...(watts !== null ? { systemWatts: watts } : {})
+    };
+  };
+
+  const preloadFromSearch = (search) => {
+    if (!breakEvenController) return;
+    const cost = parseCalculatorCostParam(search);
+    const watts = parseCalculatorWattsParam(search);
+    if (cost !== null || watts !== null) {
+      breakEvenController.preloadRig({
+        ...(cost !== null ? { upfrontCost: cost } : {}),
+        ...(watts !== null ? { systemWatts: watts } : {})
+      });
+    }
+  };
+
   const modelPickerController = createModelPicker(modelPickerRoot, (rigData) => {
-    const calcCost = typeof rigData?.upfrontCost === 'number' && Number.isFinite(rigData.upfrontCost)
-      ? clampRigCost(rigData.upfrontCost)
-      : null;
-    navigate(parseRoute('/calculator'), { search: calcCost !== null ? `?cost=${calcCost}` : '' });
+    const params = new URLSearchParams();
+    if (typeof rigData?.upfrontCost === 'number' && Number.isFinite(rigData.upfrontCost)) {
+      params.set('cost', String(clampRigCost(rigData.upfrontCost)));
+    }
+    if (typeof rigData?.systemWatts === 'number' && Number.isFinite(rigData.systemWatts)) {
+      params.set('watts', String(clampSystemWatts(rigData.systemWatts)));
+    }
+    const query = params.toString();
+    navigate(parseRoute('/calculator'), { search: query ? `?${query}` : '' });
     if (breakEvenController) {
       breakEvenController.preloadRig(rigData);
     }
@@ -65,10 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const initialCalcCost = route.view === 'calculator' ? parseCalculatorCostParam(window.location.search) : null;
   breakEvenController = createBreakEvenCalc(
     viewCalculator,
-    initialCalcCost !== null ? { rigUpfrontCost: initialCalcCost } : {}
+    route.view === 'calculator' ? calcInitialFromSearch(window.location.search) : {}
   );
   createPriceTracker(trackerRoot);
   createHardwareGuide(viewGuide);
@@ -217,10 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!next) return;
     e.preventDefault();
     navigate(next, { search: url.search });
-    if (next.view === 'calculator' && breakEvenController) {
-      const calcCost = parseCalculatorCostParam(url.search);
-      if (calcCost !== null) breakEvenController.preloadRig({ upfrontCost: calcCost });
-    }
+    if (next.view === 'calculator') preloadFromSearch(url.search);
     document.getElementById('main-content').focus({ preventScroll: true });
   });
 
@@ -228,10 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('popstate', () => {
     const next = parseRoute(window.location.pathname) || parseRoute('/');
     showRoute(next);
-    if (next.view === 'calculator' && breakEvenController) {
-      const calcCost = parseCalculatorCostParam(window.location.search);
-      if (calcCost !== null) breakEvenController.preloadRig({ upfrontCost: calcCost });
-    }
+    if (next.view === 'calculator') preloadFromSearch(window.location.search);
   });
 
   // In-page links to the old #section anchors still work
