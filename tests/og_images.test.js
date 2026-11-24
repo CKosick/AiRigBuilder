@@ -97,7 +97,7 @@ describe('Dynamic Open Graph Images', () => {
       const svg = generateOgSvg(route);
       assert.ok(svg.includes('Llama 3.3 70B'));
       assert.ok(svg.includes('$2,654'), 'Should display cheapest fitting build total $2,654');
-      assert.ok(svg.includes('40 GB'), 'Should display minimum required VRAM (40 GB)');
+      assert.ok(svg.includes('42 GB'), 'Should display minimum required VRAM (42 GB)');
     });
 
     it('Llama 3.3 70B best-GPU card carries 2x Tesla P40 and computed pick price', () => {

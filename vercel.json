@@ -3,6 +3,13 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/models/:model",
+      "destination": "/builds/:model",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/builds/:model",

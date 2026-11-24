@@ -7,11 +7,12 @@ import { BUILDS_DATA } from '../src/data/builds.js';
 import { MODELS_DATA } from '../src/data/models.js';
 import {
   DUAL_3090_BANDWIDTH_GBS,
+  DUAL_3090_VRAM_GB,
   estimateSpeedToks,
   formatSpeedRange,
   formatTierSpeedLine
 } from '../src/utils/speedEstimate.js';
-import { renderModelPickerHtml } from '../src/components/modelPicker.js';
+import { headlineSpeedLabel, renderModelPickerHtml } from '../src/components/modelPicker.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -33,6 +34,25 @@ describe('Speed figures are stored once', () => {
     assert.match(speed('llama-3.3-70b'), /^17 - 21 tokens\/sec/);
     assert.match(speed('mistral-nemo-12b'), /^50 - 85 tokens\/sec/);
     assert.match(speed('llama-3.1-8b'), /^90 - 130 tokens\/sec/);
+  });
+
+  it('distinguishes engine-typical headline figures from bandwidth-bound quant estimates on build sheets', () => {
+    assert.equal(headlineSpeedLabel('17 - 21 tokens/sec (exllamav2 / llama.cpp)'), 'Typical Engine Results (Dual 3090):');
+    assert.equal(
+      headlineSpeedLabel('112 - 168 tokens/sec (bandwidth-bound estimate: 936 GB/s over 2.1 GB of active weights at MXFP4; real speeds often lower, especially for MoE)'),
+      'Estimated Speed (Dual 3090):'
+    );
+    assert.equal(headlineSpeedLabel('Exceeds dual 3090 memory (needs 220 GB+ at UD-IQ1_S)'), 'Typical Speed on Dual 3090:');
+
+    const llamaHtml = renderModelPickerHtml({ activeModelId: 'llama-3.3-70b' });
+    assert.ok(llamaHtml.includes('Typical Engine Results (Dual 3090): <strong>17 - 21 tokens/sec (exllamav2 / llama.cpp)</strong>'));
+    assert.ok(llamaHtml.includes('<th scope="col">Bandwidth-Bound Speed Estimate</th>'));
+    assert.ok(llamaHtml.includes('<td data-label="Bandwidth-bound estimate">~11-17 tok/s on 2x 3090 (bandwidth-bound est.)</td>'));
+    assert.ok(llamaHtml.includes('~20 tokens/sec (typical engine results)'));
+    assert.ok(llamaHtml.includes('id="spec-badge-min-vram"') || llamaHtml.includes('>42 GB</div>'));
+
+    const gptOssHtml = renderModelPickerHtml({ activeModelId: 'gpt-oss-20b' });
+    assert.ok(gptOssHtml.includes('Estimated Speed (Dual 3090): <strong>112 - 168 tokens/sec'));
   });
 });
 
@@ -71,6 +91,15 @@ describe('Method-based speed estimation (speedEstimate.js)', () => {
     );
   });
 
+  it('omits the 2x 3090 claim and flags rows whose quant weights exceed 48 GB', () => {
+    const fitStr = formatSpeedRange({ low: 11, high: 17 }, { weightGb: 48 });
+    assert.equal(fitStr, '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)');
+
+    const overStr = formatSpeedRange({ low: 8, high: 12 }, { weightGb: 58 });
+    assert.equal(overStr, '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)');
+    assert.ok(!/on 2x 3090/i.test(overStr));
+  });
+
   it('returns null when inputs are missing or bandwidthGbs is null/non-positive', () => {
     const model = MODELS_DATA.find(m => m.id === 'qwen-3-30b-a3b');
     const quant = model.quants[0];
@@ -93,14 +122,20 @@ describe('Method-based speed estimation (speedEstimate.js)', () => {
     }
   });
 
-  it('consistency: every model and quant stored speed string equals the util output on the 936 GB/s basis', () => {
+  it('consistency: every model and quant stored speed string equals the util output on the 936 GB/s basis and never claims 2x 3090 above 48 GB', () => {
     for (const m of MODELS_DATA) {
       for (const q of m.quants) {
         const est = estimateSpeedToks(m, q, DUAL_3090_BANDWIDTH_GBS);
         assert.ok(est && est.low > 0 && est.high >= est.low, `${m.id} ${q.name} produces valid speed estimate`);
-        const expected = formatSpeedRange(est);
+        const expected = formatSpeedRange(est, { weightGb: q.vram });
         assert.equal(q.speed, expected, `${m.id} ${q.name} stored speed must equal util output`);
         assert.ok(!q.speed.includes('Needs more than 48 GB'), `${m.id} ${q.name} must not contain sentinel text`);
+        if (q.vram > DUAL_3090_VRAM_GB) {
+          assert.ok(!/on 2x 3090/i.test(q.speed), `${m.id} ${q.name} (${q.vram} GB) must not claim dual 3090`);
+          assert.ok(q.speed.includes('does not fit dual 3090'), `${m.id} ${q.name} (${q.vram} GB) must note it does not fit dual 3090`);
+        } else {
+          assert.ok(q.speed.includes('on 2x 3090'), `${m.id} ${q.name} (${q.vram} GB) fits dual 3090`);
+        }
       }
     }
   });

@@ -358,6 +358,19 @@ describe('404, sitemap and hosting config', () => {
     assert.equal(vercel.cleanUrls, true);
     assert.ok(!(vercel.rewrites || []).some(r => r.destination === '/index.html'), 'no SPA catch-all (unknown paths must 404)');
     for (const r of vercel.rewrites || []) assert.ok(r.destination.endsWith('.html'), `${r.source} rewrites to a static file`);
+
+    const redirect = (vercel.redirects || []).find(r => r.source === '/models/:model');
+    assert.deepEqual(redirect, {
+      source: '/models/:model',
+      destination: '/builds/:model',
+      permanent: true
+    });
+  });
+
+  it('no prerendered HTML page links to /models/', () => {
+    for (const { route, html } of pages) {
+      assert.ok(!html.includes('href="/models/'), `${route.path} must not link to /models/`);
+    }
   });
 
   it('renderPage fails loudly if index.html loses a tag the prerender fills in', () => {

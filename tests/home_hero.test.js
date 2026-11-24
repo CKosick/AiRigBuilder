@@ -26,7 +26,7 @@ describe('Home first screen answers the main question', () => {
   it('quotes the same speed as the model card below it', () => {
     const model = MODELS_DATA.find(m => m.id === DEFAULT_MODEL_ID);
     const [lo, hi] = model.typicalSpeedDual3090.match(/\d+/g);
-    assert.ok(hero.includes(`<strong>${lo}–${hi} tokens/sec</strong> on ${model.name} at ${model.sweetSpotQuant}`));
+    assert.ok(hero.includes(`<strong>${lo}–${hi} tokens/sec</strong> on ${model.name} at ${model.sweetSpotQuant} (typical engine results)`));
     assert.ok(renderModelPickerHtml({ activeModelId: DEFAULT_MODEL_ID }).includes(`${lo} - ${hi} tokens/sec`));
   });
 

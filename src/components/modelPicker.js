@@ -187,6 +187,17 @@ function renderCloudBadgeActionsHtml(model) {
         </div>`;
 }
 
+/** Label for the model banner's dual-3090 speed line, distinguishing engine-typical figures from bandwidth-bound estimates. */
+export function headlineSpeedLabel(speedStr = '') {
+  if (/tokens\/sec/i.test(speedStr) && !/bandwidth-bound|est\.|exceeds|needs/i.test(speedStr)) {
+    return 'Typical Engine Results (Dual 3090):';
+  }
+  if (/bandwidth-bound/i.test(speedStr)) {
+    return 'Estimated Speed (Dual 3090):';
+  }
+  return 'Typical Speed on Dual 3090:';
+}
+
 export function renderModelPickerHtml(state = {}) {
   const {
     activeModelId, activeTierId, contextK, kvPrecision, vramBudget, codingOnly, searchQuery, showAllModels, isHome, salesTaxRate, dailyUsageHours, kwhRate
@@ -251,7 +262,7 @@ export function renderModelPickerHtml(state = {}) {
         <${titleTag} class="model-info-title">${currentModel.name}</${titleTag}>
         <p class="model-info-desc">${fillGpuPrices(currentModel.description)}</p>
         <div class="model-speed-line">
-          ${icon('zap')}Typical Speed on Dual 3090: <strong>${currentModel.typicalSpeedDual3090}</strong>
+          ${icon('zap')}${headlineSpeedLabel(currentModel.typicalSpeedDual3090)} <strong>${currentModel.typicalSpeedDual3090}</strong>
         </div>
         ${isBestGpuModel(currentModel.id) ? `
         <div class="model-best-gpu-link">
@@ -295,7 +306,7 @@ export function renderModelPickerHtml(state = {}) {
             <tr>
               <th scope="col">Quant</th>
               <th scope="col">VRAM for Weights</th>
-              <th scope="col">Typical Speed</th>
+              <th scope="col">Bandwidth-Bound Speed Estimate</th>
               <th scope="col">Quality Notes</th>
             </tr>
           </thead>
@@ -304,7 +315,7 @@ export function renderModelPickerHtml(state = {}) {
               <tr>
                 <td class="stack-head"><strong>${q.name}</strong>${q.recommended ? ' <span class="condition-badge condition-new">Recommended</span>' : ''}</td>
                 <td class="part-price-cell" data-label="VRAM for weights">${q.vram} GB</td>
-                <td data-label="Typical speed">${q.speed}</td>
+                <td data-label="Bandwidth-bound estimate">${q.speed}</td>
                 <td class="stack-wide" data-label="Quality notes">${q.quality}</td>
               </tr>
             `).join('')}

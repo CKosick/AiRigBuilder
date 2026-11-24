@@ -146,14 +146,14 @@ export const MODELS_DATA = [
     description: 'The reigning open-weights champion. Matches original Llama 3 405B capabilities on reasoning, math, and code at a fraction of the hardware cost.',
     architecture: 'Dense Transformer',
     flagship: true,
-    minVram: 40,
+    minVram: 42,
     recommendedVram: 48,
     sweetSpotQuant: 'Q4_K_M (4.5 bpw)',
     quants: [
       { name: 'Q4_K_M (4.5 bpw)', vram: 42, speed: '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: 99% FP16 accuracy', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 50, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Maximum fidelity dense' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Bit-exact research grade' }
+      { name: 'Q5_K_M (5.5 bpw)', vram: 50, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Maximum fidelity dense' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Bit-exact research grade' }
     ],
     contextCostPer8k: 2.7,
     typicalSpeedDual3090: '17 - 21 tokens/sec (exllamav2 / llama.cpp)',
@@ -176,9 +176,9 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M or EXL2 4.25bpw',
     quants: [
       { name: 'Q4_K_M (4.5 bpw)', vram: 43, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Optimal reasoning retention', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 51, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near-perfect chain of thought' },
-      { name: 'Q6_K (6.5 bpw)', vram: 60, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Flawless math proof retention' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Maximum mathematical fidelity' }
+      { name: 'Q5_K_M (5.5 bpw)', vram: 51, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near-perfect chain of thought' },
+      { name: 'Q6_K (6.5 bpw)', vram: 60, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Flawless math proof retention' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Maximum mathematical fidelity' }
     ],
     contextCostPer8k: 2.7,
     typicalSpeedDual3090: '18 - 23 tokens/sec (vLLM / exllamav2)',
@@ -200,9 +200,9 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M (4.5 bpw)',
     quants: [
       { name: 'Q4_K_M (4.5 bpw)', vram: 44, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Recommended standard for production', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 53, speed: '~9-13 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Zero quantization loss in code' },
-      { name: 'Q6_K (6.5 bpw)', vram: 62, speed: '~8-11 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Exceptional multilingual accuracy' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 78, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Full precision equivalent' }
+      { name: 'Q5_K_M (5.5 bpw)', vram: 53, speed: '~9-13 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Zero quantization loss in code' },
+      { name: 'Q6_K (6.5 bpw)', vram: 62, speed: '~8-11 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Exceptional multilingual accuracy' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 78, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Full precision equivalent' }
     ],
     contextCostPer8k: 2.7,
     typicalSpeedDual3090: '16 - 20 tokens/sec (vLLM / llama.cpp)',
@@ -224,9 +224,9 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M (4.5 bpw)',
     quants: [
       { name: 'Q4_K_M (4.5 bpw)', vram: 42, speed: '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Daily driver benchmark', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 50, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High precision agents' },
-      { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless 128k context' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Reference FP16 match' }
+      { name: 'Q5_K_M (5.5 bpw)', vram: 50, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High precision agents' },
+      { name: 'Q6_K (6.5 bpw)', vram: 58, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless 128k context' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 75, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Reference FP16 match' }
     ],
     contextCostPer8k: 2.7,
     typicalSpeedDual3090: '17 - 21 tokens/sec',
@@ -826,7 +826,7 @@ export const MODELS_DATA = [
       { name: 'Q4_K_M (4.5 bpw)', vram: 29.5, speed: '~29-43 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot for dual GPU', recommended: true },
       { name: 'Q5_K_M (5.5 bpw)', vram: 35.0, speed: '~24-36 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless expert routing' },
       { name: 'Q6_K (6.5 bpw)', vram: 41.0, speed: '~21-31 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Maximum fidelity MoE' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 52.0, speed: '~16-24 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Bit-exact FP16' }
+      { name: 'Q8_0 (8.5 bpw)', vram: 52.0, speed: '~16-24 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Bit-exact FP16' }
     ],
     contextCostPer8k: 1.1,
     typicalSpeedDual3090: '32 - 42 tokens/sec',
@@ -847,10 +847,10 @@ export const MODELS_DATA = [
     recommendedVram: 96,
     sweetSpotQuant: 'Q4_K_M (Mac Studio 128GB or Quad 3090)',
     quants: [
-      { name: 'Q3_K_M (3.4 bpw)', vram: 68, speed: '~12-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Acceptable compression' },
-      { name: 'Q4_K_M (4.5 bpw)', vram: 85, speed: '~10-15 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Production standard', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 102, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless 141B' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 155, speed: '~5-8 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Full precision' }
+      { name: 'Q3_K_M (3.4 bpw)', vram: 68, speed: '~12-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Acceptable compression' },
+      { name: 'Q4_K_M (4.5 bpw)', vram: 85, speed: '~10-15 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Production standard', recommended: true },
+      { name: 'Q5_K_M (5.5 bpw)', vram: 102, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless 141B' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 155, speed: '~5-8 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Full precision' }
     ],
     contextCostPer8k: 1.9,
     typicalSpeedDual3090: 'Needs 4x GPU or Mac Studio 128GB',
@@ -871,10 +871,10 @@ export const MODELS_DATA = [
     recommendedVram: 72,
     sweetSpotQuant: 'Q4_K_M on Triple/Quad GPU or Mac 96GB+',
     quants: [
-      { name: 'Q3_K_M (3.4 bpw)', vram: 52, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Good for long document RAG' },
-      { name: 'Q4_K_M (4.5 bpw)', vram: 64, speed: '~7-11 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Optimal for corporate agents', recommended: true },
-      { name: 'Q5_K_M (5.5 bpw)', vram: 76, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Flawless enterprise citations' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 112, speed: '~4-6 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Bit-exact FP16' }
+      { name: 'Q3_K_M (3.4 bpw)', vram: 52, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Good for long document RAG' },
+      { name: 'Q4_K_M (4.5 bpw)', vram: 64, speed: '~7-11 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Optimal for corporate agents', recommended: true },
+      { name: 'Q5_K_M (5.5 bpw)', vram: 76, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Flawless enterprise citations' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 112, speed: '~4-6 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Bit-exact FP16' }
     ],
     contextCostPer8k: 2.1,
     typicalSpeedDual3090: 'Needs 3x-4x 3090 or Mac Studio 96GB+',
@@ -899,15 +899,15 @@ export const MODELS_DATA = [
       {
         name: 'IQ1_S (2.2 bpw)',
         vram: 186.2,
-        speed: '~23-35 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~23-35 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Extreme sub-2-bit compression: significant quality loss, best quant that fits 192GB RAM',
         recommended: true
       },
-      { name: 'Q2_K (2.9 bpw)', vram: 244, speed: '~18-27 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 319.2, speed: '~14-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Good reasoning retention on 384GB+ systems' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 404.4, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 475.4, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q2_K (2.9 bpw)', vram: 244, speed: '~18-27 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 319.2, speed: '~14-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Good reasoning retention on 384GB+ systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 404.4, speed: '~11-16 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 475.4, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 188 GB+ at IQ1_S)',
@@ -932,19 +932,19 @@ export const MODELS_DATA = [
     recommendedVram: 188,
     sweetSpotQuant: 'IQ1_S on 192GB RAM Offload (or Q4_K_M on multi-node / cloud)',
     quants: [
-      { name: 'TQ1_0 (1.9 bpw)', vram: 161.6, speed: '~27-40 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme 1-bit ternary compression: heavy quality loss, emergency 192GB fit' },
+      { name: 'TQ1_0 (1.9 bpw)', vram: 161.6, speed: '~27-40 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme 1-bit ternary compression: heavy quality loss, emergency 192GB fit' },
       {
         name: 'IQ1_S (2.2 bpw)',
         vram: 185.5,
-        speed: '~23-35 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~23-35 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Extreme sub-2-bit compression: significant quality loss, best quant that fits 192GB RAM',
         recommended: true
       },
-      { name: 'Q2_K (2.9 bpw)', vram: 244.8, speed: '~18-27 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 319.8, speed: '~14-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Good reasoning retention on 384GB+ systems' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 404.9, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 475.8, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q2_K (2.9 bpw)', vram: 244.8, speed: '~18-27 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 319.8, speed: '~14-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Good reasoning retention on 384GB+ systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 404.9, speed: '~11-16 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 475.8, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 188 GB+ at IQ1_S)',
@@ -1012,7 +1012,7 @@ export const MODELS_DATA = [
       {
         name: 'MXFP4 (~4.25 bpw experts)',
         vram: 63.4,
-        speed: '~85-127 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~85-127 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Native MXFP4 release: no extra quantization loss',
         recommended: true
       }
@@ -1069,17 +1069,17 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M',
     quants: [
       // Size source: unsloth/Qwen3-235B-A22B-GGUF and bartowski/Qwen_Qwen3-235B-A22B-Instruct-2507-GGUF (published 85.7GB)
-      { name: 'Q2_K (2.9 bpw)', vram: 85.7, speed: '~29-44 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 96GB systems' },
-      { name: 'Q3_K_M (3.9 bpw)', vram: 112.4, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest practical quant: noticeable quality loss' },
+      { name: 'Q2_K (2.9 bpw)', vram: 85.7, speed: '~29-44 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: noticeable quality loss, fits 96GB systems' },
+      { name: 'Q3_K_M (3.9 bpw)', vram: 112.4, speed: '~22-33 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest practical quant: noticeable quality loss' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 142.2,
-        speed: '~18-26 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~18-26 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 166.8, speed: '~15-22 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 249.9, speed: '~10-15 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 166.8, speed: '~15-22 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 249.9, speed: '~10-15 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 145 GB+ at Q4_K_M)',
@@ -1103,10 +1103,10 @@ export const MODELS_DATA = [
     recommendedVram: 70,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'Q3_K_M (3.9 bpw)', vram: 51.8, speed: '~29-43 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest practical quant: noticeable quality loss' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 65.4, speed: '~23-34 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: small quality loss for the size', recommended: true },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 76.5, speed: '~20-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 114.5, speed: '~13-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q3_K_M (3.9 bpw)', vram: 51.8, speed: '~29-43 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest practical quant: noticeable quality loss' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 65.4, speed: '~23-34 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: small quality loss for the size', recommended: true },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 76.5, speed: '~20-29 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 114.5, speed: '~13-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 68 GB+ at Q4_K_M)',
@@ -1260,17 +1260,17 @@ export const MODELS_DATA = [
     recommendedVram: 247,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'Q2_K (2.9 bpw)', vram: 145.6, speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 191.1, speed: '~29-43 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
+      { name: 'Q2_K (2.9 bpw)', vram: 145.6, speed: '~38-57 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 191.1, speed: '~29-43 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 242.8,
-        speed: '~23-34 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~23-34 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 284.5, speed: '~19-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 425.8, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 284.5, speed: '~19-29 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 425.8, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 246 GB+ at Q4_K_M)',
@@ -1294,17 +1294,17 @@ export const MODELS_DATA = [
     recommendedVram: 296,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'Q2_K (2.9 bpw)', vram: 174.7, speed: '~18-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 229.2, speed: '~14-21 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
+      { name: 'Q2_K (2.9 bpw)', vram: 174.7, speed: '~18-28 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 229.2, speed: '~14-21 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: noticeable quality loss' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 290.1,
-        speed: '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~11-17 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 340.5, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 510.4, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 340.5, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 510.4, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 2.1,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 294 GB+ at Q4_K_M)',
@@ -1328,19 +1328,19 @@ export const MODELS_DATA = [
     recommendedVram: 187,
     sweetSpotQuant: 'IQ1_S on 192GB RAM Offload (or Q4_K_M on multi-node / cloud)',
     quants: [
-      { name: 'TQ1_0 (1.9 bpw)', vram: 161.3, speed: '~27-40 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme 1-bit ternary compression: heavy quality loss, emergency 192GB fit' },
+      { name: 'TQ1_0 (1.9 bpw)', vram: 161.3, speed: '~27-40 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme 1-bit ternary compression: heavy quality loss, emergency 192GB fit' },
       {
         name: 'IQ1_S (2.2 bpw)',
         vram: 184.1,
-        speed: '~24-35 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~24-35 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Extreme sub-2-bit compression: significant quality loss, best quant that fits 192GB RAM',
         recommended: true
       },
-      { name: 'Q2_K (2.9 bpw)', vram: 245.4, speed: '~18-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 320.2, speed: '~14-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Good reasoning retention on 384GB+ systems' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 405.4, speed: '~11-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 476.2, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q2_K (2.9 bpw)', vram: 245.4, speed: '~18-26 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: exceeds 192GB rigs, needs 256GB+ unified or multi-node' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 320.2, speed: '~14-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Good reasoning retention on 384GB+ systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 405.4, speed: '~11-16 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 476.2, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 713.3, speed: '~6-9 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 186 GB+ at IQ1_S)',
@@ -1365,17 +1365,17 @@ export const MODELS_DATA = [
     recommendedVram: 250,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'Q2_K (2.9 bpw)', vram: 146.3, speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 188.2, speed: '~30-44 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 192GB RAM offload' },
+      { name: 'Q2_K (2.9 bpw)', vram: 146.3, speed: '~38-57 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: noticeable quality loss, fits 192GB RAM offload' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 188.2, speed: '~30-44 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: tight fit on 192GB RAM offload' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 248.3,
-        speed: '~22-34 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~22-34 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: small quality loss for the size',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 290, speed: '~19-29 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 428.6, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 290, speed: '~19-29 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 428.6, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.3,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 250 GB+ at Q4_K_M)',
@@ -1400,16 +1400,16 @@ export const MODELS_DATA = [
     sweetSpotQuant: 'Q4_K_M',
     quants: [
       { name: 'Q2_K (2.9 bpw)', vram: 46.4, speed: '~63-95 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 48GB dual-3090 rigs with reduced quality' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 59.2, speed: '~49-74 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 72GB+ unified memory' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 59.2, speed: '~49-74 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: fits 72GB+ unified memory' },
       {
         name: 'Q4_K_M (4.8 bpw)',
         vram: 77.6,
-        speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~38-57 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: fits 96GB unified or workstation rigs',
         recommended: true
       },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 90.4, speed: '~32-49 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 132.6, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'Q5_K_M (5.7 bpw)', vram: 90.4, speed: '~32-49 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 132.6, speed: '~22-33 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.2,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 79 GB+ at Q4_K_M)',
@@ -1635,18 +1635,18 @@ export const MODELS_DATA = [
     recommendedVram: 113,
     sweetSpotQuant: 'UD-Q4_K_XL',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 72.5, speed: '~97-145 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation / unified memory rigs' },
-      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 78.9, speed: '~89-133 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 96GB workstation rigs' },
-      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 90, speed: '~78-117 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 96GB workstation rigs' },
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 72.5, speed: '~97-145 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation / unified memory rigs' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 78.9, speed: '~89-133 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 90, speed: '~78-117 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: fits 96GB workstation rigs' },
       {
         name: 'UD-Q4_K_XL (4.8 bpw)',
         vram: 111.3,
-        speed: '~63-95 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~63-95 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: fits 128GB unified memory or multi-GPU systems',
         recommended: true
       },
-      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 158.3, speed: '~44-67 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 188.2, speed: '~37-56 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 158.3, speed: '~44-67 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 188.2, speed: '~37-56 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.2,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 113 GB+ at UD-Q4_K_XL)',
@@ -1669,18 +1669,18 @@ export const MODELS_DATA = [
     recommendedVram: 157,
     sweetSpotQuant: 'UD-Q4_K_XL',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 82.5, speed: '~62-93 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
-      { name: 'UD-Q2_K (2.9 bpw)', vram: 96.8, speed: '~53-79 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: tight fit on 96GB rigs' },
-      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 104.2, speed: '~49-74 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
-      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 128.1, speed: '~40-60 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 192GB unified or RAM offload' },
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 82.5, speed: '~62-93 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 96.8, speed: '~53-79 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: tight fit on 96GB rigs' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 104.2, speed: '~49-74 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
+      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 128.1, speed: '~40-60 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 192GB unified or RAM offload' },
       {
         name: 'UD-Q4_K_XL (4.8 bpw)',
         vram: 155.1,
-        speed: '~33-49 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~33-49 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems',
         recommended: true
       },
-      { name: 'UD-Q8_K_XL (8.5 bpw)', vram: 161.9, speed: '~32-47 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-Q8_K_XL (8.5 bpw)', vram: 161.9, speed: '~32-47 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.4,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 157 GB+ at UD-Q4_K_XL)',
@@ -1704,20 +1704,20 @@ export const MODELS_DATA = [
     recommendedVram: 201,
     sweetSpotQuant: 'UD-Q4_K_XL',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 93.1, speed: '~45-67 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload rig' },
-      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 101.8, speed: '~41-62 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
-      { name: 'UD-Q2_K (2.9 bpw)', vram: 108.7, speed: '~38-58 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
-      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 120.4, speed: '~35-52 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
-      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 147.5, speed: '~28-42 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits 192GB RAM offload' },
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 93.1, speed: '~45-67 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload rig' },
+      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 101.8, speed: '~41-62 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 108.7, speed: '~38-58 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 120.4, speed: '~35-52 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest 3-bit quant: fits 128GB unified memory' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 147.5, speed: '~28-42 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: fits 192GB RAM offload' },
       {
         name: 'UD-Q4_K_XL (4.8 bpw)',
         vram: 199.7,
-        speed: '~21-31 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~21-31 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Sweet spot: exceeds 192GB rigs, fits 256GB unified or multi-node',
         recommended: true
       },
-      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 240.3, speed: '~17-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 341, speed: '~12-18 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 240.3, speed: '~17-26 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 341, speed: '~12-18 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.1,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 201 GB+ at UD-Q4_K_XL)',
@@ -1743,17 +1743,17 @@ export const MODELS_DATA = [
       {
         name: 'UD-IQ1_S (2.2 bpw)',
         vram: 216.7,
-        speed: '~20-31 tok/s on 2x 3090 (bandwidth-bound est.)',
+        speed: '~20-31 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)',
         quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)',
         recommended: true
       },
-      { name: 'UD-IQ2_M (2.6 bpw)', vram: 238.6, speed: '~18-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-Q2_K (2.9 bpw)', vram: 253.9, speed: '~17-26 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 281.7, speed: '~16-23 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest 3-bit quant: fits 512GB Mac Studio tier' },
-      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 343, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: tight fit on 512GB Mac Studio tier' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 467.3, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' },
-      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 562.5, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 801.4, speed: '~5-8 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-IQ2_M (2.6 bpw)', vram: 238.6, speed: '~18-28 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q2_K (2.9 bpw)', vram: 253.9, speed: '~17-26 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ3_XXS (3.3 bpw)', vram: 281.7, speed: '~16-23 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest 3-bit quant: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 343, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Smallest mid-tier quant: tight fit on 512GB Mac Studio tier' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 467.3, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 512GB+ memory is available' },
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 562.5, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 801.4, speed: '~5-8 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.7,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 220 GB+ at UD-IQ1_S)',
@@ -1778,13 +1778,13 @@ export const MODELS_DATA = [
     recommendedVram: 236,
     sweetSpotQuant: 'UD-IQ1_S on 512GB Mac Studio',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 233, speed: '~20-31 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
-      { name: 'UD-IQ1_M (2.4 bpw)', vram: 259.6, speed: '~18-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-IQ2_XXS (2.8 bpw)', vram: 302.5, speed: '~16-24 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-Q2_K_XL (3.5 bpw)', vram: 378.3, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Tight fit on 512GB Mac Studio tier' },
-      { name: 'UD-IQ3_XXS (3.9 bpw)', vram: 423.5, speed: '~11-17 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Exceeds 384GB usable memory; requires cluster or multi-node' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 604.8, speed: '~8-12 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 640GB+ memory is available' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 1115.2, speed: '~4-6 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 233, speed: '~20-31 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
+      { name: 'UD-IQ1_M (2.4 bpw)', vram: 259.6, speed: '~18-28 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ2_XXS (2.8 bpw)', vram: 302.5, speed: '~16-24 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q2_K_XL (3.5 bpw)', vram: 378.3, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Tight fit on 512GB Mac Studio tier' },
+      { name: 'UD-IQ3_XXS (3.9 bpw)', vram: 423.5, speed: '~11-17 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Exceeds 384GB usable memory; requires cluster or multi-node' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 604.8, speed: '~8-12 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 640GB+ memory is available' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 1115.2, speed: '~4-6 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.7,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 236 GB+ at UD-IQ1_S)',
@@ -1808,13 +1808,13 @@ export const MODELS_DATA = [
     recommendedVram: 179,
     sweetSpotQuant: 'UD-IQ1_S on 256GB+ Mac Studio / 192GB RAM',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 175.6, speed: '~26-39 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload and 256GB/512GB Mac Studio tiers', recommended: true },
-      { name: 'UD-IQ1_M (2.5 bpw)', vram: 208.9, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-IQ2_XXS (2.7 bpw)', vram: 225.6, speed: '~20-30 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-IQ2_S (3.3 bpw)', vram: 275.5, speed: '~17-25 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-Q2_K_XL (3.7 bpw)', vram: 311.2, speed: '~15-22 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Fits 512GB Mac Studio tier' },
-      { name: 'UD-IQ3_XXS (4.1 bpw)', vram: 340.4, speed: '~13-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Tight fit on 512GB Mac Studio tier' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 505.5, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 512GB+ memory is available' }
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 175.6, speed: '~26-39 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload and 256GB/512GB Mac Studio tiers', recommended: true },
+      { name: 'UD-IQ1_M (2.5 bpw)', vram: 208.9, speed: '~22-33 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ2_XXS (2.7 bpw)', vram: 225.6, speed: '~20-30 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ2_S (3.3 bpw)', vram: 275.5, speed: '~17-25 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q2_K_XL (3.7 bpw)', vram: 311.2, speed: '~15-22 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Fits 512GB Mac Studio tier' },
+      { name: 'UD-IQ3_XXS (4.1 bpw)', vram: 340.4, speed: '~13-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Tight fit on 512GB Mac Studio tier' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 505.5, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 512GB+ memory is available' }
     ],
     contextCostPer8k: 0.9,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 179 GB+ at UD-IQ1_S)',
@@ -1838,12 +1838,12 @@ export const MODELS_DATA = [
     recommendedVram: 167,
     sweetSpotQuant: 'UD-Q4_K_M',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 74.8, speed: '~69-104 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
-      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 87.9, speed: '~59-89 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 96GB workstation rigs' },
-      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 119.4, speed: '~43-65 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 128GB unified memory or 192GB RAM offload' },
-      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 162.5, speed: '~32-48 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems', recommended: true },
-      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 196.1, speed: '~26-40 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 256GB unified systems' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 280.3, speed: '~19-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 74.8, speed: '~69-104 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 87.9, speed: '~59-89 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 96GB workstation rigs' },
+      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 119.4, speed: '~43-65 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 128GB unified memory or 192GB RAM offload' },
+      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 162.5, speed: '~32-48 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems', recommended: true },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 196.1, speed: '~26-40 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 256GB unified systems' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 280.3, speed: '~19-28 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.4,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 167 GB+ at UD-Q4_K_M)',
@@ -1867,12 +1867,12 @@ export const MODELS_DATA = [
     recommendedVram: 268,
     sweetSpotQuant: 'UD-Q4_K_M',
     quants: [
-      { name: 'UD-IQ1_M (2.4 bpw)', vram: 129.3, speed: '~34-50 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload or 256GB unified systems' },
-      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 143.9, speed: '~30-45 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 192GB RAM offload or 256GB unified systems' },
-      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 195.5, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 256GB unified memory' },
-      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 264.9, speed: '~16-25 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
-      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 318.7, speed: '~14-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 512GB Mac Studio tier' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 453.6, speed: '~10-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-IQ1_M (2.4 bpw)', vram: 129.3, speed: '~34-50 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 192GB RAM offload or 256GB unified systems' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 143.9, speed: '~30-45 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 192GB RAM offload or 256GB unified systems' },
+      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 195.5, speed: '~22-33 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 256GB unified memory' },
+      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 264.9, speed: '~16-25 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 318.7, speed: '~14-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 512GB Mac Studio tier' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 453.6, speed: '~10-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 1.0,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 268 GB+ at UD-Q4_K_M)',
@@ -1895,13 +1895,13 @@ export const MODELS_DATA = [
     recommendedVram: 189,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'IQ1_S (2.2 bpw)', vram: 64.1, speed: '~52-78 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 72GB/96GB rigs' },
-      { name: 'IQ2_XXS (2.5 bpw)', vram: 82.1, speed: '~41-61 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 96GB workstation rigs' },
-      { name: 'Q2_K (2.9 bpw)', vram: 106.7, speed: '~31-47 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 137.5, speed: '~24-36 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 192GB RAM offload or 256GB unified systems' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 182.2, speed: '~18-27 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 256GB unified systems', recommended: true },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 212.8, speed: '~16-23 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 256GB+ unified systems' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 317.7, speed: '~10-16 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'IQ1_S (2.2 bpw)', vram: 64.1, speed: '~52-78 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 72GB/96GB rigs' },
+      { name: 'IQ2_XXS (2.5 bpw)', vram: 82.1, speed: '~41-61 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 96GB workstation rigs' },
+      { name: 'Q2_K (2.9 bpw)', vram: 106.7, speed: '~31-47 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 137.5, speed: '~24-36 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 192GB RAM offload or 256GB unified systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 182.2, speed: '~18-27 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 256GB unified systems', recommended: true },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 212.8, speed: '~16-23 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 256GB+ unified systems' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 317.7, speed: '~10-16 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 2.7,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 189 GB+ at Q4_K_M)',
@@ -1925,12 +1925,12 @@ export const MODELS_DATA = [
     recommendedVram: 307,
     sweetSpotQuant: 'UD-IQ1_M on 512GB Mac Studio',
     quants: [
-      { name: 'UD-IQ1_M (2.4 bpw)', vram: 303.9, speed: '~25-37 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
-      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 317.8, speed: '~24-35 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 512GB Mac Studio tier' },
-      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 339.5, speed: '~22-33 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Tight fit on 512GB Mac Studio tier' },
-      { name: 'UD-IQ3_S (3.4 bpw)', vram: 418.8, speed: '~18-27 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Exceeds 384GB usable memory; requires cluster or multi-node' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 583.7, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot where 640GB+ memory is available' },
-      { name: 'UD-Q8_K_XL (8.5 bpw)', vram: 594.5, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High precision compressed-tensors quant' }
+      { name: 'UD-IQ1_M (2.4 bpw)', vram: 303.9, speed: '~25-37 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
+      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 317.8, speed: '~24-35 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 512GB Mac Studio tier' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 339.5, speed: '~22-33 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Tight fit on 512GB Mac Studio tier' },
+      { name: 'UD-IQ3_S (3.4 bpw)', vram: 418.8, speed: '~18-27 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Exceeds 384GB usable memory; requires cluster or multi-node' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 583.7, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot where 640GB+ memory is available' },
+      { name: 'UD-Q8_K_XL (8.5 bpw)', vram: 594.5, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High precision compressed-tensors quant' }
     ],
     contextCostPer8k: 0.6,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 307 GB+ at UD-IQ1_M)',
@@ -1984,9 +1984,9 @@ export const MODELS_DATA = [
       { name: 'UD-IQ1_S (2.2 bpw)', vram: 18.5, speed: '~105-158 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits single 24GB GPU' },
       { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 28.8, speed: '~68-101 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 32GB+ or dual-3090 rigs' },
       { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 39, speed: '~50-75 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Smallest mid-tier quant: fits dual-3090 (48GB) rigs' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 50.2, speed: '~39-58 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 72GB Mac Studio or 96GB workstation rigs', recommended: true },
-      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 58.9, speed: '~33-50 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 72GB+ unified or 96GB workstation rigs' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 78.9, speed: '~25-37 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16: fits 96GB workstation rigs' }
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 50.2, speed: '~39-58 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 72GB Mac Studio or 96GB workstation rigs', recommended: true },
+      { name: 'UD-Q5_K_XL (5.7 bpw)', vram: 58.9, speed: '~33-50 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 72GB+ unified or 96GB workstation rigs' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 78.9, speed: '~25-37 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16: fits 96GB workstation rigs' }
     ],
     contextCostPer8k: 0.1,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory at UD-Q4_K_XL (fits at UD-Q3_K_XL, ~50-75 tok/s est.)',
@@ -2010,10 +2010,10 @@ export const MODELS_DATA = [
     recommendedVram: 74,
     sweetSpotQuant: 'Q4_0',
     quants: [
-      { name: 'Q4_0 (4.5 bpw)', vram: 72.1, speed: '~34-51 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 96GB workstation or Strix Halo 128GB rigs', recommended: true },
-      { name: 'NVFP4 (4.8 bpw)', vram: 76.9, speed: '~32-47 tok/s on 2x 3090 (bandwidth-bound est.)', quality: '4-bit Blackwell-optimized quant: fits 96GB workstation rigs' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 128.5, speed: '~19-28 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16: fits 192GB RAM offload' },
-      { name: 'BF16 (16 bpw)', vram: 241.5, speed: '~10-15 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Full unquantized BF16 weights' }
+      { name: 'Q4_0 (4.5 bpw)', vram: 72.1, speed: '~34-51 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 96GB workstation or Strix Halo 128GB rigs', recommended: true },
+      { name: 'NVFP4 (4.8 bpw)', vram: 76.9, speed: '~32-47 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: '4-bit Blackwell-optimized quant: fits 96GB workstation rigs' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 128.5, speed: '~19-28 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16: fits 192GB RAM offload' },
+      { name: 'BF16 (16 bpw)', vram: 241.5, speed: '~10-15 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Full unquantized BF16 weights' }
     ],
     contextCostPer8k: 0.1,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 74 GB+ at Q4_0)',
@@ -2037,12 +2037,12 @@ export const MODELS_DATA = [
     recommendedVram: 309,
     sweetSpotQuant: 'UD-Q4_K_XL',
     quants: [
-      { name: 'UD-IQ1_S (2.2 bpw)', vram: 103.1, speed: '~49-74 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 128GB unified or 192GB RAM offload' },
-      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 133.9, speed: '~38-57 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 192GB RAM offload' },
-      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 186.9, speed: '~27-41 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 256GB unified systems' },
-      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 242.3, speed: '~21-32 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 512GB Mac Studio tier (384GB usable)' },
-      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 306.5, speed: '~17-25 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
-      { name: 'Q8_0 (8.5 bpw)', vram: 532.8, speed: '~10-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'UD-IQ1_S (2.2 bpw)', vram: 103.1, speed: '~49-74 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 128GB unified or 192GB RAM offload' },
+      { name: 'UD-IQ2_XXS (2.5 bpw)', vram: 133.9, speed: '~38-57 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 192GB RAM offload' },
+      { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 186.9, speed: '~27-41 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 256GB unified systems' },
+      { name: 'UD-Q3_K_XL (3.8 bpw)', vram: 242.3, speed: '~21-32 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 512GB Mac Studio tier (384GB usable)' },
+      { name: 'UD-Q4_K_XL (4.8 bpw)', vram: 306.5, speed: '~17-25 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
+      { name: 'Q8_0 (8.5 bpw)', vram: 532.8, speed: '~10-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 0.4,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 309 GB+ at UD-Q4_K_XL)',
@@ -2068,10 +2068,10 @@ export const MODELS_DATA = [
     quants: [
       { name: 'UD-IQ1_S (2.2 bpw)', vram: 33.8, speed: '~102-153 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits dual-3090 (48GB) rigs' },
       { name: 'UD-Q2_K_XL (2.9 bpw)', vram: 39.7, speed: '~87-130 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits dual-3090 (48GB) rigs' },
-      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 54, speed: '~64-96 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 72GB Mac Studio or 96GB workstation rigs' },
-      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 73.1, speed: '~47-71 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 96GB workstation or Strix Halo 128GB rigs', recommended: true },
-      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 87.9, speed: '~39-59 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 96GB workstation rigs' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 125, speed: '~28-41 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16: fits 192GB RAM offload' }
+      { name: 'UD-Q3_K_M (3.8 bpw)', vram: 54, speed: '~64-96 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 72GB Mac Studio or 96GB workstation rigs' },
+      { name: 'UD-Q4_K_M (4.8 bpw)', vram: 73.1, speed: '~47-71 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 96GB workstation or Strix Halo 128GB rigs', recommended: true },
+      { name: 'UD-Q5_K_M (5.7 bpw)', vram: 87.9, speed: '~39-59 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 96GB workstation rigs' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 125, speed: '~28-41 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16: fits 192GB RAM offload' }
     ],
     contextCostPer8k: 0.5,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory at UD-Q4_K_M (fits at UD-Q2_K_XL, ~87-130 tok/s est.)',
@@ -2094,13 +2094,13 @@ export const MODELS_DATA = [
     recommendedVram: 243,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'IQ1_S (2.2 bpw)', vram: 85, speed: '~45-67 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
-      { name: 'IQ2_XXS (2.5 bpw)', vram: 111, speed: '~34-52 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 128GB unified memory' },
-      { name: 'Q2_K (2.9 bpw)', vram: 146.2, speed: '~26-39 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 192GB RAM offload or 256GB unified systems' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 182.5, speed: '~21-31 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 256GB unified systems' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 237.8, speed: '~16-24 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 289.6, speed: '~13-20 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 512GB Mac Studio tier' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 403.1, speed: '~9-14 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16' }
+      { name: 'IQ1_S (2.2 bpw)', vram: 85, speed: '~45-67 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 96GB workstation rigs' },
+      { name: 'IQ2_XXS (2.5 bpw)', vram: 111, speed: '~34-52 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 128GB unified memory' },
+      { name: 'Q2_K (2.9 bpw)', vram: 146.2, speed: '~26-39 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 192GB RAM offload or 256GB unified systems' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 182.5, speed: '~21-31 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 256GB unified systems' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 237.8, speed: '~16-24 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 512GB Mac Studio tier (384GB usable)', recommended: true },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 289.6, speed: '~13-20 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 512GB Mac Studio tier' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 403.1, speed: '~9-14 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16' }
     ],
     contextCostPer8k: 2.0,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 243 GB+ at Q4_K_M)',
@@ -2148,13 +2148,13 @@ export const MODELS_DATA = [
     recommendedVram: 138,
     sweetSpotQuant: 'Q4_K_M',
     quants: [
-      { name: 'IQ1_S (2.2 bpw)', vram: 49.3, speed: '~42-62 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Extreme sub-2-bit compression: fits 72GB Mac Studio or 96GB workstation rigs' },
-      { name: 'IQ2_XXS (2.5 bpw)', vram: 62.3, speed: '~33-49 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 72GB Mac Studio or 96GB workstation rigs' },
-      { name: 'Q2_K (2.9 bpw)', vram: 80.1, speed: '~26-38 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'High compression: fits 96GB workstation rigs' },
-      { name: 'Q3_K_M (3.8 bpw)', vram: 102.6, speed: '~20-30 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Mid-tier quant: fits 128GB unified memory' },
-      { name: 'Q4_K_M (4.8 bpw)', vram: 135.1, speed: '~15-23 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems', recommended: true },
-      { name: 'Q5_K_M (5.7 bpw)', vram: 157.8, speed: '~13-19 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Near lossless: fits 192GB RAM offload or 256GB unified systems' },
-      { name: 'Q8_0 (8.5 bpw)', vram: 232, speed: '~9-13 tok/s on 2x 3090 (bandwidth-bound est.)', quality: 'Effectively identical to BF16: fits 512GB Mac Studio tier' }
+      { name: 'IQ1_S (2.2 bpw)', vram: 49.3, speed: '~42-62 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Extreme sub-2-bit compression: fits 72GB Mac Studio or 96GB workstation rigs' },
+      { name: 'IQ2_XXS (2.5 bpw)', vram: 62.3, speed: '~33-49 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 72GB Mac Studio or 96GB workstation rigs' },
+      { name: 'Q2_K (2.9 bpw)', vram: 80.1, speed: '~26-38 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'High compression: fits 96GB workstation rigs' },
+      { name: 'Q3_K_M (3.8 bpw)', vram: 102.6, speed: '~20-30 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Mid-tier quant: fits 128GB unified memory' },
+      { name: 'Q4_K_M (4.8 bpw)', vram: 135.1, speed: '~15-23 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Sweet spot: fits 192GB RAM offload or 256GB unified systems', recommended: true },
+      { name: 'Q5_K_M (5.7 bpw)', vram: 157.8, speed: '~13-19 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Near lossless: fits 192GB RAM offload or 256GB unified systems' },
+      { name: 'Q8_0 (8.5 bpw)', vram: 232, speed: '~9-13 tok/s at 936 GB/s (bandwidth-bound est.; does not fit dual 3090)', quality: 'Effectively identical to BF16: fits 512GB Mac Studio tier' }
     ],
     contextCostPer8k: 0.7,
     typicalSpeedDual3090: 'Exceeds dual 3090 memory (needs 138 GB+ at Q4_K_M)',

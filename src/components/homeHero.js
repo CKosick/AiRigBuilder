@@ -19,7 +19,7 @@ export function renderHomeHeroHtml() {
         <h1 class="hero-answer" id="hero-answer"><span class="hero-question">What's the cheapest way to run a 70B model at home?</span> Two used RTX 3090s: <span class="hero-highlight">about ${usd(dual3090RigEst)}</span> for the whole PC.</h1>
         <ul class="hero-facts">
           <li><strong>48 GB</strong> of VRAM across both cards</li>
-          <li><strong>${speed}</strong> on ${model.name} at ${model.sweetSpotQuant}</li>
+          <li><strong>${speed}</strong> on ${model.name} at ${model.sweetSpotQuant} (typical engine results)</li>
           <li><strong>~${payoffMonths4h} months</strong> to pay for itself vs RunPod ($${runpodDual3090.hourlyRate.toFixed(2)}/hr) at 4 hrs a day</li>
         </ul>
         <div class="hero-actions">

@@ -77,6 +77,11 @@ describe('Data Integrity & Consistency Contracts', () => {
         const hasRecommended = model.quants.some(q => q.recommended);
         assert.ok(hasRecommended, `Model ${model.id} must have at least one recommended quantization level`);
       }
+
+      const llama70b = MODELS_DATA.find(m => m.id === 'llama-3.3-70b');
+      const llamaSmallest = llama70b.quants.reduce((a, b) => (b.vram < a.vram ? b : a), llama70b.quants[0]);
+      assert.equal(llama70b.minVram, 42, 'llama-3.3-70b minVram must match Q4_K_M weights (42 GB)');
+      assert.ok(llama70b.minVram >= llamaSmallest.vram, 'llama-3.3-70b minVram must be >= smallest quant weights');
     });
 
     it('derives contextCostPer8k from the documented KV-cache architecture specs', () => {

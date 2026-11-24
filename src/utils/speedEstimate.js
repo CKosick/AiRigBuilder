@@ -26,6 +26,7 @@
 // interconnect overhead.
 
 export const DUAL_3090_BANDWIDTH_GBS = 936;
+export const DUAL_3090_VRAM_GB = 48;
 export const EFFICIENCY_LOW = 0.5;
 export const EFFICIENCY_HIGH = 0.75;
 export const MOE_FACTOR = 0.5;
@@ -69,14 +70,23 @@ export function estimateSpeedToks(model, quant, bandwidthGbs) {
 }
 
 /**
- * Formats a { low, high } speed range into the batch 1 stored quant speed string on 2x RTX 3090.
+ * Formats a { low, high } speed range into the quant table's speed estimate string.
+ * Drops the "on 2x 3090" claim and marks non-fitting rows when weightGb exceeds 48 GB
+ * (or fitsDual3090 is false).
  *
  * @param {{ low: number, high: number } | null | undefined} range
+ * @param {{ weightGb?: number, fitsDual3090?: boolean }} [options]
  * @returns {string | null}
  */
-export function formatSpeedRange(range) {
+export function formatSpeedRange(range, options = {}) {
   if (!range || typeof range.low !== 'number' || typeof range.high !== 'number') {
     return null;
+  }
+  const fitsDual3090 = typeof options.weightGb === 'number'
+    ? options.weightGb <= DUAL_3090_VRAM_GB
+    : options.fitsDual3090 !== false;
+  if (!fitsDual3090) {
+    return `~${range.low}-${range.high} tok/s at ${DUAL_3090_BANDWIDTH_GBS} GB/s (bandwidth-bound est.; does not fit dual 3090)`;
   }
   return `~${range.low}-${range.high} tok/s on 2x 3090 (bandwidth-bound est.)`;
 }

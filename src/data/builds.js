@@ -24,7 +24,7 @@ export const BUILDS_DATA = {
         badge: 'Community Gold Standard',
         type: 'used',
         accentColor: '#10b981', // emerald
-        headline: 'Cheapest way to run full 70B locally at ~20 tokens/sec',
+        headline: 'Cheapest way to run full 70B locally at ~20 tokens/sec (typical engine results)',
         rigSummary: 'Dual used RTX 3090 24GB cards on a budget AM4/B550 platform. Delivers 48GB VRAM with NVLink support for the lowest total cost of any 70B-capable build.',
         memoryGb: 48,
         bandwidthGbs: 936,
