@@ -79,7 +79,7 @@ export function homeFaq() {
     },
     {
       question: 'How fast does a local 70B AI build break even against cloud GPU providers?',
-      answer: `At 4 hours of daily usage compared to renting 2x RTX 3090 on RunPod ($${f.runpodDual3090.hourlyRate.toFixed(2)}/hr plus storage), a ~${usd(f.dual3090RigEst)} Dual 3090 rig pays for itself in roughly ${f.payoffMonths4h} months after electricity costs. At 12 hours a day the payoff drops to about ${f.payoffMonths12h} months.`
+      answer: `A ~${usd(f.dual3090RigEst)} Dual 3090 rig pays for itself in roughly ${f.payoffMonths4h} months (RunPod 2x RTX 3090 at $${f.runpodDual3090.hourlyRate.toFixed(2)}/hr plus storage, 4 hrs/day, full cost including electricity). At 12 hrs/day on the same basis, payoff drops to about ${f.payoffMonths12h} months.`
     }
   ];
 }

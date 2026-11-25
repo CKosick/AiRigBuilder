@@ -94,7 +94,7 @@ export function computeCloudRentalCallout(tierTotal, hourlyRate, label, asOf = C
     equivalencePhrase = 'more than 5 years of rental fees';
   }
 
-  const line = `Rent the same GPUs instead: from $${hourlyRate.toFixed(2)}/hr (${label}). At ${CLOUD_CALLOUT_DAILY_HOURS} hrs/day, this rig's price equals ${equivalencePhrase}.`;
+  const line = `Rent the same GPUs instead: this rig's price equals ${equivalencePhrase} (${label} at $${hourlyRate.toFixed(2)}/hr, ${CLOUD_CALLOUT_DAILY_HOURS} hrs/day, rental-fees-only).`;
   const subLine = `Cloud rates checked ${asOf}`;
 
   return {

@@ -2,7 +2,7 @@
 // Rendered at build time into a static page; in the browser the chart is drawn on top.
 import { GPUS_DATA, GPUS_UPDATED_AT } from '../data/gpus.js';
 import { formatAffiliateUrl, AFFILIATE_LINK_REL } from '../config/affiliates.js';
-import { fillMonthGaps } from '../utils/priceHistory.js';
+import { fillMonthGaps, historyGapBetween } from '../utils/priceHistory.js';
 import { trendBadgeHtml } from '../utils/priceTrends.js';
 import { gpuSummary } from '../utils/siteFacts.js';
 import { gpuPath, shortGpuName } from '../routes.js';
@@ -38,12 +38,19 @@ export function renderGpuDetailHtml(gpu) {
   const historyRows = [...gpu.history].reverse().map((h, i, rows) => {
     const prev = rows[i + 1];
     const change = prev ? h.price - prev.price : null;
+    const gap = prev ? historyGapBetween(prev.date, h.date) : null;
+    const gapRow = gap
+      ? `
+              <tr class="history-gap-row">
+                <td colspan="3">No data: ${gap.start} – ${gap.end}</td>
+              </tr>`
+      : '';
     return `
               <tr>
                 <td>${h.date}</td>
                 <td class="part-price-cell">$${h.price.toLocaleString('en-US')}</td>
                 <td>${change === null ? '<span class="text-dim">—</span>' : `${change > 0 ? '+' : change < 0 ? '−' : '±'}$${Math.abs(change)}`}</td>
-              </tr>`;
+              </tr>${gapRow}`;
   }).join('');
   const others = [...GPUS_DATA].filter(g => g.id !== gpu.id).sort((a, b) => a.pricePerGb - b.pricePerGb);
 

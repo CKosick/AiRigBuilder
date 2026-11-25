@@ -210,12 +210,12 @@ export const BUILDS_DATA = {
       },
       {
         id: 'tier-best-new',
-        name: 'Best New / Turnkey Unified (Apple Mac Studio / RTX 5090 Path)',
+        name: 'Best New / Turnkey Unified (Mac Studio M2 Ultra)',
         badge: 'Zero Cable Friction / Whisper Silent',
         type: 'new',
         accentColor: '#8b5cf6', // purple
-        headline: 'Mac Studio M2 Ultra (64GB/128GB) or New Ada/Blackwell Turnkey',
-        rigSummary: 'Apple Mac Studio M2 Ultra with 64GB-128GB unified memory or a single next-gen 32GB+ flagship GPU with CPU offload. Zero multi-GPU cabling, 140W whisper-quiet power draw.',
+        headline: 'Turnkey Apple Mac Studio M2 Ultra (64GB Unified Memory)',
+        rigSummary: 'Apple Mac Studio M2 Ultra with 64GB unified memory (48GB usable for GPU/Metal, 800 GB/s bandwidth). Zero multi-GPU cabling, 140W whisper-quiet power draw.',
         memoryGb: 48,
         bandwidthGbs: 800,
 

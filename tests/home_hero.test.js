@@ -20,7 +20,7 @@ describe('Home first screen answers the main question', () => {
   it('states the answer with the current rig cost, payoff and cloud rate', () => {
     assert.match(hero, /What's the cheapest way to run a 70B model at home\?/);
     assert.ok(hero.includes(`Two used RTX 3090s: <span class="hero-highlight">about ${usd(f.dual3090RigEst)}</span>`));
-    assert.ok(hero.includes(`~${f.payoffMonths4h} months</strong> to pay for itself vs RunPod ($${f.runpodDual3090.hourlyRate.toFixed(2)}/hr)`));
+    assert.ok(hero.includes(`~${f.payoffMonths4h} months</strong> to pay for itself (RunPod at $${f.runpodDual3090.hourlyRate.toFixed(2)}/hr, 4 hrs/day, full cost including electricity)`));
   });
 
   it('quotes the same speed as the model card below it', () => {

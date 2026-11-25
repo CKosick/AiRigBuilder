@@ -91,7 +91,7 @@ describe('Cloud rental callout on tier cards', () => {
     assert.equal(Math.round(llamaCallout.rawMonths), 52);
     assert.equal(
       llamaCallout.line,
-      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 52 months of rental fees."
+      "Rent the same GPUs instead: this rig's price equals about 52 months of rental fees (Vast.ai 2x RTX 3090 at $0.42/hr, 4 hrs/day, rental-fees-only)."
     );
     assert.equal(llamaCallout.subLine, `Cloud rates checked ${CLOUD_RATES_AS_OF}`);
 
@@ -99,14 +99,14 @@ describe('Cloud rental callout on tier cards', () => {
     const under12 = computeCloudRentalCallout(430, 0.42, 'Vast.ai 2x RTX 3090');
     assert.equal(
       under12.line,
-      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 8.4 months of rental fees."
+      "Rent the same GPUs instead: this rig's price equals about 8.4 months of rental fees (Vast.ai 2x RTX 3090 at $0.42/hr, 4 hrs/day, rental-fees-only)."
     );
 
     // Over 60 months: "more than 5 years of rental fees"
     const over60 = computeCloudRentalCallout(3373, 0.42, 'Vast.ai 2x RTX 3090');
     assert.equal(
       over60.line,
-      "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals more than 5 years of rental fees."
+      "Rent the same GPUs instead: this rig's price equals more than 5 years of rental fees (Vast.ai 2x RTX 3090 at $0.42/hr, 4 hrs/day, rental-fees-only)."
     );
   });
 
@@ -115,7 +115,7 @@ describe('Cloud rental callout on tier cards', () => {
     assert.ok(llamaDefaultHtml.includes('class="tier-cloud-callout"'));
     assert.ok(
       llamaDefaultHtml.includes(
-        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals about 52 months of rental fees."
+        "Rent the same GPUs instead: this rig's price equals about 52 months of rental fees (Vast.ai 2x RTX 3090 at $0.42/hr, 4 hrs/day, rental-fees-only)."
       )
     );
     assert.ok(llamaDefaultHtml.includes(`Cloud rates checked ${CLOUD_RATES_AS_OF}`));
@@ -167,7 +167,7 @@ describe('Cloud rental callout on tier cards', () => {
     });
     assert.ok(
       llamaBalancedHtml.includes(
-        "Rent the same GPUs instead: from $0.42/hr (Vast.ai 2x RTX 3090). At 4 hrs/day, this rig's price equals more than 5 years of rental fees."
+        "Rent the same GPUs instead: this rig's price equals more than 5 years of rental fees (Vast.ai 2x RTX 3090 at $0.42/hr, 4 hrs/day, rental-fees-only)."
       )
     );
   });

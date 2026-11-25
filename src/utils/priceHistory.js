@@ -26,6 +26,28 @@ export function recordMonthlyPrice(history, price, date = new Date()) {
   return history;
 }
 
+function formatMonthIdx(idx) {
+  return `${MONTHS[idx % 12]} ${Math.floor(idx / 12)}`;
+}
+
+/**
+ * When two consecutive recorded history entries are more than minMonthsApart (default 2)
+ * calendar months apart, returns { start, end, missingMonths } for the unrecorded span
+ * strictly between them; otherwise returns null.
+ */
+export function historyGapBetween(olderDate, newerDate, minMonthsApart = 2) {
+  const olderIdx = parseLabel(olderDate);
+  const newerIdx = parseLabel(newerDate);
+  if (olderIdx === null || newerIdx === null) return null;
+  const diff = newerIdx - olderIdx;
+  if (diff <= minMonthsApart) return null;
+  return {
+    start: formatMonthIdx(olderIdx + 1),
+    end: formatMonthIdx(newerIdx - 1),
+    missingMonths: diff - 1
+  };
+}
+
 /**
  * Expands history into one point per month, with price null for months that
  * have no recorded data, so charts show gaps instead of compressing them.

@@ -961,6 +961,12 @@ body {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.parts-table tr.history-gap-row td {
+  color: var(--text-dim);
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.02);
+}
+
 .part-category-tag {
   font-size: 0.72rem;
   color: var(--text-muted);

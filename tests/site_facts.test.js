@@ -106,10 +106,21 @@ describe('Price-derived copy is generated from the data files', () => {
     assert.ok(payoff.answer.includes(`roughly ${f.payoffMonths4h} months`));
     assert.ok(payoff.answer.includes(`about ${f.payoffMonths12h} months`));
     assert.ok(payoff.answer.includes(`$${f.runpodDual3090.hourlyRate.toFixed(2)}/hr`));
+    assert.ok(payoff.answer.includes('4 hrs/day, full cost including electricity'));
 
     const shell = renderShell(parseRoute('/'));
     assert.ok(shell.includes(`~$${f.dual3090RigEst.toLocaleString('en-US')}`), 'header rig cost matches');
     assert.ok(shell.includes(`~${f.payoffMonths4h} Months`), 'header payoff matches');
+    assert.ok(shell.includes('full cost incl. electricity'), 'header states full cost basis');
+  });
+
+  it('llama-3.3-70b tier-best-new describes only the Mac Studio M2 Ultra build in the parts list', () => {
+    const tier = BUILDS_DATA['llama-3.3-70b'].tiers.find(t => t.id === 'tier-best-new');
+    assert.equal(tier.name, 'Best New / Turnkey Unified (Mac Studio M2 Ultra)');
+    assert.equal(tier.headline, 'Turnkey Apple Mac Studio M2 Ultra (64GB Unified Memory)');
+    assert.ok(!/5090|Ada\/Blackwell|32GB\+|CPU offload/i.test(`${tier.name} ${tier.headline} ${tier.rigSummary}`));
+    assert.equal(tier.parts[0].price, 2899);
+    assert.equal(tier.parts.reduce((s, p) => s + p.price, 0), 3118);
   });
 
   it('the prerendered home JSON-LD FAQ follows a price change', () => {
