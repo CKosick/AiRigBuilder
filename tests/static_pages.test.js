@@ -4,7 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonical, DEFAULT_MODEL_ID, SITE_URL, SITE_NAME } from '../src/routes.js';
+import { allRoutes, pageMeta, parseRoute, legacyHashRoute, buildPath, isCanonical, DEFAULT_MODEL_ID, SITE_URL, SITE_NAME, MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH, formatPageTitle } from '../src/routes.js';
 import { renderAllPages, renderPage, renderNotFound, renderSitemap, outputFileFor } from '../scripts/prerender.js';
 import { GPUS_DATA } from '../src/data/gpus.js';
 import { MODELS_DATA } from '../src/data/models.js';
@@ -84,13 +84,42 @@ describe('Generated page <head> SEO', () => {
     assert.equal(attr(template, /<meta\s+name="description"\s+content="([^"]+)"/), meta.description);
   });
 
+  it('enforces <= 65-char titles (dropping site suffix cleanly) and <= 160-char untruncated descriptions across all routes', () => {
+    assert.equal(formatPageTitle('A'.repeat(48)), `${'A'.repeat(48)} | ${SITE_NAME}`);
+    assert.equal(formatPageTitle('A'.repeat(49)), 'A'.repeat(49));
+
+    for (const route of allRoutes()) {
+      const meta = pageMeta(route);
+      assert.ok(
+        meta.title.length <= MAX_TITLE_LENGTH,
+        `${route.path} title (${meta.title.length} chars) exceeds ${MAX_TITLE_LENGTH}: ${meta.title}`
+      );
+      assert.ok(
+        meta.description.length <= MAX_DESCRIPTION_LENGTH,
+        `${route.path} description (${meta.description.length} chars) exceeds ${MAX_DESCRIPTION_LENGTH}: ${meta.description}`
+      );
+      assert.ok(
+        Buffer.byteLength(meta.description, 'utf8') <= MAX_DESCRIPTION_LENGTH,
+        `${route.path} description (${Buffer.byteLength(meta.description, 'utf8')} UTF-8 bytes) exceeds ${MAX_DESCRIPTION_LENGTH}: ${meta.description}`
+      );
+      assert.ok(
+        !meta.description.endsWith('…'),
+        `${route.path} description must not be silently truncated: ${meta.description}`
+      );
+    }
+
+    const notFoundHtml = renderNotFound(template);
+    const nfTitle = titleOf(notFoundHtml);
+    assert.ok(nfTitle.length <= MAX_TITLE_LENGTH, `404 title (${nfTitle.length} chars) exceeds ${MAX_TITLE_LENGTH}: ${nfTitle}`);
+  });
+
   for (const page of pages) {
     const { route, html } = page;
     it(`${route.path} has its own title, description, canonical and Open Graph URL`, () => {
       const title = titleOf(html);
-      assert.ok(title.length >= 30 && title.length <= 80, `title length ${title.length}: ${title}`);
+      assert.ok(title.length >= 30 && title.length <= MAX_TITLE_LENGTH, `title length ${title.length}: ${title}`);
       const desc = attr(html, /<meta\s+name="description"\s+content="([^"]+)"/);
-      assert.ok(desc.length >= 80 && desc.length <= 165, `description length ${desc.length}: ${desc}`);
+      assert.ok(desc.length >= 80 && desc.length <= MAX_DESCRIPTION_LENGTH, `description length ${desc.length}: ${desc}`);
       const canonical = canonicalFor(route);
       assert.equal(attr(html, /<link\s+rel="canonical"\s+href="([^"]+)"/), canonical);
       assert.equal(attr(html, /<meta\s+property="og:url"\s+content="([^"]+)"/), canonical);

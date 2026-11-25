@@ -18,14 +18,14 @@ describe('SEO & Structured Data Verification Tests', () => {
     const title = titleMatch[1];
     assert.ok(title.includes('AI Rig Builder'), 'Title should mention AI Rig Builder');
     assert.ok(title.includes('Local AI'), 'Title should mention Local AI');
-    assert.ok(title.length >= 30 && title.length <= 80, `Title length (${title.length}) should be between 30 and 80 chars`);
+    assert.ok(title.length >= 30 && title.length <= 65, `Title length (${title.length}) should be between 30 and 65 chars`);
   });
 
-  it('verifies meta description exists and falls within 80-165 characters', () => {
+  it('verifies meta description exists and falls within 80-160 characters', () => {
     const descMatch = indexHtml.match(/<meta\s+name="description"\s+content="([^"]+)"/);
     assert.ok(descMatch, 'index.html missing meta description');
     const desc = descMatch[1];
-    assert.ok(desc.length >= 80 && desc.length <= 165, `Description length (${desc.length}) should be 80-165 chars`);
+    assert.ok(desc.length >= 80 && desc.length <= 160, `Description length (${desc.length}) should be 80-160 chars`);
   });
 
   it('verifies canonical URL and robots indexing directives', () => {

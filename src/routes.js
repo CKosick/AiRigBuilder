@@ -94,15 +94,20 @@ export function allRoutes() {
 
 export const shortGpuName = (gpu) => gpu.name.replace(/^(NVIDIA (GeForce )?|AMD |Apple )/, '');
 
-// Keeps meta descriptions inside the ~160 characters search results show
-function clampDescription(text, max = 160) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max - 1);
-  return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
+export const MAX_TITLE_LENGTH = 65;
+export const MAX_DESCRIPTION_LENGTH = 160;
+
+/**
+ * Appends ` | ${SITE_NAME}` when the combined title fits within MAX_TITLE_LENGTH (65 chars);
+ * otherwise drops the brand suffix for that page without rewriting the base title.
+ */
+export function formatPageTitle(baseTitle) {
+  const full = `${baseTitle} | ${SITE_NAME}`;
+  return full.length <= MAX_TITLE_LENGTH ? full : baseTitle;
 }
 
 const HOME_META = {
-  title: 'AI Rig Builder — The Used-Hardware Price Layer for Local AI | airigbuilder.com',
+  title: 'AI Rig Builder — The Used-Hardware Price Layer for Local AI',
   description: 'Calculate the cheapest way to run 70B local AI models with real used GPU prices, true total build costs (parts + tax + power), and cloud break-even ROI.'
 };
 
@@ -124,47 +129,47 @@ export function pageMeta(route) {
     const cheapest = cheapestFittingTotal(sheet);
     const tiersText = cheapest === null
       ? `None of our ${sheet.tiers.length} listed rigs has enough memory for it yet; see the closest builds and what it needs.`
-      : `${fitting.length} build ${fitting.length === 1 ? 'tier' : 'tiers'} from $${cheapest.toLocaleString('en-US')}, with full parts lists, power draw and first-year cost.`;
+      : `${fitting.length} build ${fitting.length === 1 ? 'tier' : 'tiers'} from $${cheapest.toLocaleString('en-US')}: parts lists, power draw, and 1st-year cost.`;
     meta = {
-      title: `${model.name} Local Build: Parts & Cost | ${SITE_NAME}`,
+      title: formatPageTitle(`${model.name} Local Build: Parts & Cost`),
       description: `What hardware runs ${model.name} locally? ${sheet.vramTarget}. ${tiersText}`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' }, { name: model.name, path: route.path });
   } else if (route.view === 'builds') {
     meta = {
-      title: `Local AI Build Sheets: Hardware for ${MODELS_DATA.length} LLMs Compared | ${SITE_NAME}`,
+      title: formatPageTitle(`Local AI Build Sheets: Hardware for ${MODELS_DATA.length} LLMs Compared`),
       description: `Every local LLM build sheet in one table: VRAM needed, best quant, speed and the cheapest rig for ${MODELS_DATA.length} models from Llama 3.3 70B to Phi-4 Mini.`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' });
   } else if (route.view === 'playground') {
     meta = {
-      title: `Local AI Rig Playground: What Can My GPU Run? | ${SITE_NAME}`,
+      title: formatPageTitle('Local AI Rig Playground: What Can My GPU Run?'),
       description: `Enter the GPU you already own to see which of our ${MODELS_DATA.length} local LLMs run in VRAM, your generation speeds, and the highest-impact upgrade for your budget.`
     };
     crumbs.push({ name: 'Rig Playground', path: '/playground' });
   } else if (route.view === 'calculator') {
     meta = {
-      title: `Local AI vs Cloud GPU Break-Even Calculator | ${SITE_NAME}`,
+      title: formatPageTitle('Local AI vs Cloud GPU Break-Even Calculator'),
       description: 'When does a home AI rig pay for itself? Compare a used dual RTX 3090 build with RunPod and Vast.ai rental, including power costs and resale value.'
     };
     crumbs.push({ name: 'Break-Even Calculator', path: '/calculator' });
   } else if (route.view === 'tracker') {
     const rtx3090 = GPUS_DATA.find(g => g.id === 'rtx-3090');
     meta = {
-      title: `Used GPU Prices for Local AI: RTX 3090, P40 & More | ${SITE_NAME}`,
+      title: formatPageTitle('Used GPU Prices for Local AI: RTX 3090, P40 & More'),
       description: `Used prices estimated from current eBay listings for the ${GPUS_DATA.length} GPUs that matter for local LLMs, ranked by price per GB of VRAM. RTX 3090 now $${rtx3090.usedStreetPrice} ($${rtx3090.pricePerGb.toFixed(2)}/GB).`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' });
   } else if (route.view === 'guide') {
     meta = {
-      title: `Local AI Hardware Guide: Multi-GPU Gotchas | ${SITE_NAME}`,
+      title: formatPageTitle('Local AI Hardware Guide: Multi-GPU Gotchas'),
       description: 'Avoid costly multi-GPU mistakes: RTX 3090 transient power spikes, PCIe slot spacing, x8 vs x4 bandwidth, the VRAM math formula and memory thermals.'
     };
     crumbs.push({ name: 'Hardware Guide', path: '/guide' });
   } else if (route.view === 'gpu') {
     const gpu = GPUS_DATA.find(g => g.id === route.gpuId);
     meta = {
-      title: `${shortGpuName(gpu)} Used Price & History ($${gpu.usedStreetPrice.toLocaleString('en-US')}) | ${SITE_NAME}`,
+      title: formatPageTitle(`${shortGpuName(gpu)} Used Price & History ($${gpu.usedStreetPrice.toLocaleString('en-US')})`),
       description: `${gpu.name} used price: about $${gpu.usedStreetPrice.toLocaleString('en-US')} on eBay (range $${gpu.usedPriceLow.toLocaleString('en-US')}–$${gpu.usedPriceHigh.toLocaleString('en-US')}, $${gpu.pricePerGb.toFixed(2)}/GB VRAM). Price history, pros and cons for local AI.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: gpu.name, path: route.path });
@@ -174,14 +179,14 @@ export function pageMeta(route) {
     const nameA = shortGpuName(gpuA);
     const nameB = shortGpuName(gpuB);
     meta = {
-      title: `${nameA} vs ${nameB}: Local LLM Specs | ${SITE_NAME}`,
+      title: formatPageTitle(`${nameA} vs ${nameB}: Local LLM Specs`),
       description: `Compare ${nameA} vs ${nameB} for local LLMs: VRAM, bandwidth, power draw, used prices, and model fit speeds across ${MODELS_DATA.length} models.`
     };
     crumbs.push({ name: 'GPU Price Tracker', path: '/tracker' }, { name: `${nameA} vs ${nameB}`, path: route.path });
   } else if (route.view === 'best-gpu') {
     const model = MODELS_DATA.find(m => m.id === route.modelId);
     meta = {
-      title: `Best GPU for ${model.name}: VRAM & Speed | ${SITE_NAME}`,
+      title: formatPageTitle(`Best GPU for ${model.name}: VRAM & Speed`),
       description: `Ranked GPU configurations for running ${model.name} locally. Compare single and dual GPU fits, VRAM headroom, speeds, and used market prices.`
     };
     crumbs.push({ name: 'Build Sheets', path: '/builds' }, { name: `Best GPU for ${model.name}`, path: route.path });
@@ -189,7 +194,7 @@ export function pageMeta(route) {
 
   return {
     ...meta,
-    description: clampDescription(meta.description),
+    description: meta.description,
     canonical: `${SITE_URL}${route.view === 'builds' && route.modelId ? buildPath(route.modelId) : route.path}`,
     breadcrumbs: crumbs
   };
