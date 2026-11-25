@@ -171,7 +171,7 @@ export const MODELS_DATA = [
     description: 'SOTA reasoning model distilled from DeepSeek-R1 into Llama-3.3-70B. Chains of thought match OpenAI o1-mini on AIME, MATH-500, and Codeforces.',
     architecture: 'Dense Distilled Reasoning',
     flagship: true,
-    minVram: 42,
+    minVram: 43,
     recommendedVram: 48,
     sweetSpotQuant: 'Q4_K_M or EXL2 4.25bpw',
     quants: [
@@ -219,7 +219,7 @@ export const MODELS_DATA = [
     description: 'The foundation 70B model with native 128K context window. Enterprise workhorse for agent tool calling and heavy document analysis.',
     architecture: 'Dense Transformer',
     flagship: false,
-    minVram: 40,
+    minVram: 42,
     recommendedVram: 48,
     sweetSpotQuant: 'Q4_K_M (4.5 bpw)',
     quants: [
@@ -321,7 +321,7 @@ export const MODELS_DATA = [
     description: 'Punches well above its weight class. Trained on 13T tokens with distillation; rivals early 70B models in dialogue and creative writing.',
     architecture: 'Dense (Sliding Window Attention)',
     flagship: false,
-    minVram: 16,
+    minVram: 17,
     recommendedVram: 24,
     sweetSpotQuant: 'Q5_K_M or Q6_K on single 24GB',
     quants: [
@@ -346,7 +346,7 @@ export const MODELS_DATA = [
     description: 'Next-gen architecture from Google with expanded 128K context, native tool use, and superior reasoning compared to Gemma 2.',
     architecture: 'Dense Multimodal-Ready',
     flagship: true,
-    minVram: 17,
+    minVram: 18,
     recommendedVram: 24,
     sweetSpotQuant: 'Q5_K_M on RTX 3090',
     quants: [
@@ -370,7 +370,7 @@ export const MODELS_DATA = [
     description: 'Third-generation Qwen model with breakthrough architectural efficiency. Superior token-per-second throughput and 256K native context window.',
     architecture: 'Dense Transformer v3',
     flagship: false,
-    minVram: 20,
+    minVram: 21,
     recommendedVram: 24,
     sweetSpotQuant: 'Q4_K_M on 24GB GPU',
     quants: [
@@ -394,7 +394,7 @@ export const MODELS_DATA = [
     description: 'Built specifically for RAG (Retrieval-Augmented Generation) and enterprise multi-step tool use with grounded citation outputs.',
     architecture: 'Dense RAG Specialist',
     flagship: false,
-    minVram: 22,
+    minVram: 23,
     recommendedVram: 32,
     sweetSpotQuant: 'Q4_K_M on 24GB or Dual GPU',
     quants: [
@@ -419,7 +419,7 @@ export const MODELS_DATA = [
     description: 'Trained on 80+ programming languages. Exceptional code completion, fill-in-the-middle (FIM), and test generation with 32K context.',
     architecture: 'Dense Code Specialist',
     flagship: false,
-    minVram: 14,
+    minVram: 15,
     recommendedVram: 24,
     sweetSpotQuant: 'Q5_K_M or Q6_K on single 24GB',
     quants: [
@@ -819,7 +819,7 @@ export const MODELS_DATA = [
     description: 'The breakthrough sparse MoE model. Routes each token through 2 of 8 expert networks; executes at 13B speed while matching 70B quality.',
     architecture: 'Sparse Mixture-of-Experts (MoE)',
     flagship: true,
-    minVram: 28,
+    minVram: 30,
     recommendedVram: 48,
     sweetSpotQuant: 'Q4_K_M or Q5_K_M on dual 24GB GPUs',
     quants: [
